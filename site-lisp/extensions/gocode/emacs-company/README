@@ -1,0 +1,47 @@
+This is an alternative emacs plugin, uses company-mode:
+	http://company-mode.github.io
+
+Here's how I use it in my .emacs:
+
+(require 'company)                                   ; load company mode
+(require 'company-go)                                ; load company mode go backend
+(setq company-tooltip-limit 20)                      ; bigger popup window
+(setq company-minimum-prefix-length 0)               ; autocomplete right after '.'
+(setq company-idle-delay .3)                         ; shorter delay before autocompletion popup
+(setq company-echo-delay 0)                          ; removes annoying blinking
+(setq company-begin-commands '(self-insert-command)) ; start autocompletion only after typing
+
+One thing to note here is the 'company-backends' list. By default company mode
+loads every backend it has. And while I could simply add company-go backend to
+that list using a hook, I'm leaving it to the end user. Perhaps it would be
+preferrable for you to use multiple backends at the same time, or maybe you
+just want the company-go backend only in the go-mode. I prefer to use the
+company-go backend only and having company-mode enabled only for go-mode.
+That's the way you can do it:
+
+(add-hook 'go-mode-hook (lambda ()
+                          (set (make-local-variable 'company-backends) '(company-go))
+                          (company-mode)))
+
+I hope you get the idea.
+
+P.S. Also, default company mode colors are kind of ugly, I took these from
+auto-complete-mode defaults:
+
+(custom-set-faces
+ '(company-preview
+   ((t (:foreground "darkgray" :underline t))))
+ '(company-preview-common
+   ((t (:inherit company-preview))))
+ '(company-tooltip
+   ((t (:background "lightgray" :foreground "black"))))
+ '(company-tooltip-selection
+   ((t (:background "steelblue" :foreground "white"))))
+ '(company-tooltip-common
+   ((((type x)) (:inherit company-tooltip :weight bold))
+    (t (:inherit company-tooltip))))
+ '(company-tooltip-common-selection
+   ((((type x)) (:inherit company-tooltip-selection :weight bold))
+    (t (:inherit company-tooltip-selection)))))
+
+Of course you can change them the way you prefer, use customize-mode or do it manually.
