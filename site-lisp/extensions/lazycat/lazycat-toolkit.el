@@ -89,7 +89,6 @@
 (require 'mwe-log-commands)
 (require 'shell-command-extension)
 (require 'window-number)
-(require 'windows)
 (require 'color-moccur)
 (require 'basic-edit-toolkit)
 
@@ -212,14 +211,6 @@
   (other-window 1)
   (with-current-buffer (current-buffer)
     (call-interactively 'run-lisp)))
-
-(defun emacs-exit ()
-  "Exit emacs."
-  (interactive)
-  (if (get-buffer "*Group*")
-      (gnus-group-exit))
-  (w3m-quit t)
-  (see-you-again))
 
 (defun window-number-jump ()
   "Jump to nth window."

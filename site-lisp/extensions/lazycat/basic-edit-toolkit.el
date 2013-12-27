@@ -75,6 +75,7 @@
 
 ;;; Require
 
+(require 'windows)
 (require 'cycle-buffer)
 (require 'tramp)
 

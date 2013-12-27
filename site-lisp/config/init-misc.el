@@ -105,39 +105,6 @@
                            plain-tex-mode))
       (indent-region (region-beginning) (region-end) nil)))
 
-;;; ### Indent ###
-;;; --- 缩进设置
-(setq-default indent-tabs-mode t)       ;默认不用空格替代TAB
-(setq default-tab-width 4)              ;设置TAB默认的宽度
-(dolist (hook (list                     ;设置用空格替代TAB的模式
-               'emacs-lisp-mode-hook
-               'lisp-mode-hook
-               'lisp-interaction-mode-hook
-               'scheme-mode-hook
-               'c-mode-hook
-               'c++-mode-hook
-               'java-mode-hook
-               'haskell-mode-hook
-               'asm-mode-hook
-               'emms-tag-editor-mode-hook
-               'sh-mode-hook
-               'haskell-cabal-mode-hook
-               'qml-mode-hook
-               ))
-  (add-hook hook '(lambda () (setq indent-tabs-mode nil))))
-
-;;; ### Windows ###
-;;; --- 用于保存和管理窗口的配置方案
-(win:startup-with-window)
-(setq win:configuration-file "~/.emacs.d/deepin-emacs/Configure-File/Windows/windows-configure") ;窗口布局管理保存文件
-
-;;; ### Revive ###
-;;; --- 用于记录恢复特定窗口配置方案
-(autoload 'save-current-configuration "revive" "Save status" t)
-(autoload 'resume "revive" "Resume Emacs" t)
-(autoload 'wipe "revive" "Wipe Emacs" t)
-(setq revive:configuration-file "~/.emacs.d/deepin-emacs/Configure-File/Revive/revive-configure") ;窗口布局设置保存文件
-
 ;;; ### Mode-line ###
 ;;; --- mode-line
 

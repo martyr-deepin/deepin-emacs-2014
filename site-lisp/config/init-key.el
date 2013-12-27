@@ -186,7 +186,7 @@
    ("<f2>" . refresh-file)                       ;自动刷新文件
    ("<f3>" . visit-tags-table)                   ;查找TAGS文件 (更新TAGS表)
    ("<f4>" . generate-gtags-files)               ;生成gtags引用文件
-   ("<f5>" . emacs-exit)                         ;退出emacs
+   ("<f5>" . emacs-session-save)                 ;退出emacs
    ("<f6>" . lock-screen)                        ;锁屏
    ("<f7>" . one-key-menu-ui)                    ;用户界面菜单
    ("<f8>" . dired-jump)                         ;文件管理起

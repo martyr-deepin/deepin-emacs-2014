@@ -42,7 +42,6 @@
 ;; (require 'rcirc)                        ;Emacs里面一个轻量IRC客户端
 ;; (require 'rcirc-color)                  ;rcirc高亮, 随机颜色妮称
 ;; (require 'rcirc-sound)                  ;CTCP声音支持
-(require 'windows)                      ;窗口保存
 ;; (require 'festival)                     ;语音合成
 ;; (require 'what-domain)      ;域名查询
 (require 'goto-last-change)             ;跳转到最后编辑的地方
