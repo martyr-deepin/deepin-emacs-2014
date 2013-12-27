@@ -1200,10 +1200,6 @@
  '(egg-text-help                        ;文本帮助
    ((t (:inherit egg-text-base
                  :height 0.9))))
- ;; scim-bridge
- '(scim-preedit-default-face            ;预选窗口的默认外观
-   ((t (:background "DarkRed"
-                    :foreground "White"))))
  ;; rfcview
  '(rfcview-headlink-face                ;链接
    ((t (:foreground "DodgerBlue"))))
@@ -1247,9 +1243,6 @@
    :file "/usr/share/deepin-emacs/Image/mail1.jpeg"
    :background "DarkRed"
    :ascent center)
- ;; Scim-bridge 光标颜色 (开启 . 关闭)
- scim-cursor-color
- '("Gold3" . "Red3")
  )
 
 (provide 'theme)
