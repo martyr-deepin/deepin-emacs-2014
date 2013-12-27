@@ -1062,7 +1062,7 @@ please check its value")
 
     ;; Sites should not disable this.  Only individuals should disable
     ;; the startup screen.
-    (setq inhibit-startup-screen nil)
+    (setq inhibit-startup-screen t)
 
     ;; Warn for invalid user name.
     (when init-file-user
