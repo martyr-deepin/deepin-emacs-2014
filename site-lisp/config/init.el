@@ -1,8 +1,6 @@
 (require 'theme)                        ;主题
 (require 'lazy-set-key)                 ;懒惰按键设置扩展
 (require 'scroll-mode-line-mode)        ;滚动信息栏
-(require 'thing-edit)                   ;基于thingatpt的编辑扩展
-(require 'thing-edit-extension)         ;thing-edit 增强
 (require 'paredit)
 (require 'tabbar)                       ;多标签
 (require 'miniedit)                     ;编辑输入栏

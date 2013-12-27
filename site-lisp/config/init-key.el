@@ -10,7 +10,6 @@
    ("C-c ns" . notes-search)                ;便签搜索
    ("C-c nn" . notes-new)                   ;新建便签
    ("s-c o" . one-key-menu-directory)       ;目录打开菜单
-   ("M-C" . one-key-menu-cycle-buffer)      ;特定模式切换
    ("s-*" . one-key-menu-backup-file)       ;备份资料
    ("s-," . bury-buffer)                    ;隐藏当前buffer
    ("s-." . unbury-buffer)                  ;反隐藏当前buffer
@@ -258,10 +257,12 @@
  )
 ;;; ### Thingh-edit ###
 ;;; --- 增强式编辑当前光标的对象
-(lazy-set-key
+(lazy-set-autoload-key
  '(
    ("M-s-h" . one-key-menu-thing-edit)  ;thing-edit 菜单
-   ))
+   )
+ "init-thing-edit"
+ )
 ;;; ### Multi-Term ###
 ;;; --- 多标签式的shell
 (lazy-set-autoload-key
@@ -300,5 +301,11 @@
    ("C-s-y" . anything-call-source)     ;调用特定的源
    )
  "init-anything")
+
+(lazy-set-autoload-key
+ '(
+   ("M-C" . one-key-menu-cycle-buffer)      ;特定模式切换
+   )
+ "init-cycle-buffer")
 
 (provide 'init-key)

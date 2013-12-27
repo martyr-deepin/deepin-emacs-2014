@@ -360,40 +360,6 @@
   (interactive)
   (one-key-menu "DIRECTORY" one-key-menu-directory-alist t))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Cycle Buffer ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defvar one-key-menu-cycle-buffer-alist nil
-  "The `one-key' menu alist for CYCLE-BUFFER.")
-
-(setq one-key-menu-cycle-buffer-alist
-      '(
-        (("l" . "Elisp") . (lambda () (interactive) (cycle-buffer-in-special-mode 'emacs-lisp-mode)))
-        (("i" . "IRC") . (lambda () (interactive) (cycle-buffer-in-special-mode 'erc-mode)))
-        (("d" . "Dired") . (lambda () (interactive) (cycle-buffer-in-special-mode 'dired-mode)))
-        (("o" . "Org") . (lambda () (interactive) (cycle-buffer-in-special-mode 'org-mode)))
-        (("H" . "Haskell") . (lambda () (interactive) (cycle-buffer-in-special-mode 'haskell-mode)))
-        (("w" . "W3m") . (lambda () (interactive) (cycle-buffer-in-special-mode 'w3m-mode)))
-        (("t" . "Term") . (lambda () (interactive) (cycle-buffer-in-special-mode 'term-mode)))
-        (("y" . "Yaoddmuse") . (lambda () (interactive) (cycle-buffer-in-special-mode 'yaoddmuse-mode)))
-        (("r" . "RFC") . (lambda () (interactive) (cycle-buffer-in-special-mode 'irfc-mode)))
-        (("v" . "DocView") . (lambda () (interactive) (cycle-buffer-in-special-mode 'doc-view-mode)))
-        (("c" . "C-Mode") . (lambda () (interactive) (cycle-buffer-in-special-mode 'c-mode)))
-        (("C" . "C++-Mode") . (lambda () (interactive) (cycle-buffer-in-special-mode 'c++-mode)))
-        (("j" . "JS") . (lambda () (interactive) (cycle-buffer-in-special-mode 'js-mode)))
-        (("x" . "XML") . (lambda () (interactive) (cycle-buffer-in-special-mode 'nxml-mode)))
-        (("p" . "Python") . (lambda () (interactive) (cycle-buffer-in-special-mode 'python-mode)))
-        (("s" . "CSS") . (lambda () (interactive) (cycle-buffer-in-special-mode 'css-mode)))
-        (("h" . "html") . (lambda () (interactive) (cycle-buffer-in-special-mode 'html-helper-mode)))
-        (("m" . "OCaml") . (lambda () (interactive) (cycle-buffer-in-special-mode 'tuareg-mode)))
-        (("g" . "Golang") . (lambda () (interactive) (cycle-buffer-in-special-mode 'go-mode)))
-        (("q" . "QML") . (lambda () (interactive) (cycle-buffer-in-special-mode 'qml-mode)))
-        (("u" . "Lisp") . (lambda () (interactive) (cycle-buffer-in-special-mode-except-buffer 'lisp-mode " *slime-fontify*")))
-        ))
-
-(defun one-key-menu-cycle-buffer ()
-  "The `one-key' menu for CYCLE-BUFFER."
-  (interactive)
-  (one-key-menu "CYCLE-BUFFER" one-key-menu-cycle-buffer-alist t))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Backup File ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defvar one-key-menu-backup-file-alist nil
   "The `one-key' menu alist for BACKUP-FILE.")
@@ -776,53 +742,6 @@
   "The `one-key' menu for YAODDMUSE."
   (interactive)
   (one-key-menu "YAODDMUSE" one-key-menu-yaoddmuse-alist t))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Thing-Edit ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defvar one-key-menu-thing-edit-alist nil
-  "The `one-key' menu alist for THING-EDIT.")
-
-(setq one-key-menu-thing-edit-alist
-      '(
-        ;; Copy.
-        (("w" . "Copy Word") . thing-copy-word)
-        (("s" . "Copy Symbol") . thing-copy-symbol)
-        (("m" . "Copy Email") . thing-copy-email)
-        (("f" . "Copy Filename") . thing-copy-filename)
-        (("u" . "Copy URL") . thing-copy-url)
-        (("x" . "Copy Sexp") . thing-copy-sexp)
-        (("g" . "Copy Page") . thing-copy-page)
-        (("t" . "Copy Sentence") . thing-copy-sentence)
-        (("o" . "Copy Whitespace") . thing-copy-whitespace)
-        (("i" . "Copy List") . thing-copy-list)
-        (("c" . "Copy Comment") . thing-copy-comment)
-        (("h" . "Copy Function") . thing-copy-defun)
-        (("p" . "Copy Parentheses") . thing-copy-parentheses)
-        (("l" . "Copy Line") . thing-copy-line)
-        (("a" . "Copy To Line Begin") . thing-copy-to-line-beginning)
-        (("e" . "Copy To Line End") . thing-copy-to-line-end)
-        ;; Copy.
-        (("W" . "Paste Word") . thing-paste-word)
-        (("S" . "Paste Symbol") . thing-paste-symbol)
-        (("M" . "Paste Email") . thing-paste-email)
-        (("F" . "Paste Filename") . thing-paste-filename)
-        (("U" . "Paste URL") . thing-paste-url)
-        (("X" . "Paste Sexp") . thing-paste-sexp)
-        (("G" . "Paste Page") . thing-paste-page)
-        (("T" . "Paste Sentence") . thing-paste-sentence)
-        (("O" . "Paste Whitespace") . thing-paste-whitespace)
-        (("I" . "Paste List") . thing-paste-list)
-        (("C" . "Paste Comment") . thing-paste-comment)
-        (("H" . "Paste Function") . thing-paste-defun)
-        (("P" . "Paste Parentheses") . thing-paste-parentheses)
-        (("L" . "Paste Line") . thing-paste-line)
-        (("A" . "Paste To Line Begin") . thing-paste-to-line-beginning)
-        (("E" . "Paste To Line End") . thing-paste-to-line-end)
-        ))
-
-(defun one-key-menu-thing-edit ()
-  "The `one-key' menu for THING-EDIT."
-  (interactive)
-  (one-key-menu "THING-EDIT" one-key-menu-thing-edit-alist t))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Org-mode ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defvar one-key-menu-org-mode-alist nil

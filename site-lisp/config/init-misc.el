@@ -432,7 +432,6 @@ from tradition chinese to simple chinese" t)
 
 ;;; ### one-key ###
 ;;; --- one key
-(setq one-key-popup-window nil)         ;禁止自动弹出窗口
 
 ;;; ### elisp-depend ###
 ;;; --- 分析elisp文件依赖

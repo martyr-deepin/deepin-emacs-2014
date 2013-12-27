@@ -53,5 +53,7 @@
 (setq make-backup-files nil)
 (setq auto-save-default nil)            ;不生成 ~ # 备份文件
 (setq backup-directory-alist (quote (("." . "/tmp/emacs-backup")))) ;把备份文件放到 /tmp/emacs-backup 下
+(setq split-width-threshold nil)                                    ;分屏的时候使用上下分屏
+(setq one-key-popup-window nil)         ;禁止自动弹出窗口
 
 (provide 'init-startup)
