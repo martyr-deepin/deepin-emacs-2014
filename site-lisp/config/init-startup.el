@@ -10,7 +10,7 @@
 (show-paren-mode t)			;显示括号匹配
 (setq-default comment-style 'indent)    ;设定自动缩进的注释风格
 (setq ring-bell-function 'ignore)       ;关闭烦人的出错时的提示声
-(setq inhibit-startup-message t)        ;关闭起动时闪屏
+(setq inhibit-startup-screen t)        ;关闭起动时闪屏
 (setq initial-scratch-message nil)      ;禁止在草稿缓存里面显示处始化信息
 (setq show-paren-style 'parentheses)    ;括号匹配显示但不是烦人的跳到另一个括号。
 (setq blink-matching-paren nil)         ;当插入右括号时不显示匹配的左括号
