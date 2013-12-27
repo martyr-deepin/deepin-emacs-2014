@@ -1,0 +1,3 @@
+#name : where ...
+# --
+where ${0:content}

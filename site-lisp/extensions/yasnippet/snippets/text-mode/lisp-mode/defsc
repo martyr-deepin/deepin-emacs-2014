@@ -1,0 +1,4 @@
+#name : (define-stumpwm-command ... ...)
+# --
+(define-stumpwm-command ${1:name} ()
+  $0)

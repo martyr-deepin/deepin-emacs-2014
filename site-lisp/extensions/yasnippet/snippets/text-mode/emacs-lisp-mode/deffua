@@ -1,0 +1,6 @@
+#name : (defun anything-* () ... (interactive) (anything 'anything-*))
+# --
+(defun anything-${1:name} ()
+ "${2:document}"
+ (interactive)
+ (anything 'anything-$0))

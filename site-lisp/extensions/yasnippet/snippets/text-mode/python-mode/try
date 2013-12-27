@@ -1,0 +1,6 @@
+#name : try: ... except Exception, e: ...
+# --
+try:
+    ${try code}
+except Exception, e:
+    ${except code}	

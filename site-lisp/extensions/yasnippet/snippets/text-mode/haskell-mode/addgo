@@ -1,0 +1,3 @@
+#name : {-# OPTIONS_GHC ... #-}
+# --
+{-# OPTIONS_GHC -${1:GHC Option} #-}$0

@@ -1,0 +1,6 @@
+#name : (dolist (hooked (list ...)) (add-hook '... hooked))
+# --
+(dolist (hooked (list
+               ${1:mode-list}
+               ))
+  (add-hook '${0:mode-hook} hooked))

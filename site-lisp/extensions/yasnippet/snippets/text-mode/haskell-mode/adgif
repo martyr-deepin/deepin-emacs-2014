@@ -1,0 +1,3 @@
+#name : with ... $ \... ->
+# --
+withForeignPtr ${1:name} $ \ $1Ptr -> $0

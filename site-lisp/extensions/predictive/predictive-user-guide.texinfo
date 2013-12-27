@@ -1,0 +1,2806 @@
+\input texinfo @c -*-texinfo-*-
+
+@comment Documentation for the Emacs predictive completion mode
+
+@c %**start of header
+@setfilename predictive-user-guide.info
+@settitle Emacs Predictive Completion User Guide
+@c %**end of header
+
+@dircategory Emacs
+@direntry
+* Predictive: (predictive-user-guide). Predictive text completion package for Emacs.
+@end direntry
+
+@copying
+This manual documents the Emacs Predictive Completion package, version
+0.20
+@c --version--
+
+Copyright @copyright{} 2005--2008 Toby Cubitt
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.2 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts. A
+copy of the license is included in the section entitled "GNU Free
+Documentation License".
+@end quotation
+@end copying
+
+
+@titlepage
+@title Emacs Predictive Completion Manual
+@subtitle Version 0.20
+@c --version--
+@author Toby Cubitt
+
+@c Start copyright page
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+
+@ifnottex
+@node Top
+@top Emacs Predictive Completion Manual
+
+@insertcopying
+
+The package adds a new predictive completion minor-mode, called
+@dfn{predictive} mode, to the GNU Emacs editor. Although there are many
+options and customizations, the easiest way to start using it is to
+simply install the package (@pxref{Obtaining and Installing}), turn on
+the minor-mode by running the @command{predictive-mode} command, and
+start typing. Then come back and read up on how to tailor it to your
+liking.
+@cindex .emacs file
+@cindex startup file
+@cindex configuration file
+
+@menu
+* What is predictive completion?::
+* Obtaining and Installing::
+* Quick-Start::
+* Completing Words::
+* Dictionaries::
+* Advanced Customisation::
+* Bugs and Future Improvements::
+* Credits::
+* Command Index::
+* Variable Index::
+* Concept Index::
+* Copying this Manual::
+
+@detailmenu
+ --- The Detailed Node Listing ---
+
+Completing Words
+
+* Overview::
+* Basic Completion Commands::
+* Auto-Completion Mode::
+* Dynamic Completion::
+* Completion Hotkeys::
+* Displaying Completions in the Echo Area::
+* Completion Tooltip::
+* Pop-Up Frame::
+* Completion Menu and Browser::
+* Auto-Show a List of Completions::
+* Miscellaneous Options::
+
+Overview
+
+* Basic Completion Commands::
+* Auto-Completion Mode::
+* Dynamic Completion::
+* Completion Hotkeys::
+* Displaying Completions in the Echo Area ::
+* Completion Tooltip::
+* Pop-Up Frame::
+* Completion Menu and Browser::
+* Miscellaneous Options::
+
+Basic Completion Commands
+
+* Inserting Completions::
+* Deleting Characters::
+
+Dictionaries
+
+* Creating Dictionaries::
+* Loading and Saving Dictionaries::
+* Basic Dictionary Usage::
+* Region-Local Dictionaries::
+* Dictionary Learning::
+* Getting the Most out of Dictionaries::
+
+Dictionary Learning
+
+* Learning from Buffers and Files::
+* Automatic Learning::
+* Relationships Between Words::
+
+Advanced Customisation
+
+* Character Syntax and Key Bindings::
+* Major Modes::
+
+Character Syntax and Key Bindings
+
+* Keymaps and Key Bindings::
+* Syntax::
+
+Major Modes
+
+* LaTeX Support::
+* Texinfo Support::
+* HTML Support::
+
+@LaTeX{} Support
+
+* LaTeX Packages::
+* Automatically Created Files for @LaTeX{}::
+
+Texinfo Support
+
+* Automatically Created Files for Texinfo::
+
+Bugs and Future Improvements
+
+* Known Bugs::
+* Future Improvements::
+
+Copying this Manual
+
+* GNU Free Documentation License::
+
+@end detailmenu
+@end menu
+
+@end ifnottex
+
+
+@c table of contents
+@contents
+
+
+
+
+
+
+@node What is predictive completion?
+@chapter What is predictive completion?
+@cindex What is predictive completion?
+@cindex predictive completion, introduction
+@cindex completion, predictive
+
+The languages we use to communicate contain a large amount of
+redundancy. Given the first few letters of a word, for instance, it's
+not too difficult to predict what should come next. Try it! You can
+probably easily guess how to fill in the missing letters in the
+following sentence:
+
+@display
+Giv th fir fe lett o a wor i no diffi t predi wh shou com nex.
+@end display
+
+This is even more true of the languages used to communicate with
+computers, which typically have very restricted vocabularies and rigidly
+defined grammars. Redundancy occurs on many levels: on the level of
+individual characters (as illustrated above), on the level of words (we
+can often predict quite accurately what words are likely to come next in
+a sentence, based on grammar and usage), and perhaps even on higher
+levels. Predictive completion exploits this redundancy by attempting to
+complete what you are trying to type before you've finished typing it.
+
+The predictive completion package described here is an add-on to the GNU
+Emacs editor, which implements a new minor-mode called
+@code{predictive-mode} (@pxref{Minor Modes, , , emacs, GNU emacs
+manual}). When this predictive completion minor-mode is switched on,
+Emacs will try to complete the word you are typing based on the
+characters typed so far. As you add characters, it can look up words
+starting with those characters in a dictionary, and offer to insert the
+most likely ones. How you choose which completion (if any) to insert
+depends on various customization settings, some more intrusive than
+others.
+
+Note that by only taking into account characters belonging to the
+current word when predicting how to complete it, much of the redundancy
+in language remains unexploited. This limitation is partly for
+simplicity, but also because some of the benefits of predictive
+completion would be lost if context (i.e. the preceding words and
+sentences) was also taken into account.
+
+@noindent
+What benefits does predictive completion bring?
+
+@enumerate
+@item
+Saving on typing (obviously!): you don't have to type the whole word.
+@cindex save on typing
+
+@item
+Automatic spelling assistance: when you type the first few characters of
+a word, only correct spellings of the whole word are offered. This is
+not only useful for human languages. The predictive completion mode can
+be set up to complete on variable and function names in a program,
+helping avoid bugs due to misspelled names.
+@cindex automatic spelling assistance
+@cindex spelling
+
+@item
+Faster typing: not quite the same as point 1. As you get used to
+predictive completion, your fingers will start to learn the key
+sequences required for frequently used words. And these key sequences
+will usually be much shorter than typing the full word. (This is one
+reason for not taking context into account. If we did, the same word
+might require different key sequences depending on the words and
+sentences preceding it.)
+@cindex faster typing
+@cindex type faster
+@end enumerate
+
+
+
+
+
+
+@node Obtaining and Installing
+@chapter Obtaining and Installing
+@cindex obtaining and installing
+@cindex installation
+@cindex obtaining
+
+The current version of the predictive completion package can be obtained
+from @uref{http://www.dr-qubit.org/emacs.php}.
+
+If you are upgrading from a previous version of the predictive
+completion package, make sure you first backup dictionaries you use by
+dumping the words and data they contain to files (unless you want to
+start from scratch). To make the backups, use
+@command{predictive-dump-dict-to-file}. @xref{Loading and Saving
+Dictionaries}. It is @emph{not} enough to make a copy of the dictionary
+file. Only the plain-text "dumped" format is guaranteed to be portable
+across different versions of predictive mode.
+
+Older versions of the predictive completion package saved dictionaries
+in a compiled form that was not portable across different versions of
+Emacs. Newer versions now automatically save dictionaries in both
+compiled and uncompiled forms. If you are upgrading to a different
+version of Emacs, but continuing to use the same recent version of the
+predictive completion package, then it is sufficient to delete the
+compiled dictionary files (extension @file{.elc}, but make sure you do
+@emph{not} delete the uncompiled files with extension @file{.el}!), and
+let predictive mode recompile them automatically when the dictionaries
+are saved.
+
+However, backing up your dictionaries by dumping them to plain-text
+files, as described above, is still a very good idea (just to be on the
+safe side!).
+
+To install the package, extract the files using @kbd{tar -xvzf
+predictive.tar.gz}. This will unpack the files in a new directory called
+@file{predictive/}. Now byte-compile all the Lisp files and create the
+required dictionaries by running @kbd{make} in the @file{predictive/}
+directory. If necessary, you can specify explicitly where your Emacs
+resides with @kbd{make EMACS=/path/to/emacs}.
+
+Then run @kbd{make install} to copy the package files to
+@file{~/.emacs.d/predictive/} (the @file{~/.emacs.d/} directory will be
+created if it doesn't already exist). If you want to install the files
+elsewhere, you can change the default install location using @kbd{make
+install DESTDIR=@var{/path/to/install/}} and the package files will be
+copied to the @file{/path/to/install/} directory.
+
+The dictionaries are intended to be user-specific, and @emph{must} be
+writable by your user. If you're performing a site-wide installation of
+the predictive package, the dictionary files (all files starting with
+the prefix @file{dict-} and ending in @file{.elc} or @file{.el}) need to
+be copied to a separate writable directory for each user. For this
+reason, the dictionaries will still be installed under
+@file{~/.emacs.d/predictive/} even if @kbd{DESTDIR} is specified (you
+will have to copy them manually for any other users who want to use
+predictive). If you want to change the dictionary install location, use
+@kbd{make install DICTDIR=/path/to/dictionaries/}. This can of course be
+combined with the @kbd{DESTDIR} option: @kbd{make install
+DESTDIR=/path/to/install/ DICTDIR=/path/to/dictionaries/}.
+
+Finally, put the following lines in your .emacs file (replace the paths
+as appropriate if you're not using the default install locations):
+
+@lisp
+;; predictive install location
+(add-to-list 'load-path "~/.emacs.d/predictive/")
+;; dictionary locations
+(add-to-list 'load-path "~/.emacs.d/predictive/latex/")
+(add-to-list 'load-path "~/.emacs.d/predictive/html/")
+;; load predictive package
+(require 'predictive)
+@end lisp
+
+Alternatively, you can save memory and only load the lisp libraries when
+they're needed (i.e. when you first run the @command{predictive-mode}
+command), by replacing the final line as follows:
+
+@lisp
+;; predictive install location
+(add-to-list 'load-path "~/.emacs.d/predictive/")
+;; dictionary locations
+(add-to-list 'load-path "~/.emacs.d/predictive/latex/")
+(add-to-list 'load-path "~/.emacs.d/predictive/html/")
+;; load predictive package
+(autoload 'predictive-mode "~/.emacs.d/predictive/predictive"
+          "Turn on Predictive Completion Mode." t)
+@end lisp
+
+If you want to install the info documentation into your local info
+system, you should run the following command @emph{as root}: @kbd{make
+info-install}. If your info @file{dir} file is not located in
+@file{/usr/share/info/}, then you can specify its location using
+@kbd{make info-install INFODIR=/path/to/info/}.
+
+For more details, and for alternative installation options, you should
+consult the @file{INSTALL} file included in the predictive package.
+
+
+
+
+@node Quick-Start
+@chapter Quick-Start
+@cindex quick-start
+@cindex using predictive mode
+@cindex predictive mode, using
+
+Use the @command{predictive-mode} command to switch the predictive
+minor-mode on. The same command will also switch it off again. This
+section only covers (some of) the @emph{default} behaviour of
+@code{predictive-mode}. The way that @code{predictive-mode} works can be
+radically changed via numerous customization options, which are
+described in detail in the rest of this user-guide.
+@findex predictive-mode
+
+As you add characters to a word, predictive mode searches in a
+dictionary for words starting with those characters. There are a number
+of different ways to choose which word (if any) should be used to
+complete what you've typed.
+
+The most likely completion is provisionally inserted in the buffer after
+the point, and highlighted to indicate that it has not yet been
+accepted. The most likely completion is updated as you add more
+characters to the word. Use @kbd{C-RET} to accept a
+completion. @xref{Dynamic Completion}, for details.
+@findex completion-accept
+
+What if you don't want to use the most likely completion? As you type, a
+list of the ten most likely completions is displayed in the echo area
+and, after a short delay, in a tooltip. They are ranked according to
+likelihood. Typing a number @kbd{0}--@kbd{9} will insert the
+corresponding completion. @xref{Completion Hotkeys}, @ref{Displaying
+Completions in the Echo Area}, and @ref{Completion Tooltip} for details.
+@cindex completions, selecting
+@cindex selecting completions
+@cindex completion, hotkeys
+@cindex hotkeys
+@findex completion-select
+
+You can also display the completion tooltip manually, using
+@kbd{S-down}. When the tooltip is displayed, the @kbd{up} and @kbd{down}
+keys can be used to select a completion from the list in tooltip.
+@cindex completion tooltip
+@cindex tooltip
+@findex completion-show-tooltip
+
+You can cycle forwards and backwards through the available completions
+even when the tooltip isn't displayed, using @kbd{M-TAB} or @kbd{M-/}
+and @kbd{M-SHIFT-TAB} or @kbd{M-?}. As you cycle, the next completion is
+provisionally inserted after the point and highlighted. @kbd{C-RET}
+accepts the completion, as usual.
+@findex completion-cycle
+
+Hitting @kbd{TAB} whilst completing will perform traditional
+``tab-completion'' on the word: the word will be completed up to the
+longest common prefix of the available completions.
+@findex completion-tab-complete
+
+Another useful command is @kbd{C-TAB}. This accepts all the characters
+from the current provisional completion as though you typed them
+yourself, and re-completes the resulting, longer string --- useful if a
+word just needs a suffix adding, for instance.
+@findex completion-scoot-ahead
+
+@xref{Basic Completion Commands}, for details of cycling and
+tab-completion.
+@cindex basic completion commands
+@cindex completion, basic commands
+@cindex commands, basic
+
+@kbd{M-Down} will display a menu from which you can select a completion
+(@pxref{Completion Menu and Browser}). There is also a @samp{Browser}
+menu item, which brings up the completion browser. This hierarchically
+lists @emph{all} possible completions, not just the most likely
+ones. (It can sometimes take a while to construct the completion
+browser, but you can always hit @kbd{C-g} to cancel
+it). @xref{Completion Menu and Browser}, for details.
+@cindex completion menu
+@cindex completion browser
+@cindex menu
+@findex completion-show-menu
+
+@kbd{C-Down} displays a pop-up frame, in which you can use the usual
+Emacs motion keys to select a completion. @kbd{M-Tab} or @kbd{M-/} in
+the pop-up frame toggles between displaying the most likely completions
+and displaying all possible completions. To get rid of the pop-up frame,
+use @kbd{C-Up}.
+@cindex completion pop-up frame
+@cindex pop-up frames
+@findex completion-popup-frame
+
+This ``Quick-Start'' describes the default behaviour. However,
+predictive completion mode can be heavily customized, allowing its
+behaviour to be radically changed. The many and various predictive
+completion mode customization options can be found in the
+@env{predictive} and @env{completion-ui} customization groups. If you
+like the idea of predictive completion, but don't like the way it works
+``out-of-the-box'' the rest of this guide explains all the options and
+features in detail.
+
+The predictive completion package comes with an English dictionary,
+which is used by default. However, this is only really included to make
+sure everything works ``out of the box''. This default dictionary has
+already been trained on a large body of English text, which means it
+will take a very long time to adapt to your individual writing
+style. Don't expect predictive completion mode to display particularly
+good predictive powers if you stick to the default dictionary! For much
+better results, you should create your own dictionary (possible based on
+the supplied one), and train it on your own
+writing. @xref{Dictionaries}.
+
+
+
+
+
+
+@node Completing Words
+@chapter Completing Words
+@cindex completing words
+@cindex completion
+
+The minor-mode command @command{predictive-mode} toggles the mode on and
+off. With a positive prefix argument it switches the mode on, whilst a
+negative prefix argument turns it off and a zero prefix argument
+toggles. The @command{turn-on-predictive-mode} is also provided as a
+convenience for use in hooks.
+@findex predictive-mode
+@findex turn-on-predictive-mode
+
+
+
+@menu
+* Overview::
+* Basic Completion Commands::
+* Auto-Completion Mode::
+* Dynamic Completion::
+* Completion Hotkeys::
+* Displaying Completions in the Echo Area::
+* Completion Tooltip::
+* Pop-Up Frame::
+* Completion Menu and Browser::
+* Auto-Show a List of Completions::
+* Miscellaneous Options::
+@end menu
+
+@node Overview
+@section Overview
+@cindex overview
+@cindex completion, overview
+
+Predictive mode is extremely flexible, and how you interact with it
+depends heavily on how you customize it. Broadly, there are two ways to
+use predictive mode: it can either do nothing until you ask it to
+complete a word, or it can automatically search for the most likely
+completions as you type. (You may have seen something similar to the
+latter on certain models of mobile phone, though predictive mode is far
+more powerful.)  This behaviour is controlled by enabling or disabling
+@command{auto-completion-mode} (@pxref{Auto-Completion Mode}). It is
+enabled for you automatically if the @env{predictive-auto-complete}
+customization option is enabled (the default).
+
+If you are using @command{auto-completion-mode}, you can (by default)
+continue to type normally. The completion candidates will be displayed,
+but will not be accepted unless you do so explicitly using
+@command{completion-accept}, bound to @kbd{C-RET}. However, since it
+learns as you type, predictive mode can become very good at predicting
+the word you want, and it can become tedious to have to hit @kbd{C-RET}
+all the time. In that case, you can customize
+@env{auto-completion-syntax-alist} so that typing a punctuation or
+white-space character automatically accepts the current completion,
+before inserting the character. This lets you skip typing the rest of
+the characters in a word as soon as predictive mode has found the
+completion you want. However, the down side is that you have to slightly
+change the way you type, and it can take a little while until your
+fingers ``get used to it''. If you need to reject a completion candidate
+when @command{auto-completion-mode} is enabled, you can do so using
+@kbd{C-SPC}.
+@cindex completion, automatic
+@cindex auto-completion mode
+@findex auto-completion-mode
+
+If aren't using @command{auto-completion-mode}, you will need to call
+the @command{complete-word-at-point} command whenever you want to
+complete the word at or next to the point. This is bound to @kbd{M-TAB},
+@kbd{M-SHIFT-TAB}, @kbd{M-/} and @kbd{M-?}. There are then two
+``styles'' of behaviour: completions can either be ephemeral, acting
+purely as a visual indicator, and disappearing unless you explicitly
+accept them using @command{completion-accept}, bound to
+@kbd{C-RET}. (You may be used to this style of behaviour from word
+processing software such as OpenOffice Writer). Or alternatively,
+completions can be permanent, so that completing a word really does
+insert those characters into the buffer unless you explicitly reject it
+using @command{completion-reject}, bound to @kbd{C-DEL}. (This the more
+traditional Emacs-style behaviour, that you may be used to from using
+@command{dabbrev}s, for example.) The choice is yours, and is controlled
+by the @env{completion-resolve-behaviour} customization option
+(@pxref{Miscellaneous Options}). (Note that these two different
+``styles'' of behaviour are mainly relevant when Dynamic Completion is
+enabled, as it is by default. This is described below.)
+@findex complete-word-at-point
+
+Whether you are using @command{auto-completion-mode} or not, there are
+various ways to display and select completions. All of them can be
+enabled or disabled indepentently, and many of them can be extensively
+customized.
+
+Perhaps the simplest is to display the most likely completion in the
+buffer (@pxref{Dynamic Completion}). You can then cycle through the
+other completion candidates using the @command{completion-cycle}
+command. @kbd{M-TAB} and @kbd{M-/} cycle forwards, whereas
+@kbd{M-SHIFT-TAB} and @kbd{M-?} cycle backwards. (These are the same key
+bindings used to manually complete the word at point. Hitting them for
+the first time will bring up the possible completions, hitting them
+again will cycle.)
+
+You can also insert a completion candidate directly, without having to
+cycle through them until you get to the one you want, by using a
+completion hot-key (@pxref{Completion Hotkeys}). By default, the
+hot-keys are the number keys @kbd{0}--@kbd{9}, which insert the first
+through to the tenth candidate, respectively.
+
+Of course, you won't know which completion candidate you want unless you
+can see which candidates are available! The candidates can be displayed
+in the echo area, and/or in a tooltip below the point (@pxref{Displaying
+Completions in the Echo Area}, and @pxref{Completion Tooltip}). When
+completion hot-keys are enabled, both of these also indicate which
+completion candidate corresponds to which hot-key.
+
+The completion tooltip is more than just a visual reminder of which
+completions are available. When it is displayed, you can select a
+completion from the list using the @kbd{up} and @kbd{down} arrow
+keys. When completing a word, you can display the tooltip at any time
+using @command{completion-show-tooltip}, bound to
+@kbd{S-down}. @xref{Completion Tooltip}.
+
+A slightly more powerful alternative to the completion tooltip is a
+pop-up frame, displayed using @command{completion-popup-frame}, bound to
+@kbd{C-down} (@pxref{Pop-Up Frame}. This lists the completion candidates
+in a separate Emacs frame positioned below the point, and you can use
+the usual Emacs motion keys to move through the list and select a
+candidate. However, you can also toggle between displaying just the most
+likely completion candidates and displaying all possible completions,
+using @command{completion-popup-frame-toggle-all}, bound to @kbd{M-Tab}
+and @kbd{M-/}. To get rid of a pop-up frame, use
+@command{completion-popup-frame-cancel}, bound to @kbd{C-up} and
+@kbd{M-up}. Note that all of these key bindings are only active when the
+pop-up frame has the focus. If you manually switch the focus back to the
+original frame, the pop-up frame will disappear as soon as you type
+anything.
+
+The completion menu is the most flexible way of selecting completions,
+and can be displayed using @command{completion-show-menu}, bound to
+@kbd{M-down}. Again, it displays the completion candidates and lets you
+select them, and like the pop-up frame, it also allows you to see all
+possible completions, rather than just displaying the most likely ones,
+by bringing up the completion browser. But selecting the @samp{Browser}
+menu item doesn't just display all possible completions in a big
+list. Instead, it organises them hierarchically, making it easy to
+browse through them until you find the one you want.
+
+The completion tooltip, pop-up frame, and menu all display a list of
+completion candidates, but each has its own advantages and
+disadvantages. The tooltip is visually and functionally least intrusive,
+but also gives you fewer ways to find the completion you want. The
+pop-up frame is encumbered by your window manager's frame decoration
+(though some window managers allow you to disable this for specific
+windows, which are called frames in Emacs). But it can display large
+numbers of completion candidates far more effectively than a
+tooltip. The completion menu and completion browser make finding the
+desired completion much easier, especially when you're not sure
+precisely what it is you're looking for. But menus steal the keyboard
+focus in Emacs, so you can no longer type in the buffer until you
+dismiss the menu.
+
+You can select one of these three, tooltip, pop-up frame or menu, to be
+displayed automatically when you complete a word, by setting the
+@env{completion-auto-show} customization option. You can optionally
+leave a short delay before it is displayed, by setting
+@env{completion-auto-show-delay}@footnote{Although you can choose to
+display the completion menu automatically, because it steals the
+keyboard focus this probably isn't all that useful, at least not without
+a long delay.}.
+
+
+@menu
+* Basic Completion Commands::
+* Auto-Completion Mode::
+* Dynamic Completion::
+* Completion Hotkeys::
+* Displaying Completions in the Echo Area ::
+* Completion Tooltip::
+* Pop-Up Frame::
+* Completion Menu and Browser::
+* Miscellaneous Options::
+@end menu
+
+
+@node Basic Completion Commands
+@section Basic Completion Commands
+@cindex basic completion commands
+@cindex completion, basic commands
+@cindex commands, basic
+
+@menu
+* Inserting Completions::
+* Deleting Characters::
+@end menu
+
+
+@node Inserting Completions
+@subsection Inserting Completions
+@cindex inserting completions
+@cindex completions, inserting
+
+@ftable @command
+@item complete-word-at-point
+(@kbd{M-TAB}, @kbd{M-SHIFT-TAB}, @kbd{M-/}, @kbd{M-?}) Find completions
+for the word at or next to the point.
+
+@item completion-cycle
+(@kbd{M-TAB}, @kbd{M-SHIFT-TAB}, @kbd{M-/}, @kbd{M-?}) Cycle through
+available completion candidates. When supplied with a prefix argument,
+it will jump that many completions forwards (or backwards if the prefix
+argument is negative). @kbd{M-/} and @kbd{M-?} cycle backwards (so a
+negative argument will cause them to jump @emph{forwards} that number of
+completions).
+
+@item completion-accept
+(@kbd{C-RET}) Accept the current completion, and move the point just
+beyond it. If @env{predictive-auto-learn} and/or
+@env{predictive-auto-add} are enabled, predictive mode will also learn
+the word (@pxref{Dictionary Learning}).
+
+@item completion-reject
+(@kbd{C-Backspace}, @kbd{C-SPC}) Abandon the current completion,
+removing the provisionally inserted (i.e. highlighted) characters. If a
+prefix argument is supplied, predictive mode will also learn the
+resulting word, i.e. the prefix with the provisional completion removed
+(@pxref{Dictionary Learning}). The @kbd{C-SPC} binding is only active in
+@command{auto-completion-mode} (@pxref{Auto-Completion Mode}).
+
+@item completion-tab-complete
+(@kbd{TAB}) Do ``traditional'' tab-completion, i.e. insert the longest
+common prefix of all candidate completions, and re-complete the
+resulting longer string.
+@findex completion-tab-complete
+
+@item completion-scoot-ahead
+(@kbd{C-TAB}) Insert the characters from the current completion as
+though typed manually, and look for completions of the resulting, longer
+string.
+@findex completion-scoot-ahead
+@end ftable
+
+Note that, apart from the @command{complete-word-at-point} bindings,
+none of the other key bindings are active until you have started
+completing a word, either using @command{complete-word-at-point} or
+automatically if you are using @command{auto-completion-mode}
+(@pxref{Auto-Completion Mode}).
+@cindex auto-completion mode
+@cindex completion, automatic
+@findex auto-completion-mode
+
+
+@node Deleting Characters
+@subsection Deleting Characters
+@cindex deleting characters
+@cindex characters, deleting
+
+@ftable @command
+@item completion-delete-char
+(@kbd{<delete>}) Delete forwards and, after deleting, reject any
+completion at the point. A prefix argument sets the number of characters
+to delete.
+
+@item completion-backward-delete-char
+Reject current completion, if there is one, and delete
+backwards. A prefix argument sets the number of characters to delete. If
+this deletes into a word and @command{auto-completion-mode} is enabled,
+complete what remains of that word.
+@cindex completion, automatic
+@cindex auto-completion mode
+@findex auto-completion-mode
+
+@item completion-backward-delete-char-untabify
+(@kbd{DEL}) Similar to @command{completion-backward-delete-char}, but
+changes tabs to spaces as it deletes.
+
+@item completion-kill-word (@kbd{C-<delete>})
+@item completion-kill-sentence
+@item completion-kill-sexp
+@item completion-kill-paragraph
+Similar to @command{completion-delete-char}, but kill forward until the
+end of the word/sentence/sexp/paragraph, instead of deleting individual
+characters.
+
+@item completion-backward-kill-word (@kbd{C-DEL})
+@item completion-backward-kill-sentence
+@item completion-backward-kill-sexp
+@item completion-backward-kill-paragraph
+Similar to @command{completion-backward-delete-char}, but kill backward
+until the end of the word/sentence/sexp/paragraph, instead of deleting
+individual characters.
+@end ftable
+
+These commands replace the standard Emacs deletion and kill commands, so
+that they deal sensibly with any provisional completion that might be
+present in the region being deleted. If auto completion mode is enabled,
+the backwards deletion commands also re-complete any remaining prefix
+when they delete backwards into part of a word (@pxref{Auto-Completion
+Mode}). In all other respects, these commands are identical to the
+equivalent standard deletion commands with corresponding names.
+@findex backward-delete
+
+
+
+
+@node Auto-Completion Mode
+@section Auto-Completion Mode
+@cindex auto-completion mode
+@cindex completion, automatic
+
+When the @command{auto-completion} minor mode is enabled by calling the
+@command{auto-completion-mode} command, predictive mode will
+automatically look for completions of words as you type. This is
+especially useful when used in conjunction with dynamic completion
+(@pxref{Dynamic Completion}). If you would like
+@command{auto-completion-mode} to be enabled automatically whenever
+predictive mode is enabled, set the @env{predictive-auto-complete}
+variable (set by default).
+
+@ftable @command
+@item auto-completion-mode
+Enable auto-completion Mode. In this minor mode, completions are found
+automatically as words are typed.
+@end ftable
+
+@vtable @env
+@item predictive-auto-complete
+When non-nil (the default), enabling and disabling predictive mode will
+also automatically enable or disable @command{auto-completion-mode}, without
+needing to run the @command{auto-completion-mode} command manually.
+@end vtable
+
+Word-constituent characters are added to the current word before finding
+new completions. The current syntax table (@pxref{Syntax, , , emacs, GNU
+Emacs Manual}) determines which characters are word-constituents and
+which are not (although the behaviour of individual characters can be
+overridden).
+
+By customizing @env{auto-completion-syntax-alist}, you can make
+punctuation and white-space characters automatically accept the current
+completion. If you want to exceptionally insert a punctuation character
+as though it were a word-constituent (such as the @samp{.} in
+@samp{e.g.}), you can often prefix the character key with @kbd{M-}. The
+bindings @kbd{M-.} and @kbd{M--} @c and @kbd{M-/}
+are already set up by default, but you can easily add more using the
+@command{completion-define-word-constituent-binding} convenience
+function in your @file{.emacs} file. @xref{Character Syntax and Key
+Bindings}, for more details about the syntax and key binding features.
+@findex completion-define-word-constituent-binding
+
+The following variables affect the behaviour of
+@command{auto-completion-mode}:
+
+@vtable @env
+@item auto-completion-syntax-alist
+Whether @command{auto-completion-mode} allows you to type normally,
+ignoring the provisional completions until you want to use one (select
+@samp{type normally} in the customization buffer), or whether
+punctuation characters automatically accept the current provisional
+completion before the character is inserted (select @samp{punctuation
+accepts} in the customization buffer). For full details, see
+@xref{Character Syntax and Key Bindings}.
+
+@item auto-completion-min-chars
+Minimum number of characters that must be typed before the various
+completion mechanisms are activated when using
+@command{auto-completion-mode}. Note that you can still explicitly
+invoke completion on a shorter prefix using the
+@command{complete-word-at-point} command (@pxref{Inserting
+Completions}).
+
+@item auto-completion-delay
+Number of seconds Emacs must be idle before the various completion
+mechanisms are activated when using
+@command{auto-completion-mode} (@pxref{Auto-Completion Mode}).
+
+@item auto-completion-backward-delete-delay
+Number of seconds Emacs must be idle after a backwards deletion
+(@pxref{Deleting Characters}) before the various completion mechanisms
+are activated when using @command{auto-completion-mode}
+(@pxref{Auto-Completion Mode}). Having a small delay is useful when the
+delete key is held down continuously. Default is 0.1 seconds.
+@end vtable
+
+
+
+
+@node Dynamic Completion
+@section Dynamic Completion
+@cindex dynamic completion
+@cindex completion, dynamic
+@vindex completion-use-dynamic
+
+Dynamic completion is controlled by the @env{completion-use-dynamic}
+customisation variable. When it is non-nil, the most likely completion
+is provisionally inserted in the buffer after the point and
+highlighted. If @command{auto-completion-mode} is enabled, typing more
+word-constituent characters will add them to the word, updating the most
+likely completion (@pxref{Auto-Completion Mode}).
+@cindex completion, automatic
+@cindex auto-completion mode
+@findex auto-completion-mode
+
+Note that since the @command{completion-reject} command ends the
+completion process, if you want to find completions for the same prefix
+again you have to do it manually with @command{complete-word-at-point}
+even when @command{auto-completion-mode} is enabled. @xref{Inserting
+Completions}, and @ref{Auto-Completion Mode}.
+@findex complete-word-at-point
+@findex auto-completion-mode
+
+@vtable @env
+@item completion-use-dynamic
+When non-nil, enable dynamic completion, which provisionally inserts the
+most likely conpletion in the buffer.
+
+@item completion-dynamic-highlight-common-prefix
+When non-nil, the longest common prefix is highlighted ina different
+colour in the dynamic completion.
+
+@item completion-dynamic-face
+The face used to highlight the provisional dynamic completion.
+
+@item completion-dynamic-common-prefix-face
+The face used to highlight the longest common prefix in a dynamic
+completion.
+@end vtable
+
+
+
+
+@node Completion Hotkeys
+@section Completion Hotkeys
+@cindex completion hotkeys
+@vindex completion-use-hotkeys
+
+When the customisation variable @env{completion-use-hotkeys} is non-nil,
+you will be able to select a completion by typing a single character
+(the numerical characters @kbd{0}--@kbd{9} are used by default).
+
+You will probably also want to display a list of the possible
+completions, so that you know which completion will be selected by each
+of these ``hotkeys'' (@pxref{Displaying Completions in the Echo Area},
+and @ref{Completion Tooltip}).
+
+@noindent
+The following variables affect the behaviour of the completion hotkeys:
+
+@vtable @env
+@item completion-use-hotkeys
+When non-nil, enable completion hotkeys, allowing completion candidates
+to be selected by hitting a single key.
+
+@item completion-hotkey-list
+List of keys to use for selecting completions. Default is numerical
+characters 0 to 9. Note that this variable must be set @emph{before}
+loading the predictive mode libraries, e.g. in your @file{.emacs}
+file. @xref{Keymaps and Key Bindings}.
+@end vtable
+
+Of course, however many characters are in @env{completion-hotkey-list},
+there cannot be more completions available than the number actually
+found! The maximum number to find is limited by
+@env{completion-max-candidates}, @ref{Miscellaneous Options}.
+@vindex completion-max-candidates
+
+
+
+
+@node Displaying Completions in the Echo Area
+@section Displaying Completions in the Echo Area
+@cindex completion help-echo
+@cindex help-echo
+@cindex displaying completion candidates
+@cindex completion, displaying candidates
+@cindex completion, displaying list of
+@cindex completion, echo area
+@cindex echo area
+
+If the customisation variable @env{completion-use-help-echo} is non-nil,
+a list of completion candidates is displayed in the echo
+area. If @env{completion-use-hotkeys} is also enabled
+(@pxref{Completion Hotkeys}, the hot-key characters will be displayed
+next to the completions they select.
+
+@vtable @env
+@item completion-use-help-echo
+When non-nil, a list of completion candidates (along with the hotkeys
+that select them, if enabled) is displayed in the echo area.
+@end vtable
+
+
+
+
+@node Completion Tooltip
+@section Completion Tooltip
+@cindex completion tooltip
+@cindex tooltip
+@cindex displaying completion candidates
+@cindex completion, displaying candidates
+@cindex completion, displaying list of
+
+Calling @command{completion-show-tooltip} when completing, bound to
+@kbd{S-Down}, displays a list of available completions in a tooltip. The
+@kbd{up} and @kbd{down} arrow keys can then be used to select a
+completion from the list. The following variables affect the completion
+tooltip:
+
+The tooltip can also be displayed automatically when completing,
+optionally after a time-delay. @xref{Auto-Show a List of Completions}.
+
+@vtable @env
+@item completion-tooltip-timeout
+The number of seconds to display the tooltip. The tooltip is hidden
+automatically when it is no longer needed, but it is impossible to
+display a tooltip indefinitely in Emacs. The work-around is to set this
+to a very large value. Default is 86400.
+
+@item completion-tooltip-offset
+A cons cell containing the number of pixels (an integer) by which to
+offset the tooltip by in the x and y directions (car and cdr,
+respectively).
+
+@item completion-tooltip-face
+The face to use in the tooltip. Only the @code{:foreground} and
+@code{:background} attributes are actually used.
+@end vtable
+
+
+
+
+@node Pop-Up Frame
+@section Pop-Up Frame
+@cindex pop-up frame
+@cindex completion pop-up frame
+
+Calling @command{completion-popup-frame} when completing, bound to
+@kbd{C-Down}, displays the available completions in a separate Emacs
+frame positioned below the point. You can then use the usual Emacs
+motion keys to select a completion candidate and provisionally insert it
+in the buffer (@kbd{up}, @kbd{down}, @kbd{M-p}, @kbd{M-n}, @kbd{C-p},
+@kbd{C-n}, @kbd{pageup}, @kbd{C-v}, @kbd{M-v}, @kbd{pagedown},
+@kbd{home}, @kbd{M-<}, @kbd{end} and @kbd{M->}; you can also supply
+numerical optional arguments to these, as usual).
+
+You can also toggle between displaying just the most likely completions
+or displaying all possible completions using
+@command{completion-popup-toggle-all}, bound to @kbd{M-tab} and
+@kbd{M-/}. If there are a lot of possible completions, it can take a
+while before they're displayed. If it's taking too long, use @kbd{C-g}
+to cancel. To dismiss the pop-up frame, use
+@command{completion-popup-frame-dismiss}, bound to @kbd{C-up} and
+@kbd{M-up}.
+
+The pop-up frame can also be displayed automatically when completing,
+optionally after a time-delay. @xref{Auto-Show a List of Completions}.
+
+@ftable @command
+@item completion-popup-frame
+(@kbd{C-down}) Display completion candidates in a pop-up frame.
+
+@item completion-popup-frame-toggle-all
+(@kbd{M-tab}, @kbd{M-/}) Toggle between displaying the most likely
+completion candidates and displaying all possible completions.
+
+@item completion-popup-frame-dismiss
+(@kbd{C-up}, @kbd{M-up}) Dismiss the pop-up frame.
+@end ftable
+
+The following variables affect the pop-up frame:
+
+@vtable @env
+@item completion-popup-frame-max-height
+An integer specifying the maximum height (in rows) of pop-up frames.
+
+@item completion-popup-frame-offset
+A cons cell containing the number of pixels (an integer) by which to
+offset the pop-up frame by in the x and y directions (car and cdr,
+respectively).
+@end vtable
+
+
+
+
+@node Completion Menu and Browser
+@section Completion Menu and Browser
+@cindex completion menu
+@cindex completion browser
+
+Calling @command{completion-show-menu} when completing, bound to
+@kbd{M-Down}, will bring up the completion menu, from which you can
+select a completion to insert. If @env{completion-use-hotkeys} is
+enabled, the menu will also display the hotkeys next to the completions
+they select, although you will have to exit the menu before you can use
+them (@pxref{Completion Hotkeys}).
+
+The completion menu also contains a @code{Browser} entry, which replaces
+the completion menu with the completion browser. This hierarchically
+lists @emph{all} possible completions, irrespective of the setting of
+@env{completion-max-candidates} (@pxref{Miscellaneous Options}). If it's
+taking too long to construct the browser, you can hit @kbd{C-g} to
+cancel it. You can also display the browser directly using
+@command{completion-show-browser-menu} (not bound to any key by
+default).
+
+The completion menu can be displayed automatically when completing,
+optionally after a time-delay, though because it steals the keyboard
+focus this is less useful than auto-displaying the tooltip or pop-up
+frame. @xref{Auto-Show a List of Completions}.
+
+The following variables affect the behaviour of the completion menu and
+browser:
+
+@vtable @env
+@item completion-menu-offset
+A cons cell containing the number of pixels (an integer) by which to
+offset the menu by in the x and y directions (car and cdr,
+respectively).
+
+@item completion-browser-max-items
+Maximum number of completions to display in a completion browser
+menu. If there are more completions than this in a menu, the menu will
+be divided into submenus, and if necessary the submenus will be
+further divided into subsubmenus, and so on ad infinitum. Default is
+to 25.
+
+@item completion-browser-buckets
+Chooses the algorithm used to subdivide browser menus into submenus. The
+symbol @code{balance} causes the number of entries in all menus,
+submenus, subsubmenus etc. to be made as equal as possible. The symbol
+@code{max} maximizes the number of entries in higher level menus (and
+hence minimizes the number of entries in lower level submenus), whereas
+@code{minimize} does the opposite. Note that none of these options
+affect the number of levels of submenu required in a given browser
+instance.
+@end vtable
+
+
+
+
+@node Auto-Show a List of Completions
+@section Auto-Show a List of Completions
+@cindex auto-show a list of completions
+@cindex list of completions, automatically showing
+@cindex completion, auto-show
+@cindex completion tooltip, auto-show
+@cindex tooltip, auto-show
+@cindex completion pop-up frame, auto-show
+@cindex pop-up frame, auto-show
+@cindex completion menu, auto-show
+@cindex menu, auto-show
+
+One out of the completion tooltip, pop-up frame, or menu can be
+displayed automatically when you start completing (it makes no sense to
+display more than one of them at a time; they would simply mask each
+other). It can either be displayed immediately, or only after Emacs has
+been idle for a number of seconds. The following variables control this
+feature:
+
+@vtable @env
+@item completion-auto-show
+When set to 'tooltip, 'pop-up or 'menu, the corresponding list of
+completions is displayed automatically when completing. When nil,
+nothing is displayed automatically (they can still be displayed manually
+when required).
+
+@item completion-auto-show-delay
+Number of seconds (integer) that Emacs must be idle before the list of
+completions is displayed.
+@end vtable
+
+
+
+
+@node Miscellaneous Options
+@section Miscellaneous Options
+@cindex miscellaneous options
+@cindex completion, miscellaneous options
+
+@noindent
+The following variables affect the overall behaviour of predictive mode:
+
+@vtable @env
+@item completion-resolve-behaviour
+Determines what to do with dynamics completions that have not explicitly
+been accepted or rejected. The options are: @code{'leave}, which just
+leaves the old provisional completion in place to return to later if you
+so desire, @code{'accept} and @code{'reject}, which accept or reject the
+completion, and @code{'ask}, which asks you whether you want to accept
+or reject.
+@end vtable
+
+@env{completion-resolve-behaviour} controls what happens when you move
+the point away from a provisional dynamic completion (@pxref{Dynamic
+Completion}) and start typing elsewhere in the buffer. When
+@command{auto-completion-mode} is disabled, it also determines how the
+@emph{current} dynamic completion behaves. If
+@env{completion-resolve-behaviour} is set to @code{'reject}, the current
+dynamic completion only serves as a visual indicator; it disappears
+unless you explicitly accept it. If @env{completion-resolve-behaviour}
+is set to anything else, dynamic completions really are part of the
+buffer, and you must explicitly reject them to get rid of the inserted
+characters.
+
+There is one exception to this behaviour: whether or not
+@command{auto-completion-mode} is enabled, if you move the point to
+somewhere @emph{within} a dynamic completion and start typing, that
+completion is always accepted. This is almost always what you intended,
+and leads to less surprises.
+@cindex completion, automatic
+@cindex auto-completion mode
+@findex complete-word-at-point
+
+@vtable @env
+@item completion-overwrite
+When non-nil, completions overwrite the rest of the word after point,
+both when you manually call @command{complete-word-at-point} with the
+point positioned in the middle of a word, and when
+@command{auto-completion-mode} is enabled and you type a new character
+in the middle of a word. Enabled by default.
+@end vtable
+@findex complete-word-at-point
+
+Predictive mode doesn't play all that well with
+@command{overwrite-mode}. The @env{completion-overwrite} option
+implements an intelligent, partial over-write behaviour for
+completions. This only has an effect if you try to start completing with
+the point in the middle of a word. When @env{completion-overwrite} is
+enabled, the part of the word at point that comes after the point will
+be over-written by the completion. When disabled, the completion is
+simply inserted in the middle of the word, without deleting the rest of
+it.
+
+@vtable @env
+@item completion-max-candidates
+Maximum number of completions to find. Default is 10.
+@end vtable
+
+Setting @env{completion-max-candidates} to a large number is probably
+not useful, and will slow predictive mode down. It is easier to type a
+few extra characters than cycle through lots of completions, and the
+number available directly via hotkeys is limited by the number of keys
+you are prepared to set aside for selecting completions
+(@pxref{Completion Hotkeys}).
+
+@vtable @env
+@item predictive-ignore-initial-caps
+Controls whether predictive mode should ignore initial capital letters
+when searching for completions. If non-nil (the default), completions
+for the uncapitalised string are also found.
+@end vtable
+
+Only the @emph{first} capital letter of a string is ignored. Thus typing
+@kbd{A} would find @samp{and} (which would complete to @samp{And}),
+@samp{Alaska} and @samp{ANSI}, but typing @kbd{AN} would only find
+@samp{ANSI}, whilst typing @kbd{a} would only find @samp{and}.
+
+@vtable @env
+@item predictive-auxiliary-file-location
+Controls where any auxiliary files generated by predictive mode should
+be saved. It can either be a relative path, or an absolute path, but the
+former is @emph{strongly} recommended. If it is a relative path, it is
+taken to be relative to the file that a predictive-mode buffer is
+visiting.
+
+If an absolute path is used, all auxiliary files for all predictive-mode
+buffers will be saved to the same location. In this case, there are
+@emph{no} safe-guards to prevent two different auxiliary files that
+happen to have the same name from clobbering one another. That said,
+only identically named files in different directories pose a risk.
+@end vtable
+
+Depending on the settings you have chosen, predictive mode may not
+create any auxiliary files at all. The only one created in standard
+predictive mode buffers is the buffer-local dictionary (@pxref{Automatic
+Learning}). However, the predictive mode support for a number of
+major-modes makes extensive use of auxiliary files. @xref{Major Modes}.
+
+
+
+
+@node Dictionaries
+@chapter Dictionaries
+@cindex dictionaries
+
+Predictive completion is only as good as the dictionary it uses. The
+dictionary doesn't only list the words themselves, it also ranks them
+according to how likely they are, so that predictive mode can offer the
+most likely completions first.
+
+As you type, predictive mode learns which words you use more frequently,
+so that the predictions improve. It can automatically ensure certain
+words are always ranked higher than others (useful when one word is a
+prefix for another).
+
+Predictive mode is not restricted to using one dictionary at a time; it
+can use many dictionaries in parallel, and can automatically switch
+dictionaries in different regions of text, the regions being defined by
+regular expressions.
+
+And predictive mode attempts to do all of that faster than you type, so
+that your typing is not slowed down even when using very large
+dictionaries. (As soon as Emacs becomes sentient -- surely not far off
+-- it will probably go on strike through being forced to work too fast!)
+
+@menu
+* Creating Dictionaries::
+* Loading and Saving Dictionaries::
+* Basic Dictionary Usage::
+* Region-Local Dictionaries::
+* Dictionary Learning::
+* Getting the Most out of Dictionaries::
+@end menu
+
+
+
+@node Creating Dictionaries
+@section Creating Dictionaries
+@cindex creating dictionaries
+@cindex dictionaries, creating
+
+Predictive mode dictionaries store words along with their associated
+weights, used to rank the words in order of likelihood. The weight is
+just an integer value, which can be thought of as the relative frequency
+of a word (relative to the other words in the dictionary). A dictionary
+can also store prefix relationships between words, @xref{Relationships
+Between Words}.
+
+@noindent
+The following commands are used to manually create and modify
+dictionaries:
+
+@ftable @command
+@item predictive-create-dict
+Create a new dictionary. The dictionary name is read from the
+mini-buffer. You can optionally supply a filename to associate with the
+dictionary. The dictionary will be saved to this file by default (just
+as a buffer is saved to its associated file). You may also supply a file
+containing a list of words with which to populate the new
+dictionary. The @env{predictive-completion-speed} and
+@env{predictive-dict-autosave} variables set the new dictionary's
+completion speed and autosave flag (see below).
+@vindex predictive-completion-speed
+@vindex predictive-dict-autosave
+
+@item predictive-create-meta-dict
+Create a new meta-dictionary. A meta-dictionary is a wrapper around two
+or more dictionaries that behaves as if it was a single, combined
+dictionary. The weight of a word is the sum of it's weights in the
+constituent dictionaries, and the prefix relationships from all
+constituent dictionaries are merged (@pxref{Relationships Between
+Words}). Apart from supplying a list of constituent dictionaries, the
+other options are identical to those for
+@command{predictive-create-dict}.
+
+@item predictive-add-to-dict
+Insert a word into a dictionary. The dictionary name and word are read
+from the mini-buffer (defaults to the word at the point). An optional
+prefix argument specifies the weight. If the word is not already in the
+dictionary, it will be added to it with that initial weight (or 0 if
+none is supplied). If the word is already in the dictionary, its weight
+will be incremented by the weight value (or by 1 if none is supplied).
+
+@item predictive-remove-from-dict
+Completely remove a word from a dictionary. The dictionary name and word
+are read from the mini-buffer (defaults to the word at the point).
+
+@item predictive-reset-weight
+Reset the weight of a word in a dictionary to 0. The dictionary name and
+word are read from the mini-buffer. If no word is supplied, reset the
+weights of all words in the dictionary. If a prefix argument is
+supplied, reset weight(s) to that value, rather than 0.
+
+@item dictree-size
+Display the number of words in a dictionary.
+@end ftable
+
+The file containing the list of words used to populate a dictionary has
+to conform to a specific format. Each line contains one word, delimited
+by @samp{""}, optionally followed by an integer separated by white-space
+from the word itself, which specifies the word's weight. Any characters
+before the first @samp{"} are ignored. Note that the `words' in a
+dictionary do not have to be words in the usual sense. They can be
+arbitrary sequences of characters, including white-space and punctuation
+characters. The quote character @samp{"} can be included by escaping it:
+@samp{\"}. (@xref{Known Bugs}, however.)
+
+To ensure it is as efficiently structured as possible, it is best to
+create a dictionary from a list of words using
+@command{predictive-create-dict}, rather than creating a blank
+dictionary and adding the words manually using
+@command{predictive-add-to-dict}. Also, deleting many words using
+@command{predictive-remove-from-dict} will eventually result in
+inefficient dictionary structures. For small dictionaries it won't make
+much difference, but for larger ones it can be significant. You can
+rebuild an inefficient dictionary by dumping the words to a buffer,
+creating a new dictionary, and populating it from the dumped
+words. @xref{Loading and Saving Dictionaries}.
+
+@noindent
+The following variables set defaults for other dictionary properties:
+
+@vtable @env
+@item predictive-completion-speed
+Sets the default completion speed of dictionaries created with
+@command{predictive-create-dict}. This is the desired upper limit on the
+time it takes to find completions; there is no guarantee it will be
+achieved! If it takes longer than this to find a particular completion,
+the results are cached so that they can be retrieved faster next
+time. Thus lower values result in faster completion, at the expense of
+dictionaries taking up more memory.
+
+@item predictive-dict-autosave
+Sets the default autosave property for dictionaries created with
+@command{predictive-create-dict}. If non-nil, modified dictionaries will
+automatically be saved when they are unloaded (either with the
+@command{predictive-dict-unload} command, or when exiting emacs). If
+nil, any unsaved modifications will be lost unless the dictionary is
+saved manually. @xref{Loading and Saving Dictionaries}.
+@cindex predictive-dict-unload
+@end vtable
+
+
+
+
+@node Loading and Saving Dictionaries
+@section Loading and Saving Dictionaries
+@cindex loading and saving dictionaries
+@cindex dictionaries, loading
+@cindex dictionaries, saving
+
+@ftable @command
+@item predictive-load-dict
+Load a dictionary by name, and add it to the list of dictionaries used
+by the current buffer. The dictionary will be included when learning
+from the buffer, see @ref{Learning from Buffers and Files}, and if its
+autosave flag is set (@pxref{Creating Dictionaries}), it will
+automatically be saved when the buffer is killed. The dictionary file
+must be in your @env{load-path}.
+
+@item dictree-load
+Load a dictionary from file. The name of the loaded dictionary is the
+same as the file name, with the extension removed. This will not add it
+to the list of dictionaries used by the current buffer (see
+@command{predictive-load-dict}, above).
+
+@item predictive-unload-dict
+Remove a dictionary from the list of dictionaries used by the current
+buffer. The dictionary will no longer be included when learning from the
+buffer, see @ref{Learning from Buffers and Files}, and it will not be
+saved when the buffer is killed. Note that this doesn't actually unload
+the dictionary from Emacs (see @command{dictree-unload}, below).
+
+@item dictree-unload
+Unload a dictionary. If the dictionary's autosave flag is set, this will
+also save it (@pxref{Creating Dictionaries}), unless overridden by
+supplying a prefix argument.
+
+@item predictive-save-dict
+Save a dictionary to its associated file. Prompt for a file name if
+there is none associated with the dictionary.
+
+@item predictive-write-dict
+Write a dictionary to a file specified via the mini-buffer. This also
+associates the dictionary with that file. If a prefix argument is
+supplied, you will @emph{not} be asked to confirm if over-writing an
+existing file.
+
+@item predictive-save-modified-dicts
+Save all modified dictionaries that have a non-nil autosave flag. If a
+prefix argument is supplied, prompt for confirmation before saving each
+dictionary.
+
+@item predictive-dump-dict-to-buffer
+Dump all words, weights and prefix relationships in the dictionary to a
+buffer, in the same format as that used to populate dictionaries
+(@pxref{Creating Dictionaries}).
+
+@item predictive-dump-dict-to-file
+Dump words, weights and prefix relationships to a text file rather than
+a buffer. If a prefix argument is supplied, you will @emph{not} be asked
+to confirm if over-writing an existing file.
+@end ftable
+
+@vtable @env
+@item predictive-dict-autosave
+Sets the default autosave property for dictionaries created with
+@command{predictive-create-dict}. If non-nil, modified dictionaries will
+automatically be saved when they are unloaded (either with the
+@command{predictive-dict-unload} command, or when exiting emacs). If
+nil, any unsaved modifications will be lost unless the dictionary is
+saved manually. @xref{Loading and Saving Dictionaries}.
+
+@item predictive-dict-compilation-mode
+Determines whether dictionaries are saved in compiled or uncompiled
+form, or both. If set to the symbol @code{'compiled}, dictionaries are
+saved in compiled form, if set to @code{'uncompiled} they are saved in
+uncompiled form, and if set to anything else they are saved in both
+forms (the default). A compiled dictionary can be loaded a lot faster,
+and is always used in preference to the uncompiled form if it
+exists. However, compiled dictionaries are not portable between
+different Emacs versions, whereas uncompiled ones are.
+@end vtable
+
+
+To use a dictionary, it must be loaded into memory. If the dictionary is
+in your load path, this can be done manually using the
+@command{load-library} or @command{predictive-load-dict} commands. The
+@command{predictive-load-dict} command additionally adds it to the list
+of dictionaries used by the current buffer. This has two implications:
+the dictionary will automatically be saved when the buffer is killed
+(assuming its autosave flag is non-nil, @pxref{Creating Dictionaries}),
+and it will be included when learning from the buffer (@pxref{Learning
+from Buffers and Files}). Alternatively, you can manually load a
+dictionary from file using the @command{dictree-load} command (you
+should avoid loading a dictionary using the @command{load-file} command,
+as it will not necessarily ensure that the dictionary is correctly
+associated with the file it was loaded from).
+
+If you want a dictionary to be loaded every time you run Emacs, you can
+add the following line to your @file{.emacs} file:
+
+@lisp
+(require '@var{dictionary-name})
+@end lisp
+
+@noindent
+The major-mode setup functions load the dictionaries they need
+automatically. @xref{Major Modes}.
+
+A buffer is usually associated with a file, and saving the buffer with
+the Emacs @command{save-buffer} command writes any changes back to that
+file. Similarly, dictionaries are usually associated with a dictionary
+file. The @command{predictive-save-dict} command saves any changes back
+to that file. The @command{predictive-write-dict} command is analogous
+to the Emacs @command{write-file} command.
+
+Dictionaries can be modified by adding words to them with the
+@command{predictive-add-to-dict} command (@pxref{Creating
+Dictionaries}). If the auto-learn features are used, dictionaries are
+modified whenever a completion is accepted (@pxref{Automatic
+Learning}). The @command{predictive-save-modified-dicts} saves all
+modified dictionaries whose autosave flag is set. Modified dictionaries
+used in a buffer are automatically saved when that buffer is killed if
+they have their autosave flag set. All modified autosave dictionaries
+are saved when you exit Emacs.
+
+
+
+
+
+@node Basic Dictionary Usage
+@section Basic Dictionary Usage
+@cindex basic dictionary usage
+@cindex dictionaries, basic usage
+@cindex dictionaries, using
+@vindex predictive-main-dict
+
+The name of the main dictionary used by a buffer is stored in the
+buffer-local @env{predictive-main-dict} variable. Note that the variable
+usually contains the @emph{name} of the dictionary (a symbol), not the
+dictionary itself. This is the dictionary predictive mode will normally
+search in when looking for completions.
+
+@env{predictive-main-dict} can also hold a list of dictionary
+names. They are then treated as though they form one combined
+dictionary. However, when @env{predictive-auto-add-to-dict} is used,
+words are always added to the first dictionary in the
+list. @xref{Automatic Learning}.
+@vindex predictive-auto-learn
+@vindex predictive-auto-add-to-dict
+
+@ftable @command
+@item predictive-set-main-dict
+This function can be used as a convenience to set the main dictionary
+for the current buffer. You will only be able to select dictionaries
+that are already loaded (@pxref{Loading and Saving Dictionaries}). If
+you want to set the default main dictionary permanently, customize
+@env{predictive-main-dict} instead.
+@end ftable
+
+
+
+@node Region-Local Dictionaries
+@section Region-Local Dictionaries
+@cindex dictionaries, region-local
+@cindex dictionaries, region of text
+@cindex dictionaries, overlays
+@cindex dictionaries, using multiple
+@cindex using multiple dictionaries
+@cindex multiple dictionaries
+
+Using overlays, it is possible to set up dictionaries that are local to
+specific regions of text. The predictive mode support for a number of
+major modes (notably the @LaTeX{} support) makes use of this feature
+(@pxref{Major Modes}). Configuring region-local dictionaries is,
+however, beyond the scope of this user-guide. @xref{Region-Local
+Dictionaries, , , predictive-programmer-guide, Predictive Programmer
+Guide}.
+
+@ftable @command
+@item predictive-which-dict-mode
+Auxilliary minor-mode that displays the currently active dictionary in
+the mode-line.
+@end ftable
+
+Predictive mode provides an auxilliary minor-mode,
+@command{predictive-which-dict-mode}, which displays the name of the
+currently active dictionary in the mode-line, i.e. the dictionary that
+is active at the point. If the active dictionary is in fact a list of
+dictionaries, the name of the first dictionary in the list is displayed,
+followed by @samp{...}. Positioning the mouse over the dictionary name
+displays the names of the other dictionaries, either in the echo-area
+(if @command{tooltip-mode} is disabled, or in a terminal) or in a
+tooltip. However, for this to work, you have to customize part of the
+@env{mode-line-modes} variable, as the default setting clobbers this
+functionality. Find the part that refers to the @env{minor-mode-alist}
+variable, and delete the @code{help-echo} property, i.e. change that
+part to:
+@lisp
+(:propertize ("" minor-mode-alist)
+ mouse-face mode-line-highlight local-map
+ (keymap (header-line keymap (down-mouse-3 . mode-line-mode-menu-1))
+         (mode-line keymap (down-mouse-3 . mode-line-mode-menu-1)
+                           (mouse-2 . mode-line-minor-mode-help)
+                           (down-mouse-1 . mouse-minor-mode-menu))))
+@end lisp
+
+
+
+@node Dictionary Learning
+@section Dictionary Learning
+@cindex dictionaries, learning
+@cindex learning
+
+The better the weights in a dictionary match the frequency with which
+you use words, the more useful predictive mode will be. Some of the
+standard dictionaries already include word weights, which match average
+word frequencies taken from a large sample of texts. Some don't include
+any word weights. In any case, your personal word usage might be very
+different from the average.
+
+Ideally, the weights in a dictionary should match your personal style of
+writing. In fact, since your writing style might change significantly
+depending on whether you're writing, say, a scientific article or an
+email, it may even be worth having different dictionaries for different
+circumstances.
+
+The easiest way to teach a dictionary about your writing style is to
+supply it with samples of your writing, and have it learn the word
+weights from them. Predictive mode provides two ways to do this:
+learning from existing files, and automatic learning as you type.
+
+@menu
+* Learning from Buffers and Files::
+* Automatic Learning::
+* Relationships Between Words::
+@end menu
+
+
+
+@node Learning from Buffers and Files
+@subsection Learning from Buffers and Files
+@cindex learning from buffers
+@cindex learning from files
+@cindex dictionaries, learning from buffers
+@cindex dictionaries, learning from files
+
+Predictive mode can learn word weights from existing text. The following
+commands can be used to do this. Note that they will not add new words
+to a dictionary; they only update weights of words that are already in
+the dictionary. The learning commands take account of region-local
+dictionaries, and will ensure words are learnt in the correct
+dictionaries (@pxref{Region-Local Dictionaries}).
+
+Usually, you want to accumulate knowledge from each new piece of
+text. But sometimes, you may want to start from scratch, and reset the
+word weights to zero before starting to train a dictionary (for example,
+to erase the predefined weights from the supplied English dictionary, so
+that you can train it on your own writing style). You can use the
+@command{predictive-reset-weight} command for this purpose
+(@pxref{Creating Dictionaries}).
+
+Note that all the learning commands (even the ``fast'' ones!) can take a
+long time to run.
+
+@ftable @command
+@item predictive-learn-from-buffer
+Learns weights for words in a dictionary from text in a buffer. If no
+explicit dictionary is specified, this learns word weights for all
+dictionaries used by the current buffer (@pxref{Loading and Saving
+Dictionaries}). Each occurrence of a word increments its weight in the
+dictionary. By default, only occurrences that occur in a region where
+the dictionary is active are taken into account (@pxref{Region-Local
+Dictionaries}). When an explicit dictionary is specified, this can be
+overridden by supplying a prefix argument, in which case all occurrences
+are taken into account.
+
+@item predictive-learn-from-file
+Like @command{predictive-learn-from-buffer}, but learns from a file
+instead of a buffer.
+
+@item predictive-fast-learn-from-buffer
+Similar to @command{predictive-learn-from-buffer}. It runs faster for
+large dictionaries, at the expense of missing some words. Specifically,
+only words consisting entirely of word- or symbol-constituent characters
+(according to the buffer's syntax table) will be taken into
+account. Also, unlike @command{predictive-learn-from-buffer}, this
+command takes into account the setting of the
+@env{predictive-auto-add-to-dict} option. If an explicit dictionary is
+specified, words that are not already in the dictionary will be added to
+it if @env{predictive-auto-add-to-dict} has any non-nil
+value. Otherwise, @env{predictive-auto-add-to-dict} has the usual
+effect, as do the other auto-add-related options (@pxref{Automatic
+Learning}).
+
+@item predictive-fast-learn-from-file
+Like @command{predictive-fast-learn-from-buffer}, but learns from a file
+instead of a buffer.
+@end ftable
+
+
+
+@node Automatic Learning
+@subsection Automatic Learning
+@cindex automatic learning
+@cindex learning, automatic
+@cindex dictionaries, automatic learn
+
+Predictive mode can automatically learn which words you use most often
+as you type, in order to make better predictions. This feature is
+especially useful when you first start using a dictionary, to adapt it
+to your writing style. Once a dictionary has been trained and is making
+good predictions, it can be turned off to fix the order in which
+completions are offered (@pxref{What is predictive completion?}), though
+leaving it on usually doesn't cause the order to change that much.
+
+@noindent
+The following variables control automatic learning:
+
+@vtable @env
+@item predictive-auto-learn
+Controls automatic word frequency learning. When non-nil (the default),
+the weight for a word in is incremented each time it is accepted as a
+completion, making the word more likely to be offered higher up the list
+of completions in the future. Words that are not already in the
+dictionary are ignored unless @env{predictive-auto-add-to-dict} is set.
+
+@item predictive-auto-add-to-dict
+Controls automatic adding of new words to dictionaries. If nil (the
+default), new words are never automatically added to a dictionary. If
+@code{t}, new words are automatically added to the active dictionary.
+If set to a dictionary name, new words are automatically added to that
+dictionary instead of the active one.
+
+@item predictive-add-to-dict-ask
+If non-nil, predictive mode will ask for confirmation before
+automatically adding any word to a dictionary. Enabled by default. This
+has no effect unless @env{predictive-auto-add-to-dict} is also set.
+
+@item predictive-use-buffer-local-dict
+If non-nil, a special, buffer-local dictionary will be created for each
+predictive mode buffer. The buffer-local dictionary is used in
+conjunction with the @env{predictive-main-dict}, and the two act as a
+single, combined main dictionary for the buffer.
+@cindex dictionaries, buffer-local
+@cindex buffer-local dictionary
+
+The buffer-local dictionary is initially empty, but whenever a word is
+learnt (auto-learnt, auto-added, learnt from a buffer or file, or added
+manually), it is added to the buffer-local dictionary, and its weight
+there is incremented by a value
+@env{predictive-buffer-local-learn-multiplier} times higher than for
+normal dictionaries. Thus the buffer-local dictionary will help
+predictive mode adapt much faster to the vocabulary used in a specific
+buffer than global dictionaries alone can.
+
+If @env{predictive-dict-autosave} is enabled and the buffer is
+associated with a file, the buffer-local dictionary will automatically
+be saved to the directory containing the file@footnote{In fact, two
+dictionaries will be saved in the directory, since the buffer-local
+dictionary is composed of a meta-dictionary and a normal dictionary,
+@pxref{Creating Dictionaries}.}. When you load the file in the future,
+predictive mode will look for the buffer-local dictionary in the same
+directory; there is no need to add the directory to your load path. If
+the buffer is not associated with a file, the buffer-local dictionary
+will be discarded when you end the Emacs session.
+
+@item predictive-buffer-local-learn-multiplier
+Sets the learning speed for buffer-local dictionaries. Whenever a word
+is added to a buffer-local dictionary, the weight increment is
+multiplied by this value before being added to any existing word
+weight. The default is 50.
+
+@item predictive-use-auto-learn-cache
+If non-nil (the default), auto-learnt and auto-added words are cached,
+and only actually added to the dictionary when Emacs has been idle for
+@env{predictive-flush-auto-learn-delay} seconds or the buffer is killed
+(it has no effect unless at least one of @env{predictive-auto-learn} or
+@env{predictive-auto-add-to-dict} is also set). This avoids small but
+sometimes noticeable delays when typing. New words or word weights will
+not be taken into account until the cache is fully flushed.
+
+@item predictive-auto-add-min-chars
+Minimum length of words auto-added to the dictionary. When enabled,
+words shorter than this will be ignored when auto-add is used.
+
+@item predictive-auto-add-filter
+When this variable is set to a function, and when
+@env{predictive-auto-add-to-dict} is enabled, the function will called
+whenever a word is going to be auto-added to the dictionary, passing the
+word (a string) and the dictionary as arguments. The word will only be
+added if the function returns non-nil. If
+@env{predictive-use-auto-learn-cache} is enabled, the filter function
+will be called when cached entries are flushed, not when they're added
+to the cache, allowing even time-consuming filter functions to be used.
+@end vtable
+
+Note that if @env{predictive-main-dict} contains a list of dictionary
+names (@pxref{Basic Dictionary Usage}), an automatically learnt or
+added word may not end up where you want it. The weight of a word is
+incremented in the first dictionary it is found in, and words are added
+to the first dictionary in the list (assuming
+@env{predictive-auto-add-to-dict} is set to @code{t}). It is best to
+ensure that dictionaries in the list do not duplicate any words.
+@vindex predictive-main-dict
+@cindex dictionaries, main
+
+The @env{predictive-auto-add-filter} is not a customization option, so
+it can only be set from Lisp code (e.g. a setup function, @pxref{Major
+Modes}). One example of its use would be to filter out words that
+contain non-letter characters (though it may be better to customize
+@env{completion-dynamic-syntax-alist} and
+@env{completion-dynamic-override-syntax-alist} instead,
+@pxref{Syntax}). The following will accomplish this:
+@lisp
+(setq predictive-auto-add-filter
+      (lambda (word dict) (string-match "^[[:alpha:]]$" word)))
+@end lisp
+Note that the function must accept both the word and dictionary
+arguments, even if it doesn't make use of the dictionary.
+
+Another example would be to check that words are spelled correctly before
+auto-adding them to a dictionary, either using @command{ispell} or using
+the English dictionary that comes with predictive mode. This sounds
+tautological, but it does make sense: the dictionary you use for
+predictive completion will only contain words you've used at least once,
+but typos and spelling mistakes won't make it into the dictionary
+(@pxref{Getting the Most out of Dictionaries}).
+@lisp
+(setq predictive-auto-add-filter (lambda (word dict) (lookup-words word)))
+@end lisp
+Using the supplied predictive English dictionary will be faster than
+@command{ispell}, since it is optimised for looking up words, though
+this isn't such an issue if @env{predictive-use-auto-learn-cache} is
+enabled (the following assumes @code{dict-english} is already loaded,
+@pxref{Loading and Saving Dictionaries}).
+@lisp
+(setq predictive-auto-add-filter
+      (lambda (word) (dictree-member-p dict-english word)))
+@end lisp
+
+Other possible uses for @env{predictive-auto-add-filter} are limited
+only by your imagination!
+
+
+
+@node Relationships Between Words
+@subsection Relationships Between Words
+@cindex relationship between words
+@cindex prefix words
+@cindex words, relationships
+@cindex words, prefixes
+
+As well as word frequencies, predictive mode dictionaries can store
+certain relationships between words, to make learning more
+effective. With each word in a dictionary, a list of other words can be
+associated. Predictive mode automatically ensures that the weights of
+the words in this list are always at least as large as that of the word
+they are associated with.
+
+This is most useful when one word is a prefix for another. For example,
+you may want to ensure that, however frequently the word @samp{learning}
+is used, the weight of the word @samp{learn} is always kept at least as
+big, so that it always takes precedence when completing.
+
+The following functions allow you to define and undefine such prefix
+relationships (note that despite the command names and descriptions,
+@command{predictive-define-prefix} and
+@command{predictive-undefine-prefix} can be used to define relationships
+between any two words, not just prefixes; however,
+@command{predictive-define-all-prefixes} and the
+@env{predictive-auto-define-prefixes} feature can only define actual
+prefix relationships):
+
+@ftable @command
+@item predictive-define-prefix
+Define one word to be a prefix of another. Predictive mode will ensure
+that the weight of the ``prefix'' word is always at least as large as
+that of the other. (Note that the word does not actually have to be a
+prefix of the other; this can be used to define a relationship between
+any two words, so that the weight of one is always larger than the
+other.)
+
+@item predictive-undefine-prefix
+Remove a ``prefix'' definition. (As for
+@command{predictive-define-prefix}, the word does not actually have to
+be a prefix of the other.)
+
+@item predictive-define-all-prefixes
+Add the given prefix to the prefix definitions of all words that for
+which it is a prefix, or define all possible prefix relationships in the
+dictionary if no explicit prefix is supplied. In the latter case, a
+numerical prefix argument sets a minimum word length for which to define
+a prefix relationship; relationships are only defined for words that are
+at least this long (the @emph{prefixes} defined for those words can
+still be any length).
+
+@item predictive-undefine-all-prefixes
+The analogue of @command{predictive-define-all-prefixes}. Remove the
+given prefix from the prefix definitions of all words, or remove all
+prefix definitions in the dictionary if no explicit prefix is
+supplied. In the latter case, a numerical prefix argument sets a minimum
+word length for which to @emph{undefine} prefix relationships (the
+length of the @emph{prefixes} that are undefined is still not restricted
+in any way).
+@end ftable
+
+
+The following variable is used to help guess a likely prefix as a
+default for @command{predictive-define-prefix} and
+@command{predictive-undefine-prefix}. It's default value is only
+appropriate for English.
+
+@vtable @env
+@item predictive-guess-prefix-suffixes
+List of suffixes to use when guessing a likely prefix for a word. The
+suffixes a tried in the order they appear in the list, and the first one
+that matches the end of the word is used: the guessed prefix is the
+original word with the suffix removed.
+@end vtable
+
+
+Ensuring that prefixes take precedence when completing words is almost
+always a good idea. It makes predictive completion much more convenient
+(especially dynamic completion, @pxref{Dynamic Completion}). Therefore,
+predictive mode includes a feature that, when enabled (the default),
+automatically defines all the prefix relationships whenever a word is
+added to a dictionary.
+
+@vtable @env
+@item predictive-auto-define-prefixes
+When non-nil, predictive mode will automatically update all prefix
+relationships for a word in a dictionary when the word is added. The
+new word will always take precedence over any word that is an extension
+of it, and in their turn any words that are prefixes of the new word
+will take precedence over it.
+@end vtable
+
+
+
+
+@node Getting the Most out of Dictionaries
+@section Getting the Most out of Dictionaries
+@cindex Getting the most out of dictionaries
+@cindex dictionaries, getting the most out of
+@cindex dictionaries, tips and tricks
+@cindex dictionaries, discussion
+@cindex automatic learning
+@cindex learning, automatic
+@cindex dictionaries, automatic learning
+
+As it says at the beginning of this chapter, predictive completion is
+only as good as the dictionary it uses. The English dictionary supplied
+with the predictive package is trained on a large body of (British)
+English text, so the words and word weights it contains accurately
+reflect average English usage. But you are very unlikely to write
+``average'' English (whatever that is!). To get the most out of
+predictive completion, it is better to train your dictionary on your own
+writing style, rather than someone else's.
+
+There are two approaches to this. The first is to create a copy of the
+supplied English dictionary containing the all same words, but with all
+their weights reset to zero. You can then either use the auto-learn
+feature to slowly train the dictionary as you write (@pxref{Automatic
+Learning}, or better still, kick-start things by training it on text you
+have already written by learning from existing files (@pxref{Learning
+from Buffers and Files}). You can of course still leave auto-learn
+enabled in order to refine the dictionary, or even use the auto-add
+feature to automatically add missing words as you type them (see below).
+
+A variant of this approach, if you don't like the supplied English
+dictionary, is to create the initial dictionary from some other list of
+words, e.g. the @file{/usr/dict/words} file on Unix systems. You will
+first need to massage the list into the format required by
+@command{predictive-create-dict} (@pxref{Creating Dictionaries}), which
+is the same as the format produced by the dump commands (@pxref{Loading
+and Saving Dictionaries}), but this should be easy for even a moderately
+savvy Emacs user@footnote{Keyboard macros may help here...}!
+
+The second approach is to start from a completely empty dictionary, and
+use the auto-add feature to automatically add words as you type them
+(@pxref{Automatic Learning}). The auto-add feature adds words when you
+``accept'' them. In this case, since the words aren't already in the
+dictionary, the only way to accept words while typing is to ensure
+dynamic completion is enabled, and type an end-of-word character (such
+as a space or punctuation character) at the end of the word
+(@pxref{Dynamic Completion}). Alternatively, you can use the fast
+learning commands @command{predictive-fast-learn-from-buffer} and
+@command{predictive-fast-learn-from-file} to add words from existing
+text (note that you @emph{must} use the fast learning commands for this;
+the normal ones will only increment the weights of words that are
+already in the dictionary).
+@cindex relationship between words
+@cindex prefix words
+@cindex words, relationships
+@cindex words, prefixes
+
+However you auto-add the words, there is a risk that some words that you
+don't want will make their way into the dictionary, for example typos
+and misspellings, or possibly words containing non-letter
+characters. The latter are best dealt with by appropriate entries in
+@env{completion-dynamic-syntax-alist} and
+@env{completion-dynamic-override-syntax-alist} (@pxref{Syntax}). The
+former are best dealt with by setting a @env{predictive-auto-add-filter}
+function (@pxref{Automatic Learning}). It's still a good idea to
+occasionally check which words are in the dictionary by dumping it to a
+buffer and scanning through it by hand or with @command{ispell}
+(@pxref{Loading and Saving Dictionaries}).
+
+So which approach is better? Each has advantages and disadvantages, and
+it comes down to personal preference. Training a reset copy of the
+supplied English dictionary (or one built from another word list)
+ensures that all the words in the dictionary are spelled correctly
+(assuming the words in the list were correct in the first place). It
+also means that predictive mode will provide spelling assistance even
+when you type an obscure word that you've never used before. On the
+other hand, the dictionary will contain many words that you will never
+use, and may lack words that you do use, which will have to be added by
+hand (unless you enable auto-add).
+
+If you write different types of text (e.g. your novel, academic papers,
+and emails), the vocabulary you use will differ significantly between
+the different types of text. You will get more out of predictive
+completion by creating separate dictionaries for each. You can then set
+up predictive mode to select the appropriate dictionary automatically,
+either based on the major mode (@pxref{Major Modes}) or, in the case of
+@LaTeX{} documents, based on the document class (@pxref{LaTeX Support}).
+@cindex dictionaries, using multiple
+@cindex using multiple dictionaries
+@cindex dictionaries, selecting automatically
+@cindex automatic dictionary selection
+
+Once you've created your dictionaries, you can use the many features of
+predictive mode to tweak the dictionary training and behaviour to suit
+your every desire. Using buffer-local dictionaries can help predictive
+mode adapt faster to the specific vocabulary you are using in an
+individual document, especially if you set a large
+@env{predictive-buffer-local-learn-multiplier} (@pxref{Automatic
+Learning}). Defining sensible prefix relationships between words makes
+sure predictive completion doesn't ``get in your way'' when you're
+typing fast (@pxref{Relationships Between Words}). The
+@env{predictive-auto-define-prefixes} option and the
+@command{predictive-define-all-prefixes} command make defining prefix
+relationships very easy.
+@cindex dictionaries, buffer-local
+@cindex buffer-local dictionary
+
+Finally, having gone to all this effort to create the perfect
+dictionary, it would be tragic to lose it all! Make sure you
+occasionally backup your dictionaries by dumping them to a plain text
+file using @command{predictive-dump-dict-to-file} (@pxref{Loading and
+Saving Dictionaries}). This is vital before upgrading to a new version
+of Emacs, since there's no guarantee that the dictionary will be
+readable in the new version@footnote{The dictionaries are saved as
+compiled Elisp code for efficiency reasons, and the byte-code format can
+change even between minor Emacs versions.}.
+@cindex dictionaries, backup
+@cindex dictionaries, dumping
+@cindex backing-up dictionaries
+@cindex dumping dictionaries
+
+
+
+
+
+@node Advanced Customisation
+@chapter Advanced Customisation
+@cindex customisation, advanced
+@cindex advanced customisation
+
+This chapter describes the more advanced customisation features provided
+by predictive mode. Many of these are on the borderline between
+user-customisations and features to be used by Lisp packages that
+enhanced predictive completion for specific major modes, though
+describing all the features available to Lisp packages is beyond the
+scope of this user guide.
+
+@menu
+* Character Syntax and Key Bindings::
+* Major Modes::
+@end menu
+
+
+
+@node Character Syntax and Key Bindings
+@section Character Syntax and Key Bindings
+@cindex characters
+@cindex syntax
+@cindex key bindings
+@cindex bindings
+
+Predictive mode significantly changes what happens when normal,
+printable characters are typed. Different characters cause different
+behaviour. For example, letter characters will usually be added to the
+current word, updating the completions, whereas punctuation characters
+end the completion process.
+
+This chapter describes the mechanisms that determine the behaviour of
+different characters, and how to customize them.
+
+@menu
+* Keymaps and Key Bindings::
+* Syntax::
+@end menu
+
+
+
+@node Keymaps and Key Bindings
+@subsection Keymaps and Key Bindings
+@cindex keymaps and key bindings
+@cindex key bindings
+@cindex keymaps
+@cindex bindings
+
+@noindent
+The following keymaps are defined by predictive mode:
+
+@vtable @env
+@item predictive-map
+Main keymap, enabled whenever predictive mode is.
+
+@item completion-map
+Keymap enabled whenever a completion minor mode (including predictive
+mode) is enabled.
+
+@item auto-completion-map
+Keymap enabled whenever @command{auto-completion-mode} is.
+
+@item completion-hotkey-map
+Keymap used when hotkey completion is enabled. Constructed from
+@env{completion-hotkey-list}. Warning: setting this directly will cause
+errors! Set @env{completion-hotkey-list} instead. @xref{Completion
+Hotkeys}.
+
+@item completion-hotkey-list
+List of hotkey characters to use for selecting completions. Default is
+numerical characters 0 to 9. This must be set @emph{before} predictive
+mode is loaded, so can not be customized, and must instead be set
+manually in your @file{.emacs} file before the @code{(require
+'predictive)} line (@pxref{Obtaining and Installing}. @xref{Completion
+Hotkeys}.
+
+@item completion-dynamic-map auto-completion-dynamic-map
+Keymaps assigned to the overlay used to highlight the provisional
+completions inserted when dynamic completion is enabled. Not currently
+used@footnote{Minor mode keymaps override overlay keymaps in the older
+versions (21.x) of Emacs, limiting their use. For these versions, these
+overlay keymaps are simulated by bindings in @env{completion-map} and
+@env{completion-dynamic-map} using the
+@command{completion-run-if-within-overlay} function as a work-around
+(a.k.a. hack!).}. @xref{Dynamic Completion}.
+@end vtable
+
+@findex predictive-self-insert
+@vindex predictive-dynamic-syntax-alist
+@vindex predictive-override-dynamic-syntax-alist
+
+The various keymaps define key bindings for different situations that
+arise in predictive mode. The main @env{predictive-map} keymap is
+enabled whenever predictive mode is enabled, as is
+@env{completion-map}. The difference between them is that
+@env{completion-map} is used by all in-buffer completion modes that use
+the @code{completion-UI} library, whereas @env{predictive-map} is
+specific to predictive mode. The @env{auto-completion-map} keymap is
+enabled whenever @command{auto-completion-mode} is enabled. Note: if you
+find yourself thinking of re-binding printable characters in any of
+these keymaps to something other than @command{completion-self-insert},
+don't! (at least not until you've read on a bit). What you probably want
+to change are the @env{completion-dynamic-syntax-alist} and
+@env{completion-dynamic-override-syntax-alist} variables. @xref{Syntax}.
+
+@env{completion-dynamic-map} and @env{auto-completion-dynamic-map} are
+active within the provisional completions displayed by dynamic
+completion (@pxref{Dynamic Completion}). The former is used when
+@command{auto-completion-mode} is disabled, the latter when it is
+enabled. They are used to provide key bindings for most of the
+completion features.
+
+The @env{completion-hotkey-map} is is constructed automatically from the
+characters listed in @env{completion-hotkey-list}, and binds all those
+characters to @command{predictive-select-completion}. It should
+@emph{not} be set directly; you may get strange results if the keymap
+and key list do not correspond!
+@findex completion-select
+
+If the keymaps are not defined when predictive mode is first loaded
+(@pxref{Obtaining and Installing}), it creates the default keymaps and
+loads them into Emacs. Therefore, to completely re-define predictive
+mode key bindings, it is simpler to re-define the keymap variables
+@emph{before} loading predictive mode (e.g. before the @code{(require
+'predictive)} line in your @file{.emacs} file, @pxref{Obtaining and
+Installing}). But if you simply want to modify a few key bindings, as
+will usually be the case, you can do it in the usual Emacs way,
+@emph{after} loading predictive mode in your @file{.emacs} file.
+@cindex .emacs file
+@cindex startup file
+@cindex configuration file
+
+
+
+@node Syntax
+@subsection Syntax
+@cindex syntax
+@cindex characters, syntax
+
+@vtable @env
+@item auto-completion-syntax-alist
+Alist associating character syntax descriptors with completion
+functions. Used by the @command{completion-self-insert} function to
+decide what to do based on a typed character's syntax.
+
+@item auto-completion-override-syntax-alist
+Alist associating characters with completion functions. Overrides the
+default function for a typed character's syntax. Used by
+@command{completion-self-insert}.
+@end vtable
+
+@ftable @command
+@item completion-define-word-constituent-binding
+Convenience command for use in your @file{.emacs} file. It is used to
+define key bindings that insert a character as though it had a different
+syntax. Usually used to allow punctuation characters to be inserted
+one-off as word-constituents. To define @var{key} as a binding to insert
+character @var{char} as though its were a word-constituent, use:
+@lisp
+(completion-define-word-constituent-binding key char)
+@end lisp
+To define @var{key} as a binding to insert character @var{char} as
+though its syntax class were @var{syntax}, use:
+@lisp
+(completion-define-word-constituent-binding key char syntax)
+@end lisp
+To ignore @env{auto-completion-override-syntax-alist} for this key
+binding, so that the behaviour is determined only by @var{syntax},
+supply a non-nil third argument:
+@lisp
+(completion-define-word-constituent-binding key char syntax t)
+@end lisp
+@end ftable
+
+When a character is typed, predictive mode decides what to do based on
+that character's syntax, as defined by the current syntax table
+(@pxref{Syntax, , , emacs, GNU Emacs Manual}). All printable characters
+are bound by default to the function @command{completion-self-insert},
+which inserts the character, looks up the character's syntax descriptor
+in @env{auto-completion-syntax-alist}, and carries out the associated
+actions.
+@findex completion-self-insert
+
+By default, all word-constituent characters (syntax descriptor @code{w})
+insert the character and complete the new prefix, all white-space and
+punctuation characters (descriptors @code{SPACE} and @code{.}) accept
+any provisional completion and insert the character, and anything else
+rejects any provisional completion and inserts the character.
+
+Occasionally, the syntax-derived behaviour needs to be overridden for
+individual characters. The @env{auto-completion-override-syntax-alist}
+associates characters with completion behaviour and takes precedence
+over @env{auto-completion-syntax-alist}.
+
+Each association in @env{auto-completion-syntax-alist} and
+@env{auto-completion-override-syntax-alist} is a two-element list of the
+form@footnote{Lisp packages can additionally set a third element that
+controls whether the typed character is inserted, and can replace any
+element in the list with a function that returns one of the values
+described here or nil, but these features are beyond the scope of this
+user-guide.}:
+@lisp
+(<accept|reject|add> <string|word|none>)
+@end lisp
+
+The first element determines what happens if there is a provisional
+completion at the point: @code{accept} accepts it, @code{reject} rejects
+it, and @code{add} adds the typed character to the completion's
+prefix. The last element determines what kind of completion is done (if
+any) after the typed character is inserted: @code{string} and
+@code{word} complete the current prefix, whereas @code{none} doesn't do
+any completion. The @code{string} and @code{word} options differ in how
+they decide what prefix should be completed when no completion is in
+progress. @code{string} takes the prefix to be the prefix built up by
+typing sequential characters. @code{word} takes the prefix to be the
+part of the current word appearing before point@footnote{The value of
+@env{completion-word-thing} determines what is considered a
+word. Logically enough, it defaults to @code{word}. Lisp packages can
+redefine it, or even override the whole prefix-finding mechanism with
+their own function, but this is again beyond the scope of this
+user-guide.}.. The difference is only evident when typing a character in
+the middle or at the end of an existing word, in which case
+@code{string} completes the newly typed character whereas @code{word}
+completes the existing word plus the new character.
+
+Finally, it is occasionally useful to be able to manually override a
+character's syntax, and have it treated one-off as though it had a
+different syntax class. A key binding to do this can be created using
+the @command{completion-define-word-constituent-binding} function in
+your @file{.emacs} file (after the line loading the predictive package,
+@pxref{Obtaining and Installing}). This is most commonly used to allow
+punctuation characters to be inserted one-off as word-constituents. The
+bindings @kbd{M-.}, @kbd{M--}, @kbd{M-/} and @kbd{M-S-<SPC>} are defined
+by default in predictive mode to do precisely this for the punctuation
+characters @samp{.}, @samp{-} and @samp{/}.
+@findex completion-define-word-constituent-binding
+
+
+
+
+@node Major Modes
+@section Major Modes
+@cindex working with major modes
+@cindex major modes
+
+The many features of predictive mode allow you to set things up
+appropriately for whatever language you are typing, whether it be plain
+text, markup languages such as @LaTeX{} or HTML, programming languages
+such as C or Lisp, etc. Predictive mode will work happily alongside the
+appropriate major-mode. However, since each language makes different
+demands of predictive completion, you may find yourself changing a large
+number of settings when switching major modes.
+
+To facilitate using predictive completion alongside different
+major-modes, predictive mode can run a setup function determined by the
+current major-mode whenever it is switched on in a buffer. Of course,
+you can also use major mode hooks, but hooks are less convenient if you
+don't want to always switch on predictive mode in that major mode, or if
+you want to switch it on and off whilst within the mode.
+@cindex setup function
+@cindex major mode hooks
+
+@vtable @env
+@item predictive-major-mode-alist
+Alist associating a major-mode symbol with a function, which should take
+one argument. The alist is checked whenever predictive mode is enabled
+or disabled in a buffer using the @command{predictive-mode} or
+@command{turn-on-predictive-mode} commands (@pxref{Basic Completion
+Commands}). If the buffer's major-mode matches one in the alist, the
+associated function is called with a positive argument if predictive
+mode is being enabled or a negative one if it is being disabled. This
+makes it easier to customize predictive mode for different major modes.
+@findex predictive-mode
+@findex turn-on-predictive-mode
+@end vtable
+
+Since the setup function is determined by the current major-mode,
+predictive mode should be switched on @emph{after} switching to the
+appropriate major-mode. If you always want to use predictive mode with a
+particular major-mode, the easiest way to do this is to add the
+@command{predictive-mode} command to the major-mode hook in your
+@file{.emacs} file, using a line something like this:
+@cindex .emacs file
+@cindex startup file
+@cindex configuration file
+@lisp
+(add-hook '@var{major-mode}-hook 'turn-on-predictive-mode)
+@end lisp
+
+The predictive package itself includes comprehensive support for
+@LaTeX{} (@command{predictive-setup-latex}), Texinfo
+(@command{predictive-setup-texinfo}) and HTML
+(@command{predictive-setup-html}). More contributions are always
+welcome!.
+@c and Fortran 90/95 (@command{predictive-setup-f90}) @footnote{An
+@c eclectic mix, which reflects the things I use emacs for most often,
+@c and perhaps also the fact that predictive completion mode is somewhat
+@c better suited to markup languages than programming languages at the
+@c moment.
+You must ensure that the dictionaries required in order to support these
+major-modes (which are also included in the package, @pxref{Obtaining
+and Installing}) can be found in your @env{load-path}. The @LaTeX{},
+Texinfo, and HTML support goes far beyond simply changing a few
+configuration variables. @xref{LaTeX Support}, @ref{Texinfo Support},
+and @ref{HTML Support}.
+@c Support for the other major-modes is more rudimentary.
+
+@menu
+* LaTeX Support::
+* Texinfo Support::
+* HTML Support::
+@end menu
+
+
+
+@node LaTeX Support
+@subsection @LaTeX{} Support
+@cindex @LaTeX{} support
+@cindex major modes, @LaTeX{}
+@cindex @LaTeX{}, major-mode support
+
+Predictive mode comes with comprehensive support for the @LaTeX{}
+type-setting language. With the default settings, @LaTeX{} support is
+enabled automatically when predictive completion mode is turned on in a
+@LaTeX{} buffer, via an entry in @env{predictive-major-mode-alist}
+(@pxref{Major Modes}).
+
+@vtable @env
+@item predictive-latex-docclass-alist
+Alist associating LaTeX document classes (the @env{docclass} appearing
+inside @code{\documentclass@{<@env{docclass}>@}} with dictionaries.
+
+@item predictive-latex-electric-environments
+When non-nil, environment names appearing inside
+@code{\begin@{<@env{environment}>@}} and
+@code{\end@{<@env{environment}>@}} are automatically synchronised.
+@end vtable
+
+By default, predictive mode will use the usual main dictionary in
+@LaTeX{} mode, determined by @env{predictive-main-dict} (@pxref{Basic
+Dictionary Usage}). However, by customizing
+@env{predictive-latex-docclass-alist}, the main dictionary can be
+selected automatically based on the document class.
+
+In addition to the main dictionary, a number of @LaTeX{} dictionaries
+are also used, grouped into four main categories: text-mode @LaTeX{}
+commands, maths-mode @LaTeX{} commands, preamble @LaTeX{} commands, and
+@LaTeX{} environments. The dictionaries in the different categories are
+used to look for completions in different contexts in the @LaTeX{}
+document. The main @LaTeX{} dictionaries in these categories are,
+respectively, @code{dict-latex}, @code{dict-latex-math},
+@code{dict-latex-preamble} and @code{dict-latex-env}. In addition, there
+are dictionaries for @LaTeX{} document classes
+(@code{dict-latex-docclass}), bibliography styles
+(@code{dict-latex-bibstyle}). Finally, a dictionary of cross-reference
+labels and dictionaries of locally defined @LaTeX{} commands and
+environments, unique to each @LaTeX{} file, are generated automatically
+(@pxref{Automatically Created Files for @LaTeX{}}).
+
+Predictive mode will automatically complete words from the correct
+dictionary in different regions of your @LaTeX{} document@footnote{The
+automatic dictionary switching is implemented using the
+@dfn{auto-overlays} Elisp package.}. In the main body of the document it
+will complete from the main dictionary, as usual, and also from the
+dictionaries of text-mode @LaTeX{} commands. Inside @samp{equation} or
+other display-mode environments, between @samp{$}'s, or between
+@samp{\[} and @samp{\]}, it will use the dictionaries of maths
+commands. Inside @samp{\begin@{@dots{}@}} it will use the dictionaries
+of @LaTeX{} environments. Inside @samp{\ref@{@dots{}@}} it will use the
+dictionary of cross-reference labels, which is created and updated
+automatically for each @LaTeX{} document. Inside
+@samp{\documentclass@{@dots{}@}} and
+@samp{\bibliographystyle@{@dots{}@}}, it will use the document class and
+bibliography style dictionaries, respectively.
+
+When @env{predictive-latex-electric-environments} is enabled, the
+environment name appearing inside a @LaTeX{}
+@code{\end@{<@env{environment}>@}} command is automatically synchronised
+with its matching @code{\begin@{<@env{environment}>@}} command. The
+synchronisation doesn't just occur when the @code{\end} command is first
+typed; it is kept synchronised at all times, even when the @code{\begin}
+command that it originally matched is deleted, causing it to match a
+different @code{\begin} somewhere else in the document. Also, when the
+environment name within either a @code{\begin} @emph{or} an @code{\end}
+command is modified, the environment name within its matching partner is
+also modified accordingly. WARNING: this feature is known to have bugs,
+and should probably now be used at the moment (@pxref{Known Bugs}).
+
+The behaviour of different character syntax classes, and the behaviour
+of certain individual characters, is set up appropriately for @LaTeX{}
+(@pxref{Character Syntax and Key Bindings}). Also, a special @LaTeX{}
+completion browser menu, more appropriate for browsing @LaTeX{}
+commands, is used instead of the default one.
+
+Predictive @LaTeX{} mode honours the @env{TeX-master} variable. If it is
+turned on in a buffer whose @env{TeX-master} variable is set to the name
+of another @LaTeX{} file, the @env{TeX-master} file will be visited,
+predictive mode will be enabled in its buffer, and all buffers with the
+same @env{TeX-master} will share various predictive mode settings.
+
+@menu
+* LaTeX Packages::
+* Automatically Created Files for @LaTeX{}::
+@end menu
+
+
+
+@node LaTeX Packages
+@subsubsection @LaTeX{} Packages
+@cindex @LaTeX{} packages
+@cindex dictionaries, automatic loading for @LaTeX{} packages
+
+Many @LaTeX{} commands and features only become available when the
+appropriate package is included in the document using the
+@samp{\usepackage} command. Predictive @LaTeX{} mode supports this by
+automatically trying to load package dictionaries and configuration
+functions when a @samp{\usepackage} command is typed, and unloading them
+again if it is modified or deleted.
+
+When a @samp{\usepackage@{@var{package}@}} command is typed, predictive
+@LaTeX{} mode looks for four dictionaries based on the @var{package}
+name: @code{dict-latex-@var{package}},
+@code{dict-latex-math-@var{package}},
+@code{dict-latex-preamble}@var{package}, and
+@code{dict-latex-env-@var{package}}. These correspond to the four
+categories of @LaTeX{} dictionary (@pxref{LaTeX Support}). If any of
+these dictionaries are found, they are added to the list of dictionaries
+for the corresponding category, and will be active in the appropriate
+regions of the document. If the text of the
+@samp{\usepackage@{@var{package}@}} command is modified or deleted, the
+dictionaries are removed again.
+
+In addition, when a @samp{\usepackage} command is typed, modified or
+deleted, predictive @LaTeX{} mode will try to load an Elisp file called
+@file{predictive-latex-}@var{package}@samp{.el[c]}, and run
+package-specific load or unload functions, as appropriate. The variable
+@env{predictive-latex-usepackage-functions} is used to determine which
+function (if any) to call when loading or unloading a @LaTeX{} package
+(see below). This allows arbitrary configuration changes to be made when
+packages are included in or removed from the document. (A common use of
+this is to add or remove auto-overlay regexps, @pxref{LaTeX Automatic
+Overlays, @LaTeX{} Automatic Overlays, , predictive-programmer-guide,
+Predictive Programmer Guide}.)
+
+@vtable @env
+@item predictive-latex-usepackage-functions
+Alist associating @LaTeX{} @var{package} names (strings) with a list
+containing two functions: a function to be called when loading the package
+with that name (i.e. when @samp{\usepackage@{@var{package}@}} is typed),
+and a function to be called when unloading the package (i.e. when the
+@samp{\usepackage@{@var{package}@}} is modified or deleted). Entries
+should be added to this variable by the corresponding Elisp file,
+@file{predictive-latex-}@var{package}@samp{.el[c]}.
+@end vtable
+
+The predictive completion package already comes with support for some
+@LaTeX{} packages, though by no means all or even the most
+important@footnote{Dictionaries and Elisp code welcome!}.
+
+
+
+@node Automatically Created Files for @LaTeX{}
+@subsubsection Automatically Created Files
+@cindex automatically created files, @LaTeX{}
+@cindex @LaTeX{}, automatically created files
+
+The predictive completion @LaTeX{} support automatically creates and
+updates dictionaries of cross-reference labels, dictionaries of
+locally-defined text-mode and math-mode @LaTeX{} commands (defined using
+@samp{\newcommand}), and a dictionary of locally-defined environments
+(defined using @samp{\newenvironment} and @samp{\newtheorem}) for each
+@LaTeX{} buffer.
+
+All these dictionaries are saved to the directory specified by
+@env{predictive-auxiliary-file-location} (@pxref{Miscellaneous
+Options}), so by default they will be saved to a @file{.predictive/}
+subdirectory of the directory containing the @LaTeX{} file. They are
+given a filename of the form
+@file{dict-latex-@var{type}-@var{filename}.elc}, where @var{type} is the
+type of dictionary (@file{label}, @file{local-latex}, @file{local-math}
+or @file{local-env}), and @var{filename} is the name of the @LaTeX{}
+file. Note that these dictionaries are shared across all buffers with
+the same @env{TeX-master}, and the location they are saved to will be
+based on the @env{TeX-master} file's name and directory.
+
+To speed up loading of predictive mode's @LaTeX{} support, a file
+containing information about the location of different regions within
+the document is saved to @file{auto-overlays-@var{filename}} also
+located in @env{predictive-auxiliary-file-location}. (Separate files are
+created even for buffers that share the same @env{TeX-master}.)
+
+
+
+@node Texinfo Support
+@subsection Texinfo Support
+@cindex texinfo support
+@cindex major modes, texinfo
+@cindex texinfo, major-mode support
+
+The predictive mode Texinfo support shares much in common with the
+@LaTeX{} support, but Texinfo is a somewhat simpler markup language than
+@LaTeX{} (@TeX{}nically they're both @TeX{}, of course!). With the
+default settings, Texinfo support is enabled automatically when
+predictive completion mode is turned on in a Texinfo buffer, via an
+entry in @env{predictive-major-mode-alist} (@pxref{Major Modes}).
+
+Four Texinfo dictionaries are provided: @code{dict-texinfo} containing
+the main Texinfo @@-commands, @code{dict-texinfo-env} containing the
+environment names (things that are ended by @samp{@@end}),
+@code{dict-texinfo-indicating} containing just the Texinfo
+``indicating'' commands (@pxref{Indicating, , , Texinfo, GNU Texinfo
+Manual}), and @code{dict-texinfo-math} containing Texinfo @@-commands
+that are specific to math-mode (@samp{@@\} is the only one!). In
+addition, @code{dict-latex-math} is used in math-mode@footnote{It ought
+to be @code{dict-tex-math}, but that will have to await @TeX{}
+support. @xref{Known Bugs}.} (see @pxref{LaTeX Support}). Finally, a
+dictionary of node names, a dictionary of locally defined Texinfo
+commands, add a dictionary of Texinfo flags, unique to each Texinfo
+file, are generated automatically (@pxref{Automatically Created Files
+for Texinfo}).
+
+Predictive mode will automatically complete words from the correct
+dictionary in different regions of your Texinfo document@footnote{The
+automatic dictionary switching is implemented using the
+@dfn{auto-overlays} Elisp package.}. In the main body of the document it
+will complete from the main dictionary, as usual, and also from the
+dictionaries of Texinfo @@-commands. After @samp{@@end}, it will offer
+environment names as completions, whereas after @samp{@@table},
+@samp{@@vtable}, and @samp{@@ftable} it will offer Texinfo
+``indicating'' commands. Inside @samp{@@xref@{@dots{}@}},
+@samp{@@pxref@{@dots{}@}} and @samp{@@ref@{@dots{}@}}, it will use the
+dictionary of node names, which is created and updated automatically for
+each Texinfo document. Inside @samp{@@clear@{@dots{}@}},
+@samp{@@ifset@{@dots{}@}} and @samp{@@ifcler@{@dots{}@}}, it will use
+the automatically-generated dictionary of flag names. Inside
+@samp{@@math@{@dots{}@}} it will offer standard @TeX{} maths commands as
+completions@footnote{Currently, it actually offers @LaTeX{} maths
+commands, @pxref{Known Bugs}.}.
+
+The behaviour of different character syntax classes, and the behaviour
+of certain individual characters, is set up appropriately for Texinfo
+(@pxref{Character Syntax and Key Bindings}). Also, a special Texinfo
+completion browser menu, more appropriate for browsing Texinfo commands,
+is used instead of the default one.
+
+
+@menu
+* Automatically Created Files for Texinfo::
+@end menu
+
+@node Automatically Created Files for Texinfo
+@subsubsection Automatically Created Files
+@cindex automatically created files, Texinfo
+@cindex Texinfo, automatically created files
+
+The predictive completion Texinfo support automatically creates and
+updates dictionaries of node names, dictionaries of locally-defined
+Texinfo commands (defined using @samp{@@macro}, @samp{@@rmacro} or
+@samp{@@alias}), and a dictionary of flags (defined using @samp{@@set}),
+for each buffer.
+
+All these dictionaries are saved to the directory specified by
+@env{predictive-auxiliary-file-location} (@pxref{Miscellaneous
+Options}), so by default they will be saved to a @file{.predictive/}
+subdirectory of the directory containing the Texinfo file. They are
+given a filename of the form
+@file{dict-texinfo-@var{type}-@var{filename}.elc}, where @var{type} is
+the type of dictionary (@file{node}, @file{local-texinfo}, or
+@file{flag}), and @var{filename} is the name of the Texinfo file.
+
+To speed up loading of predictive mode's Texinfo support, a file
+containing information about the location of different regions within
+the document is saved to @file{auto-overlays-@var{filename}} also
+located in @env{predictive-auxiliary-file-location}.
+
+
+
+
+@node HTML Support
+@subsection HTML Support
+@cindex HTML support
+@cindex html support
+@cindex major modes, HTML
+@cindex HTML, major-mode support
+@cindex html, major-mode support
+
+HTML is a simpler markup language than @LaTeX{}, and the predictive mode
+support for it is correspondingly simpler. It includes a dictionary of
+HTML tags, @code{dict-html}, and dictionaries of valid attributes for
+different tags, @code{dict-html-@var{tag}}. Completion is
+context-sensitive: typing a @samp{<} character will start completing an
+HTML tag, whereas within a tag predictive mode will complete from the
+appropriate tag attribute dictionaries. With the default settings, HTML
+support is enabled automatically when predictive completion mode is
+turned on in an HTML buffer, via an entry in
+@env{predictive-major-mode-alist} (@pxref{Major Modes}).
+
+To speed up loading of predictive mode's HTML support, a file containing
+information about the location of different regions within the document
+is saved to @file{auto-overlays-@var{filename}} located in
+@env{predictive-auxiliary-file-location} (@pxref{Miscellaneous
+Options}), which by default is a @file{.predictive/} subdirectory of the
+directory containing the HTML file.
+
+
+
+
+@node Bugs and Future Improvements
+@chapter Bugs and Future Improvements
+@cindex bugs and future improvements
+@cindex reporting bugs
+@cindex bugs, reporting
+@cindex feature requests
+@cindex features, requesting
+
+The predictive completion package has been tested on Emacs versions 21.3
+and the multi-tty CVS branch, and is known to work reasonably well. It
+will not work under older versions, and currently doesn't work under any
+version of XEmacs.
+
+Report bugs and feature requests to
+@email{toby-predictive@@dr-qubit.org}. Even reports of which versions of
+Emacs it runs under are useful at this stage (though check the web-site
+@uref{http://www.dr-qubit.org/emacs.php} first to make sure your version
+is not already listed).
+
+@menu
+* Known Bugs::
+* Future Improvements::
+@end menu
+
+
+
+@node Known Bugs
+@section Known Bugs
+@cindex known bugs
+@cindex bugs, known
+
+@noindent
+Known bugs (in no particular order):
+
+@enumerate
+@item
+Predictive mode does not work under XEmacs. Making it work will take
+some compatibility work, but should be possible.
+
+@item
+The @env{predictive-latex-electric-environments} feature is very flaky,
+and should probably not be used at the moment. It has occasionally been
+known to completely mess up @LaTeX{} files by randomly deleting parts of
+them!
+
+@item
+There are probably still bugs remaining in the @code{auto-overlay} code,
+used in some major modes to set up region-local dictionaries. If you
+find one, please report it, along with precise instructions on how to
+reproduce it. They're fiendishly difficult to track down!
+
+@item
+The predictive mode Texinfo support uses @code{dict-latex-math} inside
+@samp{@@math@{@dots{}@}}, when it should only use @TeX{} maths commands.
+@end enumerate
+
+
+
+
+@node Future Improvements
+@section Future Improvements
+@cindex feature requests
+@cindex future improvements
+
+@noindent
+Possible future improvements to predictive completion (in no particular
+order):
+
+@enumerate
+@item
+Allow the learning rate (i.e. increment added each time a word is
+learnt) to be set buffer-locally and/or separately for each dictionary?
+
+@item
+Support for more major modes. (This one will probably be here for
+ever. I suspect new major modes are being created faster than predictive
+mode setup functions!)
+
+@item
+More predictive mode configuration variables could be allowed to have
+``overlay-local'' bindings, not just the active dictionary,
+completion-menu function, and @env{completion-word-thing}.
+
+@item
+Predictive mode should be integrated with the @dfn{semantic} or similar
+package, to make it more useful for programming languages. At the
+moment, it works best with plain text and markup languages.
+@end enumerate
+
+
+
+
+
+@node Credits
+@chapter Credits
+@cindex credits
+
+Much inspiration for the Emacs predictive completion package came from a
+similar package written for the @dfn{nedit} editor by Christian
+Merkwirth.
+@c (@uref{http://www.physik3.gwdg.de/~cmerk/prog/nedit/index.html})
+Most significantly, it provided the clue that ternary search trees are
+the best data structure to use for the dictionaries.
+
+Ternary search trees are described in a very readable article by Jon
+Bentley and Robert Sedgewick in Dr. Dobb's Journal, among other
+places. The article can be found via
+@uref{http://www.ddj.com/articles/1998/9804/}.
+
+Finally, the English dictionary supplied with the predictive completion
+package was originally based on the British National Corpus frequency
+tables, available from
+@uref{http://www.itri.brighton.ac.uk/~Adam.Kilgarriff/bnc-readme.html}.
+
+
+
+
+
+@node Command Index
+@appendix Command Index
+@printindex fn
+
+
+@node Variable Index
+@appendix Variable Index
+@printindex vr
+
+
+@node Concept Index
+@appendix Concept Index
+@printindex cp
+
+
+
+
+
+@node Copying this Manual
+@appendix Copying this Manual
+
+@menu
+* GNU Free Documentation License::
+@end menu
+
+@include fdl.texi
+
+
+
+
+@bye
+
+@c  LocalWords:  Regexps regexps maths customization

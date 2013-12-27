@@ -1,0 +1,19 @@
+#name : Add entire yaoddmuse template code.
+# --
+==What is `yaoddmuse-pagename` ?==
+`yaoddmuse-pagename` is a mode that ${1:Describe}.
+
+==Install==
+: Put Lisp:${2:package-name}.el in your load-path, add
+{{{
+    (require '$2)
+}}}    
+: in ~/.emacs
+
+==Usage==
+${3:Usage}
+
+==Customize==
+All below option can customize by: M-x customize-group RET $2 RET
+
+${4:Customize}

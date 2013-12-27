@@ -1,0 +1,320 @@
+
+Obtaining
+---------
+
+The current version of the predictive completion package can be obtained
+from:
+
+  http://www.dr-qubit.org/emacs.php
+
+Developed and maintained by Toby Cubitt (toby-predictive@dr-qubit.org).
+
+
+
+
+Backing-Up Dictionaries      
+-----------------------     
+
+*************   If you are upgrading from a previous version of the
+* IMPORTANT *   predictive completion package, make sure you first backup
+*************   any dictionaries you use by dumping the words and data
+they contain to files (unless you want to start from scratch). To make
+the backups, use
+
+  M-x predictive-dump-dict-to-file
+
+(see Loading and Saving Dictionaries, Emacs Predictive Completion
+Manual). It is NOT enough to make a copy of the dictionary file. Only the
+plain-text "dumped" format is guaranteed to be portable across different
+versions of predictive mode.
+
+Older versions of the predictive completion package saved dictionaries in
+a compiled form that was not portable across different versions of
+Emacs. Newer versions now automatically save dictionaries in both
+compiled and uncompiled forms. If you are upgrading to a different
+version of Emacs, but continuing to use the same recent version of the
+predictive completion package, then it is sufficient to delete the
+compiled dictionary files (extension ".elc", but make sure you do NOT
+delete the uncompiled files with extension ".el"!), and let predictive
+mode recompile them automatically when the dictionaries are saved.
+
+However, backing up your dictionaries by dumping them to plain-text
+files, as described above, is still a very good idea (just to be on the
+safe side!).
+
+
+
+
+Installing
+----------
+
+To install the package, extract the files using
+
+  tar -xvzf predictive.tar.gz
+
+This will unpack the files into a new directory called predictive/. Now
+byte-compile all the Lisp files and create the required dictionaries by
+running
+
+  make
+
+in the predictive/ directory. If necessary, you can specify explicitly
+where your Emacs resides with
+
+  make EMACS=/path/to/emacs
+
+Then run
+
+  make install
+
+to copy the package files to ~/.emacs.d/predictive/ (the ~/.emacs.d/
+directory will be created if it doesn't already exist). If you want to
+install the files elsewhere, you can change the default install location
+using
+
+  make install DESTDIR=/path/to/install/
+
+and the package files will be copied to the /path/to/install/ directory.
+
+***********  The dictionaries are intended to be user-specific, and MUST
+* CAREFUL *  be writable by your user. If you're performing a site-wide
+***********  installation of the predictive package, the dictionary files
+(all files starting with the prefix "dict-" and ending in ".elc" or
+".el") need to be copied to a separate writable directory for each
+user. For this reason, the dictionaries will still be installed under
+~/.emacs.d/predictive/ even if DESTDIR is specified (you will have to
+copy them manually for any other users who want to use predictive). If
+you want to change the dictionary install location, use
+
+  make install DICTDIR=/path/to/dictionaries/
+
+This can of course be combined with the DESTDIR option:
+
+  make install DESTDIR=/path/to/install/ DICTDIR=/path/to/dictionaries/
+
+
+Finally, put the following lines in your .emacs file (replace the paths
+as appropriate if you're not using the default install locations):
+  
+  ;; predictive install location
+  (add-to-list 'load-path "~/.emacs.d/predictive/")
+  ;; dictionary locations
+  (add-to-list 'load-path "~/.emacs.d/predictive/latex/")
+  (add-to-list 'load-path "~/.emacs.d/predictive/html/")
+  ;; load predictive package
+  (require 'predictive)
+
+Alternatively, you can save memory and only load the lisp libraries when
+they're needed (i.e. when you first run the `predictive-mode' command),
+by replacing the final line as follows:
+
+  ;; predictive install location
+  (add-to-list 'load-path "~/.emacs.d/predictive/")
+  ;; dictionary locations
+  (add-to-list 'load-path "~/.emacs.d/predictive/latex/")
+  (add-to-list 'load-path "~/.emacs.d/predictive/html/")
+  ;; load predictive package
+  (autoload 'predictive-mode "~/.emacs.d/predictive/predictive"
+            "Turn on Predictive Completion Mode." t)
+
+
+If you want to install the info documentation into your local info
+system, you should run the following command AS ROOT:
+
+  make info-install
+
+If your info dir file is not located in /usr/share/info/, then you can
+specify its location using
+
+  make info-install INFODIR=/path/to/info/
+
+
+
+
+Manual installation
+-------------------
+
+You're of course free to ignore the Makefile-based installation, and
+instead do everything manually (if you're not running a POSIX-like
+environment, this may be your only option, for example if you're running
+Windows and don't have Cygwin installed).
+
+
+--- Byte-Compiling ---
+
+For performance reasons, it is important to byte-compile the lisp
+code. You can do it manually using `byte-compile-file' or one of the
+other Emacs byte-compilation commands (see The Compilation Functions, GNU
+Emacs Lisp Reference Manual) for all of the Lisp files contained in the
+predictive/ directory.
+
+Personally, I like to use `dired' when byte-compiling multiple files from
+within Emacs. (See Operating on Files, GNU Emacs manual.)
+
+
+
+--- Creating the Dictionaries ---
+
+The only pre-prepared dictionary included in the main package is the
+English dictionary (so that predictive completion mode works "out of the
+box", albeit very slowly if you don't byte-compile!). However, you will
+get better results if you roll your own English dictionary and train it
+to your own writing style. The "dict-english.word-list" file could serve
+as a basis for this. (See Getting the Most out of Dictionaries,
+Predictive Completion Manual.) Other dictionaries (e.g. for LaTeX and
+html) are included only as plain-text word lists, from which the
+dictionaries can be created. So support for these major modes will not be
+available until the dictionaries have been created.
+
+You can create the dictionaries manually using the
+`predictive-create-dict' command from within Emacs. You should give the
+dictionary the same file name as the word list file, minus the final
+".word-list" extension. (See Creating Dictionaries, Emacs Predictive
+Completion Manual.)
+
+
+
+--- Installing ---
+
+Copy all the Lisp files (files with extensions .el and .elc) to a
+directory in your Emacs `load-path' (see Lisp Libraries, GNU Emacs
+Manual). You can view the current load-path using `C-h v load-path' in
+Emacs, and you can add a directory to it by putting a line such as the
+following in your .emacs file:
+
+  (add-to-list 'load-path "/path/to/add/")
+
+
+***********  Some of the dictionary Lisp files required to support
+* CAREFUL *  specific major-modes (e.g. LaTeX and html) may have been
+***********  created in subdirectories of the predictive/ directory
+(e.g. predictive/latex/ and predictive/html/). Note that Emacs does NOT
+search the `load-path' recursively, so you must also ensure that their
+locations are also in the load-path.
+
+***********  The dictionaries are intended to be user-specific, and MUST
+* CAREFUL *  be writable by your user. If you're performing a site-wide
+***********  of the predictive package, the dictionary files (all files
+starting with the prefix "dict-" and ending in ".elc" or ".el") need to
+be copied to a separate writable directory for each user, and appropriate
+load-path lines added to their .emacs files.
+
+
+If you want the predictive completion minor-mode to be available whenever
+you start Emacs, put the following line in your .emacs file after the
+load-path lines:
+
+  (require 'predictive)
+
+Alternatively, you can save memory and only load the lisp libraries when
+they're needed (i.e. when you first run the `predictive-mode' command),
+by putting the following in your .emacs instead:
+
+  (autoload 'predictive-mode "/path/to/predictive/predictive"
+            "Turn on Predictive Completion Mode." t)
+
+Note that "/path/to/predictive/predictive" is not a typo! The second
+"predictive" refers to the "predictive.el" and "predictive.elc" files,
+minus the final extension.
+
+
+
+
+Problems?
+---------
+
+Experience suggests that if predictive mode doesn't work at all for you,
+it is almost invariably an installation issue, not a show-stopping
+bug. (That's not to say predictive is bug-free! Just that the bugs that
+no doubt still exist are unlikely to completely prevent predictive from
+loading.)
+
+Check the following points carefully, calculate the value of pi (or your
+favourite transcendental number) to seven decimal places in your head,
+and check the following points again:
+
+1. Can the predictive Lisp libraries (all files with extensions ".elc"
+   and ".el") be found somewhere in your Emacs `load-path'? You can check
+   the current load-path using "C-h v load-path" from within Emacs.
+
+2. That includes the dictionaries! (Files starting with the prefix
+   "dict-" and ending with ".elc" or ".el"). If you forgot about them, go
+   back to point 1. and check them too.
+
+3. Are you quite sure ALL the dictionaries can be found, including the
+   LaTeX and html ones? They're probably in the "predictive/latex/" and
+   "predictive/html/" subdirectories. If not, go back to point 2. and
+   redo.
+
+4. Are all the dictionaries writable by your user (or the user running
+   Emacs)? That includes the "dict-english.el" and "dict-english.elc"
+   files, as well as the LaTeX and html dictionaries. If you're not sure
+   where all the dictionaries are, go back to point 3. and redo.
+
+5. Have you loaded the predictive package? Remember that the lines added
+   to your .emacs file (as described above) will only take effect when
+   that file is re-read, usually by restarting Emacs.
+
+6. Have you got the latest version of the predictive completion package?
+   Check the web-page listed at the top of this document. If a newer
+   version is available, download and install it following the
+   instructions in the new INSTALL file included in the new package (if
+   things still don't work out, you'll end up back here, but this will be
+   the new INSTALL file).
+
+
+If you're reading this, you've somehow managed to exit those labyrinthine
+loops, and have either sorted out your problem, or taken a sledgehammer
+to your computer (for which I accept no responsibility). If you think the
+documentation could be improved to avoid ending up here in the first
+place, suggestions are welcome. If you still think you've found a bug,
+then reassemble your computer (you really shouldn't keep a sledgehammer
+anywhere near your computer you know), and do the following:
+
+
+1. Start Emacs from the command line using
+
+     emacs -q --no-site-file
+
+   (this prevents loading your .emacs and other startup files, ensuring
+   you're starting from a clean slate).
+
+
+2. Run
+
+     M-: (add-to-list 'load-path "/path/to/predictive/")
+
+  replacing /path/to/predictive/ as appropriate (since the `load-path'
+  will not have been updated by your .emacs).
+
+
+3. If your problem is with LaTeX or html support, add the appropriate
+   paths to the `load-path' using
+
+     M-: (add-to-list 'load-path "/path/to/latex/dictionaries/")
+     M-: (add-to-list 'load-path "/path/to/html/dictionaries/")
+
+  replacing the paths as appropriate.
+
+
+4. Load the predictive package manually using
+
+     M-x load-library predictive
+
+  (since it won't have been loaded by your .emacs).
+
+
+5. Run
+
+     M-x toggle-debug-on-error
+
+
+6. Repeat the steps that caused the bug.
+
+
+7. Send an email to the address listed at the top of this document,
+   including a copy of any backtrace (it will appear in a separate Emacs
+   window called *Backtrace*), along with a precise description of the
+   steps required to reproduce the error, and why you think the behaviour
+   is wrong (if it's not blatantly obvious). Also state which version of
+   Emacs and which version of the predictive package you are using.

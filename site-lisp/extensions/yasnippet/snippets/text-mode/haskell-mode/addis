@@ -1,0 +1,3 @@
+#name : import {-# source #-} ...
+# --
+import {-# source #-} ${0:content}

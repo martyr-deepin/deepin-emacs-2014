@@ -1,0 +1,3 @@
+#name : (autoload '... "..." "..." ...)
+# --
+(autoload '${1:function-name} "${2:file-name}" "${3:document}" ${0:interactive})

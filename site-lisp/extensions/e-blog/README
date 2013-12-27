@@ -1,0 +1,116 @@
+e-blog.el - a GNU Emacs interface to Blogger
+Copyright (C)  2007 Mikey Coulson
+
+Introduction
+------------ 
+e-blog allows you to post, edit, label and delete posts on one or more
+blogs on Blogger.  You must have curl <http://curl.haxx.se> to use
+e-blog.  One of the original goals was to eliminate the need for curl,
+but upon further inspection of Emacs native url retrieving functions,
+I think that curl is the right tool for the job.  Using native Emacs
+functions would actually _increase_ the number of external
+dependencies.
+
+History
+-------
+One might ask, "Why another blogging interface to Emacs?"  The short
+answer is that I couldn't find an interface that worked (or, probably
+more accurately, that I could _get_ to work).
+
+The longer answer is that many of the projects that exist for posting
+to Blogger use the deprecated Atom API, and much of the code will not
+work for posting.  Blogger now uses the GData API.  I couldn't find
+any existing code that utilizes this newer API.
+
+So, I set out to write one of my own...
+
+Goals
+-----
+The original goal for e-blog was to provide a command that
+I could punch in and be presented with a buffer for writing a new post
+to Blogger and send it as if I were writing an e-mail.  That was it.
+I didn't have a particular intention of going further with it.
+
+I decided that if I was going to go that far, I may as well include
+the other features (updating, deleting) as well.  These features are
+now included.
+
+A few days after registering e-blog with Google Code, an issue was
+registered for allowing manipulation of labels, which is also now an
+included feature.  Something interesting to note about labels is that
+there is no provision in the API for them.  It is not difficult to add
+labels using the API, it is simply undocumented.  For the most part,
+they will work as expected.  The only thing that CANNOT be done with
+labels using e-blog is removing ALL labels from a post that previously
+had labels.  I have verified that e-blog is submitting XML properly in
+such a case, but one label (the last label added or first of multiple
+labels) will remain with the post regardless.
+
+Setup/Usage
+-----------
+There shouldn't be any setup, really.  It should be as simple as:
+      (load-file "/path-to-e-blog/e-blog.el")
+      (e-blog-new-post)
+
+e-blog will then ask you for your Blogger username and password.  It
+will save the authorization token that is returned from Blogger so
+that, from within a single Emacs session, it will only need your
+username and password once.
+
+NOTE: In this release, you can also move between `+', blog titles,
+and posts by using the TAB key.
+
+e-blog will present you with a buffer allowing you to choose which
+blog you want to send a post to.  If you only have one blog, it
+will still present you with this buffer so that you have the option
+of listing and deleting posts.  Simply move point to the name of
+the blog that you want to post to and press <Enter>, or click on
+the blog title with button-2.
+
+Clicking on the `+' next to a blog title will present you with a list
+of posts for that blog.  Clicking on a post title will present you
+with a buffer for editing that post.  C-c C-c in this new buffer will
+send the updated post to blogger.
+
+Clicking on the `[X]' behind the title of a post will DELETE the post
+preceding it.  e-blog asks for confirmation before deleting the post.
+
+While posting or editing, you may specify any number of labels (or
+none) by typing a comma separated list of labels on the appropriate
+line in the post/edit buffer.  If you are editing a post that has
+labels, you may change or delete them as usual.  If you remove them
+all, one will remain anyway, as noted above.
+
+There are a few convenient helper functions for doing html markup.  To
+use them, simply set the mark before any text you want to mark up and
+call the associated key for formatting the text between mark and
+point.  Provided markups are links, typewriter, emphasize, and strong.
+Their keys, respectively, are C-ch, C-ct, C-ci, and C-cs.  These
+keybindings are customizable, that is, e-blog will respect your
+settings over its own.  Simply set the variables, which are
+`e-blog-link-region-key', `e-blog-tt-region-key',
+`e-blog-emphasize-key', and `e-blog-strong-key'.
+
+If you intend to use e-blog often, you could bind `e-blog-new-post' to
+a key.  Personally, I have
+      (global-set-key "\C-cb" 'e-blog-new-post)
+in my ~/.emacs.
+
+Author
+------
+Mikey Coulson
+<miketcoulson@gmail.com>
+
+Bugs/Issues/Other
+-----------------
+If you have an issue or think you have found a bug in e-blog, you are
+welcome to use the `Issues' page at e-blog's home on
+<http://e-blog.googlecode.com>.
+
+Even better is to skip filing an issue and e-mail me a patch that fixes
+said issue/bug.
+
+If you haven't found an issue or bug, but have been using e-blog, drop
+me a line telling me how you use it, on what blog, etc.  I would like
+to hear from you, and you will probably gain a blog subscriber by
+doing so.

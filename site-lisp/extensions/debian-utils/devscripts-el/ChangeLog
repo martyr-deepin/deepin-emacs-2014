@@ -1,0 +1,322 @@
+2005-08-21  Junichi Uekawa  <dancer@debian.org>
+
+	* pbuilder-mode.el (pbuilder-build, pbuilder-user-mode-linux-build): 
+	add \n after 'start compile' message
+
+2003-10-18  Junichi Uekawa  <dancer@debian.org>
+
+	* devscripts.el (debdiff): add new function, debdiff
+
+2003-10-05  Junichi Uekawa  <dancer@debian.org>
+
+	* Moved all files to alioth.
+
+2003-09-27  Junichi Uekawa  <dancer@debian.org>
+
+	* pbuilder-mode.el (pdebuild-user-mode-linux): set buffer-process-coding-system to dos for user-mode-linux output.
+	fix bug.
+	(pbuilder-user-mode-linux-build): fix.
+
+2003-09-18  Junichi Uekawa  <dancer@debian.org>
+
+	* readme-debian.el: remove from here, alioth has the latest.
+	* debian-copyright.el: remove from here, alioth has the latest.
+
+2003-08-25  Junichi Uekawa  <dancer@debian.org>
+
+	* readme-debian.el (readme-debian-mode): use write-contents-hooks
+	instead of write-file-hooks, and do not make-local-variable, but 
+	use the add-hook and LOCAL flag.
+
+2003-06-25  Junichi Uekawa  <dancer@debian.org>
+
+	* debian-copyright.el: add patch from PSG for font-lock problem in 
+	Xemacs.
+
+2003-05-25  Junichi Uekawa  <dancer@debian.org>
+
+	* readme-debian.el: Applied patch from Peter S Galbraith
+
+2003-05-21  Junichi Uekawa  <dancer@debian.org>
+
+	* readme-debian.el: accept patch from Peter S Galbraith
+	for byte-compilation fixes and many cosmetic fixes.
+
+2003-05-16  Junichi Uekawa  <dancer@debian.org>
+
+	* readme-debian.el: defgroup/defcustom.
+
+	* pbuilder-log-view-mode.el (pbuilder-log-view-web-basepath): 
+	renamed from pbuilder-log-web-basepath
+	Change to defgroup/custom.
+
+	* devscripts.el: defgroup.
+
+	* pbuilder-mode.el (pbuilder-mode): defgroup,
+	and change to defcustom.
+
+2003-05-14  Junichi Uekawa  <dancer@debian.org>
+
+	* debian-copyright.el (debian-copyright): fix typo.
+	(debian-copyright): include patch from Peter S Galbraith.
+
+2003-05-12  Junichi Uekawa  <dancer@debian.org>
+
+	* debian-copyright.el: include patch from Peter S Galbraith <p.galbraith@globetrotter.net>, who has rewrote most of debian-copyright.el
+	
+2003-04-02  Junichi Uekawa  <dancer@debian.org>
+
+	* devscripts.el (debclean): add debclean
+
+2003-02-10  Junichi Uekawa  <dancer@debian.org>
+
+	* pbuilder-mode.el (pdebuild-user-mode-linux): new function.
+	(pdebuild-user-mode-linux-path): new variable.
+
+2003-01-08  Junichi Uekawa  <dancer@debian.org>
+
+	* pbuilder-mode.el (debuild-pbuilder): convert debuild-pbuilder
+	to make-comint.
+	(pbuilder-user-mode-linux-path, pbuilder-user-mode-linux-build): 
+	support pbuilder-user-mode-linux.
+
+2003-01-07  Junichi Uekawa  <dancer@debian.org>
+
+	* devscripts.el (debi): try to use comint for starting up,
+	so that it can run interactive.
+
+2002-11-27  Junichi Uekawa  <dancer@debian.org>
+
+	* readme-debian.el (readme-debian-font-lock-keywords) 
+	(readme-debian-mode): Apply patch from
+	James LewisMoss <dres@lewismoss.org> to make this thing 
+	work with xemacs, and then revert the patch because that
+	does not really work with emacs21.
+
+2002-11-10  Junichi Uekawa  <dancer@debian.org>
+
+	* pbuilder-mode.el: done checkdoc.
+
+	* devscripts.el (devscripts-mode-gain-root-command): done checkdoc.
+
+	* readme-debian.el: done checkdoc.
+
+	* debian-copyright.el: done checkdoc
+
+2002-10-30  Junichi Uekawa  <dancer@debian.org>
+
+	* Makefile (distimage): add COPYING file.
+
+	* pbuilder-mode.el (debuild-pbuilder): use debuild-option-list
+
+	* pbuilder-log-view-mode.el (pbuilder-log-view-internal-garbage-collect-log): check the title as well ?
+	I will only be able to match via title page.
+
+	* pbuilder-mode.el (debuild-pbuilder): introduce debuild-pbuilder function for running debuild-pbuilder hack.
+
+	* pbuilder-log-view-mode.el (pbuilder-log-view-build-result-alist-mutex): change names 
+	(pbuilder-log-view-build-result-alist): change names from debuild-* 
+
+2002-10-29  Junichi Uekawa  <dancer@debian.org>
+
+	* pbuilder-log-view-mode.el (pbuilder-log-view-add): use mutex lock
+	(pbuilder-log-view-lock-mutex): mutex lock implementation
+	(pbuilder-log-view-internal-function): lock mutex.
+	(mcharset): require.
+	(pbuilder-log-view-internal-view-one-log): ran checkdoc, and fixed some text.
+	(pbuilder-log-view-internal-view-one-log): try and use relative paths now.
+	(pbuilder-log-view-elserv): publish one base path.
+	(pbuilder-log-view-internal-function): remove the hack to generate list of 
+	available web pages.
+
+	* pbuilder-mode.el (pdebuild): use pbuilder-log-view-add
+	(pbuilder-build): ditto
+
+	* pbuilder-log-view-mode.el (pbuilder-log-view-add): new function
+
+	* devscripts.el (debuild): use pbuilder-log-view-add function
+
+2002-10-28  Junichi Uekawa  <dancer@debian.org>
+
+	* pbuilder-log-view-mode.el (pbuilder-log-view-internal-function): move the function
+	location to avoid locking up.
+	garbage collector needs to lock variables, it seems.
+	(pbuilder-log-view-internal-garbage-collect-log): reverse the listing.
+
+	* htmlize.el (htmlize-buffer-noninteractive): new hack from upstream.
+
+	* pbuilder-log-view-mode.el (pbuilder-log-view-mode): change to
+	match filename.
+	(pbuilder-log-web-basepath): move from pbuilder-mode.el
+	(pbuilder-log-view-internal-garbage-collect-log): try garbage collection.
+	(pbuilder-log-view-internal-function): try garbage collecting before start.
+	(pbuilder-log-view-internal-view-one-log): use htmlize-buffer-noninteractive, provided by 0.68? of htmlize.el
+
+	* pbuilder-mode.el (pbuilder-log-view): require.
+
+	* devscripts.el (pbuilder-log-view): require.
+
+	* pbuilder-log-view-mode.el (pbuilder-log-view): provide pbuilder-log-view
+
+	* Makefile (clean): add clean rule.
+
+	* pbuilder-mode.el: remove things from here.
+	* pbuilder-log-view-mode.el: new file, move things related to logview mode over here.
+
+	* htmlize.el: modified last night, merging the modified version into the tree
+	until this thing is fixed upstream.
+
+	* pbuilder-mode.el (pbuilder-log-view-elserv): add description
+	(pdebuild): fixed typo.
+
+2002-10-27  Junichi Uekawa  <dancer@debian.org>
+
+	* pbuilder-mode.el (pbuilder-build): give process information for debuild-results-alist
+	(pdebuild): ditto.
+	(pbuilder-log-view-internal-function): change the page to use running-status
+	of process if it is available.
+	(pbuilder-log-view-internal-function): running-status and exit-status are now used to 
+	generate information.
+	(pbuilder-log-view-internal-function): add  current time to last-updated string ;)
+	(pbuilder-log-view-internal-function): reorganized to use with-temp-buffer instead of 
+	a massive string variable
+	(pbuilder-log-view-internal-view-one-log): set-buffer instead of swith-to-buffer
+	(pbuilder-log-view-internal-view-one-log): use save-excursion instead of save-window-excursion
+	(pbuilder-log-view-internal-function): use set-buffer
+	(pbuilder-log-view-internal-view-one-log): change back to save-window-excursion
+	(pbuilder-log-view-internal-view-one-log): use a newly hacked htmlize-buffer.
+
+	* devscripts.el (debuild-option-list): add -us and -uc, because there is no 
+	reasonable way (currently) to sign debuilt package inside emacs.
+	(debuild): add process information as third member of debuild-results-alist
+
+	* pbuilder-mode.el (pbuilder-log-view-internal-view-one-log): use htmlize-buffer.
+	(pbuilder-log-view-internal-view-one-log): kill the htmlized buffer after sending the info.
+	(pbuilder-log-view-elserv): require 'htmlize on starting the server, because 
+	logs are htmlized.
+	(pbuilder-log-view-internal-view-one-log): I don't need the concat of progname here.
+
+2002-10-26  Junichi Uekawa  <dancer@debian.org>
+
+	* readme-debian.el (readme-debian-mode-load-hook): add *
+	(readme-debian-mode-hook): new var.
+
+	* pbuilder-mode.el (pbuilder-path, pdebuild-path) 
+	(pbuilder-log-web-basepath): add *
+
+	* devscripts.el (debuild-option-list): add *
+	(devscripts-mode-gain-root-command): add *
+	(devscripts-mode-load-hook): add *
+
+	* debian-copyright.el (debian-copyright-mode-load-hook): add * to
+	documentation string for customizable value.
+
+2002-10-25  Junichi Uekawa  <dancer@debian.org>
+
+	* debian-copyright.el (debian-copyright-mode-version): add version string.
+
+	* devscripts.el (devscripts-mode-version): add version string.
+
+	* pbuilder-mode.el (pbuilder-log-view-function): support charsets.
+	(pbuilder-log-view-elserv, pbuilder-log-view-internal-function): rename function to add "internal"
+	(pbuilder-log-view-internal-function) 
+	(pbuilder-log-view-internal-view-one-log): experimental dynamic log generation.
+	(pbuilder-log-view-internal-function): update to be dynamic.
+	(pbuilder-log-view-internal-function): provide only the dynamic pages.
+	(pbuilder-log-view-elserv): add more notes to the program.
+	(pbuilder-mode-version): add version string.
+
+	* devscripts.el (debuild): use devscripts-internal-get-debian-package-name to record the build log.
+
+	* pbuilder-mode.el (pdebuild): use devscripts-internal-get-debian-package-name instead.
+
+	* devscripts.el (debuild-results-alist): move over to devscripts, 
+	from pbuilder var.
+	(devscripts-internal-get-debian-package-name): new func to get dirname.
+
+	* pbuilder-mode.el (pbuilder-log-view-function)
+	(pbuilder-log-web-basepath, pbuilder-log-view-elserv): use pbuilder-log-web-basepath
+	as a variable to define the path for the build logs.
+	(pbuilder-build): fix name-getting.
+	(pbuilder-build): use filename instead of default-directory as identifier.
+
+2002-10-24  Junichi Uekawa  <dancer@debian.org>
+
+	* pbuilder-mode.el (pbuilder-results-alist): alist for pbuilder 
+	results.
+	(pdebuild): get the current package name that is being built, and 
+	set the name.
+	(pbuilder-build): support adding the build log.
+	(pbuilder-log-view-function): Implementation of elserv log viewer 
+	for pbuilder session.
+
+	* devscripts.el (debuild-option-list): introduce new option.
+	(debuild): use the option, with apply command, etc.
+
+	* pbuilder-mode.el (pbuilder-build, pdebuild, pdebuild-path) 
+	(pbuilder-path): define variable to specify pbuilder and pdebuild path.
+
+2002-10-23  Junichi Uekawa  <dancer@debian.org>
+
+	* pbuilder-mode.el (pdebuild): new file, new code.
+	(pbuilder-build): implement.
+	Use devscripts mode variables.
+	(pbuilder-build): update, use expand-file-name
+
+	* devscripts.el (debuild): add -i option. I want to make this optional.
+
+2002-10-20  Junichi Uekawa  <dancer@debian.org>
+
+	* debian-copyright.el (debian-copyright-mode-load-hook): add
+
+	* readme-debian.el (readme-debian-mode-load-hook): add
+
+	* devscripts.el (devscripts-mode-load-hook): add.
+
+2002-10-19  Junichi Uekawa  <dancer@debian.org>
+
+	* debian-copyright.el (debian-copyright-mode): create default.
+
+	* readme-debian.el (readme-debian-mode): add mode map doc.
+
+	* debian-copyright.el (auto-mode-alist): create, modify.
+
+	* devscripts.el: add copyright.
+
+2002-10-17  Junichi Uekawa  <dancer@debian.org>
+
+	* readme-debian.el (debian-changelog-mode): require debian-changelog-mode
+	(readme-debian-mode): provide readme-debian-mode, not readme-debian
+	(readme-debian-update-timestamp): use variables from debian-changelog mode,
+	not invent my own.
+
+	* devscripts.el: provide devscripts.
+
+2002-10-16  Junichi Uekawa  <dancer@debian.org>
+
+	* readme-debian.el: update copyright.
+
+	* devscripts.el (devscripts-debc-mode-syntax-table): fix.
+	(debi, debit): change, new debit function. Use devscripts-mode-gain-root-command
+	(devscripts-mode-gain-root-command): new var.
+
+	* readme-debian.el (readme-debian-mode-syntax-table): fix readme-debian-mode-syntax-table.
+
+	* readme-debian.el (readme-debian-mode): add ^[-=]+$ to highlight 
+	(auto-mode-alist): add README.Debian in /usr/share/doc
+
+	* Makefile (RELEASE): create make rules.
+
+2002-10-15  Junichi Uekawa  <dancer@debian.org>
+
+	* readme-debian.el (readme-debian-mode): implemented something un-cool about this...
+	I've done a README.Debian syntax highlighter
+	(readme-debian-update-timestamp): create a function to change timestamp.
+	(readme-debian-mode): and add hook to use that function on file write.
+	(auto-mode-alist): add reamde-debian-mode to auto-mode-alist.
+
+	* devscripts.el (debc, debi, debuild): import from .emacs of myself.
+	(devscripts-debc-mode): create a good fontmap, so that things are highlighted properly.
+
+	Copyright GPL.
+

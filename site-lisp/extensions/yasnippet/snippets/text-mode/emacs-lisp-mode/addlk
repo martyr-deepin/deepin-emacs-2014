@@ -1,0 +1,3 @@
+#name : (define-key ... (kbd "...") ...)
+# --
+(define-key ${1:some-mode-map} (kbd "${2:some-key}") ${0:some-command})

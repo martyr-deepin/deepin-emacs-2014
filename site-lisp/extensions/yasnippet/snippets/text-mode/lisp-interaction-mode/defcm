@@ -1,0 +1,5 @@
+#name : (defcustom ... ... ... ...)
+# --
+(defcustom ${1:symbol} ${2:value}
+  "${3:doc}"
+  ${0:body})

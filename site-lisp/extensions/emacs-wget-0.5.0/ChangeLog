@@ -1,0 +1,653 @@
+2004-10-19  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* Makefile (VERSION): New version 0.5.0.
+
+2004-10-16  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-download-directory-filter): Add tag
+	for wget-download-dir-filter-current-dir.
+
+2004-10-15  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el: Add page delimiter ^L before every section.
+	(wget-read-download-dir): New function.
+	(wget-cd-download-dir, wget-download-dir-filter-current-dir)
+	(wget-download-dir-filter-alias): Use it.
+
+2004-10-14  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-download-dir-filter-current-dir): New filter
+	function.
+	Suggested by Juri Linkov <juri@jurta.org>.
+	(wget-cd-download-dir, wget-download-dir-filter-current-dir)
+	(wget-download-dir-filter-regexp)
+	(wget-download-dir-filter-alias)
+	(wget-download-dir-filter-regexp-and-alias): Fix `url' to `uri'.
+
+2004-10-13  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-download-log-time-format): Use `%H:%M:%S' instead
+	of `%T' because `%T' is also appeared in variable
+	wget-download-log-format in differnet meaning, so it is confusing.
+	Suggested by Juri Linkov <juri@jurta.org>.
+	(wget-cd-download-dir, wget-download-dir-filter-regexp)
+	(wget-download-dir-filter-alias)
+	(wget-download-dir-filter-regexp-and-alias): Rename argument
+	`file' to `url'.
+	Suggested by Juri Linkov <juri@jurta.org>.
+
+2004-10-12  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-download-directory): Accept sexp in :type.
+	(wget-download-directory-filter): Set :type.
+	(wget-download-log-file): Change :type to 'file from 'string.
+	(wget-executable-file-extension-list): Doc fix in :tag.
+	(wget-download-dir-filter-regexp)
+	(wget-download-dir-filter-alias)
+	(wget-download-dir-filter-regexp-and-alias): Add doc.
+	(wget-progress-update): Print directory and file name in progress
+	buffer when "downloaded".
+
+2004-10-11  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-cd-download-dir): Create parent directories if
+	they don't exist.
+	Patch by Juri Linkov <juri@jurta.org>.
+
+	* wget.el (wget-download-log-format): Use TAB for the separator of
+	time and url.
+
+	* wget.el (wget-download-directory-filter): New user option.
+	(wget-cd-download-dir): Use it.  Change the order of arguments.
+	(wget, wget-web-page): Follow the change of argument order.
+	(wget-download-dir-filter-regexp)
+	(wget-download-dir-filter-alias)
+	(wget-download-dir-filter-regexp-and-alias): New download dir
+	filtering functions.
+	Suggested by Juri Linkov <juri@jurta.org>.
+
+2004-10-10  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-executable-file-extension-list): Set nil.
+	(wget-set-file-executable): Take argument PROC.
+	(wget-process-sentinel): Call it.
+
+2004-10-09  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-add-download-log-eof): New user option.
+	Suggested by Juri Linkov <juri@jurta.org>.
+	(wget-write-download-log): Use it.
+	(wget-cd-download-dir): Use function consp instead of listp.
+	Suggested by Juri Linkov <juri@jurta.org>.
+
+2004-10-08  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* w3-wget.el (w3-wget): Suppress byte-compile warning.
+
+	* wget.el (wget-cd-download-dir): Check "default" and use it if
+	`C-u' is not specified.
+	(wget-download-log-format): Set default "%T %U\n".
+	`%t' is now optional.
+
+2004-10-07  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-download-log-time-format): New user option.
+	(wget-write-download-log): Use it.
+	(wget-download-log-format): New user option.
+	(wget-write-download-log): Use it.
+	(wget-download-log-file): Doc fix.
+
+2004-10-06  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-write-download-log): Skip if
+	wget-download-log-file is nil.
+
+	* Makefile (DOC): Add Makefile.
+	Now emacs-wget prepares Makefile for compile and install.
+	Reported by Juri Linkov <juri@jurta.org>.
+
+	* wget.el (wget-create-download-log): New user option.
+	Suggested by Juri Linkov <juri@jurta.org>.
+	(wget-write-download-log): Renamed from wget-save-data.
+	Use it.
+	(wget-uri): Follow the change.
+	(wget-download-log-file): Set default value nil.
+
+2004-10-05  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-download-log-file): Renamed from
+	wget-download-data-file.
+	Suggested by Juri Linkov <juri@jurta.org>.
+	(wget-save-data): Follow the change.
+
+2004-10-02  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-download-data-file): Doc fix.
+	(wget-uri): Do not compare wget-download-directory with DIR.
+	(wget-kill-process): Use wget-process-dir-alist.
+	(wget-cd-download-dir): Set download directory by uri (we hope
+	that the uri becomes filename).  Take new argument FILE.
+	(wget, wget-web-page): Follow the change of wget-cd-download-dir.
+
+	* wget.el (wget-cd-download-dir): Use file-name-as-directory.
+	Patch by Juri Linkov <juri@jurta.org>.
+
+2004-10-01  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-cd-download-dir, wget-uri): Use temporary buffer
+	" *wget*" if wget-process-buffer is nil.
+
+	* wget.el (wget-cd-download-dir): Fix bug to download files go to
+	current directory if wget-download-directory is "./".
+	Reported by Juri Linkov <juri@jurta.org>.
+
+2004-07-14  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* Makefile (.PHONY): Append phony.
+	(prefix, datadir, lispdir, ELC, LPATH, EMACS, ELCC): New macros.
+	(compile-elc, %.elc, install, clean): New target.
+
+	* lpath.el: New file.
+
+2004-07-13  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-download-directory): Doc fix.
+	(wget-cd-download-dir): Ask download dir if
+	wget-download-directory is nil.
+	Suggested by mace <mace@kirjakaapeli.lib.hel.fi>.
+	(wget-uri): String check for wget-download-directory.
+
+2004-03-13  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* w3m-wget.el (w3m-wget): Set wget-current-title.
+
+	* wget.el (wget-download-data-file): New user option.
+	(wget-current-title): Nev variable.
+	(wget-save-data): New function.
+	(wget-uri): Call it before starting download.
+	(wget-cd-download-dir): Removed message code.
+
+2004-02-29  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* Makefile (VERSION): New version 0.4.2.
+
+	* wget.el (wget-executable-file-extension-list): New user option.
+	(wget-set-file-executable): New function.
+
+2004-02-24  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-long-option-alist): New options in GNU wget 1.9
+	are added.
+	(wget-web-page-options): Get rid of `-L' option.  GNU wget does
+	not span hosts by defaults even without `-H' option.
+
+2004-01-26  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-cd-download-dir): Create buffer
+	wget-process-buffer if not available.
+
+2004-01-25  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget-sysdep.el (wget-read-directory-name): Slim up.
+	Return DIR if user enters a null string in prompt.
+
+	* wget.el (wget-cd-download-dir): Fix bug that changing directory
+	in current buffer.  Change directory in wget-process-buffer.
+	(wget-uri): Start process in wget-process-buffer.
+
+2003-12-24  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-after-hook): New hook.
+	(wget-process-sentinel): Use it.
+
+2003-05-20  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-cd-download-dir): Ask download dir again, if not
+	create new directory.
+
+2003-05-14  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* Makefile: Add comment document about releasing emacs-wget.
+
+	* wget-sysdep.el: Comment fix.
+
+2003-05-13  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-uri): Copy list process-environment before delete
+	LANG element.
+
+2003-05-01  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget-sysdep.el (wget-read-directory-name): New function.
+	System dependencies for Emacs 20.
+
+	* wget.el (wget-cd-download-dir): Use it.
+
+2002-11-20  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-progress-update): Fix previous change.
+
+2002-11-18  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-process-sentinel): Show downloading file message
+	when the file has retrieved even if `-o' options are used.
+	(wget-process-sentinel): Procect to reset property when wget
+	process is finished.
+	(wget-process-buffer): Doc fix.  Do not open *wget-buffer* when
+	the value is nil.
+	(wget-uri): Do not set process filter when wget-process-buffer is
+	nil.
+	(wget-revert-buffer): Do not revert buffer when
+	wget-process-buffer is nil.
+	(wget-progress-update): Like wise.
+
+2002-11-15  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-uri): Independent of env command!
+	(wget-env-command): Removed.
+	(wget-process-sentinel, wget-get-wget-process): Follow the change.
+
+2002-11-09  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-process-filter): Use match-string.
+	(dired-wget): Ditto.
+	(wget-quit): Use wget-download-line-format.
+	(wget-process-filter): Ditto.
+	(wget-process-filter, wget-progress-update): Fix problem called
+	without -nc option or with -N option.  With -r option, show
+	filename which is retrieving correctly.
+
+2002-11-05  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-default-options, wget-download-directory) 
+	(wget-hook, wget-process-buffer): Doc fix.
+
+	* Makefile (DOC): Add new files, README and USAGE.
+
+	* USAGE: New file.
+
+	* README: New file.
+
+2002-11-04  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-default-options): Set nil.
+	(wget-web-page-options): Take over the value of wget-default-options.
+	(wget-info): Print percent of pregress, too.  Use princ instead of message.
+
+2002-11-02  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-info): Save excursion.
+	Show current byte, but do not redisplay info.
+	(wget-previous-line, wget-next-line): Call wget-info inside.
+	(wget-uri): Set wget-process-dir-alist download dir.
+	(wget, wget-web-page): Follow the change of wget-uri.
+
+2002-11-01  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-download-line-format): New constant variable.
+	(wget-next-line, wget-previous-line): Use it.
+	(wget-info): New function.  Bind to `i'.
+
+	* w3-wget.el (w3-wget): Follow wget-api change.
+
+	* w3m-wget.el (w3m-wget): Follow wget-api change.
+
+2002-10-31  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-env-command): Use command name.
+	(wget-process-messg-alist): New variable.
+	(wget, wget-web-page, wget-api): Make ARG optional argument.
+	(wget-process-filter, wget-process-sentinel)
+	(wget-progress-update): If the file is already retrieved, show
+	"=*=Up-To-Date=*=" message.
+	(wget-process-filter, wget-progress-update): Use insert instead of
+	insert-string.
+
+2002-10-30  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-uri): Use backquote.
+	(wget-process-sentinel): Revert wget buffer and close window if
+	wget failed to download.
+	(wget-delete-property): New macro.
+	(wget-reset-property): Renamed from wget-initialize-property.
+	(wget-change-property): New macro (was function).
+	(wget-process-filter, wget-uri): Use it.
+	(dired-wget): Remove unused variable MIN.
+	(wget-process-sentinel): Remove debug code.
+
+2002-10-29  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* Makefile (distclean): Remove tar.gz file.
+
+	* wget.el (wget-uri): Function apply bring start-process &rest arg
+	in list.  Change wget arguments order; URI is last.  Do not call
+	env command if environment variable LANG is empty.
+	(wget-get-wget-process): Cope with the change of the order in wget
+	arguments.
+	Reported by TSURUDA Naoki <tsuru@yokohama.office.ne.jp>
+
+	* w3m-wget.el: autoload wget-api and eval key substitution and
+	others after load w3m.  Suggested by KOSEKI Yoshinori.
+
+	* w3-wget.el: autoload wget-api.
+
+2002-10-28  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* Makefile (dist): make directory to distribute emacs-wget.
+	(distclean): New target.
+
+2002-10-26  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-hook, wget-load-hook): New hook.
+
+	* Makefile: New file.
+
+	* wget.el (wget-web-page-options): Fix typo.
+	(wget-ftp-default-options): New user option.
+	(wget-ftp-regexp): New variable.
+	(wget): Use them.
+	(wget-uri): Do not call wget-env-command, if environment variable
+	LANG is C.
+	(wget-long-option-alist): New variable.
+	(wget-read-options-map): New variable.
+	(wget-read-options): New function.
+	(wget, wget-web-page): Use it.
+	(wget-option-completion): New function.
+
+2002-07-28  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-basic-options): New var.  Support wget ver. 1.8+
+	(wget, wget-web-page): Use it.
+	(wget-uri): Do not use double wget-option var.
+
+2002-07-16  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-cd-download-dir): Use function read-directory-name.
+
+2002-07-05  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-quit): Fixed bug.
+	kill process in wget-mode.
+
+2002-07-04  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget-sysdep.el: New file.  Absorb system dependencies between
+	FSF Emacs ver. 20 and 21.
+	(wget-window-height): New function.  Return window text height.
+	(wget-replace-regexp-in-string): New function.  Replace regexp in
+	string.  Code is copy from FSF Emacs 21.3.50.
+
+2002-05-08  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* w3m-wget.el: Add RCS tag.
+	* w3-wget.el: Ditto.
+
+2002-05-07  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* emacs-wget: Verison 0.1 Released.
+
+2002-05-07  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el: Add copyright and document.
+	* w3-wget.el: Ditto.
+	* w3m-wget.el: Ditto.
+
+2002-05-06  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-process-sentinel): Fixed problem that
+	if (wget-get-wget-process proc) return nil.
+	(wget-progress-update): Fixed problem that if cdr of
+	wget-process-saved-alist is nil.  Especially for that wget option
+	"-nc" is on, cdr of wget-process-saved-alist will be nil.
+
+2002-05-05  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-debug, wget-debug-buffer): New var.  If wget-defug
+	is t, wget log is output to wget-debug-buffer.
+	(wget-process-filter): Use them.  Now support debug of
+	wget (output wget-log).
+
+2002-05-03  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* w3-wget.el (w3-wget-web-page): Removed.
+
+	* w3m-wget.el (w3m-wget-web-page): Removed.
+
+	* wget.el (wget-api): New func.  Application Program Interface of
+	emacs-wget mode called from browser like emacs-w3 or emacs-w3m.
+	(wget-cd-download-dir): New func.  Change diroctory where to
+	download.  Default directory is wget-download-directory.  Called
+	with prefix arg, set it interactively.
+	(wget-web-page, wget): Use it.
+
+	* w3-wget.el (w3-wget): Split code into wget-api in wget.el.
+
+	* w3m-wget.el (w3m-wget): Likewise.
+
+2002-03-19  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-progress-update): Display progress bar if called
+	without progress.
+
+2002-03-16  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* w3-wget.el: New file.  interface for emacs/w3.
+	Still experimental code.
+
+2002-03-14  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-revert-buffer): shrink window if window height is
+	larger than number of wget processes.
+
+2002-03-04  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-progress-update): Fixed bug that do not
+	display [...%], when called without argument PROGRESS.
+
+	* wget.el: Change HomePage to Web page.
+	* w3m-wget.el: Likewise.
+
+	* wget.el (wget-kill-process): Do not remove files and directory,
+	if process download recursively.
+	(wget-quit): Ditto.
+	(wget-quit, wget-mode-map): Quit download from wget buffer.
+	(wget-quit-and-exit, wget-mode-map): New func.  Quit all wget processes.
+
+2002-03-01  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-kill-process): End of wget-download-directory is
+	"/".
+	(wget-change-property): Fixed bug and doc fix.  Replace old
+	property with new one, not add it.
+	(wget-initialize-property): New func.  Delete PROC from properties.
+	(wget-process-sentinel, wget-kill-process): Use it.
+	(wget-kill-process): Fixed bug.  Point correct path to the file
+	which is removed.
+	(wget-process-sentinel): Fixed bug that do not accept Japanese
+	state message.  But this change is dangerous.
+	(wget-process-filter): Rewrite function.
+	(wget-progress-update): Display "connecting" and "connected" message.
+	(wget-process-sentinel): Use string instead of number to tell
+	wget-progress-update that download is finished.
+	(wget-next-line, wget-previous-line): Fixed bug that do not move
+	point with no prefix arg even if wget-previous-line.
+	(wget-recursive-p): New func.  Judge wget was called with recursive option.
+	(wget-process-filter): Use it.  Match the file name when recursive
+	option is on.
+	(wget-progress-update): Use it.  Change download file in wget
+	buffer when recursive option is on.
+
+2002-02-28  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-change-property): Fix doc.
+	(wget-process-sentinel): Revert buffer before close output window.
+
+	* w3m-wget.el (w3m-wget-homepage): New func.
+	Download whole homepage from w3m.el.
+
+	* wget.el (wget-homepage-options): New var.
+	(wget-homepage): New func. Download whole homepage.
+
+2002-02-26  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-env-command): New var.
+	`env LANG=C' turn off CATALOG.
+	(wget-uri, wget-get-wget-process): Use it.
+	(wget-process-filter): correspond newer wget output.
+
+2001-12-22  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-default-options): Add -v (--verbose) option.
+
+2001-12-21  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-change-property): Doc fix.
+	(wget-next-line, wget-previous-line): Accept prefix arg and add	doc.
+	(wget-progress-update): Fix bug that STATUS become [  0%] called
+	from wget-revert-buffer although downloading is proceeded.
+
+2001-12-20  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (dired-wget): Fix bug that return list instead of
+	string.
+
+2001-12-19  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* w3m-wget.el (w3m-wget): Set default URI w3m-current-url if
+	called with prefix argument and no anchor or no image is selected.
+
+	* wget.el (dired-wget): Return string of URI at current line.
+	(wget): Call it.
+
+2001-12-18  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (dired-wget): New function.  Wget interface for
+	dired mode (especailly for ftp).
+	(wget-process-filter): Bug fix.
+	(wget-state-of-progress): Fix bug that causes error with no process.
+	(wget-revert-buffer): Use insert instead of insert-string.
+	(wget-progress-update): Ditto.
+
+2001-12-17  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-process-filter): Go to beginning of URI.
+
+2001-12-15  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-process-property-alist): Delete.
+	(wget-process-percent-alist): New var.  Save property data of wget
+	process.  This var replace wget-process-property-alist.
+	(wget-process-byte-alist): Ditto.
+	(wget-process-length-alist): Ditto.
+	(wget-process-mime-alist): Ditto.
+	(wget-process-saved-alist): Ditto.
+	(wget-process-dir-alist): Ditto.
+	(wget-uri): Use them.
+	(wget-process-filter): Use them and slim up code.
+	(wget-change-property): Rewrite and use them.
+	(wget-process-sentinel): Use them.
+	(wget-kill-process): Use them.
+	(wget-progress-update): Use them.
+
+2001-12-13  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-progress-update): Show downdoaded file name
+	instead of URI.
+
+2001-12-12  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-truncate-partial-width-windows): Change default
+	value t.
+	(wget-process-property-alist): New var.  Save property data of
+	downloading file.  Value is (PROC . '(NUM BYTE LENGTH MIME SAVED)).
+	(wget-uri): Use it.
+	(wget-process-filter, wget-process-sentinel): Use it.
+	(wget-kill-process): Use it.
+	(wget-change-property): New function.
+
+2001-12-11  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-process-filter): Rewrite.
+	(wget-process-sentinel): Fix bug, get correct error status.
+	Just message and ding when failing to download.
+	(wget-progress-update): set save-excursion out of let.
+
+2001-12-09  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-max-window-height): New user option.  Set max
+	height of *wget* window.
+	(wget-state-of-progress): Use it.
+	(wget-truncate-partial-width-windows): New user option.  Control
+	truncate lines in *wget* buffer.
+	(wget-mode): Use it.
+	(wget-process-buffer): New var.  Set wget buffer name.
+	(wget-uri, wget-process-filter, wget-revert-buffer): Use it.
+	(wget-progress-update): Change appearence of wget progress.  Show
+	downloaded message in wget buffer when finish downloading.
+	(wget-process-sentinel): Call it.
+	(wget-revert-buffer): Fix bug not to change to wget buffer if it
+	was called from the other.
+	(wget-mode-map): Add it.
+
+2001-12-07  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-uri, wget-process-sentinel): Change start and end
+	message of wget process like `Operating...done' suggested in
+	Emacs Lisp Reference Manual.
+	(wget-mode): Show the state of wget progress and operate process.
+	(wget-mode-map): Ditto.
+	(wget-state-of-progress): Ditto.
+	(wget-revert-buffer): Ditto.
+	(wget-progress-update): Ditto.
+	(wget-process-filter): Ditto.  Use it.
+	(wget-uri): Ditto. Use it.
+
+	* w3m-wget.el (w3m-wget): Add Doc.
+
+2001-12-06  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-get-wget-process): Bug fix.
+	(wget-process-file-name): New function.
+	(wget-quit): New function.  Interface of wget-kill-process.
+	(wget-kill-process): Split function to wget-quit.
+	(wget-close-wget-output-window): New function.
+	(wget-process-sentinel): Use it.
+
+2001-12-05  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget-command): Change option name from wget-program.
+	(wget-kill-process): New function.  Kill wget process.
+	(wget-get-process-alist, wget-get-wget-process): New function.
+	Get wget process and it's URI.
+	(wget-process-sentinel): Use it.
+	(wget-uri): Show end of wget-output buffer when called.
+
+2001-12-04  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget): With prefix arg, ask wget options.
+	* w3m-wget.el (w3m-wget): Ditto.  Also ask download URI.
+
+2001-12-03  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* w3m-wget.el: New file.  Interface to emacs-w3m.  Custom support.
+	Substitute download command from emacs/w3m to w3m-wget.
+
+	* wget.el (wget-process-sentinel): Delete wget process window when
+	the downloading is finished.
+
+	* wget.el (wget-uri): Fix a problem for opening new window of wget
+	process.
+
+2001-11-30  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el (wget): Custom support.
+	* wget.el (wget-program, wget-default-options) 
+	(wget-download-directory): New user options.
+	* wget.el (wget-uri): New function.  User interface for wget.
+	(wget-process-sentinel): New function.  Precess sentinel function
+	for wget.
+
+2001-11-27  Masayuki Ataka  <ataka@milk.freemail.ne.jp>
+
+	* wget.el: New file.
+

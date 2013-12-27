@@ -1,0 +1,4 @@
+#name : (unless ... ...)
+# --
+(unless ${1:conditional}
+  ${0:body})

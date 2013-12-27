@@ -1,0 +1,53 @@
+"Bmatrix"
+"Vmatrix"
+"abstract"
+"align"
+"align*" nil ("align")
+"alignat" nil ("align")
+"alignat*" nil ("align" "alignat")
+"aligned" nil ("align")
+"alignedat" nil ("align" "aligned")
+"array"
+"bmatrix"
+"center"
+"description"
+"displaymath"
+"document"
+"enumerate"
+"equation"
+"equation*"
+"figure"
+"figure*" nil ("figure")
+"flalign"
+"flalign*" nil ("flalign")
+"flushleft"
+"flushright"
+"gather"
+"gather*" nil ("gather")
+"gathered"
+"itemize"
+"list"
+"matrix"
+"minipage"
+"multline"
+"multline*" nil ("multline")
+"picture"
+"pmatrix"
+"quotation"
+"quote"
+"smallmatrix"
+"split"
+"subequations"
+"tabbing"
+"table"
+"table*" nil ("table")
+"tabular"
+"tabular*" nil ("tabular")
+"thebibliography"
+"theorem"
+"titlepage"
+"trivlist"
+"verbatim"
+"verbatim*" nil ("verbatim")
+"verse"
+"vmatrix"

@@ -1,0 +1,3 @@
+#name : (ad-deactivate ...)
+# --
+(ad-deactivate '${1:Function})

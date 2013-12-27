@@ -1,0 +1,3 @@
+#name : with ... $ \... ->
+# --
+withArray ${1:name} $ \ $1Ptr -> $0
