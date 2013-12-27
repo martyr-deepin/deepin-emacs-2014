@@ -73,6 +73,18 @@
 
 ;;; Require
 
+(require 'anything)                     ;Anything
+(require 'anything-config)              ;Anything config
+(require 'anything-complete)            ;Anything 补全
+(require 'anything-match-plugin)        ;Anything 匹配算法的人性话提升
+(require 'anything-gtags)               ;Anything 结合 Gtags
+(require 'anything-c-yasnippet)         ;Anything yasnippet
+(require 'anything-c-moccur)            ;Anything 和 moccur搜索
+(require 'anything-etags)               ;Anything etags
+(require 'anything-extension)           ;Anything 的一些扩展
+(require 'anything-auto-install)        ;auto-install 和 anything 集成
+(require 'anything-emms)                ;emms 和 anything 集成
+(require 'anything-irfc)                ;irfc 和 anything 集成
 
 ;;; Code:
 
@@ -95,9 +107,9 @@
        anything-c-source-file-name-history        ;文件名历史
        anything-c-source-locate                   ;本地文件
        anything-c-source-files-in-current-dir+    ;当前目录的文件
-       anything-c-source-elisp-library-catalog    ;查找加载的库
+       ;; anything-c-source-elisp-library-catalog    ;查找加载的库
        anything-c-source-auto-install-batch       ;批量安装一些扩展
-       anything-c-source-w3m-bookmarks            ;w3m 书签
+       ;; anything-c-source-w3m-bookmarks            ;w3m 书签
        anything-c-source-extended-command-history ;Emacs命令历史
        ;; anything-c-source-info-elisp               ;Info Elisp
        ;; anything-c-source-info-cl        ;Info Common-Lisp
@@ -121,6 +133,28 @@
        ;; anything-c-source-evaluation-result        ;执行表达式结果
        ;; anything-c-source-kill-ring                ;Kill ring
        ))
+
+(lazy-set-key
+ '(
+   ("C-n" . anything-next-line)                  ;下一行
+   ("C-p" . anything-previous-line)              ;上一行
+   ("C-s" . anything-isearch)                    ;搜索
+   ("C-m" . anything-exit-minibuffer)            ;执行动作, 并退出
+   ("C-j" . anything-execute-persistent-action)  ;执行动作, 但不退出
+   ("C-v" . anything-next-page)                  ;下一页
+   ("M-v" . anything-previous-page)              ;上一页
+   ("M-s-y" . anything-insert-selection)         ;插入当前项目
+   ("M-s-i" . anything-insert-symbol)            ;插入当前符号
+   ("M-s-o" . anything-insert-buffer-name)       ;插入缓存名字
+   ("M-s-j" . anything-next-source)              ;下一个种类
+   ("M-s-k" . anything-previous-source)          ;上一个种类
+   ("M-s-h" . anything-select-action)            ;选择动作或切换回源
+   ("M-s-l" . anything-select-source)            ;选择源
+   ("M-s-n" . anything-next-history-element)     ;下一个历史记录
+   ("M-s-p" . anything-previous-history-element) ;上一个历史记录
+   )
+ anything-map
+ )
 
 (provide 'init-anything)
 

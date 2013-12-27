@@ -123,7 +123,7 @@
   "Update library list"
   (setq anything-c-elisp-library-catalog-alist (anything-c-elisp-library-catalog-fileline-to-alist anything-c-elisp-library-catalog-filename)))
 
-(run-with-timer 0 anything-c-elisp-library-catalog-timeout 'anything-c-elisp-library-catalog-update)
+;; (run-with-timer 0 anything-c-elisp-library-catalog-timeout 'anything-c-elisp-library-catalog-update)
 
 (defun anything-c-elisp-library-catalog-fileline-to-alist (file)
   "Transform line in special file to element of list.

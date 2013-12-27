@@ -17,6 +17,7 @@
 (require 'lazy-search-extension)        ;lazy-seach 扩展
 (require 'go-to-char)                   ;跳转到某个字符
 (require 'buffer-extension)
+(require 'find-func-extension)
 
 (require 'init-key)                     
 (require 'init-dired)

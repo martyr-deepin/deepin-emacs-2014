@@ -293,4 +293,12 @@
    )
  "init-dired")
 
+;;; ### Anything ###
+;;; --- 快速buffer切换
+(lazy-set-autoload-key
+ '(("s-y" . anything)                   ;anything
+   ("C-s-y" . anything-call-source)     ;调用特定的源
+   )
+ "init-anything")
+
 (provide 'init-key)
