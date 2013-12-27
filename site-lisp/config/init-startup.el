@@ -1,9 +1,10 @@
-(menu-bar-mode -1)                   ;禁用菜单栏
 (tool-bar-mode -1)                   ;禁用工具栏
+(menu-bar-mode -1)                   ;禁用菜单栏
 (scroll-bar-mode -1)                 ;禁用滚动条
 (toggle-frame-fullscreen)            ;全屏
 (emacs-session-restore)              ;加载窗口布局
 (setq inhibit-startup-screen t)	     ;关闭起动时闪屏
+(setq inhibit-splash-screen t)	     ;关闭起动时闪屏
 (setq initial-scratch-message nil)   ;禁止在草稿缓存里面显示处始化信息
 (unmark-all-buffers)                 ;取出所有buffer的标记
 (fset 'yes-or-no-p 'y-or-n-p)        ;以 y/n代表 yes/no

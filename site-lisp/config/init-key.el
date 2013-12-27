@@ -130,8 +130,6 @@
    ("s-I" . string-insert-rectangle)             ;插入字符串在矩形的每一行
    ("s-F" . delete-whitespace-rectangle)         ;删除矩形中空格
    ("s-:" . mark-rectangle-to-end)               ;标记矩形到行末
-   ("s-H" . execute-command-with-region-replace) ;在选择的区域中执行命令并替换
-   ("s-P" . execute-command-with-region-kill)    ;在选择的区域中执行命令并删除
    ("s-\"" . copy-rectangle-to-register)         ;拷贝矩形到寄存器
    ))
 ;;; ### Font ###
