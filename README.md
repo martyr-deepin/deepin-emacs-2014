@@ -6,5 +6,7 @@ sudo apt-get install build-essential git autoconf texinfo libxaw7-dev libxpm-dev
 cd ./emacs-git
 ./autogen.sh
 ./configure --prefix=/home/andy/emacs-bin --with-x-toolkit=gtk3
+make
+sudo make install
 
 http://dynamic-thinking.blogspot.com/2012/07/emacs-speeding-up-loading-your-emacs.html
