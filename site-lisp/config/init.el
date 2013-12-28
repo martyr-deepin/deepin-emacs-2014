@@ -16,7 +16,9 @@
 (require 'go-to-char)                   ;跳转到某个字符
 (require 'buffer-extension)
 (require 'find-func-extension)
+(require 'highlight-parentheses)   ;智能括号
 
+(require 'init-mode)
 (require 'init-key)                     
 (require 'init-dired)
 (require 'init-session)

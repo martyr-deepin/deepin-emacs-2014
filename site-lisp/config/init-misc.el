@@ -125,12 +125,6 @@
   "Convert a region from simple chinese to tradition chinese or
 from tradition chinese to simple chinese" t)
 
-;;; ### Tabbar ###
-;;; --- 多标签浏览
-
-;;; ### Files ###
-;;; --- 文件设置
-
 ;;; ### Browse-kill-ring ###
 ;;; --- 浏览删除环
 (browse-kill-ring-default-keybindings)  ;加载默认的按键邦定
@@ -141,55 +135,6 @@ from tradition chinese to simple chinese" t)
 (setq recentf-max-saved-items 100)      ;最近打开文件的最大数量
 (setq recentf-auto-cleanup 300)         ;自动清理最近打开文件列表中重复或其他文件的时间间隔 (秒)
 (setq recentf-save-file "~/.emacs.d/deepin-emacs/Configure-File/Recentf/recentf-list") ;最近打开的文件列表
-
-;;; ### Uniquify ###
-;;; --- 相同缓存名字时加上路径以区别
-
-;;; ### Miniedit ###
-;;; --- 编辑 Minibuffer
-
-;;; ### Cycle-buffer ###
-;;; --- 循环切换 Buffer
-(autoload 'cycle-buffer "cycle-buffer" "Cycle forward." t)
-(autoload 'cycle-buffer-backward "cycle-buffer" "Cycle backward." t)
-(autoload 'cycle-buffer-permissive "cycle-buffer" "Cycle forward allowing *buffers*." t)
-(autoload 'cycle-buffer-backward-permissive "cycle-buffer" "Cycle backward allowing *buffers*." t)
-(autoload 'cycle-buffer-toggle-interesting "cycle-buffer" "Toggle if thisc buffer will be considered." t)
-
-;;; ### auto-mode-alist ###
-;;; --- 绑定扩展名到特定的模式
-(dolist (elt-cons '(
-                    ("\\.markdown" . markdown-mode)
-                    ("\\.md" . markdown-mode)
-                    ("\\.coffee$" . coffee-mode)
-                    ("\\.iced$" . coffee-mode)
-                    ("Cakefile" . coffee-mode)
-                    ("\\.stumpwmrc\\'" . lisp-mode)
-                    ("\\.[hg]s\\'" . haskell-mode)
-                    ("\\.hi\\'" . haskell-mode)
-                    ("\\.hs-boot\\'" . haskell-mode)
-                    ("\\.chs\\'" . haskell-mode)
-                    ("\\.l[hg]s\\'" . literate-haskell-mode)
-                    ("\\.inc\\'" . asm-mode)
-                    ("\\.max\\'" . maxima-mode)
-                    ("\\.lrc\\'" . emms-lyrics-mode)
-                    ("\\.org\\'" . org-mode)
-                    ("\\.cron\\(tab\\)?\\'" . crontab-mode)
-                    ("cron\\(tab\\)?\\." . crontab-mode)
-                    ("\\.a90\\'" . intel-hex-mode)
-                    ("\\.hex\\'" . intel-hex-mode)
-                    ("\\.html\\'" . html-helper-mode)
-                    ("SConstruct". python-mode)
-                    ("\\.ml\\'" . tuareg-mode)
-                    ("\\.mli\\'" . tuareg-mode)
-                    ("\\.mly\\'" . tuareg-mode)
-                    ("\\.mll\\'" . tuareg-mode)
-                    ("\\.mlp\\'" . tuareg-mode)
-                    ("\\.qml\\'" . qml-mode)
-                    ("\\.jl\\'" . lisp-mode)
-                    ("\\.asdf\\'" . lisp-mode)
-                    ))
-  (add-to-alist 'auto-mode-alist elt-cons))
 
 ;; Zencoding mode.
 (add-hook 'sgml-mode-hook 'zencoding-mode)
@@ -227,10 +172,6 @@ from tradition chinese to simple chinese" t)
 (setq sr-speedbar-skip-other-window-p t)
 (setq sr-speedbar-right-side nil)
 
-;;; ### Highlight-parentheses ###
-;;; --- 增强的括号高亮
-(add-hook 'find-file-hook 'highlight-parentheses-mode t)
-
 ;;; ### Kill ring search ###
 ;;; --- 删除环搜索
 (autoload 'kill-ring-search "kill-ring-search"
@@ -261,13 +202,6 @@ from tradition chinese to simple chinese" t)
 (setq contentswitch-file-completion-delay 0.1) ;匹配显示延迟
 (setq contentswitch-max-name-length 40)        ;名字显示的最大宽度
 
-;;; ### find-func ###
-;;; --- 查找函数
-(setq find-function-C-source-directory "/usr/share/deepin-emacs/Src") ;设置Emacs的C语言代码目录
-
-;;; ### hl-line ###
-;;; --- 高亮当前行
-
 ;;; ### timid ###
 ;;; --- timid补全
 (timid-mode 1)
@@ -282,16 +216,6 @@ from tradition chinese to simple chinese" t)
 (setq doc-view-cache-directory my-translate-png-directory) ;doc-view转换的图书目录
 (setq doc-view-image-width (- (display-pixel-width) 16))
 (setq doc-view-resolution 300)
-
-;;; ### Auto-fill ###
-;;; --- 自动换行
-(setq default-fill-column 100)          ;默认显示 100列就换行
-(dolist (hook (list
-               'after-text-mode-hook
-               'message-mode-hook
-               'org-mode-hook
-               ))
-  (add-hook hook '(lambda () (auto-fill-mode 1))))
 
 ;;; ### Tempbuf ###
 ;;; --- 临时Buffer管理

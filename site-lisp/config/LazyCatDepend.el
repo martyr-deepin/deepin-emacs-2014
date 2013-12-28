@@ -10,7 +10,6 @@
 (require 'flymake-shell)           ;对shell模式的实时语法检查
 (require 'flymake-python)          ;对Python进行实时检查
 (require 'kill-ring-search)        ;Kill ring 搜索
-(require 'highlight-parentheses)   ;智能括号
 (require 'top-mode)                ;top
 (require 'pick-backup)             ;备份浏览
 (require 'autoload)                ;用于'autoload'的处理

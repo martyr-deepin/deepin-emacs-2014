@@ -1134,37 +1134,6 @@
 ;;; --- 补全列表
 (lazy-set-key vi-move-key-alist completion-list-mode-map) ;vi-move的局部按键
 (lazy-set-key sdcv-key-alist completion-list-mode-map)    ;sdcv 的局部按键
-;;; ### Isearch ###
-;;; --- 交互式搜索
-(lazy-set-key
- '(
-   ("TAB" . isearch-complete)               ;isearch补全
-   ("C-s" . isearch-repeat-forward)         ;重复向前搜索, 第一次可以用来搜索上一次的历史哟
-   ("C-r" . isearch-repeat-backward)        ;重复向后搜索
-   ("C-g" . isearch-abort)                  ;中止搜索
-   ("C-w" . isearch-yank-word-or-char)      ;粘帖光标后的词或字符作为搜索对象
-   ("C-y" . isearch-yank-line)              ;粘帖光标后的行作为搜索对象
-   ("M-o" . isearch-delete-char)            ;删除
-   ("M-l" . isearch-to-lazy-search)         ;切换到lazy-search
-   ("M-p" . isearch-ring-retreat)           ;搜索历史向后
-   ("M-n" . isearch-ring-adjust)            ;搜索历史向前
-   ("M-y" . isearch-yank-kill)              ;从 kill ring 中粘帖最后一项到搜索对象后
-   ("M-h" . isearch-yank-char)              ;粘帖光标后的字符到搜索对象
-   ("M-e" . isearch-edit-string)            ;编辑搜索对象
-   ("M-c" . isearch-toggle-case-fold)       ;切换大小写
-   ("M-r" . isearch-toggle-regexp)          ;切换正则表达式
-   ("M-w" . isearch-toggle-word)            ;切换词
-   ("M-g" . isearch-moccur)                 ;moccur 当前 buffer
-   ("M-G" . isearch-moccur-all)             ;moccur 所有 buffer
-   ("M->" . isearch-beginning-of-buffer)    ;跳转到buffer开头并重新搜索, 搜索最前面一个
-   ("M-<" . isearch-end-of-buffer)          ;跳转到buffer末尾并重新搜索, 搜索最后面一个
-   ("M-%" . isearch-query-replace)          ;替换
-   ("M-d" . isearch-find-duplicate-word)    ;查找重复的单词
-   ("M-z" . isearch-find-duplicate-line)    ;查找重复的行
-   ("C-M-%" . isearch-query-replace-regexp) ;正则表达式替换
-   )
- isearch-mode-map
- )
 ;; Zencoding
 (lazy-set-key
  '(
