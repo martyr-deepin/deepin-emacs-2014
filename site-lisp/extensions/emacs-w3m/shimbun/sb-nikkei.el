@@ -1,6 +1,6 @@
 ;;; sb-nikkei.el --- shimbun backend for nikkei.co.jp -*- coding: iso-2022-7bit; -*-
 
-;; Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2009
+;; Copyright (C) 2001-2007, 2009-2011
 ;; Kazuyoshi KOREEDA <Koreeda.Kazuyoshi@jp.panasonic.com>
 
 ;; Author: Kazuyoshi KOREEDA <Koreeda.Kazuyoshi@jp.panasonic.com>,
@@ -43,9 +43,6 @@
 (defvar shimbun-nikkei-url
   (concat "http://www." shimbun-nikkei-top-level-domain "/")
   "Name of the parent url.")
-
-(defvar shimbun-nikkei-url-coding-system 'shift_jis
-  "Coding system used to encode URLs containing non-ASCII letters.")
 
 (defvar shimbun-nikkei-group-table
   `(("top" "トップ" ,shimbun-nikkei-url
@@ -500,7 +497,7 @@ Face: iVBORw0KGgoAAAANSUhEUgAAADAAAAAWAgMAAAD7mfc/AAAABGdBTUEAALGPC/xhBQAAAAx
 	       (string-match "[^/]/[^/]\\|[^/]/\\'" folder))
       (setq folder (substring folder 0 (+ (match-beginning 0) 2))))
     (while (search-forward "\r" nil t)
-      (delete-backward-char 1))
+      (delete-char -1))
     (goto-char (point-min))
     (when (fboundp fn)
       (shimbun-sort-headers (funcall fn group folder shimbun range)))))
@@ -1496,7 +1493,7 @@ http://markets.nikkei.co.jp/kokunai/bunkatsu3.aspx" (match-string 1)) folder))
 			  shimbun-nikkei-group-table)))
 	(case-fold-search t))
     (while (search-forward "\r" nil t)
-      (delete-backward-char 1))
+      (delete-char -1))
     (goto-char (point-min))
     (while (re-search-forward "[\t\n ]*\\(?:\
 <ul\\(?:[\t\n ]+[^>]+\\)?>\
@@ -1833,7 +1830,7 @@ Please visit <a href=\""
 
 (defun shimbun-nikkei-prepare-article-release (&rest args)
   "Function used to prepare contents of an article for the release group."
-  (shimbun-remove-tags "<p[\t\n ]+class=\"re_print\"" "</p>")
+  (shimbun-remove-tags "\\(p\\)[\t\n ]+class=\"re_print\"" t)
   (goto-char (point-min))
   (when (re-search-forward "<[\t\n ]*TD[\t\n ]+colspan=\"3\">" nil t)
     (insert shimbun-nikkei-content-start)

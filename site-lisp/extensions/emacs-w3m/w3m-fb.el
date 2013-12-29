@@ -3,7 +3,7 @@
 ;;; Copyright (C) 2005, 2006 Matthew P. Hodges
 
 ;; Author: Matthew P. Hodges <MPHodges@member.fsf.org>
-;; Version: $Id: w3m-fb.el,v 1.4 2006-09-20 09:26:42 yamaoka Exp $
+;; Version: $Id: w3m-fb.el,v 1.4 2006/09/20 09:26:42 yamaoka Exp $
 
 ;; w3m-fb.el is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published

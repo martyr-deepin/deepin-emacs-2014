@@ -1,6 +1,6 @@
 ;;; sb-tigris.el --- shimbun backend for tigris.org ML
 
-;; Copyright (C) 2005 Tsuyoshi CHO <tsuyoshi_cho@ybb.ne.jp>
+;; Copyright (C) 2005, 2007, 2009 Tsuyoshi CHO <tsuyoshi_cho@ybb.ne.jp>
 
 ;; Author: Tsuyoshi CHO <tsuyoshi_cho@ybb.ne.jp>
 ;; Keywords: news
@@ -96,7 +96,7 @@
 	   (shimbun-tigris-get-ml-name shimbun)
 	   )))
 
-(defsubst shimbun-tigris-remove-amp (url)
+(defun shimbun-tigris-remove-amp (url)
   "Remove URL &amp; -> &"
   (save-match-data
     (while (string-match "&amp;" url)

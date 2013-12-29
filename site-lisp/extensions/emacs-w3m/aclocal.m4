@@ -2,7 +2,7 @@ AC_DEFUN(AC_SET_VANILLA_FLAG,
  [dnl Determine arguments to run Emacs as vanilla.
   retval=`echo ${EMACS}| ${EGREP} xemacs| ${EGREP} -v '^$'`
   if test -z "${retval}"; then
-	VANILLA_FLAG="-q -no-site-file --no-unibyte"
+	VANILLA_FLAG="-q -no-site-file"
   else
 	VANILLA_FLAG="-vanilla"
   fi
@@ -26,8 +26,8 @@ if test -z "$3"; then
 fi
 AC_CACHE_VAL(EMACS_cv_SYS_$1,[
 	OUTPUT=./conftest-$$
-	echo ${XEMACSDEBUG}${EMACS}' '${VANILLA_FLAG}' -batch -eval '\''(let ((x '"${elisp}"')) (write-region (if (stringp x) (princ x) (prin1-to-string x)) nil "'${OUTPUT}'" nil 5))'\' >& AC_FD_CC 2>&1
-	eval ${XEMACSDEBUG}${EMACS}' '${VANILLA_FLAG}' -batch -eval '\''(let ((x '"${elisp}"')) (write-region (if (stringp x) (princ x) (prin1-to-string x)) nil "'${OUTPUT}'" nil 5))'\' >& AC_FD_CC 2>&1
+	echo ${XEMACSDEBUG}${EMACS}' '${VANILLA_FLAG}' -batch -eval '\''(let ((x '"${elisp}"')) (write-region (format "%s" x) nil "'${OUTPUT}'" nil 5))'\' >& AC_FD_CC 2>&1
+	eval ${XEMACSDEBUG}${EMACS}' '${VANILLA_FLAG}' -batch -eval '\''(let ((x '"${elisp}"')) (write-region (format "%s" x) nil "'${OUTPUT}'" nil 5))'\' >& AC_FD_CC 2>&1
 	retval="`cat ${OUTPUT}`"
 	echo "=> ${retval}" >& AC_FD_CC 2>&1
 	rm -f ${OUTPUT}
@@ -42,9 +42,10 @@ fi
 AC_DEFUN(AC_PATH_EMACS,
  [dnl Check for Emacsen.
 
-  dnl Apparently, if you run a shell window in Emacs, it sets the EMACS
-  dnl environment variable to 't'.  Lets undo the damage.
-  test x${EMACS} = xt && EMACS=
+  dnl Apparently, if you run a shell window or a term window in Emacs,
+  dnl it sets the EMACS environment variable to 't' or a version number
+  dnl of Emacs.  Lets undo the damage.
+  test "${EMACS}" = "t" -o -n "${INSIDE_EMACS}" && EMACS=
 
   dnl Ignore cache.
   unset ac_cv_prog_EMACS; unset EMACS_cv_SYS_flavor;
@@ -70,53 +71,20 @@ AC_DEFUN(AC_PATH_EMACS,
 
   AC_MSG_CHECKING([what a flavor does ${EMACS} have])
   AC_EMACS_LISP(flavor,
-    (if (featurep (quote xemacs))\
-	(if (and\
-	     (condition-case nil\
-		 (progn\
-		   (unless (or itimer-process itimer-timer)\
-		     (itimer-driver-start))\
-		   (let* ((inhibit-quit t)\
-			  (ctime (current-time))\
-			  (itimer-timer-last-wakeup\
-			   (prog1\
-			       ctime\
-			     (setcar ctime (1- (car ctime)))))\
-			  (itimer-list nil)\
-			  (itimer (start-itimer \"*testing*\"\
-						(function ignore) 5)))\
-		     (sleep-for 0.1)\
-		     (prog1\
-			 (> (itimer-value itimer) 0)\
-		       (delete-itimer itimer))))\
-	       (error nil))\
-	     (string-match\
-	      (concat (vector 94 92 40 63 58 32 43 92 41 42 92 91 92 93))\
-	      (concat (vector 32 91 93)))\
-	     (or (not (executable-find \"cat\"))\
-		 (with-temp-buffer\
-		   (insert \"foo\")\
-		   (backward-char)\
-		   (call-process-region (1- (point)) (point) \"cat\" t t)\
-		   (goto-char (point-min))\
-		   (looking-at \"foo\"))))\
-	    \"XEmacs\"\
-	  (let ((v (emacs-version)))\
-	    (if (string-match (char-to-string 41) v)\
-		(substring v 0 (match-end 0))\
-	      \"Old XEmacs\")))\
-      (concat \"Emacs \"\
-	      (mapconcat (function identity)\
-			 (nreverse\
-			  (cdr (nreverse\
-				(split-string emacs-version\
-					      (concat (vector 92 46))))))\
+    (if (featurep (quote xemacs))
+	\"XEmacs\"
+      (concat \"Emacs \"
+	      (mapconcat (function identity)
+			 (nreverse
+			  (cdr (nreverse
+				(split-string emacs-version
+					      (concat (vector 92 46))))))
 			 \".\"))),
     noecho)
   case "${flavor}" in
   XEmacs)
     EMACS_FLAVOR=xemacs;;
-  Emacs\ 2[[123]]\.*)
+  Emacs\ 2[[1234]]\.*)
     EMACS_FLAVOR=emacs;;
   *)
     EMACS_FLAVOR=unsupported;;
@@ -295,7 +263,7 @@ AC_DEFUN(AC_ADD_LOAD_PATH,
         ADDITIONAL_LOAD_PATH=${ADDITIONAL_LOAD_PATH}:`pwd`/attic
       fi
     fi])
-  retval=`eval ${XEMACSDEBUG}${EMACS}' '${VANILLA_FLAG}' -batch -l w3mhack.el '${ADDITIONAL_LOAD_PATH}' -f w3mhack-print-status'`
+  retval=`eval ${XEMACSDEBUG}${EMACS}' '${VANILLA_FLAG}' -batch -l w3mhack.el '${ADDITIONAL_LOAD_PATH}' -f w3mhack-print-status 2>/dev/null | $EGREP -v '\''^$'\'`
   if test x"$retval" != xOK; then
     AC_MSG_ERROR([Process couldn't proceed.  See the above messages.])
   fi

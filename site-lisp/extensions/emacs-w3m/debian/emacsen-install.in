@@ -1,0 +1,213 @@
+#! /bin/sh
+# /usr/lib/emacsen-common/packages/install/@PACKAGE@
+set -e
+
+FLAVOR=$1
+PACKAGE=@PACKAGE@
+PKGSNAME=w3m
+
+case $FLAVOR in
+    emacs|emacs20|emacs19|mule2)
+    exit 0
+    ;;
+    *xemacs*)
+    if [ ! -f "/usr/share/$FLAVOR/site-lisp/apel/poe.elc" ]; then
+	echo "install/$PACKAGE: apel/poe.elc is not ready, skipped"
+	exit 0
+    fi
+    mule=`/bin/ls -1 /usr/bin/$FLAVOR*-mule* 2>/dev/null | head -1`
+    nomule=`/bin/ls -1 /usr/bin/$FLAVOR*-nomule* 2>/dev/null | head -1`
+    if [ -n "$nomule" ]; then
+	if [ -n "$mule" ]; then
+	    EMACSEN="$mule $nomule"
+	else
+	    EMACSEN="$nomule"
+	fi
+    else
+	EMACSEN=$FLAVOR
+    fi
+    ;;
+    *)
+    EMACSEN=$FLAVOR
+    ;;
+esac
+
+ELCDIR=/usr/share/$FLAVOR/site-lisp/$PKGSNAME
+ELDIR=/usr/share/emacs/site-lisp/$PKGSNAME
+ELCSTAMP=$ELCDIR/compile-stamp
+if [ -f "$ELCSTAMP" ]; then
+    echo "install/$PACKAGE: already byte-compiled for $FLAVOR, skipped"
+    exit 0
+fi
+case $FLAVOR in
+    emacs2[3-9]|emacs-*|emacs*cvs*)
+    if [ -f "$ELDIR/w3m-e21.el" ] && [ ! -f "$ELDIR/w3m-e23.el" ]; then
+	echo "install/$PACKAGE: w3m-e21.el is found, not suitable for $FLAVOR, skipped"
+	exit 0
+    fi
+    ;;
+esac
+
+LOG=`mktemp -t elc.XXXXXXXXXXXX`
+chmod 644 "$LOG"
+echo "install/$PACKAGE: byte-compiling for $FLAVOR, logged in $LOG"
+
+cd "$ELDIR"
+LINKS=`echo *.el`
+cd shimbun
+LINKS2=`echo *.el`
+if [ ! -d "$ELCDIR" ]; then
+    mkdir "$ELCDIR"
+    chmod 755 "$ELCDIR"
+fi
+if [ ! -d "$ELCDIR/shimbun" ]; then
+    mkdir "$ELCDIR/shimbun"
+    chmod 755 "$ELCDIR/shimbun"
+fi
+
+for EMACS in $EMACSEN; do
+    cd "$ELCDIR"
+    TOELDIR=../../../emacs/site-lisp/$PKGSNAME
+    case $EMACS in
+	*-nomule*)
+	if [ x"$EMACS" != x"$EMACSEN" ]; then
+	    if [ ! -d nomule ]; then
+		mkdir nomule
+		chmod 755 nomule
+	    fi
+	    cd nomule
+	    TOELDIR=../$TOELDIR
+	fi
+	;;
+    esac
+    TOELDIR2=../$TOELDIR/shimbun
+    rm -f *.elc __myinit.el
+    for f in $LINKS; do
+	ln -sf "$TOELDIR/$f" .
+    done
+    rm -f w3m-e20.el w3m-e19.el w3m-om.el w3m-bitmap.el
+    case $FLAVOR in
+	*xemacs*)
+	if [ -f "$TOELDIR/attic/rfc2368.el" ]; then
+	    ln -sf "$TOELDIR/attic/rfc2368.el" .
+	fi
+	rm -f w3m-ems.el w3m-e21.el w3m-e23.el w3m-fsf.el
+	;;
+	emacs2[3-9]|emacs-*|emacs*cvs*)
+	rm -f w3m-xmas.el w3m-ucs.el w3m-e21.el
+	;;
+	*)
+	rm -f w3m-xmas.el w3m-e23.el
+	;;
+    esac
+    case $EMACS in
+	*-nomule*)
+	rm -f w3m-ccl.el w3m-ucs.el w3m-symbol.el w3m-weather.el
+	;;
+    esac
+    FILES=`/bin/ls -1 *.el | egrep -v '^(w3mhack.el|w3m-setup.el|w3m-load.el|mew-w3m.el|mime-w3m.el|octet.el|w3m-ucs.el)'`
+
+    cat > __myinit.el << EOF
+(setq load-path (cons "/usr/share/$FLAVOR/site-lisp/apel" load-path))
+(setq load-path (cons "." load-path))
+(setq byte-compile-warnings nil)
+EOF
+    if [ -f mime-w3m.el ] && [ -f "/usr/share/$FLAVOR/site-lisp/flim/mime.elc" ]; then
+	FILES="$FILES mime-w3m.el octet.el"
+	cat >> __myinit.el << EOF
+(setq load-path (cons "/usr/share/$FLAVOR/site-lisp/flim" load-path))
+EOF
+    fi
+    if [ -f w3m-ucs.el ] && [ -f "/usr/share/$FLAVOR/site-lisp/mule-ucs/un-define.elc" ]; then
+	FILES="$FILES w3m-ucs.el"
+	cat >> __myinit.el << EOF
+(setq load-path (cons "/usr/share/$FLAVOR/site-lisp/mule-ucs" load-path))
+EOF
+    fi
+    if [ -f mew-w3m.el ] && [ -f "/usr/share/$FLAVOR/site-lisp/mew/mew.elc" ]; then
+	FILES="$FILES mew-w3m.el"
+	cat >> __myinit.el << EOF
+(setq load-path (cons "/usr/share/$FLAVOR/site-lisp/mew" load-path))
+EOF
+    fi
+    case $EMACS in
+	*-nomule*)
+	cat >> __myinit.el << EOF
+(setq load-path (cons "/usr/share/$FLAVOR/site-lisp/apel/nomule" load-path))
+(setq load-path (cons "/usr/share/$FLAVOR/site-lisp/flim/nomule" load-path))
+EOF
+	;;
+	*)
+    esac
+
+    if [ -d shimbun ]; then
+	cd shimbun
+	rm -f *.elc __myinit.el
+	for f in $LINKS2; do
+	    ln -sf "$TOELDIR2/$f" .
+	done
+	cd ..
+    fi
+    FLAGS="-q -no-site-file -batch -l __myinit.el -l w3mhack.el . -f w3mhack-generate-load-file"
+    echo "$EMACS" $FLAGS >> "$LOG"
+    "$EMACS" $FLAGS >> "$LOG" 2>&1
+
+    FLAGS="-q -no-site-file -batch -l __myinit.el -f batch-byte-compile"
+    echo "$EMACS" $FLAGS $FILES >> "$LOG"
+    "$EMACS" $FLAGS $FILES >> "$LOG" 2>&1
+    chmod 644 *.elc
+    rm -f __myinit.el*
+
+    if [ ! -f "/usr/share/$FLAVOR/site-lisp/flim/mime.elc" ]; then
+	continue
+    fi
+    case $EMACS in
+	*-nomule*)
+	continue
+	;;
+    esac
+
+    cd shimbun
+    FILES=`/bin/ls -1 *.el | egrep -v '^(mew-shimbun.el|nnshimbun.el)'`
+
+    cat > __myinit.el << EOF
+(setq load-path (cons "/usr/share/$FLAVOR/site-lisp/apel" load-path))
+(setq load-path (cons "/usr/share/$FLAVOR/site-lisp/flim" load-path))
+(setq load-path (cons ".." load-path))
+(setq load-path (cons "." load-path))
+(setq byte-compile-warnings nil)
+EOF
+    if [ -f mew-shimbun.el ] && [ -f "/usr/share/$FLAVOR/site-lisp/mew/mew.elc" ]; then
+	FILES="$FILES mew-shimbun.el"
+	cat >> __myinit.el << EOF
+(setq load-path (cons "/usr/share/$FLAVOR/site-lisp/mew" load-path))
+EOF
+    fi
+
+    FLAGS="-q -no-site-file -batch -l __myinit.el -f batch-byte-compile"
+    echo "$EMACS" $FLAGS $FILES >> "$LOG"
+    "$EMACS" $FLAGS $FILES >> "$LOG" 2>&1
+    chmod 644 *.elc
+    rm -f __myinit.el*
+done # EMACS in $EMACSEN
+
+echo "install/$PACKAGE: deleting $LOG"
+rm -f "$LOG"
+
+echo "install/$PACKAGE: byte-compiling for reverse dependency"
+pkgs=
+for p in wl:wl wl-beta:wl emacspeak; do
+    pkg=`echo $p | cut -d : -f 1`
+    sname=`echo $p | cut -d : -f 2`
+    dir=/usr/share/$FLAVOR/site-lisp/$sname
+    if [ -n "$sname" ] && [ -d "$dir" ] && [ -f "/usr/lib/emacsen-common/packages/install/$pkg" ]; then
+	rm -rf "$dir"/*
+	pkgs="$pkg $pkgs"
+    fi
+done
+for pkg in $pkgs; do
+    "/usr/lib/emacsen-common/packages/install/$pkg" "$FLAVOR"
+done
+
+touch "$ELCSTAMP"
+exit 0

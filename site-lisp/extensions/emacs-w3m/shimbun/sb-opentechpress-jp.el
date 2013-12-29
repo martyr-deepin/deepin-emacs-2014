@@ -1,6 +1,7 @@
 ;;; sb-opentechpress-jp.el --- shimbun backend for japan.linux.com -*- coding: iso-2022-7bit -*-
 
-;; Copyright (C) 2006, 2007, 2009 TSUCHIYA Masatoshi <tsuchiya@namazu.org>
+;; Copyright (C) 2006, 2007, 2009, 2010
+;; TSUCHIYA Masatoshi <tsuchiya@namazu.org>
 
 ;; Author: TSUCHIYA Masatoshi <tsuchiya@namazu.org>
 ;; Keywords: news
@@ -92,19 +93,17 @@
       (goto-char (point-max))
       (when (search-backward "</div><!-- id=\"article-body\" -->" nil t)
 	(delete-region (match-end 0) (point-max))))
-    (shimbun-remove-tags "<div class=\"pagemenu\">"
-			 "</div><!-- class=\"pagemenu\" -->")
-    (shimbun-remove-tags "<span class=\"pagemenu\">"
-			 "</span><!-- class=\"pagemenu\" -->")
+    (shimbun-remove-tags "\\(div\\) class=\"pagemenu\">" t)
+    (shimbun-remove-tags "\\(span\\) class=\"pagemenu\">" t)
+    (shimbun-remove-tags "<!-- [^>]+ -->")
     t))
 
 (luna-define-method shimbun-clear-contents :before ((shimbun
 						     shimbun-opentechpress-jp)
 						    header)
-  (shimbun-remove-tags "<SCRIPT" "</SCRIPT>")
-  (shimbun-remove-tags "<NOSCRIPT" "</NOSCRIPT>")
-  (shimbun-remove-tags "<div id=\"story-action\">"
-		       "</div><!-- class=\"story-action\" -->"))
+  (shimbun-remove-tags "SCRIPT\\|NOSCRIPT" t)
+  (shimbun-remove-tags "\\(div\\) id=\"story-action\">" t)
+  (shimbun-remove-tags "<!-- [^>]+ -->"))
 
 (provide 'sb-opentechpress-jp)
 

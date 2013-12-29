@@ -1,6 +1,6 @@
 ;;; sb-impress.el --- shimbun backend for www.watch.impress.co.jp -*- coding: iso-2022-7bit; -*-
 
-;; Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2008
+;; Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2008, 2009
 ;; Yuuichi Teranishi <teranisi@gohome.org>
 
 ;; Author: Yuuichi Teranishi <teranisi@gohome.org>
@@ -74,6 +74,9 @@
     ("kaden" rss
      "<!-- 本文開始 -->" "<!-- 本文終了 -->"
      "http://kaden.watch.impress.co.jp/cda/rss/kaden.rdf")
+    ("car" rss
+     "<!-- 本文開始 -->" "<!-- 本文終了 -->"
+     "http://car.watch.impress.co.jp/docs/car.rdf")
     ))
 
 (defvar shimbun-impress-groups (mapcar 'car shimbun-impress-groups-alist))
@@ -97,7 +100,7 @@ JzTbXTM!V{ecn<+l,RDM&H3CKdu8tWENJlbRm)a|Hk+limu}hMtR\\E!%r\
   (concat "<" (md5 url) "%" (shimbun-current-group shimbun)
 	  "@www.watch.impress.co.jp>"))
 
-(defsubst shimbun-impress-get-headers (shimbun &optional range)
+(defun shimbun-impress-get-headers (shimbun &optional range)
   "Get headers without RSS."
   (let ((case-fold-search t)
 	(regexp (nth 1 (assoc (shimbun-current-group-internal shimbun)

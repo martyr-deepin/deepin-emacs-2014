@@ -1,6 +1,6 @@
 ;;; w3m-dtree.el --- The add-on program to display local directory tree.
 
-;; Copyright (C) 2001, 2002, 2003, 2005, 2006, 2007
+;; Copyright (C) 2001, 2002, 2003, 2005, 2006, 2007, 2009
 ;; TSUCHIYA Masatoshi <tsuchiya@namazu.org>
 
 ;; Author: Hideyuki SHIRAI    <shirai@meadowy.org>,
@@ -110,7 +110,7 @@ over the 'w3m-dtree-directory-depth'."
 			       :sample-face bold :size 0
 			       :value ,(aref defaults 1)))))))
 
-(defsubst w3m-dtree-expand-file-name (path)
+(defun w3m-dtree-expand-file-name (path)
   (if (string-match "^\\(.\\):\\(.*\\)" path)
       (if w3m-use-cygdrive
 	  (concat "/cygdrive/"
@@ -118,7 +118,7 @@ over the 'w3m-dtree-directory-depth'."
 	(concat "/" (match-string 1 path) "|" (match-string 2 path)))
     path))
 
-(defsubst w3m-dtree-directory-name (path)
+(defun w3m-dtree-directory-name (path)
   (when (and w3m-treat-drive-letter
 	     (string-match
 	      "^/\\(?:\\([A-Za-z]\\)[|:]?\\|cygdrive/\\([A-Za-z]\\)\\)/"

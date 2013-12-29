@@ -29,7 +29,13 @@
 
 (require 'shimbun)
 (eval-when-compile
-  (require 'cl))
+  (require 'cl)
+  ;; `multiple-value-bind' requires the 2nd argument to be multiple-value,
+  ;; not a list, in particular for XEmacs 21.5.  `values-list' does it,
+  ;; but is a run-time cl function in XEmacs 21.4 and Emacs 21.
+  (when (eq 'identity (symbol-function 'values-list))
+    (define-compiler-macro values-list (arg)
+      arg)))
 
 (defcustom shimbun-cgi-board-group-alist
   '(("support" .
@@ -149,7 +155,7 @@
 				  (string-to-number (match-string 3 string))
 				  (match-string 4 string))
       (multiple-value-bind (sec min hour day month year dow dst zone)
-	  (decode-time (shimbun-time-parse-string string))
+	  (values-list (decode-time (shimbun-time-parse-string string)))
 	(setq zone (/ zone 60))
 	(shimbun-make-date-string year month day
 				  (format "%02d:%02d" hour min)

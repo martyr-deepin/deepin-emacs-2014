@@ -1,6 +1,6 @@
 ;;; mime-w3m.el --- mime-view content filter for text
 
-;; Copyright (C) 2001, 2002, 2003, 2004, 2005
+;; Copyright (C) 2001-2005, 2009, 2010, 2012, 2013
 ;; TSUCHIYA Masatoshi <tsuchiya@namazu.org>
 
 ;; Author: TSUCHIYA Masatoshi <tsuchiya@namazu.org>,
@@ -24,20 +24,18 @@
 ;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 ;; Boston, MA 02110-1301, USA.
 
+;;; Commentary:
 
-;;; Install:
-
-;; (1) Install SEMI.
-;; (2) Put this file to appropriate directory.
-;; (3) Write these following code to your ~/.emacs or ~/.gnus.
+;; To use this module along with a SEMI-based mail client (e.g.
+;; Wanderlust), add this one to your ~/.emacs file or ~/.wl.el file:
 ;;
-;;        (require 'mime-w3m)
-
+;; (require 'mime-w3m)
 
 ;;; Code:
 
 (eval-when-compile
   (require 'cl)
+  (require 'calist)
   ;; mime-parse.el should be loaded before mime.el so as not to make
   ;; `mime-uri-parse-cid' an autoloaded function to which the byte
   ;; compiler might issue a nonsense warning.
@@ -104,16 +102,17 @@ by way of `post-command-hook'."
   (setq mime-setup-enable-inline-html nil)
   (let (flag)
     (when (boundp 'mime-preview-condition)
-      (labels ((overwrite (x)
-		(if (symbolp x)
-		    (if (eq x 'mime-preview-text/html)
-			(setq flag 'mime-w3m-preview-text/html)
-		      (when (eq x 'mime-w3m-preview-text/html)
-			(setq flag t))
-		      x)
-		  (if (consp x)
-		      (cons (overwrite (car x)) (overwrite (cdr x)))
-		    x))))
+      (w3m-labels
+	  ((overwrite (x)
+		      (if (symbolp x)
+			  (if (eq x 'mime-preview-text/html)
+			      (setq flag 'mime-w3m-preview-text/html)
+			    (when (eq x 'mime-w3m-preview-text/html)
+			      (setq flag t))
+			    x)
+			(if (consp x)
+			    (cons (overwrite (car x)) (overwrite (cdr x)))
+			  x))))
 	(setq mime-preview-condition
 	      (overwrite mime-preview-condition))))
     (unless flag
@@ -128,7 +127,7 @@ by way of `post-command-hook'."
 	   (set-alist 'mime-view-type-subtype-score-alist
 		      '(text . html) 3))))))
 
-(defsubst mime-w3m-setup ()
+(defun mime-w3m-setup ()
   "Setup `mime-w3m' module."
   (require 'w3m)
   (when (eq mime-w3m-display-inline-images 'default)
@@ -181,14 +180,14 @@ by way of `post-command-hook'."
 
 (let (current-load-list)
   (defadvice mime-display-message
-    (after mime-w3m-add-local-hook activate compile)
+    (after add-emacs-w3m-functions-to-pre/post-command-hook activate compile)
     "Advised by emacs-w3m.
-Set hooks run arround each command is executed."
+Add some emacs-w3m utility functions to pre/post-command-hook."
     (when (featurep 'w3m)
-      (w3m-add-local-hook 'pre-command-hook
-			  'w3m-store-current-position)
-      (w3m-add-local-hook 'post-command-hook
-			  'mime-w3m-check-current-position))))
+      (w3m-make-local-hook 'pre-command-hook)
+      (w3m-make-local-hook 'post-command-hook)
+      (add-hook 'pre-command-hook 'w3m-store-current-position nil t)
+      (add-hook 'post-command-hook 'mime-w3m-check-current-position nil t))))
 
 (defun mime-w3m-check-current-position ()
   "Run `mime-w3m-after-cursor-move-hook' if the cursor has been moved."
@@ -210,7 +209,13 @@ Set hooks run arround each command is executed."
       (w3m-insert-string (mime-entity-content entity))
       (mime-entity-type/subtype entity))))
 
-(let (current-load-list)
+(eval
+ (quote
+  ;; Arglist varies according to Emacs version.
+  ;; Emacs 21.1~21.4, 23.3, 24, XEmacs, SXEmacs:
+  ;; (kill-new string &optional replace)
+  ;; Emacs 22.1~23.2:
+  ;; (kill-new string &optional replace yank-handler)
   (defadvice kill-new (before strip-keymap-properties-from-kill activate)
     "Advised by emacs-w3m.
 Strip `keymap' or `local-map' properties from a killed string."
@@ -218,7 +223,7 @@ Strip `keymap' or `local-map' properties from a killed string."
 			   'text-rendered-by-mime-w3m t (ad-get-arg 0))
 	(remove-text-properties 0 (length (ad-get-arg 0))
 				'(keymap nil local-map nil)
-				(ad-get-arg 0)))))
+				(ad-get-arg 0))))))
 
 (mime-w3m-insinuate)
 

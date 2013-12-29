@@ -1,7 +1,6 @@
 ;;; sb-asahi.el --- shimbun backend for asahi.com -*- coding: iso-2022-7bit; -*-
 
-;; Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
-;; Yuuichi Teranishi <teranisi@gohome.org>
+;; Copyright (C) 2001-2011 Yuuichi Teranishi <teranisi@gohome.org>
 
 ;; Author: TSUCHIYA Masatoshi <tsuchiya@namazu.org>,
 ;;         Yuuichi Teranishi  <teranisi@gohome.org>,
@@ -142,7 +141,7 @@ Every `.' in NAME will be replaced with `/'."
 	       (concat
 		"<item" s1 "rdf:about=\""
 		;; 1. url
-		"\\(http://\\(?:book\\|www\\)\\.asahi\\.com/"
+		"\\(http://\\(?:book\\|www\\)\\.asahi\\.com//?"
 		;; 2. extra keyword (en)
 		"\\([^/]+\\)"
 		"\\(?:/update/"
@@ -153,7 +152,8 @@ Every `.' in NAME will be replaced with `/'."
 		;; 5. subject
 		"\\([^<]+\\)"
 		s0 "</title>\\(?:"
-		s0 "\\(?:<[^>]+/>\\|<[^>]+>[^<]+</[^>]+>\\)\\)*"
+		s0 "\\(?:<[^>]+/>"
+		"\\|<[^>]+>\\(?:<[^]]+\\]+>\\|[^<]+\\)</[^>]+>\\)\\)*"
 		s0 "<dc:subject>" s0
 		;; 6. extra keyword (ja)
 		"\\([^<]+\\)"
@@ -294,7 +294,27 @@ Every `.' in NAME will be replaced with `/'."
 	 "\"")
        1 nil nil nil 2 3 4)
       ("travel" "トラベル" "%s/news/"
-       ,@(shimbun-asahi-make-regexp "travel.news"))))
+       ,@(shimbun-asahi-make-regexp "travel.news"))
+      ("wakata" "若田さんきぼう滞在記" "%s/"
+       ,(concat
+	 "<a" s1 "href=\"/"
+	 ;; 1. url
+	 "\\(wakata\\(?:/[^\"/]+\\)*/"
+	 ;; 2. serial number
+	 "\\([a-z]*"
+	 ;; 3. year
+	 "\\(20[0-9][0-9]\\)"
+	 ;; 4. month
+	 "\\([01][0-9]\\)"
+	 ;; 5. day
+	 "\\([0-3][0-9]\\)"
+	 "[0-9]+\\)"
+	 "\\.html\\)"
+	 "\">" s0
+	 ;; 6. subject
+	 "\\([^\n<>]+\\)"
+	 s0 "\\(?:<img" s1 "[^>]+>" s0 "\\)*</a>")
+       1 nil 2 6 3 4 5)))
   "Alist of group names, their Japanese translations, index pages,
 regexps and numbers.  Where index pages and regexps may contain the
 \"%s\" token which is replaced with group names, numbers point to the
@@ -913,7 +933,8 @@ Each table is the same as the `cdr' of the element of
 `shimbun-asahi-group-table'.")
 
 (defvar shimbun-asahi-content-start
-  "<div[\t\n ]+class=\"\\(?:ThmbSet256\\|Kansai-ThmbSet100\\|ThmbCol\\)\">\
+  "<div[\t\n ]+class=\"\
+\\(?:ThmbSet300Tb\\|ThmbSet256\\|Kansai-ThmbSet100\\|ThmbCol\\)\">\
 \\|<!--[\t\n ]*End of Headline[\t\n ]*-->\
 \\(?:[\t\n ]*<div[\t\n ]+[^<]+</div>[\t\n ]*\
 \\|[\t\n ]*<p[\t\n ]+[^<]+</p>[\t\n ]*\\)?\
@@ -923,7 +944,7 @@ Each table is the same as the `cdr' of the element of
 (defvar shimbun-asahi-content-end
   "<dl[\t\n ]+class=\"PrInfo\">\
 \\|<!--[\t\n ]*google_ad_section_end\
-\\|<!-[^>]+ここまで[\t\n ]*-+>\
+\\|<!-[^>]+[^>★]ここまで[\t\n ]*-+>\
 \\|\\(?:[\t\n ]*<[^>]+>\\)*[\t\n ]*<!--[\t\n ]*Start of hatenab[\t\n ]*-->\
 \\|<!--[\t\n ]*End of Kiji[\t\n ]*-->\
 \\|<!--[\t\n ]*End of related link[\t\n ]*-->\
@@ -1481,10 +1502,6 @@ that day if it failed."
 広告終わり\\(?:[\t\n ]*</p>[\t\n ]*\\|\\'\\)"
 				  nil t)
 	   (delete-region start (match-end 0)))))
-     ;; Remove any other useless things.
-     (shimbun-remove-tags "[\t\n ]*<form[\t\n ]+" "</form>[\t\n ]*")
-     (shimbun-remove-tags "[\t\n ]*<noscript>" "</noscript>[\t\n ]*")
-     (shimbun-remove-tags "[\t\n ]*<script[\t\n ]" "</script>[\t\n ]*")
      ;; Remove trailing garbage.
      (goto-char (point-min))
      (when (and (not (string-match "ゆるゆるフェミニン" from))
@@ -1506,81 +1523,60 @@ that day if it failed."
 
 (defun shimbun-asahi-clear-contents (shimbun header)
   (when (luna-call-next-method)
-    ;; Remove table tags that surround image tags.
+    ;; Remove garbage after an article.
     (goto-char (point-min))
-    (let (end start found images)
-      (while (re-search-forward "[\t\n ]*<table[\t\n ]+[^>]+>[\t\n ]*\
-\\(?:\\(?:<[^>]+>[\t\n ]*\\)*\
-<img[\t\n ]+[^>]+>[\t\n ]*\\(?:<[^>]+>[\t\n ]*\\)*[^<]+\\)+\
-\\(?:<[^>]+>[\t\n ]*\\)*</table>[\t\n ]*"
-				nil t)
-	(setq found nil
-	      images nil
-	      end (match-end 0))
-	(goto-char (setq start (match-beginning 0)))
-	(while (re-search-forward "\
-\\(<img[\t\n ]+[^>]+>\\)[\t\n ]*\\(?:<[^>]+>[\t\n ]*\\)*\\([^<]+\\)"
-				  end t)
-	  (skip-chars-backward "\t\n ")
-	  (when (> (point) (match-beginning 2))
-	    (setq found t))
-	  (push (concat (match-string 1) "<br>"
-			(buffer-substring (match-beginning 2) (point)))
-		images)))
-      (when found
-	(setq images (nreverse images))
-	(delete-region start end)
-	(insert "\n")
-	(while images
-	  (insert (pop images))
-	  (insert (if images "<br><br>\n" "\n")))))
+    (when (re-search-forward
+	   "[\t\n ]*<!-+[\t\n ]*main[\t\n ]+text[\t\n ]+end[\t\n ]*-+>"
+	   nil t)
+      (delete-region (match-beginning 0) (point-max))
+      (goto-char (point-min)))
+    ;; Remove forms and links.
+    (while (re-search-forward "[\t\n ]*\\(?:<\\(form\\)[\t\n ]\
+\\|<\\(div\\)[\t\n ]+\\(?:[^\t\n >]+[\t\n ]+\\)*class=\"Box2\"\\)" nil t)
+      (if (shimbun-end-of-tag (or (match-string 1) (match-string 2)) t)
+	  (delete-region (match-beginning 0) (match-end 0))
+	(delete-region (match-beginning 0) (point-max)))
+      (insert "\n"))
+    ;; Extract images in tables.
+    (let (imgs)
+      (while (re-search-forward "<table[\t\n ]" nil t)
+	(setq imgs nil)
+	(when (shimbun-end-of-tag "table" t)
+	  (save-restriction
+	    (narrow-to-region (goto-char (match-beginning 0)) (match-end 0))
+	    (while (re-search-forward "<img[\t\n ]" nil t)
+	      (when (shimbun-end-of-tag)
+		(push (match-string 0) imgs)))
+	    (delete-region (point-min) (point-max))
+	    (when imgs
+	      (apply 'insert (nreverse imgs))))
+	  (when (looking-at "\
+\\(?:<\\(?:!--\\|div[\t\n ]\\)[^>]+>[\t\n ]*\\)+<p>[\t ]*")
+	    (delete-region (match-beginning 0) (match-end 0))))))
     ;; Remove zoom buttons.
     (goto-char (point-min))
     (while (re-search-forward "[\t\n ]*<img\\(?:[\t\n ]+[^\t\n >]+\\)*\
 \[\t\n ]+class=\"ThmbZoomBtn\"[^>]*>[\t\n ]*"
 			      nil t)
       (replace-match "\n"))
-    ;; Remove garbage before images.
-    (goto-char (point-min))
-    (while (re-search-forward
-	    "\\(?:<\\(?:p\\|span\\)>[\t\n ]*\\)+\\(<img[\t\n ]+\\)"
-	    nil t)
-      (replace-match "\\1"))
-    ;; Remove garbage after images.
-    (goto-char (point-min))
-    (while (re-search-forward "\\(<img[\t\n ]+[^>]+>\\)[\t\n 　]*\
-\\(\\(?:<![^>]+>\\|<br>\\)[\t\n 　]*\\)*<p>"
-			      nil t)
-      (replace-match "\\1\n<p>"))
     ;; Add line breaks after images that captions or images follow.
     (goto-char (point-min))
     (while (re-search-forward
 	    "\\(<img[\t\n ]+[^>]+>\\(?:[\t\n ]*</[^>]+>\\)*\\)[\t\n ]*"
 	    nil t)
       (when (or (save-match-data
-		  (looking-at "\\(?:<[^\t\n >]+>[\t\n ]*\\)*<img[\t\n ]"))
+		  (looking-at "\\(?:<[^\t\n >]+>[\t\n ]*\\)*<img[\t\n ]\
+\\|<small>[^<]+</small>"))
 		(not (eq (char-after) ?<)))
 	(replace-match "\\1<br>\n")))
-    ;; Add line breaks before images that follow captions.
+    ;; Remove related topics.
     (goto-char (point-min))
-    (while (re-search-forward
-	    "[\t\n ]*\\(\\(?:<[^/>][^>]*>[\t\n ]*\\)*<img[\t\n ]\\)"
-	    nil t)
-      (unless (memq (char-before (match-beginning 0)) '(nil ?>))
-	(replace-match "<br>\n\\1")))
-    ;; Remove any other useless things.
-    (goto-char (point-min))
-    (while (re-search-forward "[\t\n ]*\
-\\(?:<div[\t\n ]+[^>]+>\\|</div>\\|<ul>[\t\n ]*</ul>\\)\
-\[\t\n ]*"
-			      nil t)
-      (delete-region (match-beginning 0) (match-end 0)))
-    (goto-char (point-min))
-    (while (re-search-forward "[\t\n ]*\\(?:<[^>]+>[\t\n ]*\\)+\
-\\(?:アサヒ・コム\\|ニュース\\)トップ[へヘ]\
-\\(?:\\(?:[\t\n ]*<[!/][^>]+>\\)+[\t\n ]*\\|[\t\n ]*\\'\\)"
-			      nil t)
-      (replace-match "\n"))
+    (while (re-search-forward "\
+<\\(div\\)[\t\n ]+\\(?:[^\t\n >]+[\t\n ]+\\)*class=\"LnkRelated\\(?:AsaD\\)?\"\
+\\|<\\(p\\)[\t\n ]+\\(?:[^\t\n >]+[\t\n ]+\\)*class=\"AsaDLnk\"" nil t)
+      (when (shimbun-end-of-tag (or (match-string 1) (match-string 2)) t)
+	(delete-region (match-beginning 0) (match-end 0))
+	(insert "\n")))
     (unless (shimbun-prefer-text-plain-internal shimbun)
       (shimbun-break-long-japanese-lines))
     t))

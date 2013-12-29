@@ -1,6 +1,6 @@
 ;;; sb-vinelinux.el --- shimbun backend class for vinelinux web site. -*- coding: iso-2022-7bit; -*-
 
-;; Copyright (C) 2001, 2002, 2003, 2004, 2006
+;; Copyright (C) 2001, 2002, 2003, 2004, 2006, 2009
 ;; NAKAJIMA Mikio <minakaji@namazu.org>
 
 ;; Author: NAKAJIMA Mikio <minakaji@namazu.org>
@@ -52,7 +52,7 @@
   (mapcar 'car shimbun-vinelinux-group-path-alist))
 (defconst shimbun-vinelinux-from-address "webmaster@www.vinelinux.org")
 
-(defsubst shimbun-vinelinux-parse-time (str)
+(defun shimbun-vinelinux-parse-time (str)
   (shimbun-make-date-string
    (string-to-number (substring str 0 4))
    (string-to-number (substring str 4 6))

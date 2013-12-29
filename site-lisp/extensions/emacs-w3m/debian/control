@@ -1,0 +1,29 @@
+Source: w3m-el-snapshot
+Section: lisp
+Priority: extra
+Maintainer: Tatsuya Kinoshita <tats@debian.org>
+Build-Depends: debhelper (>= 7)
+Build-Depends-Indep: emacs | emacs24 | emacs23 | emacs22, autoconf
+Homepage: http://emacs-w3m.namazu.org/
+Vcs-Git: git://anonscm.debian.org/collab-maint/w3m-el-snapshot.git
+Vcs-Browser: http://anonscm.debian.org/gitweb/?p=collab-maint/w3m-el-snapshot.git
+Standards-Version: 3.9.4
+
+Package: w3m-el-snapshot
+Architecture: all
+Depends: emacs | emacs24 | emacs23 | emacs22 | emacs21 | emacs-snapshot | apel (>= 10.5), w3m (>= 0.3) | w3m-ssl (>= 0.3) | w3mmee (>= 0.3), dpkg (>= 1.15.4) | install-info, ${misc:Depends}
+Recommends: apel, flim
+Suggests: mule-ucs, imagemagick, wv, xlhtml, ppthtml, libmoe1.5, xpdf-utils, bzip2, namazu2, perl-doc
+Provides: w3m-el
+Replaces: w3m-el
+Conflicts: w3m-el, apel (<< 10.5), flim (<< 1:1.14.3)
+Enhances: wl, wl-beta, mew, mew-beta, gnus
+Description: simple Emacs interface of w3m (development version)
+ Emacs-w3m is an interface program of w3m, a pager with WWW capability.
+ It can be used as a lightweight WWW browser on emacsen.
+ .
+ To use the optional features shimbun (interface with web newspapers),
+ w3m-namazu (search files with Namazu), w3m-perldoc (view perl documents),
+ etc., install the required packages flim, namazu2, perl-doc, etc.
+ .
+ This package provides a development snapshot version of emacs-w3m.

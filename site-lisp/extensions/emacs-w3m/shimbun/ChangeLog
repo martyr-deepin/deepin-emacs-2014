@@ -1,3 +1,711 @@
+2013-06-28  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* shimbun.el (shimbun-footer): Enclose url with <> to ensure that Gnus
+	buttonizes it correctly even if it is folded into two or more lines.
+
+	* sb-sankei.el (shimbun-sankei-clear-contents): Remove trailing
+	successive orphaned open tags.
+
+2013-06-18  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-itmedia.el (shimbun-get-headers): Update regexp for kodera group.
+
+	* sb-yahoo-auctions.el: Add coding cookie.
+
+	* sb-mainichi.el (shimbun-mainichi-multi-next-url):
+	Support the other type of navigator.
+
+2013-06-17  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-mainichi.el (shimbun-mainichi-get-headers): Update regexp.
+
+2013-05-08  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* shimbun.el (shimbun-xml-parse-buffer): Don't try to parse corrupt xml.
+
+	* sb-rss.el (shimbun-rss-get-headers): Don't conceal an error if
+	debug-on-error or debug-on-quit is non-nil.
+
+2012-07-19  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* shimbun.el (shimbun-flet): Alias to w3m-flet.
+
+	* sb-chise.el (shimbun-headers): Use it.
+
+2012-07-18  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-chise.el (shimbun-headers): Don't use flet.
+
+2012-05-01  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-chise.el: New file.
+
+	* sb-mailman.el (shimbun-mailman-make-contents): Don't decode entities;
+	restore mail addresses; append comma to day of week in Date header;
+	remove useless links around mail addresses.
+	(shimbun-mailman-ja-make-contents): Don't decode entities;
+	remove useless links around mail addresses.
+
+2012-04-16  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-mainichi.el (shimbun-mainichi-ignored-subject): New.
+	(shimbun-mainichi-get-headers, shimbun-mainichi-multi-next-url):
+	Update regexps.
+
+2012-04-12  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-kantei.el (shimbun-get-headers): Work for blog-en.
+
+2012-04-11  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-kantei.el (shimbun-get-headers): Update regexp used for blog-ja.
+
+2012-02-15  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	Remove marks feature, following Ma Gnus.
+
+	* nnshimbun.el: Don't declare server-marks.
+	(nnshimbun-marks-is-evil, nnshimbun-marks-file-name)
+	(nnshimbun-marks, nnshimbun-marks-modtime): Remove.
+	(nnshimbun-request-set-mark, nnshimbun-marks-changed-p)
+	(nnshimbun-request-update-info, nnshimbun-possibly-create-directory)
+	(nnshimbun-save-marks, nnshimbun-open-marks): Remove.
+
+2012-02-13  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* shimbun.el (shimbun-switch-to-buffer): Abolish.
+	* nnshimbun.el (nnshimbun-generate-download-script): Revert to using
+	switch-to-buffer.
+
+2012-01-25  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-kantei.el (shimbun-index-url): Update url for blog-en.
+	(shimbun-get-headers): Retrieve indices, going back to past months, for
+	blog-en group; improve regexp matching blog-ja headers.
+	(shimbun-clear-contents): Use blog-ja filter also for blog-en.
+
+2011-12-08  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-kantei.el (shimbun-get-headers): Update regexp; don't miss revised
+	articles.
+
+2011-12-05  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* shimbun.el (shimbun-xml-parse-buffer): Silence XEmacs's byte compiler.
+
+2011-11-25  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-kantei.el (shimbun-get-headers): Improve regexp for blog-ja.
+
+2011-11-25  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-kantei.el (shimbun-index-url): Update url for blog-ja.
+	(shimbun-get-headers): Retrieve indices, going back to past months, for
+	blog-ja group.
+	(shimbun-clear-contents): Add a filter for blog-ja group.
+
+2011-11-21  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-asahi.el (shimbun-asahi-clear-contents): Rewrite.
+
+2011-10-14  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-yahoo-auctions.el (shimbun-index-url): Revert last change.
+
+2011-10-13  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-nikkei.el (shimbun-nikkei-url-coding-system): Abolish.
+
+	* sb-yahoo-auctions.el (shimbun-index-url): Don't specify coding system
+	for encoding url.
+
+	* shimbun.el (url-coding-system): Abolish shimbun class.
+	(shimbun-retrieve-url): Remove url-coding-system argument.
+	(shimbun-fetch-url): Don't specify coding system for url to retrieve.
+	(shimbun-attributes): Remove url-coding-system shimbun class.
+
+2011-10-11  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-itmedia.el (shimbun-clear-contents): Improve way to extract body.
+
+2011-10-10  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-mainichi.el (shimbun-mainichi-group-table): Add jidainokaze group.
+
+2011-10-03  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* shimbun.el (shimbun-japanese-hankaku-region-1): Fix regexp.
+
+	* sb-sankei.el (shimbun-sankei-group-table): Add west groups.
+	(shimbun-server-name): New wrapper.
+	(shimbun-sankei-get-headers): Use it.
+
+2011-09-14  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-kantei.el: Add the English version of Noda's blog.
+
+2011-09-13  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-kantei.el: Add Noda's blog.
+	(shimbun-kantei-groups, shimbun-kantei-x-face-alist, shimbun-index-url)
+	(shimbun-from-address, shimbun-make-contents): Update.
+
+2011-09-01  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-mainichi.el (shimbun-mainichi-group-table): Add fuchisou group.
+
+2011-09-01  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-sankei.el (shimbun-sankei-group-table): Add flash and science
+	groups; remove culture, release, usatoday, and usatoday.ja groups.
+	(shimbun-sankei-multi-next-url, shimbun-clear-contents): Remove
+	usatoday stuff.
+
+2011-08-29  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-kantei.el (shimbun-kantei-x-face-alist): Add new face (commented).
+
+2011-08-25  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-kantei.el: Support KAN-FULL blog.
+	(shimbun-kantei-groups): Add blog-en and blog-ja groups; remove
+	m-magazine-(cn,en,ja,kr) groups.
+	(shimbun-kantei-url, shimbun-kantei-x-face-alist, shimbun-index-url)
+	(shimbun-from-address, shimbun-get-headers, shimbun-clear-contents):
+	Update.
+
+2011-07-28  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-itmedia.el (shimbun-get-headers): Update regexp matching articles
+	in kodera group.
+	(shimbun-clear-contents): Work for contents fetched from atmarkit.
+
+2011-07-21  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* shimbun.el (shimbun-xml-parse-buffer): Use xml-parse-region if
+	libxml-parse-xml-region fails for some reason.
+
+2011-07-07  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* shimbun.el (shimbun-switch-to-buffer): Alias to w3m-switch-to-buffer.
+
+	* nnshimbun.el (nnshimbun-generate-download-script): Use it.
+
+2011-07-06  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* shimbun.el (shimbun-interactive-p): Alias to w3m-interactive-p.
+
+	* sb-tech-on.el (shimbun-tech-on-login): Use it.
+
+2011-06-29  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-asahi.el (shimbun-asahi-group-table): Update regexp for rss groups.
+
+2011-04-21  David Engster  <dengste@eml.cc>
+
+	* shimbun.el (shimbun-xml-parse-buffer): New function for XML parsing
+	of whole buffer, using libxml if available.
+
+	* sb-atom.el (shimbun-atom-get-headers): Use it.
+
+	* sb-atom-hash.el (content-hash-update-items-impl): Use it.
+
+	* sb-rss.el (shimbun-rss-get-headers): Use it.
+
+	* sb-rss-hash.el (content-hash-update-items-impl): Use it.
+
+2011-04-21  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* shimbun.el (shimbun-make-html-contents)
+	(shimbun-header-insert-and-buffer-string):
+	* sb-multi.el (shimbun-multi-retrieve-next-pages):
+	Make base url a directory name.
+
+2011-04-06  David Engster  <dengste@eml.cc>
+
+	* nnshimbun.el: Add 'server-marks when declaring nnshimbun backend.
+
+2011-01-29  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-sankei.el (shimbun-sankei-get-headers): Improve regexp.
+
+2011-01-21  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-sankei.el (shimbun-sankei-group-table): Update index urls for
+	column groups.
+	(shimbun-sankei-multi-next-url, shimbun-sankei-clear-contents): Adapt
+	to new html layout.
+
+2010-12-20  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* shimbun.el (shimbun-beginning-of-tag, shimbun-end-of-tag): Move
+	definitions to w3m-util.el as w3m-beginning-of-tag and w3m-end-of-tag.
+
+2010-12-15  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-asahi.el (shimbun-asahi-group-table): Update regexp for rss groups.
+
+2010-12-09  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* nnshimbun.el (nnshimbun-request-set-mark):
+	Use nnheader-update-marks-actions if available.
+
+2010-11-12  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-yahoo.el (shimbun-yahoo-groups-table): Update regexp for topnews.
+	(shimbun-yahoo-content-start, shimbun-yahoo-content-end): Update.
+	(shimbun-clear-contents): Remove override.
+
+2010-11-04  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* shimbun.el (shimbun-remove-tags): Work strictly if optional 2nd arg
+	is neither nil nor a string.
+
+	* sb-asahi.el (shimbun-asahi-prepare-article): Move removing of form,
+	noscript, and script tags to shimbun-asahi-clear-contents.
+	(shimbun-asahi-clear-contents): Make shimbun-remove-tags work strictly.
+
+	* sb-kantei.el (shimbun-clear-contents)
+	* sb-nytimes.el (shimbun-nytimes-clear-contents)
+	* sb-tech-on.el (shimbun-clear-contents): Use shimbun-remove-tags.
+
+	* sb-atmarkit.el (shimbun-clear-contents)
+	* sb-cnet-jp.el (shimbun-clear-contents)
+	* sb-cnet.el (shimbun-cnet-remove-useless-tags)
+	* sb-excite.el (shimbun-clear-contents)
+	* sb-ibm-dev.el (shimbun-clear-contents)
+	* sb-laut-de.el (shimbun-clear-contents)
+	* sb-nikkei.el (shimbun-nikkei-prepare-article-release)
+	* sb-opentechpress-jp.el (shimbun-multi-clear-contents)
+	(shimbun-clear-contents)
+	* sb-perlentaucher-de.el (shimbun-clear-contents)
+	* sb-rediff.el (shimbun-clear-contents)
+	* sb-slashdot-jp.el (shimbun-clear-contents)
+	* sb-sueddeutsche-de.el (shimbun-clear-contents)
+	* sb-welt-de.el (shimbun-clear-contents)
+	* sb-x51.el (shimbun-clear-contents)
+	* sb-zeit-de.el (shimbun-clear-contents):
+	Make shimbun-remove-tags work strictly.
+
+2010-11-02  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* shimbun.el (shimbun-insert-footer): Remove <p> and </p> from the last
+	paragraph in order to prevent an empty line from being inserted at the
+	end.
+	(shimbun-remove-orphaned-tag-strips): Require arg always; find orphans
+	forward in addition to backward.
+
+	* sb-asahi.el (shimbun-asahi-clear-contents): Remove related topics
+	more; don't remove last </p>; remove orphaned <p>s.
+
+2010-10-01  Matt Lundin  <mdl@imapmail.org>
+
+	* nnshimbun.el (nnshimbun-retrieve-groups): Work properly for groups
+	newly subscribed to.
+
+2010-09-30  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* nnshimbun.el (nnshimbun-request-scan): Do nothing unless a group to
+	scan is specified.
+	(nnshimbun-retrieve-groups): New function.
+
+2010-09-20  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* nnshimbun.el (nnshimbun-request-group): Take an optional `info' arg.
+
+2010-09-13  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* shimbun.el (shimbun-end-of-tag): Improve regexp.
+	(shimbun-beginning-of-tag, shimbun-remove-orphaned-tag-strips):
+	New functions.
+
+	* sb-asahi.el (shimbun-asahi-clear-contents)
+	* sb-sankei.el (shimbun-sankei-clear-contents):
+	Use shimbun-remove-orphaned-tag-strips.
+
+2010-09-03  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-asahi.el (shimbun-asahi-clear-contents): Remove orphaned tag
+	strips.
+
+2010-08-17  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-itmedia.el (shimbun-itmedia-group-alist): Update url for kodera.
+	(shimbun-get-headers): Add regexp to look for kodera's articles.
+
+2010-08-10  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-nikkei.el (shimbun-get-headers, shimbun-make-contents): Replace
+	Lisp calls to delete-backward-char by calls to delete-char.
+
+2010-06-22  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-kantei.el: Add groups for ex-prime minister.
+
+2010-06-08  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-kantei.el (shimbun-kantei-x-face-alist): Add new face.
+
+2010-03-29  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* shimbun.el (shimbun-text-entity-charset): Fix regexp matching meta
+	tag.
+
+2010-03-09  David Engster  <dengste@eml.cc>
+
+	* shimbun.el (shimbun-mime-replace-image-tags): Pay attention to
+	w3m-ignored-image-url-regexp.
+
+2010-03-05  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* shimbun.el (shimbun-text-entity-charset): Prefer meta charset rather
+	than the one shimbun decides.
+
+2010-03-03  David Engster  <dengste@eml.cc>
+
+	* sb-rss-blogs.el (shimbun-get-headers): Replace call to
+	shimbun-rss-get-headers with luna-call-next-method.
+
+	* sb-rss.el (shimbun-get-headers): Revert 5th arg `quit-immediately'.
+	(shimbun-rss-get-headers): Delete those headers which only appear to
+	be new but are actualy older than the ones we already have.  Sort the
+	headers by date if possible.  Added doc-string.
+	(shimbun-rss-get-headers-1): New helper function to fetch all items.
+
+	* sb-atom.el (shimbun-atom-get-headers, shimbun-atom-get-headers-1):
+	Same changes as for sb-rss.el.
+
+2010-02-25  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-rss.el (shimbun-rss-get-headers): Add 5th arg `quit-immediately'
+	that tells this function to quit when an article that has ever been
+	fetched is found.
+
+	* sb-rss-blogs.el (shimbun-get-headers): Set 5th arg passed to it.
+
+2010-02-18  David Engster  <dengste@eml.cc>
+
+	* sb-rss-blogs.el (shimbun-rss-blogs-groups): Removed.
+	(shimbun-groups): New override.
+
+2010-02-17  David Engster  <dengste@eml.cc>
+
+	* sb-atom.el (shimbun-atom-get-headers): When encountering an already
+	present article, stop fetching further entries.
+	* sb-rss.el (shimbun-rss-get-headers): Same change as in sb-atom.
+
+2010-02-10  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-itmedia.el (shimbun-itmedia-group-alist): Add ogikubo, tachibana,
+	and unakami groups in the +D.lifestyle.column hierarchy.
+	(shimbun-index-url, shimbun-get-headers): Work for newly added groups.
+
+2010-01-14  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-sankei.el (shimbun-sankei-clear-contents): Fix regexp matching the
+	end of contents.
+
+2010-01-13  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* mew-shimbun.el (mew-kill-buffer): Use with-current-buffer rather than
+	save-excursion + set-buffer.
+	(mew-mark-clean-up): Use save-current-buffer instead of save-excursion.
+
+	* sb-fml.el (shimbun-make-contents): Use point-at-eol rather than
+	`(save-excursion (end-of-line) (point))'; use point-at-bol rather than
+	beginning-of-line + point.
+
+2009-11-30  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-nytimes.el (shimbun-get-headers): Remove "By " from From header.
+
+2009-11-04  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-atom.el (shimbun-atom-get-headers): Silence XEmacs's byte compiler.
+
+	* sb-atom-hash.el (shimbun-atom-compose-tag): Don't quote lambda form.
+
+2009-10-30  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-kantei.el (shimbun-clear-contents): Fix the way to extract pre-
+	formatted contents.
+
+2009-10-29  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-kantei.el (shimbun-kantei-groups, shimbun-index-url)
+	(shimbun-from-address, shimbun-get-headers): Support m-magazine-cn and
+	m-magazine-kr groups.
+
+2009-10-26  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-asahi.el (shimbun-asahi-clear-contents): Fix regexp matching
+	captions after images.
+
+2009-10-23  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-kantei.el (shimbun-clear-contents): Don't remove footer.
+
+2009-10-22  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-kantei.el (shimbun-clear-contents): Allow irregularly formatted
+	tags that separate sub contents.
+
+2009-10-13  David Engster  <dengste@eml.cc>
+
+	* sb-zeit-de.el (shimbun-zeit-de-groups): Updated group list.
+	(shimbun-zeit-de-content-end): Updated regexp.
+	(shimbun-make-contents): Follow window.location URL.
+	(shimbun-clear-contents): Added new tag for removal.
+
+2009-10-09  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-kantei.el (shimbun-clear-contents): Remove useless tags.
+
+2009-10-08  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-kantei.el (shimbun-clear-contents): Gather all significant
+	contents.
+
+2009-10-07  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* nnshimbun.el (nnshimbun-marks-is-evil, nnshimbun-marks-file-name)
+	(nnshimbun-marks, nnshimbun-marks-modtime): New variables.
+	(nnshimbun-group-pathname): New function that replaces
+	nnshimbun-nov-directory and nnshimbun-nov-file-name.
+	(nnshimbun-nov-directory, nnshimbun-nov-file-name): Abolish.
+	(nnshimbun-open-nov): Use nnshimbun-group-pathname instead of
+	nnshimbun-nov-file-name.
+	(nnshimbun-write-nov): Use nnshimbun-group-pathname instead of
+	nnshimbun-nov-directory and nnshimbun-nov-file-name.
+	(nnshimbun-request-delete-group): Use nnshimbun-group-pathname instead
+	of nnshimbun-nov-directory.
+	(nnshimbun-request-set-mark, nnshimbun-marks-changed-p)
+	(nnshimbun-request-update-info, nnshimbun-possibly-create-directory)
+	(nnshimbun-save-marks, nnshimbun-open-marks): New functions.
+
+2009-10-06  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-asahi.el (shimbun-asahi-clear-contents): Remove blogs link.
+
+2009-10-05  David Engster  <dengste@eml.cc>
+
+	* sb-heise.el (shimbun-heise-get-newsticker-headers)
+	(shimbun-heise-wash-newsticker-article): Updated regular expressions.
+	Use shimbun-remove-tags instead of delete-region.
+	* sb-perlentaucher-de.el (shimbun-clear-contents): RSS does not point
+	to teaser anymore, so loading of new URL removed.
+
+2009-10-01  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-kantei.el (shimbun-index-url): Update url for m-magazine-en.
+	(shimbun-clear-contents): Fix regexps.
+
+2009-09-30  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-kantei.el: Support Hatoyama Cabinet E-mail Magazine.
+
+2009-09-18  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-multi.el: Autoload shimbun-shallow-rendering.
+
+	* sb-impress.el (shimbun-impress-groups-alist): Add car group by
+	request.
+
+2009-09-17  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-cgi-board.el (shimbun-cgi-board-make-date-string):
+	* sb-cnet.el (shimbun-rss-process-date):
+	* sb-multi.el (shimbun-multi-make-contents): Use values-list to make
+	sure the 2nd argument of multiple-value-bind to be multiple-value.
+	Cf. http://news.gmane.org/group/gmane.emacs.xemacs.beta/thread=30500/
+
+2009-09-02  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* nnshimbun.el (gnus-group-make-shimbun-group): Don't use
+	default-enable-multibyte-characters that is obsolete in Emacs 23.2.
+	* sb-tech-on.el (shimbun-tech-on-login): Ditto.
+	* shimbun.el (shimbun-header-insert, shimbun-mime-encode-string)
+	(shimbun-message): Ditto.
+
+2009-08-14  David Engster  <dengste@eml.cc>
+
+	* sb-debugmagazin-de.el (shimbun-debugmagazin-de-group-url-regexp):
+	Updated feeds.
+	(shimbun-debugmagazin-de-content-end): Updated to new style.
+
+2009-08-04  David Engster  <dengste@eml.cc>
+
+	* sb-atom-hash.el (content-hash-update-items-impl): Deal with missing
+	content.
+
+2009-07-31  David Engster  <dengste@eml.cc>
+
+	* sb-slashdot.el (shimbun-slashdot-regexp-section-id-subject): Adapt to
+	new CSS.
+
+2009-06-25  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-nytimes.el (shimbun-nytimes-clear-contents): Fix regexp matching
+	content start.
+
+2009-06-22  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-tech-on.el (shimbun-clear-contents): Rewrite.
+
+2009-06-05  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-yahoo.el (shimbun-clear-contents): New override.
+	(shimbun-make-contents): Remove override.
+
+2009-05-30  David Engster  <dengste@eml.cc>
+
+	* sb-slashdot.el (shimbun-slashdot-regexp-section-id-subject)
+	(shimbun-slashdot-get-headers): Adapt to new URL scheme.
+
+2009-05-21  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-yahoo.el (shimbun-get-headers): Retrieve also "flash" index page
+	for "news" group.
+
+2009-05-15  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-itmedia.el (shimbun-get-headers): Ignore unwanted links in non-RSS
+	index pages.
+
+2009-05-14  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-yahoo.el (shimbun-get-headers): Don't stop fetching headers in
+	the succeeding pages if index range is specified even if url having
+	been fetched is found, because Yahoo! updates indices very often;
+	make range control work properly.
+
+2009-05-13  David Engster  <dengste@eml.cc>
+
+	* sb-rss-hash.el (shimbun-rss-build-message-id): New override so that
+	URL is not stripped at question mark.
+
+2009-05-11  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-yahoo.el (shimbun-yahoo-content-end): Update.
+	(shimbun-make-contents): Narrow to article body first.
+
+	* sb-m17n.el (shimbun-get-headers): Update archive url.
+
+2009-05-08  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-yahoo.el (shimbun-yahoo-groups-table): Fix default regexp; add
+	"news" group.
+	(shimbun-index-url): Add special treatment for "news" group.
+	(shimbun-get-headers): Ignore unwanted links in "news" group; don't
+	lose a link that the default regexp skips; don't stop fetching headers
+	in the first page.
+
+2009-05-07  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-fml.el (shimbun-fml-parse-time)
+	* sb-impress.el (shimbun-impress-get-headers)
+	* sb-mhonarc.el (shimbun-mhonarc-header-value)
+	* sb-ruby.el (shimbun-ruby-parse-time)
+	* sb-text.el (shimbun-shallow-rendering)
+	* sb-tigris.el (shimbun-tigris-remove-amp)
+	* sb-vinelinux.el (shimbun-vinelinux-parse-time): Don't use defsubst.
+
+2009-05-07  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-yahoo.el (shimbun-yahoo-groups-table): Fix default regexp.
+
+2009-04-28  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* shimbun.el (shimbun-header-normalize, shimbun-article-base-url)
+	(shimbun-content-start, shimbun-content-end, shimbun-strip-cr):
+	Don't use defsubst.
+	(shimbun-fetch-url): Don't inline shimbun-retrieve-url.
+	(shimbun-create-header): Don't inline shimbun-header-set-*.
+
+	* nnshimbun.el (nnshimbun-group-prefixed-name)
+	(nnshimbun-group-ephemeral-p, nnshimbun-nov-buffer-name)
+	(nnshimbun-nov-directory, nnshimbun-nov-file-name)
+	(nnshimbun-insert-nov): Don't use defsubst.
+
+2009-04-28  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-yahoo.el (shimbun-yahoo-groups-table): Update default regexp.
+	(shimbun-yahoo-from-address, shimbun-yahoo-content-end): Update.
+	(shimbun-get-headers): Follow change in shimbun-yahoo-groups-table.
+
+	* sb-asahi.el (shimbun-asahi-clear-contents): Remove related topics.
+
+2009-04-27  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-nytimes.el (shimbun-rss-build-message-id): New function that
+	doesn't strip string following "?" or "#" in url when calculating its
+	md5.
+
+2009-04-26  David Engster  <dengste@eml.cc>
+
+	* sb-sueddeutsche-de.el (shimbun-sueddeutsche-de-group-url): New RSS
+	feeds.
+	(shimbun-sueddeutsche-de-content-start)
+	(shimbun-sueddeutsche-de-content-end): Adapt to new layout.
+	(shimbun-get-headers): Removed. Use shimbun-article-url instead.
+	(shimbun-rss-build-message-id): New URL scheme.
+	(shimbun-clear-contents): Adapt to new layout.
+	(shimbun-article-url): Retrieve URL for print version of article.
+
+2009-04-23  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-sankei.el (shimbun-sankei-clear-contents): Remove ads.
+
+2009-04-16  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-sankei.el (shimbun-sankei-group-table): Update index url for
+	sankeisho group.
+
+2009-04-09  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-kantei.el (shimbun-clear-contents): Don't remove succeeding
+	contents.
+
+2009-04-05  ARISAWA Akihiro  <ari@mbf.ocn.ne.jp>
+
+	* sb-atom.el (shimbun-atom-get-headers): Check `updated' and
+	`published' element.
+
+	* sb-atom-hash.el (content-hash-update-items-impl): Ditto.
+
+2009-04-05  ARISAWA Akihiro  <ari@mbf.ocn.ne.jp>
+
+	* sb-hash.el: Don't inherit shimbun;
+	Rename class name shimbun-hash -> content-hash.
+
+	* sb-rss-hash.el (shimbun-rss-hash): Don't inherit shimbun-hash;
+	Add a new slot `content'.
+	(rss-content-hash): New class.
+	(shimbun-article): New overriden method.
+
+	* sb-atom-hash.el (shimbun-atom-hash): Don't inherit shimbun-hash;
+	Add a new slot `content'.
+	(atom-content-hash): New class.
+	(shimbun-article): New overriden method.
+
+2009-03-30  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-asahi.el (shimbun-asahi-content-start, shimbun-asahi-content-end):
+	Update.
+
+2009-03-27  ARISAWA Akihiro  <ari@mbf.sphere.ne.jp>
+
+	* sb-rss.el: Don't use internal accessor because luna does not
+	support it in multiple inheritance.
+	(shimbun-rss-initialize-ignored-subject): Use luna-set-slot-value
+	instead of shimbun-rss-set-ignored-subject-internal.
+	(shimbun-rss-get-headers): Use luna-slot-value instead of
+	shimbun-rss-ignored-subject-internal.
+
+2009-03-16  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* sb-asahi.el (shimbun-asahi-group-table): Add wakata group.
+
 2009-03-06  Katsumi Yamaoka  <yamaoka@jpl.org>
 
 	* sb-mainichi.el: Use sb-multi.

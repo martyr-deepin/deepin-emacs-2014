@@ -1,6 +1,6 @@
 ;;; w3m-namazu.el --- The add-on program to search files with Namazu.
 
-;; Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007
+;; Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007, 2009
 ;; TSUCHIYA Masatoshi <tsuchiya@namazu.org>
 
 ;; Author: TSUCHIYA Masatoshi <tsuchiya@namazu.org>
@@ -145,7 +145,7 @@ argument."
   :type '(coding-system :size 0))
 
 
-(defsubst w3m-namazu-call-process (index query whence)
+(defun w3m-namazu-call-process (index query whence)
   (setq index (if (assoc index w3m-namazu-index-alist)
 		  (mapcar 'expand-file-name
 			  (cdr (assoc index w3m-namazu-index-alist)))

@@ -1,6 +1,6 @@
 ;;; w3m-weather.el --- Look weather forecast -*- coding: iso-2022-7bit; -*-
 
-;; Copyright (C) 2001, 2002, 2003, 2005
+;; Copyright (C) 2001, 2002, 2003, 2005, 2012
 ;; TSUCHIYA Masatoshi <tsuchiya@namazu.org>
 
 ;; Authors: TSUCHIYA Masatoshi <tsuchiya@namazu.org>
@@ -262,54 +262,54 @@
 	   (prolonged-regexp (format "\\(?:\\`\\|[aiueo]\\)\\(%s\\)"
 				     (regexp-opt (mapcar (function car)
 							 prolonged-table)))))
-      (labels ((hepburn-candidates
-		(str)
-		"ヘボン式と訓令式の差によって生じる派生形を得る"
-		(if (string-match hepburn-regexp str)
-		    (let ((prefix (substring str 0 (match-beginning 1)))
-			  (candidates (if (match-beginning 2)
-					  '("n" "nn")
-					(assoc (match-string 1 str)
-					       hepburn-table)))
-			  (suffixes
-			   (hepburn-candidates
-			    (substring str (or (match-beginning 2)
-					       (match-end 0)))))
-			  (buf))
-		      (dolist (x candidates)
-			(dolist (y suffixes)
-			  (push (concat prefix x y) buf)))
-		      buf)
-		  (list str)))
-	       (prolonged-candidates
-		(str)
-		"長音の有無によって生じる派生形を得る"
-		(let (buf)
-		  (if (string-match prolonged-regexp str)
-		      (let ((prefix (substring str 0 (match-beginning 1)))
-			    (candidates (assoc (match-string 1 str)
-					       prolonged-table))
-			    (suffixes (prolonged-candidates
-				       (substring str (match-end 0)))))
-			(dolist (x candidates)
-			  (dolist (y suffixes)
-			    (push (concat prefix x y) buf))))
-		    (setq buf (list str)))
-		  (dolist (x buf)
-		    (when (string-match "\\(\\`\\|[aiue]\\)oo" x)
-		      (let ((prefix (substring x 0 (match-end 1)))
-			    (suffix (substring x (match-end 0))))
-			(dolist (y '("o" "oh" "o-"))
-			  (push (concat prefix y suffix) buf)))))
-		  buf))
-	       (romaji-candidates
-		(str)
-		"全ての派生形を得る"
-		(let (buf)
-		  (dolist (x (hepburn-candidates str))
-		    (dolist (y (prolonged-candidates x))
-		      (push y buf)))
-		  buf)))
+      (w3m-labels ((hepburn-candidates
+		    (str)
+		    "ヘボン式と訓令式の差によって生じる派生形を得る"
+		    (if (string-match hepburn-regexp str)
+			(let ((prefix (substring str 0 (match-beginning 1)))
+			      (candidates (if (match-beginning 2)
+					      '("n" "nn")
+					    (assoc (match-string 1 str)
+						   hepburn-table)))
+			      (suffixes
+			       (hepburn-candidates
+				(substring str (or (match-beginning 2)
+						   (match-end 0)))))
+			      (buf))
+			  (dolist (x candidates)
+			    (dolist (y suffixes)
+			      (push (concat prefix x y) buf)))
+			  buf)
+		      (list str)))
+		   (prolonged-candidates
+		    (str)
+		    "長音の有無によって生じる派生形を得る"
+		    (let (buf)
+		      (if (string-match prolonged-regexp str)
+			  (let ((prefix (substring str 0 (match-beginning 1)))
+				(candidates (assoc (match-string 1 str)
+						   prolonged-table))
+				(suffixes (prolonged-candidates
+					   (substring str (match-end 0)))))
+			    (dolist (x candidates)
+			      (dolist (y suffixes)
+				(push (concat prefix x y) buf))))
+			(setq buf (list str)))
+		      (dolist (x buf)
+			(when (string-match "\\(\\`\\|[aiue]\\)oo" x)
+			  (let ((prefix (substring x 0 (match-end 1)))
+				(suffix (substring x (match-end 0))))
+			    (dolist (y '("o" "oh" "o-"))
+			      (push (concat prefix y suffix) buf)))))
+		      buf))
+		   (romaji-candidates
+		    (str)
+		    "全ての派生形を得る"
+		    (let (buf)
+		      (dolist (x (hepburn-candidates str))
+			(dolist (y (prolonged-candidates x))
+			  (push y buf)))
+		      buf)))
 	(dolist (area alist)
 	  (let ((url (format format (car area)))
 		(kanji (cadr area)))

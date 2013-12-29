@@ -1,6 +1,6 @@
 ;;; sb-perlentaucher-de.el --- perlentaucher.de shimbun backend
 
-;; Copyright (C) 2008 David Engster
+;; Copyright (C) 2008, 2009, 2010 David Engster
 
 ;; Author: David Engster <dengste@eml.cc>
 ;; Keywords: news
@@ -32,7 +32,8 @@
 (defvar shimbun-perlentaucher-de-from-address "invalid@perlentaucher.de")
 (defvar shimbun-perlentaucher-de-content-start "<div class=\"col_middle\">")
 (defvar shimbun-perlentaucher-de-content-end "<div class=\"col_right\">")
-(defvar shimbun-perlentaucher-de-url-regexp "rss.feedsportal.com/.*/\\([^/]+\\)/story.*\\.htm")
+(defvar shimbun-perlentaucher-de-url-regexp
+  "rss.feedsportal.com/.*/\\([^/]+\\)/story.*\\.htm")
 
 (defvar shimbun-perlentaucher-de-x-face-alist
   '(("default" . "\
@@ -46,16 +47,9 @@ Face: iVBORw0KGgoAAAANSUhEUgAAAA8AAAAPAgMAAABGuH3ZAAAADFBMVEUAern/+/D///8aGhp
 (luna-define-method shimbun-clear-contents :before ((shimbun
 						     shimbun-perlentaucher-de)
 						    header)
-  ;; search teaser for real article url and load it
-  (goto-char (point-min))
-  (re-search-forward ".*<a href=\"\\(.*?\\)\">mehr lesen</a>" nil t)
-  (let ((url (format "http://www.perlentaucher.de%s" (match-string 1))))
-    (erase-buffer)
-    (shimbun-retrieve-url url))
-  ;; remove stuff
   (shimbun-remove-tags "<div class=\"tools\">" "Merkzettel</a></li></ul>")
-  (shimbun-remove-tags "<div class=\"box2 jumper\">" "</div>")
-  (shimbun-remove-tags "<a href=\"#top\">" "</a>"))
+  (shimbun-remove-tags "\\(div\\) class=\"box2 jumper\">" t)
+  (shimbun-remove-tags "\\(a\\) href=\"#top\">" t))
 
 
 

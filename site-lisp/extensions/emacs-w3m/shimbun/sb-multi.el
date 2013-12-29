@@ -1,6 +1,6 @@
 ;;; sb-multi.el --- Virtual shimbun class to retrieve multiple pages.
 
-;; Copyright (C) 2006, 2007, 2008 TSUCHIYA Masatoshi <tsuchiya@namazu.org>
+;; Copyright (C) 2006-2009, 2011 TSUCHIYA Masatoshi <tsuchiya@namazu.org>
 
 ;; Author: TSUCHIYA Masatoshi <tsuchiya@namazu.org>
 ;; Keywords: news
@@ -27,12 +27,17 @@
 ;;; Code:
 
 (eval-when-compile
-  (require 'cl))
+  (require 'cl)
+  ;; `multiple-value-bind' requires the 2nd argument to be multiple-value,
+  ;; not a list, in particular for XEmacs 21.5.  `values-list' does it,
+  ;; but is a run-time cl function in XEmacs 21.4 and Emacs 21.
+  (when (eq 'identity (symbol-function 'values-list))
+    (define-compiler-macro values-list (arg)
+      arg)))
 
 (require 'shimbun)
 
-(eval-when-compile (require 'sb-text)) ;; `shimbun-shallow-rendering'
-(autoload 'shimbun-fill-line "sb-text")
+(autoload 'shimbun-shallow-rendering "sb-text")
 
 (luna-define-class shimbun-multi () ())
 
@@ -56,7 +61,8 @@ Return nil, unless a content is cleared successfully.")
 						  &optional images cont)
   (let ((prefer-text-plain (shimbun-prefer-text-plain-internal shimbun))
 	(case-fold-search t) base-url next-url)
-    (setq base-url (or (shimbun-current-base-url) url)
+    (setq base-url (or (shimbun-current-base-url)
+		       (file-name-directory url))
 	  next-url (shimbun-multi-next-url shimbun header base-url))
     (when (shimbun-multi-clear-contents shimbun header cont next-url)
       (goto-char (point-min))
@@ -100,9 +106,10 @@ Return nil, unless a content is cleared successfully.")
       (error "Cannot extract base CID from %s for %s"
 	     base-cid (shimbun-article-url shimbun header)))
     (multiple-value-bind (texts images)
-	(shimbun-multi-retrieve-next-pages shimbun header base-cid
-					   (shimbun-article-url shimbun
-								header))
+	(values-list
+	 (shimbun-multi-retrieve-next-pages shimbun header base-cid
+					    (shimbun-article-url shimbun
+								 header)))
       (if (= (length texts) 1)
 	  (setq body (car texts))
 	(setq body (shimbun-make-multipart-entity))

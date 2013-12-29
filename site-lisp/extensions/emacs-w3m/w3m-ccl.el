@@ -1,7 +1,6 @@
 ;;; w3m-ccl.el --- CCL programs to process Unicode and internal characters.
 
-;; Copyright (C) 2001, 2003, 2004, 2005, 2006, 2007
-;; TSUCHIYA Masatoshi <tsuchiya@namazu.org>
+;; Copyright (C) 2001, 2003-2007, 2011 TSUCHIYA Masatoshi <tsuchiya@namazu.org>
 
 ;; Authors: TSUCHIYA Masatoshi <tsuchiya@namazu.org>,
 ;;          ARISAWA Akihiro <ari@mbf.sphere.ne.jp>
@@ -48,11 +47,15 @@
 ;;; CCL programs:
 
 (eval-when-compile
-  (when (and (not (fboundp 'charset-id))
-	     (fboundp 'charset-id-internal))
-    (defmacro charset-id (charset)
-      "Return charset identification number of CHARSET."
-      `(charset-id-internal ,charset))))
+  (if (fboundp 'charset-id)
+      (if (or (get 'charset-id 'byte-obsolete-info)
+	      (eq (get 'charset-id 'byte-compile) 'byte-compile-obsolete))
+	  (defmacro w3m-charset-id (charset) 0)
+	(defmacro w3m-charset-id (charset) `(charset-id ,charset)))
+    (if (fboundp 'charset-id-internal)
+	(defmacro w3m-charset-id (charset)
+	  `(charset-id-internal ,charset))
+      (defmacro w3m-charset-id (charset) 0))))
 
 (eval-and-compile
   (defconst w3m-internal-characters-alist
@@ -71,10 +74,10 @@
 	  `((,r1 &= ?\x7f)
 	    ,@(unless unibyte
 		`((,r1 |= ((,r0 & ?\x7f) << 7))))
-	    (,r0 = ,(charset-id charset))
+	    (,r0 = ,(w3m-charset-id charset))
 	    (write-multibyte-character ,r0 ,r1)
 	    (repeat))
-	`((write ,(charset-id charset))
+	`((write ,(w3m-charset-id charset))
 	  ,@(unless unibyte
 	      `((write ,r0)))
 	  (write-repeat ,r1)))))
@@ -82,21 +85,21 @@
   (defconst w3m-ccl-write-euc-japan-character
     (when (fboundp 'ccl-compile-read-multibyte-character)
       `((read-multibyte-character r1 r0)
-	(if (r1 == ,(charset-id 'ascii))
+	(if (r1 == ,(w3m-charset-id 'ascii))
 	    ;; (1) ASCII characters
 	    (write-repeat r0))
-	(if (r1 == ,(charset-id 'latin-jisx0201))
+	(if (r1 == ,(w3m-charset-id 'latin-jisx0201))
 	    ;; (2) Latin Part of Japanese JISX0201.1976
 	    ;;     Convert to ASCII
 	    (write-repeat r0))
-	(r2 = (r1 == ,(charset-id 'japanese-jisx0208-1978)))
-	(if ((r1 == ,(charset-id 'japanese-jisx0208)) | r2)
+	(r2 = (r1 == ,(w3m-charset-id 'japanese-jisx0208-1978)))
+	(if ((r1 == ,(w3m-charset-id 'japanese-jisx0208)) | r2)
 	    ;; (3) Characters of Japanese JISX0208.
 	    ((r1 = ((r0 & 127) | 128))
 	     (r0 = ((r0 >> 7) | 128))
 	     (write r0)
 	     (write-repeat r1)))
-	(if (r1 == ,(charset-id 'katakana-jisx0201))
+	(if (r1 == ,(w3m-charset-id 'katakana-jisx0201))
 	    ;; (4) Katakana Part of Japanese JISX0201.1976
 	    ((r0 |= 128)
 	     (write ?\x8e)
@@ -106,14 +109,14 @@
   (defconst w3m-ccl-write-iso-latin-1-character
     (when (fboundp 'ccl-compile-read-multibyte-character)
       `((read-multibyte-character r1 r0)
-	(if (r1 == ,(charset-id 'ascii))
+	(if (r1 == ,(w3m-charset-id 'ascii))
 	    ;; (1) ASCII characters
 	    (write-repeat r0))
-	(if (r1 == ,(charset-id 'latin-jisx0201))
+	(if (r1 == ,(w3m-charset-id 'latin-jisx0201))
 	    ;; (2) Latin Part of Japanese JISX0201.1976
 	    ;;     Convert to ASCII
 	    (write-repeat r0))
-	(if (r1 == ,(charset-id 'latin-iso8859-1))
+	(if (r1 == ,(w3m-charset-id 'latin-iso8859-1))
 	    ;; (3) Latin-1 characters
 	    ((r0 |= ?\x80)
 	     (write-repeat r0)))))

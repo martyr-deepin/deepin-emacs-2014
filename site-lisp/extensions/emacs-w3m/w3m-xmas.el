@@ -1,6 +1,6 @@
 ;;; w3m-xmas.el --- XEmacs stuff for emacs-w3m
 
-;; Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009
+;; Copyright (C) 2001-2010, 2012
 ;; TSUCHIYA Masatoshi <tsuchiya@namazu.org>
 
 ;; Authors: Yuuichi Teranishi  <teranisi@gohome.org>,
@@ -385,7 +385,7 @@ new glyph image.  See also the documentation for the variable
       ;; Use a cached glyph.
       (cdr cache))))
 
-(defsubst w3m-make-glyph (data type)
+(defun w3m-make-glyph (data type)
   (or (and (eq type 'xbm)
 	   (let (width height content)
 	     (with-temp-buffer
@@ -530,6 +530,8 @@ A buffer string between BEG and END are replaced with IMAGE."
   "Return non-nil if an image with IMAGE-TYPE can be displayed inline."
   (and (device-on-window-system-p)
        (featurep image-type)))
+
+(defalias 'w3m-image-animate 'identity)
 
 ;;; Toolbar:
 (defcustom w3m-use-toolbar (and (featurep 'toolbar) t)
@@ -964,8 +966,8 @@ necessarily solve the problem completely."
 	  (epos (point-at-eol))
 	  (buf (window-buffer window)))
       (save-selected-window
-	(save-excursion
-	  (set-buffer buf)
+	(save-excursion ;; Don't replace it with:
+	  (set-buffer buf) ;; (with-current-buffer buf
 	  (beginning-of-line)
 	  (condition-case nil
 	      (forward-char hs)
@@ -997,7 +999,7 @@ necessarily solve the problem completely."
 
 (defun w3m-form-coding-system-accept-region-p (&optional from to coding-system)
   "Check whether `coding-system' can encode specified region."
-  (let ((string (buffer-substring (or from (point-min)) 
+  (let ((string (buffer-substring (or from (point-min))
 				  (or to   (point-max)))))
     (unless (string= (decode-coding-string
 		      (encode-coding-string string coding-system)

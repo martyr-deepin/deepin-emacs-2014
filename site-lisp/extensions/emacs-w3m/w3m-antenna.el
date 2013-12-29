@@ -304,20 +304,32 @@ In order to use this function, `xml.el' is required."
 				    (intern (concat rss-ns "link"))
 				    channel))))
 	    (setq dates (append
-			    (w3m-rss-find-el
-			     (intern (concat dc-ns "date"))
-			     channel)
-			    (w3m-rss-find-el
-			     (intern (concat dc-ns "date"))
-			     items)
-			    (w3m-rss-find-el 'pubDate channel)
-			    (w3m-rss-find-el 'pubDate items)))
+			 (w3m-rss-find-el
+			  (intern (concat dc-ns "date"))
+			  channel)
+			 (w3m-rss-find-el
+			  (intern (concat dc-ns "date"))
+			  items)
+			 (w3m-rss-find-el 'pubDate channel)
+			 (w3m-rss-find-el 'pubDate items)))
 	    (when dates
-	      (setq date '(0 0))
-	      (dolist (tmp dates)
-		(setq tmp (w3m-rss-parse-date-string (nth 2 tmp)))
-		(when (w3m-time-newer-p tmp date)
-		  (setq date tmp))))))
+	      ;; Ignore future entries to display site announcements.
+	      (let ((now (current-time)))
+		(let ((low (+ (nth 1 now) 3600))) ; 3600 = clock skew margin
+		  (setq now
+			(if (>= low 65536)
+			    (list (1+ (car now))
+				  (- low 65536)
+				  (nth 2 now))
+			  (list (car now)
+				low
+				(nth 2 now)))))
+		(setq date '(0 0))
+		(dolist (tmp dates)
+		  (setq tmp (w3m-rss-parse-date-string (nth 2 tmp)))
+		  (and (w3m-time-newer-p tmp date)
+		       (w3m-time-newer-p now tmp)
+		       (setq date tmp)))))))
 	(if (and link date)
 	    (w3m-antenna-site-update site link date nil)
 	  (w3m-antenna-check-page site handler))))))

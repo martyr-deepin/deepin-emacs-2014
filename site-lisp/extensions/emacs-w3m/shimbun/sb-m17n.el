@@ -1,6 +1,7 @@
 ;;; sb-m17n.el --- shimbun backend for m17n.org
 
-;; Copyright (C) 2001, 2002, 2003, 2006 Akihiro Arisawa <ari@mbf.sphere.ne.jp>
+;; Copyright (C) 2001, 2002, 2003, 2006, 2009
+;; Akihiro Arisawa <ari@mbf.sphere.ne.jp>
 
 ;; Author: Akihiro Arisawa <ari@mbf.sphere.ne.jp>
 ;; Keywords: news
@@ -64,11 +65,13 @@ tcW.jD{Y&/'K6$ls7r8!M%HnBCV[j;?Vr!3l|dWt%.%Wx8nvzk1+w5Uw6Zb\n\
     (goto-char (point-min))
     (catch 'stop
       (while (and (if pages (<= (incf count) pages) t)
-		  (re-search-forward "<A HREF=\"\\([0-9]+\\)/\">" nil t)
+		  (re-search-forward
+		   "<A HREF=\"\\([0-9]+\\)/maillist\\.html\">"
+		   nil t)
 		  (push (match-string 1) months)))
       (setq months (nreverse months))
       (dolist (month months)
-	(let ((url (shimbun-expand-url (concat month "/")
+	(let ((url (shimbun-expand-url (concat month "/maillist.html")
 				       (shimbun-index-url shimbun))))
 	  (erase-buffer)
 	  (shimbun-retrieve-url url t)

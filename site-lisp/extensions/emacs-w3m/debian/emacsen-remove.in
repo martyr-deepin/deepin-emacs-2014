@@ -1,0 +1,19 @@
+#! /bin/sh
+# /usr/lib/emacsen-common/packages/remove/@PACKAGE@
+set -e
+
+FLAVOR=$1
+PACKAGE=@PACKAGE@
+PKGSNAME=w3m
+
+case $FLAVOR in
+    emacs|emacs20|emacs19|mule2)
+    exit 0
+    ;;
+esac
+
+ELCDIR=/usr/share/$FLAVOR/site-lisp/$PKGSNAME
+
+echo "remove/$PACKAGE: purging byte-compiled files for $FLAVOR"
+rm -rf "$ELCDIR"
+exit 0

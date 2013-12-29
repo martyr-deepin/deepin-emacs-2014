@@ -1,6 +1,6 @@
 ;;; sb-atom-hash.el --- shimbun backend for atom content -*- coding: iso-2022-7bit -*-
 
-;; Copyright (C) 2006, 2007, 2008 Tsuyoshi CHO <tsuyoshi_cho@ybb.ne.jp>
+;; Copyright (C) 2006-2009, 2011 Tsuyoshi CHO <tsuyoshi_cho@ybb.ne.jp>
 
 ;; Author: Tsuyoshi CHO <tsuyoshi_cho@ybb.ne.jp>
 ;; Keywords: shimbun
@@ -30,28 +30,19 @@
 (require 'sb-hash)
 
 (eval-and-compile
-  (luna-define-class shimbun-atom-hash (shimbun-hash shimbun-atom) ()))
+  (luna-define-class atom-content-hash (content-hash) ())
+  (luna-define-class shimbun-atom-hash (shimbun-atom) (content)))
 
 (defvar shimbun-atom-hash-group-path-alist
   '(;; name rss-url type(opt:html is t) content-start(opt) content-end(opt)
     ))
 
-(luna-define-method shimbun-groups ((shimbun shimbun-atom-hash))
-  (mapcar 'car shimbun-atom-hash-group-path-alist))
-
-(luna-define-method shimbun-index-url ((shimbun shimbun-atom-hash))
-  (nth 1 (assoc (shimbun-current-group-internal shimbun)
-		shimbun-atom-hash-group-path-alist)))
-
-(luna-define-method shimbun-atom-build-message-id ((shimbun shimbun-atom-hash)
-						   url date)
-  (concat "<" (md5 url) "%" (shimbun-current-group-internal shimbun) ">"))
-
-(luna-define-method shimbun-hash-update-items ((shimbun shimbun-atom-hash))
+(luna-define-method content-hash-update-items ((content-hash atom-content-hash)
+					       shimbun)
   (with-temp-buffer
     (let ((case-fold-search t))
       (shimbun-retrieve-url
-       (shimbun-hash-contents-url shimbun) 'no-cache 'no-decode)
+       (content-hash-contents-url content-hash shimbun) 'no-cache 'no-decode)
       ;; In some atom feeds, LFs might be used mixed with CRLFs.
       (shimbun-strip-cr)
       (insert
@@ -59,10 +50,10 @@
 	   (decode-coding-string (buffer-string) (shimbun-rss-get-encoding))
 	 (erase-buffer)
 	 (set-buffer-multibyte t)))
-      (shimbun-hash-update-items-impl shimbun))))
+      (content-hash-update-items-impl content-hash shimbun))))
 
-(luna-define-method shimbun-hash-update-items-impl
-  ((shimbun shimbun-atom-hash))
+(luna-define-method content-hash-update-items-impl
+  ((content-hash atom-content-hash) shimbun)
   (let (xml dc-ns atom-ns content-ns
 	    (buf-str (buffer-string)))
     (with-temp-buffer
@@ -71,10 +62,10 @@
       (insert buf-str)
       ;; parse xml : check url and desc
       (setq xml (condition-case err
-		    (xml-parse-region (point-min) (point-max))
+		    (shimbun-xml-parse-buffer)
 		  (error
 		   (message "Error while parsing %s: %s"
-			    (shimbun-hash-contents-url shimbun)
+			    (content-hash-contents-url content-hash shimbun)
 			    (error-message-string err))
 		   nil)))
       (when xml
@@ -100,6 +91,8 @@
 			       (intern (concat atom-ns "link")) entry)))))
 	    (when url
 	      (let* ((date (or (shimbun-rss-get-date shimbun url)
+			       (shimbun-rss-node-text atom-ns 'updated entry)
+			       (shimbun-rss-node-text atom-ns 'published entry)
 			       (shimbun-rss-node-text atom-ns 'modified entry)
 			       (shimbun-rss-node-text atom-ns 'created entry)
 			       (shimbun-rss-node-text atom-ns 'issued entry)
@@ -137,15 +130,34 @@
 			  (setq content (shimbun-rss-node-text
 					 atom-ns contentsym entry))
 			;; non-escaped, but  "<>& to &xxx;
-			(setq content (shimbun-decode-entities-string
-				       (shimbun-rss-node-text
-					    atom-ns contentsym entry))))))))
+			(let ((text (shimbun-rss-node-text
+				     atom-ns contentsym entry)))
+			  (when text
+			    (setq content (shimbun-decode-entities-string
+					   text)))))))))
 		(when (and id content)
-		  (shimbun-hash-set-item shimbun id content))))))))))
+		  (content-hash-set-item content-hash id content))))))))))
+
+(luna-define-method initialize-instance :after ((shimbun shimbun-atom-hash)
+						&rest init-args)
+  (luna-set-slot-value shimbun 'content
+		       (luna-make-entity 'atom-content-hash))
+  shimbun)
+
+(luna-define-method shimbun-groups ((shimbun shimbun-atom-hash))
+  (mapcar 'car shimbun-atom-hash-group-path-alist))
+
+(luna-define-method shimbun-index-url ((shimbun shimbun-atom-hash))
+  (nth 1 (assoc (shimbun-current-group-internal shimbun)
+		shimbun-atom-hash-group-path-alist)))
+
+(luna-define-method shimbun-atom-build-message-id ((shimbun shimbun-atom-hash)
+						   url date)
+  (concat "<" (md5 url) "%" (shimbun-current-group-internal shimbun) ">"))
 
 (luna-define-method shimbun-get-headers :before ((shimbun shimbun-atom-hash)
 						 &optional range)
-  (shimbun-hash-update-items-impl shimbun))
+  (content-hash-update-items-impl (luna-slot-value shimbun 'content) shimbun))
 
 (luna-define-method shimbun-make-contents ((shimbun shimbun-atom-hash) header)
   (if (nth 2 (assoc (shimbun-current-group-internal shimbun)
@@ -170,6 +182,11 @@
       (delete-region (point-min) start)
       t)))
 
+(luna-define-method shimbun-article ((shimbun shimbun-atom-hash) header
+				     &optional outbuf)
+  (content-hash-shimbun-article (luna-slot-value shimbun 'content)
+				shimbun header outbuf))
+
 (defun shimbun-atom-rebuild-node (namespace local-name element)
   (let* ((node (assq (intern (concat namespace (symbol-name local-name)))
 		     element))
@@ -193,9 +210,9 @@
 	      (symbol-name tag)
 	      (if attributes
 		  (concat " "
-			  (mapconcat '(lambda (attr)
-					(concat (symbol-name (car attr))
-						"=\"" (cdr attr) "\""))
+			  (mapconcat (lambda (attr)
+				       (concat (symbol-name (car attr))
+					       "=\"" (cdr attr) "\""))
 				     attributes " "))
 		"")
 	      (if children

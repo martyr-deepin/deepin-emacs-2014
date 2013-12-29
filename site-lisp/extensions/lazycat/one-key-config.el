@@ -484,51 +484,6 @@
   (interactive)
   (one-key-menu "WINDOW-NAVIGATION" one-key-menu-window-navigation-alist t t))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; W3m Search ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defvar one-key-menu-w3m-search-alist nil
-  "The `one-key' menu alist for W3M-SEARCH.")
-
-(setq one-key-menu-w3m-search-alist
-      '(
-        (("L" . "Google Lucky") . w3m-search-google-lucky)
-        (("s" . "Google Web CN") . w3m-search-google-web-cn)
-        (("e" . "Google Web EN") . w3m-search-google-web-en)
-        (("t" . "Google News Sci/Tech CN") . w3m-search-google-news-cn-Sci/Tech)
-        (("T" . "Google News Sci/Tech EN") . w3m-search-google-news-en-Sci/Tech)
-        (("b" . "Google Blog CN") . w3m-search-google-blog-cn)
-        (("B" . "Google Blog EN") . w3m-search-google-blog-en)
-        (("f" . "Google File") . w3m-search-google-file)
-        (("i" . "Google Image") . w3m-search-google-image)
-        (("c" . "Google Code") . w3m-search-google-code)
-        (("g" . "Google Group") . w3m-search-google-group)
-        (("k" . "Google Desktop") . w3m-search-google-desktop)
-        (("o" . "Gmail") . w3m-auto-logon-gmail)
-        (("w" . "Emacs Wiki") . w3m-search-emacswiki)
-        (("r" . "Emacs Wiki Random") . w3m-search-emacswiki-random)
-        (("h" . "Haskell Wiki") . w3m-search-haskell-wiki)
-        (("u" . "Haskell Hoogle") . w3m-search-haskell-hoogle)
-        (("m" . "BaiDu MP3") . w3m-search-baidu-mp3)
-        (("M" . "Google Music Search") . w3m-search-google-music)
-        (("d" . "Dict CN") . w3m-search-dict-cn)
-        (("l" . "Lispdoc Basic") . w3m-search-lispdoc-basic)
-        (("L" . "Lispdoc Full") . w3m-search-lispdoc-full)
-        ((";" . "Slang") . w3m-search-slang)
-        (("a" . "Answer") . w3m-search-answers)
-        (("p" . "Wikipedia CN") . w3m-search-wikipedia-cn)
-        (("P" . "Wikipedia EN") . w3m-search-wikipedia-en)
-        (("n" . "RFC Number") . w3m-search-rfc-number)
-        (("y" . "Insert Default Input") . w3m-search-advance-insert-search-object)
-        ))
-
-(defun one-key-menu-w3m-search ()
-  "The `one-key' menu for W3M-SEARCH."
-  (interactive)
-  (one-key-menu "W3M-SEARCH" one-key-menu-w3m-search-alist t nil nil
-                '(lambda ()
-                   (interactive)
-                   (unless (eq major-mode 'w3m-mode)
-                     (w3m)))))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Etags ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defvar one-key-menu-etags-alist nil
   "The `one-key' menu alist for ETAGS.")

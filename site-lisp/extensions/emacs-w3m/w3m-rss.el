@@ -1,6 +1,6 @@
 ;;; w3m-rss.el --- RSS functions
 
-;; Copyright (C) 2004, 2005 TSUCHIYA Masatoshi <tsuchiya@namazu.org>
+;; Copyright (C) 2004, 2005, 2012 TSUCHIYA Masatoshi <tsuchiya@namazu.org>
 
 ;; Authors: TSUCHIYA Masatoshi <tsuchiya@namazu.org>
 ;; Keywords: w3m, WWW, hypermedia
@@ -40,6 +40,7 @@
 ;;; Code:
 
 (eval-when-compile (require 'cl))
+(require 'w3m-util)
 (autoload 'xml-parse-region "xml")
 
 (eval-and-compile
@@ -109,11 +110,11 @@ which are supported by the `timezone-parse-date' function (which see)."
 T?\\(?:\\([0-9][0-9]\\):\\([0-9][0-9]\\)\\(?::\\([.0-9]+\\)\\)?\\)?\
 \\(?:\\([-+]\\)\\([0-9][0-9]\\):?\\([0-9][0-9]\\)\\|Z\\)?"
 		       date)
-	 (labels ((substr (n default)
-			  (if (match-beginning n)
-			      (string-to-number
-			       (match-string-no-properties n date))
-			    default)))
+	 (w3m-labels ((substr (n default)
+			      (if (match-beginning n)
+				  (string-to-number
+				   (match-string-no-properties n date))
+				default)))
 	   (encode-time
 	    (substr 6 0) ;; seconds
 	    (substr 5 0) ;; minitue

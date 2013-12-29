@@ -1,6 +1,6 @@
 ;;; sb-ruby.el --- shimbun backend class for ruby ML archiver.
 
-;; Copyright (C) 2001, 2002, 2003, 2005
+;; Copyright (C) 2001, 2002, 2003, 2005, 2009
 ;; NAKAJIMA Mikio <minakaji@osaka.email.ne.jp>
 
 ;; Author: NAKAJIMA Mikio <minakaji@osaka.email.ne.jp>
@@ -50,7 +50,7 @@
 ;;
 ;;)
 
-(defsubst shimbun-ruby-parse-time (str)
+(defun shimbun-ruby-parse-time (str)
   (save-match-data
     (if (string-match
 	 "\\([0-9]+\\)/\\([0-9]+\\)/\\([0-9]+\\) \\([0-9]+:[0-9]+:[0-9]+\\)"

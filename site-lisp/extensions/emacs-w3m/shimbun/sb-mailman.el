@@ -42,9 +42,9 @@
 
 (defun shimbun-mailman-make-contents (shimbun header)
   (subst-char-in-region (point-min) (point-max) ?\t ?\  t)
-  (shimbun-decode-entities)
   (goto-char (point-min))
-  (let ((end (search-forward "<!--beginarticle-->")))
+  (let ((end (search-forward "<!--beginarticle-->"))
+	name address)
     (goto-char (point-min))
     (search-forward "</HEAD>")
     (when (re-search-forward "<H1>\\([^\n]+\\)\\(\n +\\)?</H1>" end t nil)
@@ -54,14 +54,35 @@
     (when (re-search-forward "<B>\\([^\n]+\\)\\(\n +\\)?</B> *\n +\
 <A HREF=\"[^\n]+\n +TITLE=\"[^\n]+\">\\([^\n]+\\)"
 			     end t nil)
+      (setq name (match-string 1)
+	    address (match-string 3))
+      (when (string-match " at " name)
+	(setq name (concat (substring name 0 (match-beginning 0))
+			   "@"
+			   (substring name (match-end 0)))))
+      (when (string-match " at " address)
+	(setq address (concat (substring address 0 (match-beginning 0))
+			      "@"
+			      (substring address (match-end 0)))))
       (shimbun-header-set-from
        header
-       (shimbun-mime-encode-string (concat (match-string 1)
-					   " <" (match-string 3) ">")))
-      (when (re-search-forward "<I>\\([^\n]+\\)</I>" end t nil)
-	(shimbun-header-set-date header (match-string 1)))
+       (shimbun-mime-encode-string (concat name " <" address ">")))
+      (when (re-search-forward "<I>\
+\\(?:\\(Sun\\|Mon\\|Tue\\|Wed\\|Thu\\|Fri\\|Sat\\) \\)?\
+\\([^\n]+\\)</I>" end t nil)
+	(if (match-beginning 1)
+	    (shimbun-header-set-date
+	     header (concat (match-string 1) ", " (match-string 2)))
+	  (shimbun-header-set-date header (match-string 2))))
       (delete-region (point-min) end)
       (delete-region (search-forward "<!--endarticle-->") (point-max))
+      ;; Remove useless hrefs being added to things looking like mail
+      ;; addresses, and restore them to the original.
+      (let ((case-fold-search t))
+	(goto-char (point-min))
+	(while (re-search-forward
+		"<a +href=[^>]+>\\([^<]+\\) at \\([^<]+\\)</a>" nil t)
+	  (replace-match "\\1@\\2")))
       (shimbun-header-insert-and-buffer-string shimbun header nil t))))
 
 (luna-define-method shimbun-make-contents ((shimbun shimbun-mailman) header)
@@ -134,7 +155,6 @@
 
 (defun shimbun-mailman-ja-make-contents (shimbun header)
   (subst-char-in-region (point-min) (point-max) ?\t ?\  t)
-  (shimbun-decode-entities)
   (goto-char (point-min))
   (let ((end (search-forward "<!--beginarticle-->"))
 	name address date)
@@ -180,6 +200,13 @@
 	(shimbun-header-set-date header date))
       (delete-region (point-min) end)
       (delete-region (search-forward "<!--endarticle-->") (point-max))
+      ;; Remove useless hrefs being added to things looking like mail
+      ;; addresses, and restore them to the original.
+      (let ((case-fold-search t))
+	(goto-char (point-min))
+	(while (re-search-forward "\
+<a +href=[^>]+>\\([^<]+\\) \\(?:＠\\|at\\) \\([^<]+\\)</a>" nil t)
+	  (replace-match "\\1@\\2")))
       (shimbun-header-insert-and-buffer-string shimbun header nil t))))
 
 (luna-define-method shimbun-make-contents ((shimbun shimbun-mailman-ja) header)

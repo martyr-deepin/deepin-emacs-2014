@@ -1,8 +1,8 @@
 ;;; sb-mhonarc.el --- shimbun backend class for mhonarc
 
-;; Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007
+;; Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007, 2009
 ;; Yuuichi Teranishi <teranisi@gohome.org>
-;; Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007
+;; Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007, 2009
 ;; Akihiro Arisawa <ari@mbf.sphere.ne.jp>
 
 ;; Author: TSUCHIYA Masatoshi <tsuchiya@namazu.org>,
@@ -134,7 +134,7 @@
       (delete-char 1))
     (buffer-string)))
 
-(defsubst shimbun-mhonarc-header-value ()
+(defun shimbun-mhonarc-header-value ()
   (let ((pt (point)))
     (prog1
 	(buffer-substring (match-end 0) (std11-field-end))

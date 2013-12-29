@@ -1,6 +1,6 @@
 ;;; w3m-favicon.el --- utilities for handling favicon in emacs-w3m
 
-;; Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007
+;; Copyright (C) 2001-2005, 2007, 2009, 2011
 ;; TSUCHIYA Masatoshi <tsuchiya@namazu.org>
 
 ;; Authors: Yuuichi Teranishi  <teranisi@gohome.org>,
@@ -88,7 +88,7 @@ If this variable is nil, never expired."
   :type '(integer :size 0))
 
 (defcustom w3m-favicon-type
-  (let ((types '(png gif pbm xpm bmp))
+  (let ((types '(gif png pbm xpm bmp))
 	type)
     (catch 'det
       (while types
@@ -96,7 +96,8 @@ If this variable is nil, never expired."
 	      types (cdr types))
 	(if (if (featurep 'xemacs)
 		(featurep type)
-	      (image-type-available-p type))
+	      ;; Silence SXEmacs 22.1.14's byte compiler.
+	      (eval (list 'image-type-available-p (list 'quote type))))
 	    (throw 'det type)))))
   "*Image type of display favicon."
   :group 'w3m
@@ -238,9 +239,11 @@ favicon is ready."
 (defun w3m-favicon-convert (data type)
   "Convert the favicon DATA in TYPE to the favicon image and return it."
   (when (or (not (eq type 'ico))
-	    ;; Since most of favicons are the `ico' types, we make sure
-	    ;; of the magic-numbers only as for them.
-	    (string-equal "\x00\x00\x01\x00" (substring data 0 4)))
+	    ;; Is it really in the ico format?
+	    (string-equal "\x00\x00\x01\x00" (substring data 0 4))
+	    ;; Some icons named favicon.ico are animated GIFs.
+	    (and (member (substring data 0 5) '("GIF87" "GIF89"))
+		 (setq type 'gif)))
     (let ((height (or (cdr w3m-favicon-size)
 		      (w3m-static-if (featurep 'xemacs)
 			  (face-height 'default)
@@ -307,11 +310,13 @@ stored in the `w3m-favicon-image' buffer-local variable."
 	(w3m-favicon-set-image (w3m-favicon-cache-favicon url)))
     (lexical-let ((url url)
 		  (type type)
-		  (target target))
+		  (target target)
+		  (silent w3m-message-silent))
       (w3m-process-with-null-handler
 	(w3m-process-do-with-temp-buffer
 	    (ok (w3m-retrieve url 'raw nil nil nil handler))
-	  (let (idata image)
+	  (let ((w3m-message-silent silent)
+		idata image)
 	    (if (and ok
 		     ;; Some broken servers provides empty contents.
 		     (>= (buffer-size) 4))

@@ -1,6 +1,7 @@
-;;; sb-yahoo-auctions.el --- shimbun backend for Yahoo! AUCTIONS
+;;; sb-yahoo-auctions.el --- shimbun backend for Yahoo! AUCTIONS -*- coding: iso-2022-7bit; -*-
 
-;; Copyright (C) 2005, 2006, 2008 ARISAWA Akihiro <ari@mbf.sphere.ne.jp>
+;; Copyright (C) 2005, 2006, 2008, 2011, 2013
+;; ARISAWA Akihiro <ari@mbf.sphere.ne.jp>
 
 ;; Author: ARISAWA Akihiro <ari@mbf.sphere.ne.jp>
 ;; Keywords: news

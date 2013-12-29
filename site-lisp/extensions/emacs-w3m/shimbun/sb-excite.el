@@ -1,6 +1,6 @@
 ;;; sb-excite.el --- shimbun backend for excite -*- coding: iso-2022-7bit; -*-
 
-;; Copyright (C) 2004, 2005, 2006 Tsuyoshi CHO <tsuyoshi_cho@ybb.ne.jp>
+;; Copyright (C) 2004, 2005, 2006, 2010 Tsuyoshi CHO <tsuyoshi_cho@ybb.ne.jp>
 
 ;; Author: Tsuyoshi CHO <tsuyoshi_cho@ybb.ne.jp>
 ;; Keywords: news
@@ -90,11 +90,10 @@ Face: iVBORw0KGgoAAAANSUhEUgAAAD4AAAAZCAMAAABetm34AAAAe1BMVEUAAACaHA4WCganBSTMA
       (shimbun-header-set-from header (shimbun-from-address shimbun)))
     headers))
 
-(luna-define-method shimbun-clear-contents :before
-  ((shimbun shimbun-excite) header)
+(luna-define-method shimbun-clear-contents :before ((shimbun shimbun-excite)
+						    header)
   (shimbun-strip-cr)
-  (shimbun-remove-tags "<script" "</script>")
-  (shimbun-remove-tags "<noscript" "</noscript>"))
+  (shimbun-remove-tags "script\\|noscript" t))
 
 (provide 'sb-excite)
 

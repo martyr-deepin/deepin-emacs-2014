@@ -1,7 +1,6 @@
 ;;; w3m-search.el --- functions convenient to access web search engines
 
-;; Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
-;; TSUCHIYA Masatoshi <tsuchiya@namazu.org>
+;; Copyright (C) 2001--2012 TSUCHIYA Masatoshi <tsuchiya@namazu.org>
 
 ;; Authors: Keisuke Nishida    <kxn30@po.cwru.edu>,
 ;;          Shun-ichi GOTO     <gotoh@taiyo.co.jp>,
@@ -116,41 +115,40 @@
       ,@(cond
 	 ((and ja utf-8)
 	  '(("google news"
-	     "http://news.google.co.jp/news?hl=ja&ie=utf-8&q=%s&oe=utf-8"
+	     "http://news.google.co.jp/news?q=%s&hl=ja&ie=utf-8&oe=utf-8"
 	     utf-8)
 	    ("google news-en"
-	     "http://news.google.com/news?hl=en&q=%s")))
+	     "http://news.google.com/news?q=%s&hl=en")))
 	 (ja
 	  '(("google news"
-	     "http://news.google.co.jp/news?hl=ja&ie=Shift_JIS&q=%s&oe=Shift_JIS"
+	     "http://news.google.co.jp/news?q=%s&hl=ja&ie=Shift_JIS&oe=Shift_JIS"
 	     shift_jis)
 	    ("google news-en"
-	     "http://news.google.com/news?hl=en&q=%s")))
+	     "http://news.google.com/news?q=%s&hl=en")))
 	 (utf-8
 	  '(("google news"
-	     "http://news.google.co.jp/news?hl=ja&ie=utf-8&q=%s&oe=utf-8"
+	     "http://news.google.com/news?q=%s&ie=utf-8&oe=utf-8"
 	     utf-8)
 	    ("google news-en"
-	     "http://news.google.com/news?hl=en&q=%s")))
+	     "http://news.google.com/news?q=%s&hl=en&ie=utf-8&oe=utf-8")))
 	 (t
 	  '(("google news"
 	     "http://news.google.com/news?q=%s")
 	    ("google news-ja"
-	     "http://news.google.co.jp/news?hl=ja&ie=Shift_JIS&q=%s&oe=Shift_JIS"
+	     "http://news.google.co.jp/news?q=%s&hl=ja&ie=Shift_JIS&oe=Shift_JIS"
 	     shift_jis))))
       ("google groups"
        "http://groups.google.com/groups?q=%s")
       ,@(if ja
 	    '(("All the Web"
-	       "http://www.alltheweb.com/search?web&_sb_lang=ja&cs=euc-jp\
-&q=%s"
+	       "http://www.alltheweb.com/search?q=%s&web&_sb_lang=ja&cs=euc-jp"
 	       euc-japan)
 	      ("All the Web-en"
-	       "http://www.alltheweb.com/search?web&_sb_lang=en&q=%s"))
+	       "http://www.alltheweb.com/search?q=%s&web&_sb_lang=en"))
 	  '(("All the Web"
-	     "http://www.alltheweb.com/search?web&_sb_lang=en&q=%s")
+	     "http://www.alltheweb.com/search?q=%s&web&_sb_lang=en")
 	    ("All the Web-ja"
-	     "http://www.alltheweb.com/search?web&_sb_lang=ja&cs=euc-jp&q=%s"
+	     "http://www.alltheweb.com/search?q=%s&web&_sb_lang=ja&cs=euc-jp"
 	     euc-japan)))
       ,@(if ja
 	    '(("technorati"
@@ -266,12 +264,13 @@ as an initial string."
 (defvar w3m-search-engine-history nil
   "History variable used by `w3m-search' for prompting a search engine.")
 
+(defvar w3m-search-thing-at-point-arg 'word
+  "Argument for `thing-at-point' used in `w3m-search-read-query'")
+
 (defun w3m-search-escape-query-string (str &optional coding)
-  (mapconcat
-   (lambda (s)
-     (w3m-url-encode-string s (or coding w3m-default-coding-system)))
-   (split-string str)
-   "+"))
+  (mapconcat (lambda (s) (w3m-url-encode-string s coding))
+	     (split-string str)
+	     "+"))
 
 (defun w3m-search-read-query (prompt prompt-with-default &optional history)
   "Read a query from the minibuffer, prompting with string PROMPT.
@@ -284,7 +283,7 @@ PROMPT-WITH-DEFAULT instead of string PROMPT."
 			 (listp (get-text-property (point-at-bol) 'face))
 			 (memq 'w3m-header-line-location-title
 			       (get-text-property (point-at-bol) 'face)))
-	      (thing-at-point 'word))))
+	      (thing-at-point w3m-search-thing-at-point-arg))))
 	initial)
     (when default
       (set-text-properties 0 (length default) nil default)
@@ -300,6 +299,11 @@ PROMPT-WITH-DEFAULT instead of string PROMPT."
 
 (defun w3m-search-read-variables ()
   "Ask for a search engine and words to query and return them as a list."
+  (when w3m-current-process
+    (error "%s"
+	   (substitute-command-keys "
+Cannot run two w3m processes simultaneously \
+\(Type `\\<w3m-mode-map>\\[w3m-process-stop]' to stop asynchronous process)")))
   (let* ((search-engine
 	  (if current-prefix-arg
 	      (let ((default (or (car w3m-search-engine-history)
@@ -324,6 +328,7 @@ PROMPT-WITH-DEFAULT instead of string PROMPT."
 	  (let ((query-string (w3m-search-escape-query-string query
 							      (caddr info)))
 		(post-data (cadddr info)))
+	    (w3m-history-store-position)
 	    (funcall w3m-goto-function
 		     (format (cadr info) query-string)
 		     post-data

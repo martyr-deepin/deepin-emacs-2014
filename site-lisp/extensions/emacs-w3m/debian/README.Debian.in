@@ -1,0 +1,15 @@
+@PACKAGE@ for Debian
+--------------------------
+
+This is Debian package of emacs-w3m.  Emacs Lisp files are put in
+/usr/share/emacs/site-lisp/w3m instead of
+/usr/share/emacs/site-lisp/@PACKAGE@
+
+To use the optional features
+- shimbun (interface with web newspapers),
+- w3m-namazu (search files with Namazu),
+- w3m-perldoc (view perl documents),
+- etc.,
+install the required packages flim, namazu2, perl-doc, etc.
+
+ -- Tatsuya Kinoshita <tats@debian.org>, Sun, 25 Nov 2007 11:51:25 +0900

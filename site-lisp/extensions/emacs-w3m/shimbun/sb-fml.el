@@ -1,8 +1,8 @@
 ;;; sb-fml.el --- shimbun backend class for fml archiver.
 
-;; Copyright (C) 2001, 2002, 2003, 2004
+;; Copyright (C) 2001, 2002, 2003, 2004, 2009, 2010
 ;; Akihiro Arisawa <ari@mbf.sphere.ne.jp>
-;; Copyright (C) 2001, 2002, 2003, 2004
+;; Copyright (C) 2001, 2002, 2003, 2004, 2009, 2010
 ;; Yuuichi Teranishi <teranisi@gohome.org>
 
 ;; Author: TSUCHIYA Masatoshi <tsuchiya@namazu.org>,
@@ -41,7 +41,7 @@
 
 (luna-define-class shimbun-fml (shimbun) ())
 
-(defsubst shimbun-fml-parse-time (str)
+(defun shimbun-fml-parse-time (str)
   (save-match-data
     (if (string-match
 	 "\\([0-9]+\\)/\\([0-9]+\\)/\\([0-9]+\\) \\([0-9]+:[0-9]+:[0-9]+\\)"
@@ -97,14 +97,10 @@
 	(delete-region (point-min) (point))
       (throw 'stop nil))
     (if (search-forward "</PRE>" nil t)
-	(progn
-	  (beginning-of-line)
-	  (delete-region (point) (point-max)))
+	(delete-region (point-at-bol) (point-max))
       (throw 'stop nil))
     (if (search-backward "</SPAN>" nil t)
-	(progn
-	  (beginning-of-line)
-	  (delete-region (point) (save-excursion (end-of-line) (point))))
+	(delete-region (point-at-bol) (point-at-eol))
       (throw 'stop nil))
     (save-restriction
       (narrow-to-region (point-min) (point))

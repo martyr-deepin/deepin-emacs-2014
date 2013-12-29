@@ -1,0 +1,283 @@
+w3m-el-snapshot (1.4.517+0.20130704-1) unstable; urgency=low
+
+  * Imported Upstream version 1.4.517+0.20130704
+  * Update debian/copyright
+
+ -- Tatsuya Kinoshita <tats@debian.org>  Sat, 06 Jul 2013 09:57:11 +0900
+
+w3m-el-snapshot (1.4.515+0.20130621-1) unstable; urgency=low
+
+  * Imported Upstream version 1.4.515+0.20130621
+  * Update debian/copyright
+
+ -- Tatsuya Kinoshita <tats@debian.org>  Tue, 25 Jun 2013 21:50:06 +0900
+
+w3m-el-snapshot (1.4.513+0.20130419-1) unstable; urgency=low
+
+  * Imported Upstream version 1.4.513+0.20130419
+  * debian/control: Add Vcs-Git and Vcs-Browser
+
+ -- Tatsuya Kinoshita <tats@debian.org>  Mon, 06 May 2013 14:57:30 +0900
+
+w3m-el-snapshot (1.4.513+0.20130405-1) experimental; urgency=low
+
+  * New upstream release (CVS trunk on 2013-04-05)
+  * debian/copyright: Updated
+  * debian/control: Update Standards-Version to 3.9.4
+
+ -- Tatsuya Kinoshita <tats@debian.org>  Sat, 06 Apr 2013 23:45:30 +0900
+
+w3m-el-snapshot (1.4.483+0.20120614-2) unstable; urgency=low
+
+  * debian/control: Add emacs24
+
+ -- Tatsuya Kinoshita <tats@debian.org>  Thu, 05 Jul 2012 21:43:22 +0900
+
+w3m-el-snapshot (1.4.483+0.20120614-1) unstable; urgency=low
+
+  * New upstream release (CVS trunk on 2012-06-14)
+    - Fix labels macro for Emacs 24.1.50 (closes: #677431)
+
+ -- Tatsuya Kinoshita <tats@debian.org>  Thu, 14 Jun 2012 19:21:38 +0900
+
+w3m-el-snapshot (1.4.482+0.20120609-1) unstable; urgency=low
+
+  * New upstream release (CVS trunk on 2012-06-09)
+
+ -- Tatsuya Kinoshita <tats@debian.org>  Sun, 10 Jun 2012 10:59:58 +0900
+
+w3m-el-snapshot (1.4.478+0.20120501-1) unstable; urgency=low
+
+  * New upstream release. (CVS trunk on 2012-05-01)
+  * debian/control: Don't mention a stable version in Description.
+  * debian/copyright: Updated.
+
+ -- Tatsuya Kinoshita <tats@debian.org>  Thu, 03 May 2012 22:42:49 +0900
+
+w3m-el-snapshot (1.4.471+0.20120228-1) unstable; urgency=low
+
+  * New upstream release. (CVS trunk on 2012-02-28)
+    - Work for name anchors. (closes: #657424)
+  * debian/copyright: Update copyright-format version to 1.0.
+  * debian/control: Update Standards-Version to 3.9.3.
+
+ -- Tatsuya Kinoshita <tats@debian.org>  Sun, 11 Mar 2012 19:28:43 +0900
+
+w3m-el-snapshot (1.4.463+0.20120113-1) unstable; urgency=low
+
+  * New upstream release. (CVS trunk on 2012-01-13)
+  * debian/copyright: Updated.
+
+ -- Tatsuya Kinoshita <tats@debian.org>  Mon, 23 Jan 2012 22:36:53 +0900
+
+w3m-el-snapshot (1.4.442+0.20110729-1) unstable; urgency=low
+
+  * New upstream release. (CVS trunk on 2011-07-29)
+    - Work around the Emacs 24 error "`keymap' is reserved for embedded
+      parent maps". (closes: #637726)
+  * debian/rules: Add the targets build-indep and build-arch.
+
+ -- Tatsuya Kinoshita <tats@debian.org>  Sun, 14 Aug 2011 14:32:35 +0900
+
+w3m-el-snapshot (1.4.438+0.20110511-1) unstable; urgency=low
+
+  * New upstream release. (CVS trunk on 2011-05-11)
+  * debian/emacsen-install.in: Add messages for the rare situations.
+
+ -- Tatsuya Kinoshita <tats@debian.org>  Mon, 20 Jun 2011 20:34:00 +0900
+
+w3m-el-snapshot (1.4.437+0.20110422-1) unstable; urgency=low
+
+  * New upstream release. (CVS trunk on 2011-04-22)
+  * debian/control: Update Standards-Version to 3.9.2.
+  * debian/copyright: Switch to the DEP-5 format.
+
+ -- Tatsuya Kinoshita <tats@debian.org>  Sun, 24 Apr 2011 20:51:42 +0900
+
+w3m-el-snapshot (1.4.433+0.20110201-1) unstable; urgency=low
+
+  * New upstream release. (CVS trunk on 2011-02-01)
+  * debian/control: Update Standards-Version to 3.9.1.
+  * debian/copyright: Updated.
+
+ -- Tatsuya Kinoshita <tats@debian.org>  Sun, 06 Feb 2011 15:22:34 +0900
+
+w3m-el-snapshot (1.4.400+0.20100725-1) unstable; urgency=low
+
+  * New upstream release. (CVS trunk on 2010-07-25)
+  * debian/control:
+    - Add GNU Emacs flavors to Build-Depends-Indep.
+    - Update Standards-Version to 3.9.0.
+  * debian/copyright: Updated.
+
+ -- Tatsuya Kinoshita <tats@debian.org>  Sun, 25 Jul 2010 21:09:11 +0900
+
+w3m-el-snapshot (1.4.394+0.20100524-1) unstable; urgency=low
+
+  * New upstream release. (CVS trunk on 2010-05-24)
+    - Fix that w3m-cookie-reject-domains doesn't work. (closes: #582677)
+
+ -- Tatsuya Kinoshita <tats@debian.org>  Mon, 24 May 2010 22:50:08 +0900
+
+w3m-el-snapshot (1.4.393+0.20100421-1) unstable; urgency=low
+
+  * New upstream release. (CVS trunk on 2010-04-21)
+
+ -- Tatsuya Kinoshita <tats@debian.org>  Sat, 08 May 2010 16:12:29 +0900
+
+w3m-el-snapshot (1.4.392+0.20100329-1) unstable; urgency=low
+
+  * New upstream release. (CVS trunk on 2010-03-29)
+  * debian/rules: Install shimbun/ChangeLog* and ChangeLog.*.
+  * debian/copyright: Updated.
+
+ -- Tatsuya Kinoshita <tats@debian.org>  Tue, 30 Mar 2010 01:32:35 +0900
+
+w3m-el-snapshot (1.4.387+0.20100304-1) unstable; urgency=low
+
+  * New upstream release. (CVS trunk on 2010-03-04)
+  * debian/copyright: Updated.
+  * Switch to dpkg-source 3.0 (quilt) format.
+
+ -- Tatsuya Kinoshita <tats@debian.org>  Thu, 04 Mar 2010 21:05:42 +0900
+
+w3m-el-snapshot (1.4.384+0.20100219-1) unstable; urgency=low
+
+  * New upstream release. (CVS trunk on 2010-02-19)
+    - Bug fix for sb-rss.el and sb-atom.el.
+
+ -- Tatsuya Kinoshita <tats@debian.org>  Sat, 20 Feb 2010 11:53:05 +0900
+
+w3m-el-snapshot (1.4.384+0.20100218-1) unstable; urgency=low
+
+  * New upstream release. (CVS trunk on 2010-02-18)
+  * debian/copyright: Updated.
+
+ -- Tatsuya Kinoshita <tats@debian.org>  Thu, 18 Feb 2010 22:56:01 +0900
+
+w3m-el-snapshot (1.4.374+0.20100112-1) unstable; urgency=low
+
+  * New upstream release. (CVS trunk on 2010-01-12)
+    - Don't fail even if an anchor string is broken. (closes: #537327)
+  * debian/control:
+    - Add emacs-snapshot to Depends. (closes: #506106)
+    - Add `dpkg (>= 1.15.4) | install-info' to Depends.
+    - Add ${misc:Depends} to Depends.
+    - Set Section to lisp.
+    - Remove emacsen flavors from Build-Depends-Indep, remain `emacs'.
+    - Update Standards-Version to 3.8.4.
+  * debian/emacsen-install.in: Don't fail w3m-el 1.4.4 with emacs23 and
+    emacs-snapshot.
+  * debian/copyright: Updated.
+
+ -- Tatsuya Kinoshita <tats@debian.org>  Sat, 13 Feb 2010 00:53:08 +0900
+
+w3m-el-snapshot (1.4.364+0.20090802-1) unstable; urgency=low
+
+  * New upstream release. (CVS trunk on 2009-08-02)
+  * debian/control:
+    - Add emacs23 to Depends.
+    - Update Standards-Version to 3.8.2.
+  * debian/copyright: Updated.
+
+ -- Tatsuya Kinoshita <tats@debian.org>  Sun, 02 Aug 2009 23:40:20 +0900
+
+w3m-el-snapshot (1.4.344+0.20090405-1) unstable; urgency=low
+
+  * New upstream release. (CVS trunk on 2009-04-05)
+  * debian/emacsen-install: Don't fail with xemacs21-nomule.
+  * debian/control: Update Standards-Version to 3.8.1.
+  * debian/copyright: Updated.
+
+ -- Tatsuya Kinoshita <tats@debian.org>  Thu, 09 Apr 2009 00:46:00 +0900
+
+w3m-el-snapshot (1.4.335+0.20090216-1) unstable; urgency=low
+
+  * New upstream release. (CVS trunk on 2009-02-16)
+    - Fix anchor charset. (closes: #479631)
+  * debian/emacsen-*: Rewritten.
+  * debian/rules, debian/dirs.in: Install attic/*.el in the site-lisp
+    directory.
+  * debian/docs: Install NEWS* and BUGS*.
+  * debian/w3mhack.el.patch: Removed.
+  * debian/compat, debian/control: Update debhelper version to 7.
+  * debian/control:
+    - Remove bitmap-mule from Suggests.
+    - Update Standards-Version to 3.8.0.
+  * debian/rules: Use dh_prep instead of `dh_clean -k'.
+  * debian/copyright: Updated.
+
+ -- Tatsuya Kinoshita <tats@debian.org>  Mon, 16 Feb 2009 23:05:55 +0900
+
+w3m-el-snapshot (1.4.263+0.20080321-1) unstable; urgency=low
+
+  * New upstream release. (CVS trunk on 2008-03-21)
+  * debian/control: Build-Depends: debhelper (>= 6).
+
+ -- Tatsuya Kinoshita <tats@debian.org>  Fri, 21 Mar 2008 22:36:26 +0900
+
+w3m-el-snapshot (1.4.263+0.20080317-1) unstable; urgency=low
+
+  * New upstream release. (CVS trunk on 2008-03-17)
+    - w3m.el (w3m-mouse-safe-view-this-url): Remove redundant confirmation
+      of whether to follow link. (closes: #468257)
+  * debian/compat: 5 -> 6.
+  * debian/copyright: Updated.
+
+ -- Tatsuya Kinoshita <tats@debian.org>  Wed, 19 Mar 2008 00:32:16 +0900
+
+w3m-el-snapshot (1.4.258+0.20080220-2) unstable; urgency=low
+
+  * debian/emacsen-startup.in: Set w3m-icon-directory to
+    "/usr/share/pixmaps/w3m-el/small" for GNU Emacs.
+
+ -- Tatsuya Kinoshita <tats@debian.org>  Sat, 23 Feb 2008 07:08:15 +0900
+
+w3m-el-snapshot (1.4.258+0.20080220-1) unstable; urgency=low
+
+  * New upstream release. (CVS trunk on 2008-02-20)
+  * debian/rules: Install *.gif and *.png.
+
+ -- Tatsuya Kinoshita <tats@debian.org>  Wed, 20 Feb 2008 23:29:12 +0900
+
+w3m-el-snapshot (1.4.257+0.20080207-1) unstable; urgency=low
+
+  * New upstream release. (CVS trunk on 2008-02-07)
+    - Set show-trailing-whitespace to nil. (closes: #457115)
+  * debian/copyright: Updated.
+
+ -- Tatsuya Kinoshita <tats@debian.org>  Sun, 17 Feb 2008 18:04:43 +0900
+
+w3m-el-snapshot (1.4.250+0.20071206-1) unstable; urgency=low
+
+  * New upstream release. (CVS trunk on 2007-12-06)
+  * debian/control:
+    - (Conflicts): Add epoch to the version of flim, and remove mew.
+    - (Depends): Remove the version of apel.
+    - (Description): Typo fix.
+    - (Homepage): Move from Description.
+    - (Standards-Version): 3.7.2 -> 3.7.3.
+
+ -- Tatsuya Kinoshita <tats@debian.org>  Sun, 09 Dec 2007 23:19:35 +0900
+
+w3m-el-snapshot (1.4.244+0.20071127-1) unstable; urgency=low
+
+  * New upstream release. (CVS trunk on 2007-11-27)
+  * debian/control: Add w3m-el to Provides.
+  * debian/copyright: Updated.
+  * Use /usr/share/pixmaps/w3m-el instead of
+    /usr/share/pixmaps/w3m-el-snapshot.
+
+ -- Tatsuya Kinoshita <tats@debian.org>  Wed, 28 Nov 2007 22:29:38 +0900
+
+w3m-el-snapshot (1.4.239+0.20071122-2) unstable; urgency=low
+
+  * debian/control: Set Priority to extra.
+
+ -- Tatsuya Kinoshita <tats@debian.org>  Sun, 25 Nov 2007 16:26:39 +0900
+
+w3m-el-snapshot (1.4.239+0.20071122-1) unstable; urgency=low
+
+  * Initial release. (CVS trunk on 2007-11-22, closes: #442459)
+
+ -- Tatsuya Kinoshita <tats@debian.org>  Sun, 25 Nov 2007 15:04:58 +0900

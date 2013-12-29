@@ -1,0 +1,113 @@
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: emacs-w3m
+Upstream-Contact: emacs-w3m development team <emacs-w3m@namazu.org>
+Source: http://emacs-w3m.namazu.org/
+
+Files: *
+Copyright: 2000-2013, TSUCHIYA Masatoshi <tsuchiya@namazu.org>
+License: GPL-2+
+
+License: GPL-2+
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2, or (at your option)
+ any later version.
+ .
+ On Debian systems, the complete text of the GNU General Public License
+ version 2 can be found in `/usr/share/common-licenses/GPL-2'.
+
+Files: bookmark-w3m.el
+Copyright: 2010, Masatake YAMATO
+           1993-2010, Free Software Foundation, Inc.
+License: GPL-3+
+ Most of all codes are derived from man.el of GNU Emacs.
+ So the same license of man.el is applied to this software.
+ .
+ GNU Emacs is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ .
+ On Debian systems, the complete text of the GNU General Public License
+ version 3 can be found in `/usr/share/common-licenses/GPL-3'.
+
+Files: shimbun/*
+Copyright: 2001-2013, Yuuichi Teranishi <teranisi@gohome.org>
+           2000-2012, TSUCHIYA Masatoshi <tsuchiya@namazu.org>
+           2001-2013, Katsumi Yamaoka
+           2004-2011, Tsuyoshi CHO <tsuyoshi_cho@ybb.ne.jp>
+           2001-2013, NAKAJIMA Mikio
+           2001-2013, Koichiro Ohba <koichiro@meadowy.org>
+           2001-2013, ARISAWA Akihiro <ari@mbf.sphere.ne.jp>
+           2001-2011, Kazuyoshi KOREEDA
+           2008-2010, David Engster
+           2004-2010, Andreas Seltenreich <seltenreich@gmx.de>
+           2004-2010, S V N Vishwanathan <vishketan@yahoo.com>
+           2004-2009, David Hansen
+           2001-2008, MIYOSHI Masanori <miyoshi@meadowy.org>
+           2001-2007, OHASHI Akira <bg66@koka-in.org>
+           2001-2007, ABE Yasushi <yasushi@stbbs.net>
+           2005-2006, Matthew P. Hodges
+           2002-2006, Yoichi NAKAYAMA
+           2004-2005, Felix E. Klee <felix.klee@inka.de>
+           2002-2005, NOKUBI Takatsugu <knok@daionet.gr.jp>
+           2002-2005, Masamichi Goudge M.D. <Matanuki@Goudge.org>
+           2001-2005, (not 1)
+           2002-2004, Hidetaka Iwai <tyuyu@mb6.seikyou.ne.jp>
+           2001-2003, Tatsuya Ichikawa
+           2002-2003, Free Software Foundation, Inc.
+License: GPL-2+
+
+Files: w3m-symbol.el
+Copyright: 2002-2009, ARISAWA Akihiro <ari@mbf.sphere.ne.jp>
+License: GPL-2+
+
+Files: octet.el
+Copyright: 2000-2010, Yuuichi Teranishi <teranisi@gohome.org>
+License: GPL-2+
+
+Files: attic/rfc2368.el doc/txi-en.tex
+Copyright: 1998-2006, Free Software Foundation, Inc.
+License: GPL-2+
+
+Files: doc/ptexinfmt.el
+Copyright: 1985-1997, Free Software Foundation, Inc.
+           1999, Yoshiki Hayashi <yoshiki@xemacs.org>
+           2000-2002, TAKAHASHI Kaoru <kaoru@kaisei.org>
+License: GPL-2+
+
+Files: doc/texinfo.tex
+Copyright: 1985-2013, Free Software Foundation, Inc.
+License: GPL-3+ with Texinfo exception
+ This texinfo.tex file is free software: you can redistribute it and/or
+ modify it under the terms of the GNU General Public License as
+ published by the Free Software Foundation, either version 3 of the
+ License, or (at your option) any later version.
+ .
+ On Debian systems, the complete text of the GNU General Public License
+ version 3 can be found in `/usr/share/common-licenses/GPL-3'.
+ .
+ As a special exception, when this file is read by TeX when processing
+ a Texinfo source document, you may use the result without
+ restriction. This Exception is an additional permission under section 7
+ of the GNU General Public License, version 3 ("GPLv3").
+
+Files: install-sh
+Copyright: 1991, the Massachusetts Institute of Technology
+License:
+ Permission to use, copy, modify, distribute, and sell this software and its
+ documentation for any purpose is hereby granted without fee, provided that
+ the above copyright notice appear in all copies and that both that
+ copyright notice and this permission notice appear in supporting
+ documentation, and that the name of M.I.T. not be used in advertising or
+ publicity pertaining to distribution of the software without specific,
+ written prior permission.  M.I.T. makes no representations about the
+ suitability of this software for any purpose.  It is provided "as is"
+ without express or implied warranty.
+
+Files: debian/*
+Copyright: 2007-2013, Tatsuya Kinoshita <tats@debian.org>
+           2001-2007, Fumitoshi UKAI <ukai@debian.or.jp>
+License:
+ The Debian packaging is distributed under the same conditions as the
+ upstream.

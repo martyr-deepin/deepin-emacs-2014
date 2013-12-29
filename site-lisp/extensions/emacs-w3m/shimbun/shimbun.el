@@ -1,7 +1,6 @@
 ;;; shimbun.el --- interfacing with web newspapers -*- coding: iso-2022-7bit; -*-
 
-;; Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
-;; Yuuichi Teranishi <teranisi@gohome.org>
+;; Copyright (C) 2001-2013 Yuuichi Teranishi <teranisi@gohome.org>
 
 ;; Author: TSUCHIYA Masatoshi <tsuchiya@namazu.org>,
 ;;         Akihiro Arisawa    <ari@mbf.sphere.ne.jp>,
@@ -79,6 +78,7 @@
 (require 'luna)
 (require 'std11)
 (require 'w3m)
+(require 'xml)
 
 (eval-and-compile
   (luna-define-class shimbun ()
@@ -96,9 +96,6 @@
 			  ;; Say whether to convert Japanese zenkaku
 			  ;; ASCII chars into hankaku.
 			  japanese-hankaku
-			  ;; Coding system for encoding URIs when
-			  ;; accessing the server.
-			  url-coding-system
 			  ;; Number of times to retry fetching contents.
 			  retry-fetching))
   (luna-define-internal-accessors 'shimbun))
@@ -234,11 +231,21 @@ Default is the value of `w3m-default-save-directory'."
   (shimbun-mua-shimbun-internal mua))
 
 ;;; emacs-w3m implementation of url retrieval and entity decoding.
-(defun shimbun-retrieve-url (url &optional no-cache no-decode
-				 referer url-coding-system)
+(defalias 'shimbun-beginning-of-tag 'w3m-beginning-of-tag)
+(defalias 'shimbun-decode-anchor-string 'w3m-decode-anchor-string)
+(defalias 'shimbun-decode-entities 'w3m-decode-entities)
+(defalias 'shimbun-decode-entities-string 'w3m-decode-entities-string)
+(defalias 'shimbun-end-of-tag 'w3m-end-of-tag)
+(defalias 'shimbun-expand-url 'w3m-expand-url)
+(defalias 'shimbun-find-coding-system 'w3m-find-coding-system)
+(defalias 'shimbun-flet 'w3m-flet)
+(defalias 'shimbun-interactive-p 'w3m-interactive-p)
+(defalias 'shimbun-replace-in-string 'w3m-replace-in-string)
+(defalias 'shimbun-url-encode-string 'w3m-url-encode-string)
+
+(defun shimbun-retrieve-url (url &optional no-cache no-decode referer)
   "Rertrieve URL contents and insert to current buffer.
-Return content-type of URL as string when retrieval succeeded.
-Non-ASCII characters `url' are escaped based on `url-coding-system'."
+Return content-type of URL as string when retrieval succeeded."
   (let (type charset fname)
     (if (and url
 	     shimbun-use-local
@@ -262,9 +269,8 @@ Non-ASCII characters `url' are escaped based on `url-coding-system'."
 	      (delete-region (point-min) pos))))
       ;; retrieve URL
       (when url
-	(setq type (w3m-retrieve
-		    (w3m-url-transfer-encode-string url url-coding-system)
-		    nil no-cache nil referer))))
+	(setq type (w3m-retrieve (w3m-url-transfer-encode-string url)
+				 nil no-cache nil referer))))
     (if type
 	(progn
 	  (unless no-decode
@@ -285,30 +291,19 @@ Non-ASCII characters `url' are escaped based on `url-coding-system'."
       shimbun-retry-fetching))
 
 (defun shimbun-fetch-url (shimbun url &optional no-cache no-decode referer)
-  "Retrieve contents specified by URL for SHIMBUN.
-This function is exacly similar to `shimbun-retrieve-url', but
-considers the `coding-system' slot of SHIMBUN when estimating a
-coding system of retrieved contents and the `url-coding-system'
-slot of SHIMBUN to encode URL."
-  (let* ((coding (shimbun-coding-system-internal shimbun))
-	 (w3m-coding-system-priority-list
-	  (if coding
-	      (cons coding w3m-coding-system-priority-list)
-	    w3m-coding-system-priority-list))
-	 (retry (shimbun-retry-fetching shimbun)))
-    (setq coding (or (shimbun-url-coding-system-internal shimbun) coding))
+  "Retrieve contents specified by URL for SHIMBUN."
+  (let ((retry (shimbun-retry-fetching shimbun)))
     (save-restriction
       (narrow-to-region (point) (point))
-      (or (inline (shimbun-retrieve-url url no-cache no-decode referer coding))
+      (or (shimbun-retrieve-url url no-cache no-decode referer)
 	  (and retry
 	       (let (retval)
 		 (shimbun-message
 		  shimbun "shimbun: Retrying to fetch contents...")
 		 (while (and (> retry 0) (not retval))
 		   (delete-region (point-min) (point-max))
-		   (setq retval (inline
-				  (shimbun-retrieve-url
-				   url no-cache no-decode referer coding))
+		   (setq retval (shimbun-retrieve-url
+				 url no-cache no-decode referer)
 			 retry (1- retry)))
 		 (shimbun-message shimbun
 				  "shimbun: Retrying to fetch contents...%s"
@@ -318,14 +313,6 @@ slot of SHIMBUN to encode URL."
 (defun shimbun-real-url (url &optional no-cache)
   "Return a real URL."
   (w3m-real-url url no-cache))
-
-(defalias 'shimbun-decode-anchor-string 'w3m-decode-anchor-string)
-(defalias 'shimbun-decode-entities 'w3m-decode-entities)
-(defalias 'shimbun-decode-entities-string 'w3m-decode-entities-string)
-(defalias 'shimbun-expand-url 'w3m-expand-url)
-(defalias 'shimbun-find-coding-system 'w3m-find-coding-system)
-(defalias 'shimbun-replace-in-string 'w3m-replace-in-string)
-(defalias 'shimbun-url-encode-string 'w3m-url-encode-string)
 
 ;;; Implementation of Header API.
 (eval-and-compile
@@ -346,7 +333,7 @@ slot of SHIMBUN to encode URL."
     (shimbun-mime-encode-string
      (shimbun-header-subject-internal header))))
 
-(defsubst shimbun-header-normalize (string &optional keep-angle-brackets)
+(defun shimbun-header-normalize (string &optional keep-angle-brackets)
   (when string
     (save-match-data
       ;; This is a trick to keep backward compatibility for
@@ -456,16 +443,15 @@ following operations are unnecessary:
 If optional 11th argument ASIS is non-nil, normalization of header
 values is suppressed."
   (let ((new (luna-make-entity 'shimbun-header :number number)))
-    (inline
-      (shimbun-header-set-subject new subject asis)
-      (shimbun-header-set-from new from asis)
-      (shimbun-header-set-date new date asis)
-      (shimbun-header-set-id new id asis)
-      (shimbun-header-set-references new references asis)
-      (shimbun-header-set-chars new chars)
-      (shimbun-header-set-lines new lines)
-      (shimbun-header-set-xref new xref)
-      (shimbun-header-set-extra new extra))
+    (shimbun-header-set-subject new subject asis)
+    (shimbun-header-set-from new from asis)
+    (shimbun-header-set-date new date asis)
+    (shimbun-header-set-id new id asis)
+    (shimbun-header-set-references new references asis)
+    (shimbun-header-set-chars new chars)
+    (shimbun-header-set-lines new lines)
+    (shimbun-header-set-xref new xref)
+    (shimbun-header-set-extra new extra)
     new))
 
 (defun shimbun-make-header (&optional number subject from date id
@@ -479,8 +465,8 @@ instead of this function."
 			 (and from (eword-decode-string from))
 			 date id references chars lines xref extra t))
 
-;; Inline functions for the internal use.
-(defsubst shimbun-article-base-url (shimbun header)
+;; Functions for the internal use.
+(defun shimbun-article-base-url (shimbun header)
   "Return URL which points the original page specified by HEADER for SHIMBUN."
   (let ((xref (shimbun-header-xref header)))
     (if (and xref (eq (aref xref 0) ?/))
@@ -594,16 +580,33 @@ Generated article have a multipart/related content-type."
   "Return MIME charset of ENTITY.")
 (luna-define-method shimbun-text-entity-charset ((entity shimbun-text-entity)
 						 &optional begin end)
-  (or (shimbun-text-entity-charset-internal entity)
-      (shimbun-text-entity-set-charset-internal
-       entity
-       (upcase
-	(symbol-name
-	 (if (and begin end)
-	     (detect-mime-charset-region begin end)
-	   (with-temp-buffer
-	     (insert (shimbun-entity-data-internal entity))
-	     (detect-mime-charset-region (point-min) (point-max)))))))))
+  (let (cur tmp)
+    (unless (and begin end)
+      (setq cur (current-buffer))
+      (set-buffer (generate-new-buffer " *temp*"))
+      (insert (shimbun-entity-data-internal entity))
+      (setq begin (point-min)
+	    end (point-max)
+	    tmp (current-buffer)))
+    (prog1
+	;; Prefer meta charset.
+	(or (let ((charset (progn
+			     (goto-char begin)
+			     (and (re-search-forward "\
+<meta\\s-+http-equiv=[\"']?content-type[\"']?\\s-+content=[\"']\
+text/\\sw+\\(?:\;\\s-*charset=\\(.+\\)\\)?[\"'][^>]*>" end t)
+				  (match-string 1)))))
+	      (when (and charset
+			 (w3m-find-coding-system (intern (downcase charset))))
+		(shimbun-text-entity-set-charset-internal entity
+							  (upcase charset))))
+	    (shimbun-text-entity-charset-internal entity)
+	    (shimbun-text-entity-set-charset-internal
+	     entity (upcase (symbol-name
+			     (detect-mime-charset-region begin end)))))
+      (when cur
+	(set-buffer cur)
+	(kill-buffer tmp)))))
 
 (luna-define-method shimbun-entity-type ((entity shimbun-text-entity))
   (concat (shimbun-entity-type-internal entity)
@@ -686,7 +689,9 @@ image parts, and returns an alist of URLs and image entities."
 		      (substring url 0 (match-beginning 0))
 		    url))
 		 base-url))
-      (unless (setq img (assoc url images))
+      (unless (or (setq img (assoc url images))
+		  (and w3m-ignored-image-url-regexp
+		       (string-match w3m-ignored-image-url-regexp url)))
 	(with-temp-buffer
 	  (set-buffer-multibyte nil)
 	  (setq case-fold-search nil
@@ -762,13 +767,14 @@ you want to use no database."
   (let ((from (shimbun-header-from header))
 	(refs (shimbun-header-references header))
 	(reply-to (shimbun-reply-to shimbun))
-	x-face
-	;; Make sure the temp buffer's multibyteness is true.  It is
-	;; needed to make `encode-mime-charset-string' (which is
-	;; employed by `eword-encode-string') encode non-ascii text.
-	(default-enable-multibyte-characters t))
+	x-face)
     (insert
      (with-temp-buffer
+       ;; Make sure the temp buffer's multibyteness is true.  It is
+       ;; needed to make `encode-mime-charset-string' (which is
+       ;; employed by `eword-encode-string') encode non-ascii text.
+       (static-unless (featurep 'xemacs)
+	 (set-buffer-multibyte t))
        (insert "Subject: " (or (eword-encode-string
 				(shimbun-header-subject header t))
 			       "(none)")
@@ -859,7 +865,7 @@ you want to use no database."
   '(url groups coding-system server-name from-address
 	content-start content-end x-face-alist expiration-days
 	prefer-text-plain text-content-start text-content-end
-	japanese-hankaku url-coding-system retry-fetching))
+	japanese-hankaku retry-fetching))
 
 (defun shimbun-open (server &optional mua)
   "Open a shimbun for SERVER.
@@ -1035,7 +1041,7 @@ Bind it to nil per shimbun if the refresh brings unwanted page.")
 Return nil when articles are not expired."
   (shimbun-expiration-days-internal shimbun))
 
-(defsubst shimbun-content-start (shimbun)
+(defun shimbun-content-start (shimbun)
   "Return the `content-start' value according to SHIMBUN."
   (if (shimbun-prefer-text-plain-internal shimbun)
       (or (shimbun-text-content-start-internal shimbun)
@@ -1043,7 +1049,7 @@ Return nil when articles are not expired."
     (or (shimbun-content-start-internal shimbun)
 	(shimbun-text-content-start-internal shimbun))))
 
-(defsubst shimbun-content-end (shimbun)
+(defun shimbun-content-end (shimbun)
   "Return the `content-end' value according to SHIMBUN."
   (if (shimbun-prefer-text-plain-internal shimbun)
       (or (shimbun-text-content-end-internal shimbun)
@@ -1110,9 +1116,15 @@ HEADER is a header structure obtained via `shimbun-headers'.")
 
 (defun shimbun-insert-footer (shimbun header &optional html &rest args)
   "Insert the footer and ARGS."
+  ;; Remove <p> and </p> from the last paragraph in order to prevent
+  ;; an empty line from being inserted at the end.
+  (goto-char (point-min))
+  (when (re-search-forward "[\t\n ]*<p>[\t\n ]*\\([^<]+\\)</p>[\t\n ]*\
+\\(?:<\\(?:![^>]+\\|/?div\\|/?p\\)>[\t\n ]*\\)*\\'" nil t)
+    (replace-match "\n\\1"))
   (goto-char (point-min))
   (when (re-search-forward
-	 "[\t\n ]*\\(?:<\\(?:![^>]+\\|br\\|/?div\\|/?p\\)>[\t\n ]*\\)*\\'"
+	 "[\t\n ]*\\(?:<\\(?:![^>]+\\|br\\|div\\)>[\t\n ]*\\)*\\'"
 	 nil 'move)
     (delete-region (match-beginning 0) (point-max)))
   (apply 'insert "\n" (shimbun-footer shimbun header html) args))
@@ -1132,7 +1144,8 @@ HEADER is a header structure obtained via `shimbun-headers'.")
 
 (defun shimbun-make-html-contents (shimbun header)
   (let ((base-url (or (shimbun-current-base-url)
-		      (shimbun-article-url shimbun header))))
+		      (file-name-directory
+		       (shimbun-article-url shimbun header)))))
     (when (shimbun-clear-contents shimbun header)
       (goto-char (point-min))
       (insert "<html>\n<head>\n<base href=\""
@@ -1224,14 +1237,14 @@ integer n:    Retrieve n pages of header indices.")
       (concat "<div align=\"left\">\n--&nbsp;<br>\n$B$3$N5-;v$NCx:n8"$O!"(B"
 	      (shimbun-server-name shimbun)
 	      "$B<R$K5"B0$7$^$9!#(B<br>\n$B86J*$O(B <a href=\""
-	      (shimbun-article-base-url shimbun header) "\">"
+	      (shimbun-article-base-url shimbun header) "\">&lt;"
 	      (shimbun-article-base-url shimbun header)
-	      "</a> $B$G8x3+$5$l$F$$$^$9!#(B\n</div>\n")
+	      "&gt;</a> $B$G8x3+$5$l$F$$$^$9!#(B\n</div>\n")
     (concat "-- \n$B$3$N5-;v$NCx:n8"$O!"(B"
 	    (shimbun-server-name shimbun)
-	    "$B<R$K5"B0$7$^$9!#(B\n$B86J*$O(B "
+	    "$B<R$K5"B0$7$^$9!#(B\n$B86J*$O(B <"
 	    (shimbun-article-base-url shimbun header)
-	    " $B$G8x3+$5$l$F$$$^$9!#(B\n")))
+	    "> $B$G8x3+$5$l$F$$$^$9!#(B\n")))
 
 ;;; Misc Functions
 (defun shimbun-header-insert-and-buffer-string (shimbun header
@@ -1252,7 +1265,7 @@ that the content type is text/html, otherwise text/plain."
   (if html
       (progn
 	(insert "<html>\n<head>\n<base href=\""
-		(shimbun-article-url shimbun header)
+		(file-name-directory (shimbun-article-url shimbun header))
 		"\">\n</head>\n<body>\n")
 	(shimbun-insert-footer shimbun header t "</body>\n</html>\n"))
     (shimbun-insert-footer shimbun header))
@@ -1261,16 +1274,17 @@ that the content type is text/html, otherwise text/plain."
 (defun shimbun-mime-encode-string (string)
   (condition-case nil
       (save-match-data
-	;; Make sure the temp buffer's multibyteness is true.  It is
-	;; needed to make `encode-mime-charset-string' (which is
-	;; employed by `eword-encode-string') encode non-ascii text.
-	(let ((default-enable-multibyte-characters t))
-	  (with-temp-buffer
-	    (mapconcat
-	     #'identity
-	     (split-string (or (eword-encode-string
-				(shimbun-decode-entities-string string)) ""))
-	     " "))))
+	(with-temp-buffer
+	  ;; Make sure the temp buffer's multibyteness is true.  It is
+	  ;; needed to make `encode-mime-charset-string' (which is
+	  ;; employed by `eword-encode-string') encode non-ascii text.
+	  (static-unless (featurep 'xemacs)
+	    (set-buffer-multibyte t))
+	  (mapconcat
+	   #'identity
+	   (split-string (or (eword-encode-string
+			      (shimbun-decode-entities-string string)) ""))
+	   " ")))
     (error string)))
 
 (defun shimbun-make-date-string (year month day &optional time timezone)
@@ -1340,110 +1354,64 @@ the following form returns the present time of Japan, wherever you are.
 		   (< (cadr a) (cadr b)))))))
 
 (defun shimbun-remove-tags (begin-tag &optional end-tag)
-  "Remove all occurrences of regions surrounded by BEGIN-TAG and END-TAG."
+  "Remove all occurrences of regions surrounded by BEGIN-TAG and END-TAG.
+
+If END-TAG is neither nil nor a string, it works strictly for open and
+close tags (i.e. <tag>...</tag>).  In that case, BEGIN-TAG should be a
+regexp matching text within an open tag \"<...>\", and buffer's text that
+matches the first non-shy sub-expression surrounded by parens \"\\\\(...\\\\)\"
+in BEGIN-TAG is regarded as a name of an open tag; if there is no paren
+in BEGIN-TAG, the whole text that matches BEGIN-TAG is regarded as a tag
+name."
   (let ((case-fold-search t))
     (goto-char (point-min))
-    (if end-tag
-	(let (pos)
-	  (while (and (re-search-forward begin-tag nil t)
-		      (setq pos (match-beginning 0))
-		      (re-search-forward end-tag nil t))
-	    (delete-region pos (point))))
-      (while (re-search-forward begin-tag nil t)
-	(delete-region (match-beginning 0) (match-end 0))))))
+    (cond ((stringp end-tag)
+	   (let (pos)
+	     (while (and (re-search-forward begin-tag nil t)
+			 (setq pos (match-beginning 0))
+			 (re-search-forward end-tag nil t))
+	       (delete-region pos (point)))))
+	  ((null end-tag)
+	   (while (re-search-forward begin-tag nil t)
+	     (delete-region (match-beginning 0) (match-end 0))))
+	  (t
+	   (setq begin-tag
+		 (if (string-match "\\\\([^?]" begin-tag)
+		     (concat "<[\t\n\r ]*" begin-tag)
+		   (concat "<[\t\n\r ]*\\(" begin-tag "\\)[\t\n\r >]")))
+	   (while (re-search-forward begin-tag nil t)
+	     (when (or (not (eq (match-end 0) (match-end 1)))
+		       (memq (char-after) '(?\t ?\n ?\r ?  ?>)))
+	       (goto-char (match-beginning 0))
+	       (if (shimbun-end-of-tag (match-string 1) t)
+		   (replace-match "\n")
+		 (goto-char (match-end 0)))))))))
 
-(defun shimbun-end-of-tag (&optional tag include-whitespace)
-  "Move point to the end of tag.  Inner nested tags are skipped.
-If TAG, which is a name of the tag, is given, this function moves point
-from the open-tag <TAG ...> (point should exist in front of or within
-it initially) to the end-point of the closing-tag </TAG>.  For example,
-in the following two situations, point moves from the leftmost tag to
-the end-point of the rightmost tag:
-
-<TAG ...>...<TAG ...>...<TAG ...>...</TAG>...</TAG>...</TAG>
-<TAG ...>...<TAG ...>...</TAG>...<TAG ...>...</TAG>...</TAG>
-
-If TAG is omitted or nil, this function moves point to the end-point of
-the tag in which point exists.  In this case, point should initially
-exist within the start position of the tag and the next tag as follows:
-
-<!-- foo <bar ...<baz ...>...> -->
- ^^^^^^^^
-If INCLUDE-WHITESPACE is non-nil, include leading and trailing
-whitespace.  Return the end-point and set the match-data #0, #1, #2,
-and #3 as follows (\"___\" shows whitespace):
-
-The case where TAG is spefified:
-___<TAG ...>___...___</TAG>___
-   0        1  2  2  1     0     INCLUDE-WHITESPACE=nil
-0  1        2  3  3  2     1  0  INCLUDE-WHITESPACE=non-nil
-
-The case where TAG is nil:
-___<TAG ...>___
-   0        0     INCLUDE-WHITESPACE=nil
-0  1        1  0  INCLUDE-WHITESPACE=non-nil"
-  (let ((init (point))
-	(num 1)
-	(md (match-data))
-	(case-fold-search t)
-	regexp st1 st2 st3 nd1 nd2 nd3 nd0 st0)
-    (condition-case nil
-	(progn
-	  (if tag
-	      (progn
-		(setq tag (regexp-quote tag))
-		(if (looking-at (concat "\
-\[\t\n\r ]*\\(<[\t\n\r ]*" tag "\\(?:[\t\n\r ]*\\|[\t\n\r ]+[^>]+\\)>\\)\
-\[\t\n\r ]*"))
-		    (setq st1 (nth 2 (match-data)) ;; (match-beginning 1)
-			  st2 (nth 3 (match-data)) ;; (match-end 1)
-			  st3 (nth 1 (match-data))) ;; (match-end 0)
-		  (search-backward "<")
-		  (if (looking-at (concat "\
-\\(<[\t\n\r ]*" tag "\\(?:[\t\n\r ]*\\|[\t\n\r ]+[^>]+\\)>\\)[\t\n\r ]*"))
-		      (setq st1 (car (match-data)) ;; (match-beginning 0)
-			    st2 (nth 3 (match-data)) ;; (match-end 1))
-			    st3 (nth 1 (match-data))) ;; (match-end 0)
-		    (error "")))
-		(goto-char (1+ st1))
-		(setq regexp (concat "\
-\[\t\n\r ]*\\(<\\(/\\)?" tag "\\(?:[\t\n\r ]*\\|[\t\n\r ]+[^>]+\\)>\\)"))
-		(while (and (> num 0)
-			    (re-search-forward regexp))
-		  (setq num (if (match-beginning 2)
-				(1- num)
-			      (1+ num))))
-		(setq nd1 (nth 3 (match-data)) ;; (match-end 1)
-		      nd2 (nth 2 (match-data)) ;; (match-beginning 1)
-		      nd3 (car (match-data)))) ;; (match-beginning 0)
-	    (search-backward "<")
-	    (setq st1 (car (match-data))) ;; (match-beginning 0)
-	    (goto-char init)
-	    (while (and (> num 0)
-			(re-search-forward "\\(>\\)\\|<"))
-	      (setq num (if (match-beginning 1)
-			    (1- num)
-			  (1+ num))))
-	    (setq nd1 (nth 3 (match-data)))) ;; (match-end 1)
-	  (if include-whitespace
-	      (progn
-		(skip-chars-forward "\t\n\r ")
-		(setq nd0 (point-marker))
-		(goto-char st1)
-		(skip-chars-backward "\t\n\r ")
-		(setq st0 (point-marker))
-		(goto-char nd0)
-		(set-match-data (if tag
-				    (list st0 nd0 st1 nd1 st2 nd2 st3 nd3)
-				  (list st0 nd0 st1 nd1))))
-	    (set-match-data (if tag
-				(list st1 nd1 st2 nd2 st3 nd3)
-			      (list st1 nd1))))
-	  (point))
-      (error
-       (set-match-data md)
-       (goto-char init)
-       nil))))
+(defun shimbun-remove-orphaned-tag-strips (string)
+  "Remove orphaned tag strips that match STRING.
+STRING is like the inside of a \"\\\\(...\\\\)\" in a regular expression."
+  (let (regexp st nd)
+    (setq regexp (concat "<[\t\n\r ]*/[\t\n\r ]*\\(" string
+			 "\\)\\(?:[\t\n\r ][^>]+\\)?[\t\n\r ]*>[\t ]*"))
+    (goto-char (point-max))
+    (while (re-search-backward regexp nil t)
+      (setq st (match-beginning 0)
+	    nd (goto-char (match-end 0)))
+      (unless (prog1
+		  (shimbun-beginning-of-tag (match-string 1))
+		(goto-char st))
+	(skip-chars-backward "\t\n\r ")
+	(delete-region (point) nd)))
+    (setq regexp (concat "[\t\n\r ]*<[\t\n\r ]*\\(" string
+			 "\\)\\(?:[\t\n\r ][^>]+\\)?[\t\n\r ]*>[\t ]*"))
+    (goto-char (point-min))
+    (while (re-search-forward regexp nil t)
+      (setq st (goto-char (match-beginning 0))
+	    nd (match-end 0))
+      (unless (prog1
+		  (shimbun-end-of-tag (match-string 1))
+		(goto-char nd))
+	(delete-region st nd)))))
 
 (defun shimbun-remove-markup ()
   "Remove all HTML markup, leaving just plain text."
@@ -1457,7 +1425,7 @@ ___<TAG ...>___
     (while (re-search-forward "<[^>]+>" nil t)
       (replace-match "" t t))))
 
-(defsubst shimbun-strip-cr ()
+(defun shimbun-strip-cr ()
   "Strip ^M from the end of all lines."
   (goto-char (point-max))
   (while (search-backward "\r\n" nil t)
@@ -1493,9 +1461,10 @@ Use ## to put a single # into the output.  If `shimbun-verbose' is nil,
 it will run silently.  The `shimbun-message-enable-logging' variable
 controls whether this function should preserve a message in the
 *Messages* buffer."
-  (let ((default-enable-multibyte-characters t)
-	specifier)
+  (let (specifier)
     (with-temp-buffer
+      (static-unless (featurep 'xemacs)
+	(set-buffer-multibyte t))
       (insert fmt)
       (goto-char (point-min))
       (while (search-forward "#" nil t)
@@ -1633,7 +1602,7 @@ it considers the buffer has already been narrowed to an article."
 	(error))
       (goto-char start)
       (while (re-search-forward
-	      "[^$B!!!"!#!$!%!2!<!=!>!A!F!G!H!I!J!K!N!O!P!Q!R!S!a!l!m!o(B]+"
+	      "[^$B!!!"!#!$!%!2!<!=!>!A!A!F!G!H!I!J!K!N!O!P!Q!R!S!a!l!m!o(B]+"
 	      nil t)
 	(japanese-hankaku-region (match-beginning 0) (match-end 0) t))
       (goto-char start)
@@ -1724,7 +1693,7 @@ it considers the buffer has already been narrowed to an article."
 		   (and (member (match-string 1) '("$B8aA0(B" "$B8a8e(B"))
 			(eq (char-before) ?$B;~(B))
 		   (memq (char-before (match-end 1))
-			 '(?$B!!(B ?$B!\(B ?$B!](B ?$B!^(B ?$B!_(B ?$B!`(B ?$B!a(B ?$B!b(B ?$B!e(B ?$B!f(B ?$B"b(B
+			 '(?$B!!(B ?$B!\(B ?$B!](B ?$B!^(B ?$B!_(B ?$B!`(B ?$B!a(B ?$B!b(B ?$B!e(B ?$B!f(B ?$B-p(B
 			       ?$B"c(B ?$B"d(B))
 		   (and (memq (char-before (match-end 1)) '(?$BBh(B ?$BLs(B))
 			(memq ?j
@@ -1771,12 +1740,12 @@ it considers the buffer has already been narrowed to an article."
       (let ((regexp
 	     (if (eq w3m-output-coding-system 'utf-8)
 		 (eval-when-compile
-		   (let ((chars "$A!2!4!6!8!:!<!>#"#($B!"!#!$!%!&!+!,!1!3!4!5!6!7(B\
+		   (let ((chars "$A!2!4!6!8!:!<!>$B|~$A#($B!"!#!$!%!&!+!,!1!3!4!5!6!7(B\
 $B!A!J!K!L!M!N!O!P!Q!R!S!T!U!V!W!X!Y!Z![(B"))
 		     (concat "\\(?:[ $B!!(B]\\|&nbsp;\\)\\([" chars "$A!f$B!9!n(B]\\)"
 			     "\\|\\([" chars "]\\)\\(?:[ $B!!(B]\\|&nbsp;\\)")))
 	       (eval-when-compile
-		 (let ((chars "$A!.!0!2!4!6!8!:!<!>!c!d!e!l#"#($B!"!#!$!%!&!+!,!/(B\
+		 (let ((chars "$A!.!0!2!4!6!8!:!<!>!c!d!e!l$B|~$A#($B!"!#!$!%!&!+!,!/(B\
 $B!1!3!4!5!6!7!A!B!D!E!F!G!H!I!J!K!L!M!N!O!P!Q!R!S!T!U!V!W!X!Y!Z![!k!l!m!x(B"))
 		   (concat "\\(?:[ $B!!(B]\\|&nbsp;\\)\\([" chars "$A!f$B!9!n(B]\\)"
 			   "\\|\\([" chars "]\\)\\(?:[ $B!!(B]\\|&nbsp;\\)"))))))
@@ -1831,6 +1800,48 @@ There are exceptions; some chars aren't converted, and \"$B!c(B\", \"$B!d(B\
       (setq start (point)))
     (unless (eobp)
       (shimbun-japanese-hankaku-region start (point-max) quote))))
+
+;; Silence XEmacs's byte compiler.
+(eval-when-compile
+  (if (fboundp 'libxml-parse-xml-region) nil
+    (defalias 'libxml-parse-xml-region 'ignore)))
+
+(defun shimbun-xml-parse-buffer ()
+  "Calls (lib)xml-parse-region on the whole buffer.
+This is a wrapper for `xml-parse-region', which will resort to
+using `libxml-parse-xml-region' if available, since it is much
+faster."
+  (if (and (fboundp 'libxml-parse-xml-region)
+	   (not (eq (symbol-function 'libxml-parse-xml-region) 'ignore)))
+      (save-excursion
+	(goto-char (point-min))
+	(let ((xml (when (search-forward "<" nil t)
+		     (libxml-parse-xml-region (match-beginning 0) (point-max))))
+	      start stylestring stylesheet)
+	  (if xml
+	      (progn
+		;; Parse the stylesheet
+		(goto-char (point-min))
+		(when (re-search-forward "<\\(rss\\|feed\\)\\(.*?\\)>"
+					 nil t)
+		  (setq stylestring (match-string 2)
+			start 0)
+		  (while (string-match "\\(xmlns:?.*?\\)=\"\\(.*?\\)\""
+				       stylestring start)
+		    (setq start (match-end 0))
+		    (push (cons (intern (match-string 1 stylestring))
+				(match-string 2 stylestring))
+			  stylesheet)))
+		;; Add stylesheet into XML structure
+		(when stylesheet
+		  (if (nth 1 xml)
+		      (nconc (nth 1 xml) stylesheet)
+		    (setcar (cdr xml) stylesheet)))
+		(list xml))
+	    ;; Unfortunately libxml failed parsing for some reason.
+	    (xml-parse-region (point-min) (point-max)))))
+    ;; We don't have libxml, so just use the slow one.
+    (xml-parse-region (point-min) (point-max))))
 
 (provide 'shimbun)
 

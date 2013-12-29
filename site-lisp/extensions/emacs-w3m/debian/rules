@@ -1,0 +1,92 @@
+#!/usr/bin/make -f
+
+#export DH_VERBOSE=1
+
+PACKAGE=`cat debian/PACKAGE`
+PKGSNAME=w3m
+PKGSNAME2=w3m-el
+
+configure: configure-stamp
+configure-stamp:
+	dh_testdir
+	[ -f configure ] || touch configure
+	[ -f configure.ORIG ] || mv configure configure.ORIG
+	autoconf
+	./configure --prefix=/usr
+	grep '^Package: ' debian/control | head -1 | sed -e "s/^Package: //g" > debian/PACKAGE
+	sed -e "s/@PACKAGE@/$(PACKAGE)/g" debian/README.Debian.in > debian/README.Debian
+	sed -e "s/@PACKAGE@/$(PACKAGE)/g" debian/dirs.in > debian/dirs
+	sed -e "s/@PACKAGE@/$(PACKAGE)/g" debian/emacsen-install.in > debian/emacsen-install
+	sed -e "s/@PACKAGE@/$(PACKAGE)/g" debian/emacsen-remove.in > debian/emacsen-remove
+	sed -e "s/@PACKAGE@/$(PACKAGE)/g" debian/emacsen-startup.in > debian/emacsen-startup
+	touch $@
+
+build-indep: configure-stamp build-indep-stamp
+build-indep-stamp:
+	dh_testdir
+	$(MAKE) info
+	touch $@
+
+build-arch:
+
+build: build-indep build-arch
+
+clean:
+	dh_testdir
+	dh_testroot
+	rm -f build*-stamp configure-stamp debian/PACKAGE debian/README.Debian debian/dirs debian/emacsen-install debian/emacsen-remove debian/emacsen-startup
+	if [ -f config.status ] && [ -f Makefile ]; then $(MAKE) distclean; fi
+	rm -f doc/version.texi
+	rm -rf autom4te*.cache
+	if [ -f configure.ORIG ]; then rm -f configure; mv configure.ORIG configure; fi
+	[ -s configure ] || rm -f configure
+	dh_clean
+
+install: build-indep
+	dh_testdir
+	dh_testroot
+	dh_prep
+	dh_installdirs
+	for f in ChangeLog.* shimbun/ChangeLog*; do \
+	  if [ -f "$$f" ]; then \
+	    f2=`echo "$$f" | sed 's!/!.!g'`; \
+	    install -m 644 "$$f" "$(CURDIR)/debian/$(PACKAGE)/usr/share/doc/$(PACKAGE)/$$f2"; \
+	  fi; \
+	done
+	if [ -f "$$f" ]; then \
+	  install -m 644 "$$f" $(CURDIR)/debian/$(PACKAGE)/usr/share/pixmaps/$(PKGSNAME2); \
+	fi; \
+	install -m 644 *.el $(CURDIR)/debian/$(PACKAGE)/usr/share/emacs/site-lisp/$(PKGSNAME)
+	install -m 644 attic/*.el $(CURDIR)/debian/$(PACKAGE)/usr/share/emacs/site-lisp/$(PKGSNAME)/attic
+	install -m 644 shimbun/*.el $(CURDIR)/debian/$(PACKAGE)/usr/share/emacs/site-lisp/$(PKGSNAME)/shimbun
+	for f in icons30/*.gif icons30/*.png icons30/*.xpm; do \
+	  if [ -f "$$f" ]; then \
+	    install -m 644 "$$f" $(CURDIR)/debian/$(PACKAGE)/usr/share/pixmaps/$(PKGSNAME2); \
+	  fi; \
+	done
+	for f in icons/*.gif icons/*.png icons/*.xpm; do \
+	  if [ -f "$$f" ]; then \
+	    install -m 644 "$$f" $(CURDIR)/debian/$(PACKAGE)/usr/share/pixmaps/$(PKGSNAME2)/small; \
+	  fi; \
+	done
+
+binary-indep: install
+	dh_testdir
+	dh_testroot
+	dh_installdocs
+	dh_installexamples debian/dot.w3m*
+	dh_installemacsen
+	dh_installinfo doc/emacs-w3m.info* doc/emacs-w3m-ja.info*
+	dh_installchangelogs ChangeLog
+	dh_link
+	dh_compress --exclude=.el
+	dh_fixperms
+	dh_installdeb
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary-arch:
+
+binary: binary-indep binary-arch
+.PHONY: build-indep build-arch build clean binary-indep binary-arch binary install configure

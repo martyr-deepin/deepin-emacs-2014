@@ -8,8 +8,7 @@
 @synindex pg cp
 
 @copying
-Copyright @copyright{} 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007,
-2008, 2009 @w{TSUCHIYA Masatoshi}
+Copyright @copyright{} 2000-2011 @w{TSUCHIYA Masatoshi}
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -1877,6 +1876,12 @@ web page as currently displayed in
 emacs-w3m(@code{w3m-view-url-with-external-browser}).  The external
 browser to be used is defined by the variable
 @code{w3m-content-type-alist}, depending on the kind of URL.
+
+@item @kbd{|}
+@kindex |
+@findex w3m-pipe-source
+Pipe the source of the web page to a command.  You will be prompted for
+the command (@code{w3m-pipe-source}).
 @end table
 
 The (@pxref{Tips}) section gives more examples on how to integrate
@@ -2857,9 +2862,6 @@ those file names to the second element of this variable.  For example:
       '(nil . "\\.\\(?:[sx]?html?\\|dvi\\|ps\\|pdf\\)\\'"))
 @end lisp
 
-See also @code{w3m-use-doc-view-mode}, which you will need to modify for
-such a case.
-
 It is effective only when the @code{w3m-local-find-file-function}
 variable is set properly.
 
@@ -2928,7 +2930,7 @@ emacs-w3m session.
 @item w3m-popup-frame-parameters
 @vindex w3m-popup-frame-parameters
 Alist of frame parameters used when creating a new emacs-w3m frame.  It
-allows not only the alist form but also XEmacs' plist form.
+allows not only the alist form but also XEmacs's plist form.
 
 @item w3m-prefer-cache
 @vindex w3m-prefer-cache
@@ -2974,47 +2976,6 @@ window.
 The percentage of the selection window to the whole frame.  The car is
 used when splitting windows horizontally and the cdr is for splitting
 windows vertically.
-
-@item w3m-show-decoded-url
-@vindex w3m-show-decoded-url
-Non-@code{nil} means show decoded URIs in the echo area, the balloon,
-etc.  This variable can take one of the following five kinds of forms:
-
-@enumerate
-@item
-t
-
-Decode URIs using the encoding guessed from the value of
-@code{w3m-coding-system-priority-list}.
-
-@item
-Coding system
-
-Decode URIs using this value.
-
-@item
-List of coding systems
-
-Decode URIs using the encoding assumed based on this list.
-
-@item
-Alist of predicates and forms described below:
-
-Each element looks like the @code{(PREDICATE . ENCODING)} form.
-@code{PREDICATE} should be a regexp, a function or a Lisp form, and
-@code{ENCODING} should be one of the forms described here excluding this
-form.  If @code{PREDICATE} is a regexp, it will be tested whether it
-matches to the target url.  If it is a function, it will be called with
-the target url.  If it is a Lisp form, it will be simply evaluated.
-Elements are tested in turn until the result of the test of the
-predicate is true and the encoding which is associated to the predicate
-is used for decoding URIs.
-
-@item
-nil
-
-Don't decode URIs.
-@end enumerate
 
 @item w3m-use-title-buffer-name
 @vindex w3m-use-title-buffer-name
@@ -3173,6 +3134,11 @@ Non-@code{nil} means honor the REFRESH attribute in META tags.
 Emacs-w3m arbitrarily takes you to a url specified by that attribute.
 Note that they may be malicious traps.
 
+@item w3m-refresh-minimum-interval
+@vindex w3m-refresh-minimum-interval
+Minimum seconds to wait for refresh, when visiting a page by
+history-back or history-next.
+
 @item w3m-use-symbol
 @vindex w3m-use-symbol
 Non-@code{nil} means replace symbols that the @samp{<_SYMBOL>} tags lead
@@ -3213,6 +3179,11 @@ String used for the User-Agent field.  See also
 @vindex w3m-new-session-in-background
 Say whether not to focus on a new tab or a new session in target.
 It influences only when a new emacs-w3m buffer is created.
+
+@item w3m-do-cleanup-temp-files
+@vindex w3m-do-cleanup-temp-files
+Non-@code{nil} enables emacs-w3m's auto cleanig forgotten temporary
+files feature. The default is @code{nil}.
 @end table
 
 @node Image Variables
@@ -3461,6 +3432,11 @@ it defaults to @code{w3m-default-coding-system}.
 Non-@code{nil} means that the word at point is used as an initial
 string.  If @code{transient-mark-mode}, this option is ignored and the
 region is used as an initial string.  The default is @code{t}.
+
+@item w3m-search-thing-at-point-arg
+@vindex w3m-search-thing-at-point-arg
+Argument for `thing-at-point' used in `w3m-search-read-query'. The
+default is @code{word}.
 @end table
 
 @node Weather Variables
@@ -3838,18 +3814,31 @@ message is called an @samp{article} by Gnus users.
 @node Gnus
 @section Reading HTML mails in Gnus
 @cindex Reading HTML mails in Gnus
+@findex mm-shr
+@findex gnus-article-html
 @vindex mm-inline-text-html-with-images
 @vindex mm-inline-text-html-with-w3m-keymap
 @vindex mm-text-html-renderer
 @vindex w3m-minor-mode
 @vindex w3m-minor-mode-command-alist
 
-Did you know that Gnus, the Emacs newsreader, supports emacs-w3m?
-Actually, Gnus bundled with Emacs of which the version is 22.1 or
-greater supports emacs-w3m.  If your Emacs is somewhat old, you'd better
-use the latest version of Gnus.  It is available at:
+First of all, if the user option @code{mm-text-html-renderer} defaults
+to @code{shr} or @code{gnus-w3m} (i.e., if the function @code{mm-shr} or
+@code{gnus-article-html} is available) and you are satisfied with that
+function that is Gnus' built-in @acronym{HTML} renderer, you may not
+want to do anything.  @xref{Display Customization, ,Display
+Customization, emacs-mime, The Emacs MIME Manual}.  Also @xref{HTML,
+,HTML, gnus, The Gnus Manual}.
 
-@uref{ftp://ftp.gnus.org/pub/gnus/gnus.tar.gz}
+@quotation
+There's a tip on using @code{gnus-article-html} under XEmacs in:
+@uref{http://article.gmane.org/gmane.emacs.gnus.general/72704}
+@end quotation
+
+But if Gnus you use is a bit old and neither the @code{mm-shr} function
+nor the @code{gnus-article-html} function is available, or if you'd like
+to try emacs-w3m to render @acronym{HTML} articles, this section is just
+for you.
 
 @itemize @bullet
 @item
@@ -3871,9 +3860,7 @@ commands are replaced by others similar to them, for security reasons
 @item
 What do you have to do?
 
-Read the Gnus manual (@pxref{Display Customization, ,Display
-Customization, emacs-mime, The Emacs MIME Manual}).  The easiest way is
-to put the following line in your @file{~/.gnus.el} file:
+Add this line to your @file{~/.gnus.el} file:
 
 @lisp
 (setq mm-text-html-renderer 'w3m)
@@ -3948,8 +3935,11 @@ If the prefix arg is given, force displaying of images."
 
 (eval-after-load "gnus-sum"
   '(define-key gnus-summary-mode-map
-     "\C-i" 'gnus-summary-w3m-safe-toggle-inline-images))
+     "vi" 'gnus-summary-w3m-safe-toggle-inline-images))
 @end lisp
+
+You can change the key @kbd{vi} into something another.  Also
+@pxref{Summary Buffer, ,Summary Buffer, gnus, The Gnus Manual}.
 @end itemize
 
 @noindent
@@ -4082,8 +4072,7 @@ Wanderlust:
   "Toggle displaying of all images in the message buffer.
 If the prefix arg is given, all images are considered to be safe."
   (interactive "P")
-  (save-excursion
-    (set-buffer wl-message-buffer)
+  (with-current-buffer wl-message-buffer
     (w3m-toggle-inline-images arg)))
 
 (eval-after-load "wl-summary"
@@ -4605,14 +4594,16 @@ prefetched articles.
 
 @item nnshimbun-directory
 @vindex nnshimbun-directory
-Directory where @samp{nnshimbun} saves @acronym{NOV} files.  The default
-value is @samp{~/News/shimbun/}.
+Directory where @samp{nnshimbun} saves @acronym{NOV} and marks files.
+The default value is @samp{~/News/shimbun/}.  This is a server variable
+(@pxref{Server Variables, ,Server Variables, gnus, The Gnus Manual}).
 
 @item nnshimbun-default-group-level
 @vindex nnshimbun-default-group-level
 The default group level overriding @code{gnus-level-default-subscribed}.
 It will be applied to newly created @samp{nnshimbun} groups.  The
-default value is @code{nil}.
+default value is @code{nil}.  This is a server variable (@pxref{Server
+Variables, ,Server Variables, gnus, The Gnus Manual}).
 @end table
 
 @cindex group parameters
@@ -5166,7 +5157,7 @@ asahi.shopping asahi.shopping.column asahi.shopping.yakimono
 asahi.shougi asahi.sports asahi.sports.baseball asahi.sports.battle
 asahi.sports.etc asahi.sports.football asahi.sports.golf
 asahi.sports.rugby asahi.sports.usa asahi.sports.winter asahi.tenjin
-asahi.travel
+asahi.travel asahi.wakata
 
 Those groups generate articles containing only text by default.  If you
 would like to make them generate HTML articles that contain not only
@@ -5206,12 +5197,14 @@ gendai-net.wadai gendai-net.kenko gendai-net.syoku gendai-net.book
 
 @item @uref{http://mainichi.jp/, Mainichi jp}
 @itemx (This site has been shifted from MSN in October, 2007)
-mainichi.flash mainichi.sports mainichi.entertainment
-mainichi.entertainment.art mainichi.mantan mainichi.electronics
-mainichi.weekly mainichi.opinion.editorial mainichi.opinion.yoroku
-mainichi.opinion.hasshinbako mainichi.opinion.eye mainichi.opinion.hito
-mainichi.opinion.kinji mainichi.opinion.yuraku mainichi.opinion.closeup
+mainichi.flash mainichi.sports mainichi.entertainment mainichi.mantan
+mainichi.electronics mainichi.weekly mainichi.opinion.editorial
+mainichi.opinion.yoroku mainichi.opinion.hasshinbako
+mainichi.opinion.eye mainichi.opinion.hito mainichi.opinion.kinji
+mainichi.opinion.yuraku mainichi.opinion.closeup
 mainichi.opinion.kaisetsu mainichi.opinion.newsup
+mainichi.opinion.jidainokaze mainichi.entertainment.art
+mainichi.fuchisou
 
 Those groups generate HTML articles containing photographs by default.
 If you would like to make them generate articles that contain only text,
@@ -5313,13 +5306,12 @@ nikkei.release.const.house nikkei.release.const.etc nikkei.shasetsu
 
 @item @uref{http://sankei.jp.msn.com/, MSN Sankei News}
 @itemx (This site has been shifted to MSN in October, 2007)
-sankei.news.shakai sankei.news.kokusai sankei.news.seiji
-sankei.news.keizai sankei.news.seikatsu sankei.news.kyouiku
-sankei.news.sports sankei.news.cutlure sankei.news.chiho
-sankei.special.komori sankei.special.kuroda sankei.special.ito
-sankei.special.tamura sankei.special.jieitai sankei.special.kenpo
-sankei.special.kyouiku sankei.special.kiko sankei.ronsetsu.shucho
-sankei.ronsetsu.sankeisho sankei.ronsetsu.seiron
+sankei.points sankei.flash sankei.affairs sankei.politics sankei.economy
+sankei.world sankei.sports sankei.entertainments sankei.life
+sankei.science sankei.region sankei.west.flash sankei.west.points
+sankei.west.affairs sankei.west.sports sankei.west.life
+sankei.west.economy sankei.column.sankeisho sankei.column.shucho
+sankei.column.seiron
 
 @item @uref{http://www.spiegel.de/, Spiegel Online}
 spiegel.news
@@ -5409,7 +5401,7 @@ infoshop.news
 @item @uref{http://www.watch.impress.co.jp/, Impress}
 impress.enterprise impress.pc impress.dc impress.akiba impress.av
 impress.game impress.k-tai impress.internet impress.bb impress.forest
-impress.robot impress.kaden
+impress.robot impress.kaden impress.car
 
 @item @uref{http://www.itmedia.co.jp/, ITmedia}
 itmedia.news.bursts itmedia.news.domestic itmedia.news.foreign
@@ -5420,9 +5412,11 @@ itmedia.anchordesk itmedia.bizid itmedia.enterprise itmedia.+D.plusd
 itmedia.+D.mobile itmedia.+D.pcupdate itmedia.+D.lifestyle
 itmedia.+D.games itmedia.+D.docomo itmedia.+D.au_kddi
 itmedia.+D.vodafone itmedia.+D.shopping
-itmedia.+D.lifestyle.column.asakura itmedia.+D.lifestyle.column.takemura
-itmedia.+D.lifestyle.column.kodera itmedia.+D.lifestyle.column.honda
-itmedia.+D.lifestyle.column.nishi itmedia.+D.lifestyle.column.kobayashi
+itmedia.+D.lifestyle.column.asakura itmedia.+D.lifestyle.column.honda
+itmedia.+D.lifestyle.column.kobayashi itmedia.+D.lifestyle.column.kodera
+itmedia.+D.lifestyle.column.nishi itmedia.+D.lifestyle.column.ogikubo
+itmedia.+D.lifestyle.column.tachibana
+itmedia.+D.lifestyle.column.takemura itmedia.+D.lifestyle.column.unakami
 
 @item @uref{http://www.japantimes.co.jp/, Japan Times}
 japantimes.general japantimes.business
@@ -5530,7 +5524,7 @@ wired-jp.news wired-jp.business wired-jp.culture wired-jp.technology
 wired-jp.blog.ogura wired-jp.blog.sasaki wired-jp.blog.takahashi
 
 @item @uref{http://headlines.yahoo.co.jp/, Yahoo! Japan}
-yahoo.topnews yahoo.politics yahoo.society yahoo.people
+yahoo.topnews yahoo.news yahoo.politics yahoo.society yahoo.people
 yahoo.business-all yahoo.market yahoo.stock yahoo.industry
 yahoo.international yahoo.entertainment yahoo.sports yahoo.computer
 yahoo.zenkoku yahoo.hokkaido yahoo.aomori yahoo.iwate yahoo.miyagi
@@ -5544,6 +5538,7 @@ yahoo.yamaguchi yahoo.tokushima yahoo.kagawa yahoo.ehime yahoo.kochi
 yahoo.fukuoka yahoo.saga yahoo.nagasaki yahoo.kumamoto yahoo.oita
 yahoo.miyazaki yahoo.kagoshima yahoo.okinawa
 
+The yahoo.news group retrieves the headline news and also the flash news.
 Those groups generate HTML articles by default.  If you would like to
 make them generate articles containing only text, add the following line
 to your @file{~/.emacs} file:
@@ -5855,6 +5850,9 @@ Group name is tigris.<project>.<mailinglist>.
 scipy.astropy scipy.ipython-user scipy.ipython-dev scipy.scipy-user
 scipy.scipy-dev scipy.scipy-testlog scipy.scipy-chaco scipy.scipy-cvs
 
+@item @uref{http://lists.chise.org/mailman/listinfo, lists.chise.org Mailing Lists}
+chise.apel chise.chise chise.emacs-mime
+
 @end table
 
 @node Sport Sites Supported by Shimbun
@@ -6067,11 +6065,15 @@ vinelinux.errata.2x.i386 vinelinux.errata.2x.ppc
 vinelinux.errata.2x.sparc vinelinux.errata.2x.alpha
 vinelinux.errata.1x
 
-@item @uref{http://www.mmz.kantei.go.jp/, Aso Cabinet Mail Magazine}
-kantei.m-magazine-en kantei.m-magazine-ja kantei.m-magazine-en.fukuda
-kantei.m-magazine-ja.fukuda kantei.m-magazine-en.abe
-kantei.m-magazine-ja.abe kantei.m-magazine-en.koizumi
-kantei.m-magazine-ja.koizumi
+@item @uref{http://www.kantei.go.jp/, Japan's Cabinet Blog/Mail Magazine}
+kantei.blog-en kantei.blog-ja kantei.blog-en.kan kantei.blog-ja.kan
+kantei.m-magazine-cn.hatoyama kantei.m-magazine-kr.hatoyama
+kantei.m-magazine-en.hatoyama kantei.m-magazine-ja.hatoyama
+kantei.m-magazine-en.aso kantei.m-magazine-ja.aso
+kantei.m-magazine-en.fukuda kantei.m-magazine-ja.fukuda
+kantei.m-magazine-en.abe kantei.m-magazine-ja.abe
+kantei.m-magazine-en.koizumi kantei.m-magazine-ja.koizumi
+kantei.m-magazine
 
 @samp{kantei.m-magazine} is also available for the backward
 compatibility.

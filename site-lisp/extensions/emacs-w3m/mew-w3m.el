@@ -1,12 +1,12 @@
 ;; mew-w3m.el --- View Text/Html content with w3m in Mew
 
-;; Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2008
+;; Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2008, 2009, 2010
 ;; TSUCHIYA Masatoshi <tsuchiya@namazu.org>
 
 ;; Author: Shun-ichi GOTO  <gotoh@taiyo.co.jp>,
 ;;         Hideyuki SHIRAI <shirai@meadowy.org>
 ;; Created: Wed Feb 28 03:31:00 2001
-;; Version: $Revision: 1.64 $
+;; Version: $Revision: 1.69 $
 ;; Keywords: Mew, mail, w3m, WWW, hypermedia
 
 ;; This file is a part of emacs-w3m.
@@ -107,6 +107,13 @@ This variable is effective only in XEmacs, Emacs 21 and Emacs 22."
   :group 'mew-w3m
   :type 'hook)
 
+(defcustom mew-w3m-region-cite-mark "&gt;&nbsp;"
+  "*Method of converting `blockquote'."
+  :group 'mew-w3m
+  :type '(choice (const :tag "Use Indent" nil)
+		 (const :tag "Use Cite Mark \"> \"" "&gt;&nbsp;")
+		 (string :tag "Use Other Mark")))
+
 (defconst mew-w3m-safe-url-regexp "\\`cid:")
 
 ;; Avoid bytecompile error and warnings.
@@ -144,8 +151,7 @@ This variable is effective only in XEmacs, Emacs 21 and Emacs 22."
 	     (mew-w3m-auto-insert-image t)
 	     (mew-w3m-use-safe-url-regexp nil))
 	 (mew-summary-display 'force))
-     (save-excursion
-       (set-buffer (mew-buffer-message))
+     (with-current-buffer (mew-buffer-message)
        (let* ((image (get-text-property (point-min) 'w3m-images))
 	      (w3m-display-inline-images image)
 	      (w3m-safe-url-regexp (when mew-w3m-use-safe-url-regexp
@@ -154,6 +160,57 @@ This variable is effective only in XEmacs, Emacs 21 and Emacs 22."
 	 (mew-elet
 	  (mew-w3m-add-text-properties `(w3m-images ,(not image)))
 	  (set-buffer-modified-p nil)))))))
+
+(defun mew-w3m-region (start end &optional url charset)
+  "w3m-region with inserting the cite mark."
+  (if (null mew-w3m-region-cite-mark)
+      (w3m-region start end url charset)
+    (save-restriction
+      (narrow-to-region start end)
+      (let ((case-fold-search t)
+	    pos lines tagbeg0 tagend0 tagbeg1 tagend1)
+	(goto-char (point-min))
+	(while (w3m-search-tag "blockquote")
+	  (setq tagbeg0 (match-beginning 0))
+	  (setq tagend0 (match-end 0))
+	  (when (w3m-search-tag "/blockquote")
+	    (setq tagbeg1 (match-beginning 0))
+	    (setq tagend1 (match-end 0))
+	    (setq lines (buffer-substring tagend0 tagbeg1))
+	    (delete-region tagbeg0 tagend1)
+	    (insert (with-temp-buffer
+		      (insert lines)
+		      (goto-char (point-min))
+		      (if (and (w3m-search-tag "pre")
+			       (setq tagbeg0 (match-beginning 0))
+			       (setq tagend0 (match-end 0))
+			       (w3m-search-tag "/pre")
+			       (setq tagbeg1 (match-beginning 0))
+			       (setq tagend1 (match-end 0)))
+			  (progn
+			    (delete-region tagbeg1 tagend1)
+			    (delete-region tagbeg0 tagend0))
+			;; delete <br>
+			(goto-char (point-min))
+			(while (w3m-search-tag "br")
+			  (delete-region (match-beginning 0) (match-end 0))
+			  (unless (looking-at "[\n\r]") (insert "\n"))))
+		      (goto-char (point-max))
+		      (skip-chars-backward " \t\n\f\r")
+		      (delete-region (point) (point-max))
+		      (goto-char (point-min))
+		      (skip-chars-forward " \t\n\f\r")
+		      (delete-region (point-min) (point))
+		      (goto-char (point-min))
+		      (while (not (eobp))
+			(insert mew-w3m-region-cite-mark)
+			(forward-line 1))
+		      (goto-char (point-min))
+		      (insert "<pre>\n")
+		      (goto-char (point-max))
+		      (insert "\n</pre>\n")
+		      (buffer-substring (point-min) (point-max)))))))
+      (w3m-region (point-min) (point-max) url charset))))
 
 ;; processing Text/Html contents with w3m.
 (defun mew-mime-text/html-w3m (&rest args)
@@ -212,23 +269,22 @@ This variable is effective only in XEmacs, Emacs 21 and Emacs 22."
 			 "-o" "ext_halfdump=1"
 			 "-o" "pre_conv=1"
 			 "-o" "strict_iso2022=0")))
-	   (w3m-region begin end xref)))
+	   (mew-w3m-region begin end xref)))
 	((null cache)	;; Mew-2 + w3m, w3mmee
-	 (w3m-region begin end xref (mew-charset-guess-region begin end)))
+	 (mew-w3m-region begin end xref (mew-charset-guess-region begin end)))
 	(t		;; Old Mew
 	 (setq charset (or (mew-syntax-get-param params "charset")
-			   (save-excursion
-			     (set-buffer cache)
+			   (with-current-buffer cache
 			     (mew-charset-guess-region begin end))))
 	 (if charset
 	     (setq wcs (mew-charset-to-cs charset))
 	   (setq wcs mew-cs-text-for-write))
 	 (mew-frwlet
-	  mew-cs-dummy wcs
-	  (w3m-region (point)
-		      (progn (insert-buffer-substring cache begin end)
-			     (point))
-		      xref))))
+	     mew-cs-dummy wcs
+	   (mew-w3m-region (point)
+			   (progn (insert-buffer-substring cache begin end)
+				  (point))
+			   xref))))
        (mew-w3m-add-text-properties `(w3m t w3m-images ,mew-w3m-auto-insert-image))))))
 
 (defvar w3m-mew-support-cid (and (boundp 'mew-version-number)
@@ -375,8 +431,8 @@ This variable is effective only in XEmacs, Emacs 21 and Emacs 22."
 		       (t
 			(mew-cs-to-charset cs))))
 	(mew-frwlet
-	 mew-cs-text-for-read cs
-	 (write-region (point-min) (point-max) filename nil 'nomsg)))
+	    mew-cs-text-for-read cs
+	  (write-region (point-min) (point-max) filename nil 'nomsg)))
       (when ct
 	(setq ct (mew-capitalize ct)))
       (mew-attach-copy filename (file-name-nondirectory filename))

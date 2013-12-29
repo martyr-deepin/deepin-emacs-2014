@@ -1,4 +1,4 @@
-;;; ptexinfmt.el -- portable Texinfo formatter.
+;;; ptexinfmt.el --- portable Texinfo formatter  -*- lexical-binding: t -*-
 
 ;; Copyright (C) 1985, 1986, 1988, 1990, 1991, 1992, 1993,
 ;;               1994, 1995, 1996, 1997 Free Software Foundation, Inc.
@@ -41,7 +41,6 @@
 ;;  @float ... @end float, @caption{TEXT}, @shortcaption{TEXT}, @listoffloats
 ;;  @deftypecv[x]
 ;;  @headitem
-;;  @comma{}
 ;;  @quotation (optional arguments)
 ;;  @acronym{ACRONYM[, MEANING]} (optional argument)
 ;;  @dofirstparagraphindent
@@ -62,6 +61,11 @@
 
 (require 'texinfmt)
 
+;; Work around a problem that double-quotes at bol disappear:
+;; @dfn{FOO} => FOO", ``BAR'' => BAR", \BAZ/ => BAZ/
+(modify-syntax-entry ?\" "w" texinfo-format-syntax-table)
+(modify-syntax-entry ?\\ "w" texinfo-format-syntax-table)
+
 ;;; Broken
 (defvar ptexinfmt-disable-broken-notice-flag t
   "If non-nil disable notice, when call `ptexinfmt-broken-facility'.
@@ -69,7 +73,7 @@ This is last argument in `ptexinfmt-broken-facility'.")
 
 (put 'ptexinfmt-broken-facility 'lisp-indent-function 'defun)
 (defmacro ptexinfmt-broken-facility (facility docstring assertion
-					      &optional dummy)
+					      &optional _dummy)
   "Declare a symbol FACILITY is broken if ASSERTION is nil.
 DOCSTRING will be printed if ASSERTION is nil and
 `ptexinfmt-disable-broken-notice-flag' is nil."
@@ -129,6 +133,8 @@ DOCSTRING will be printed if ASSERTION is nil and
     t))
 
 ;; @var{METASYNTACTIC-VARIABLE}
+(defvar texinfo-enclosure-list)
+(defvar texinfo-alias-list)
 (ptexinfmt-broken-facility texinfo-format-var
   "Don't perse @var argument."
   (condition-case nil
@@ -170,7 +176,10 @@ DOCSTRING will be printed if ASSERTION is nil and
   "`texinfo-multitable-widths' unsupport wide-char."
   (if (fboundp 'texinfo-multitable-widths)
       (with-temp-buffer
-	(let ((str "幅広文字"))
+	(let ((str (string (make-char 'japanese-jisx0208 73 125)
+			   (make-char 'japanese-jisx0208 57 45)
+			   (make-char 'japanese-jisx0208 74 56)
+			   (make-char 'japanese-jisx0208 59 122))))
 	  (texinfo-mode)
 	  (insert (format " {%s}\n" str))
 	  (goto-char (point-min))
@@ -409,7 +418,7 @@ For example, @verb\{|@|\} results in @ and
       (error "Not found: @verb start brace"))
     (delete-region texinfo-command-start (+ 2 texinfo-command-end))
     (search-forward  delimiter))
-  (delete-backward-char 1)
+  (delete-char -1)
   (unless (looking-at "}")
     (error "Not found: @verb end brace"))
   (delete-char 1))
@@ -1023,6 +1032,53 @@ which are indicated by the @copying ... @end copying command."
     (while (search-forward "@insertcopying" nil t)
       (delete-region (match-beginning 0) (match-end 0))
       (texinfo-insertcopying))))
+
+
+;; @comma
+(if (fboundp 'texinfo-format-comma)
+    nil
+  (put 'comma 'texinfo-format 'texinfo-format-comma)
+  (defun texinfo-format-comma ()
+    (texinfo-parse-arg-discard)
+    (insert ",")
+    (put-text-property (1- (point)) (point) 'ignore t))
+
+  ;; Redefine this function so as to work for @comma
+  (defun texinfo-format-parse-args ()
+    (let ((start (1- (point)))
+	  next beg end
+	  args)
+      (search-forward "{")
+      (save-excursion
+	(texinfo-format-expand-region
+	 (point)
+	 (save-excursion (up-list 1) (1- (point)))))
+      ;; The following does not handle cross references of the form:
+      ;; `@xref{bullet, , @code{@@bullet}@{@}}.' because the
+      ;; re-search-forward finds the first right brace after the second
+      ;; comma.
+      (while (/= (preceding-char) ?\})
+	(skip-chars-forward " \t\n")
+	(setq beg (point))
+;;;	(re-search-forward "[},]")
+	;; Ignore commas that are derived from @comma{}.
+	(while (and (re-search-forward "[},]" nil t)
+		    (get-text-property (match-beginning 0) 'ignore)))
+;;;
+	(setq next (point))
+	(forward-char -1)
+	(skip-chars-backward " \t\n")
+	(setq end (point))
+	(cond ((< beg end)
+	       (goto-char beg)
+	       (while (search-forward "\n" end t)
+		 (replace-match " "))))
+	(push (if (> end beg) (buffer-substring-no-properties beg end))
+	      args)
+	(goto-char next))
+      ;;(if (eolp) (forward-char 1))
+      (setq texinfo-command-end (point))
+      (nreverse args))))
 
 (provide 'ptexinfmt)
 

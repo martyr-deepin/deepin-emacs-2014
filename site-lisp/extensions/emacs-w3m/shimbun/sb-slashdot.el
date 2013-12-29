@@ -55,10 +55,9 @@
 Can be 'flat', 'thread', or 'nested'.")
 
 (defvar shimbun-slashdot-regexp-section-id-subject
-  "<\\s-*h3\\s-+class=\"story\"[^\0]*?<a\\s-.*\\s-href=\"\
-\\(?:/*\\([a-zA-Z]+\\)?\\.?slashdot.org/article.pl\\?sid=\\(.*?\\)\
-\\|.*slashdot.org/\\(.*?\\)/\\(.*?\\).shtml\\)\
-\".*?>\\(.*?\\)</a>")
+  "<\\s-*h3\\s-+class=\"story\"[^\0]*?<a [^>]*?href=\"\
+/*\\([a-zA-Z]+\\)?\\.?slashdot.org/\\([a-z]+?\\)/\\(.+\\)/\\(.+?\\)\
+\"[^>]*class=.datitle.[^>]*>\\(.*?\\)</a>")
 
 (defvar shimbun-slashdot-regexp-author-time
   "Posted[\t \n]+by[^a-zA-Z]*\\(.*\\)[^\0]*?on\\s-+[a-zA-Z]+\\s-+\
@@ -92,9 +91,10 @@ Face: iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAQMAAAAlPW0iAAAABlBMVEUAgID////5Zpl0AAA
     ;; Make article URL
     (while (re-search-forward shimbun-slashdot-regexp-section-id-subject
 			      nil t)
-      (setq section (or (match-string 1) (match-string 3))
-	    id (or (match-string 2) (match-string 4))
-	    url (concat "http://" section ".slashdot.org/article.pl?sid=" id
+      (setq section (match-string 1)
+	    id (match-string 3)
+	    url (concat "http://" (if section (concat section ".") "")
+			"slashdot.org/article.pl?sid=" id
 			"&simpledesign=1&lowbandwidth=1")
 	    subject (match-string 5))
       (if (null shimbun-slashdot-get-comments)

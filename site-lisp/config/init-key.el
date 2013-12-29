@@ -328,12 +328,15 @@
 (lazy-set-autoload-key
  '(
    ("C-z C-z" . w3m)                          ;启动W3M
-   ("C-z z" . w3m-startup-background)         ;启动W3M, 后台
-   ("C-x C-z" . toggle-w3m-with-other-buffer) ;在W3M和buffer间切换
    ("s-W" . one-key-menu-w3m-search)          ;w3m 搜索菜单
    )
  "init-w3m")
-
+(lazy-set-autoload-key
+ '(
+   ("C-z z" . w3m-startup-background)         ;启动W3M, 后台
+   ("C-x C-z" . toggle-w3m-with-other-buffer) ;在W3M和buffer间切换
+   )
+ "w3m-extension")
 ;;; ### Dired ###
 ;;; --- Dired
 (lazy-set-autoload-key

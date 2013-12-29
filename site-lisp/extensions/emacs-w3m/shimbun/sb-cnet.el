@@ -1,6 +1,7 @@
 ;;; sb-cnet.el --- shimbun backend for CNET
 
-;; Copyright (C) 2004, 2006 TSUCHIYA Masatoshi <tsuchiya@namazu.org>
+;; Copyright (C) 2004, 2006, 2009, 2010
+;; TSUCHIYA Masatoshi <tsuchiya@namazu.org>
 
 ;; Author: TSUCHIYA Masatoshi <tsuchiya@namazu.org>,
 ;;         Yuuichi Teranishi  <teranisi@gohome.org>,
@@ -40,7 +41,13 @@
 (require 'shimbun)
 (require 'sb-rss)
 (eval-when-compile
-  (require 'cl))
+  (require 'cl)
+  ;; `multiple-value-bind' requires the 2nd argument to be multiple-value,
+  ;; not a list, in particular for XEmacs 21.5.  `values-list' does it,
+  ;; but is a run-time cl function in XEmacs 21.4 and Emacs 21.
+  (when (eq 'identity (symbol-function 'values-list))
+    (define-compiler-macro values-list (arg)
+      arg)))
 
 (luna-define-class shimbun-cnet (shimbun-rss shimbun) ())
 
@@ -72,7 +79,7 @@ _=ro*?]4:|n>]ZiLZ2LEo^2nr('C<+`lO~/!R[lH'N'4X&%\\I}8T!wt")))
 (luna-define-method shimbun-rss-process-date ((shimbun shimbun-cnet) string)
   "Convert a slightly corrupted date string to a date string in right format."
   (multiple-value-bind (sec min hour day month year dow dst zone)
-      (decode-time (shimbun-time-parse-string string))
+      (values-list (decode-time (shimbun-time-parse-string string)))
     (setq zone (/ zone 60))
     (shimbun-make-date-string year month day
 			      (format "%02d:%02d" hour min)
@@ -118,13 +125,12 @@ following part."
       (insert "</div>\n"))))
 
 (defun shimbun-cnet-remove-useless-tags ()
-  (shimbun-remove-tags "<script" "</script>")
-  (shimbun-remove-tags "<noscript" "</noscript>")
-  (shimbun-remove-tags "<a href=\"[^\"]+\\?tag=st_util_print\">" "</a>")
-  (shimbun-remove-tags "<a href=\"[^\"]+\\?tag=st_util_email\">" "</a>")
-  (shimbun-remove-tags "<a onclick" "</a>")
-  (shimbun-remove-tags "<a href=\"javascript" "</a>")
-  (shimbun-remove-tags "<newselement type=\"table\">" "</newselement>"))
+  (shimbun-remove-tags "script\\|noscript" t)
+  (shimbun-remove-tags "\\(a\\) \\(?:\
+\\(?:href=\"\\(?:[^\"]+\\?tag=st_util_print\"\\|[^\"]+\\?tag=st_util_email\"\
+javascript\\)\\)\
+\\|onclick\\)" t)
+  (shimbun-remove-tags "\\(newselement\\) type=\"table\"" t))
 
 (luna-define-method shimbun-clear-contents ((shimbun shimbun-cnet) header)
   (shimbun-strip-cr)

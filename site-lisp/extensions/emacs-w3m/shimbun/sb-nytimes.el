@@ -1,6 +1,6 @@
 ;;; sb-nytimes.el --- shimbun backend for The New York Times
 
-;; Copyright (C) 2007, 2008 Katsumi Yamaoka
+;; Copyright (C) 2007, 2008, 2009, 2010 Katsumi Yamaoka
 
 ;; Author: Katsumi Yamaoka <yamaoka@jpl.org>
 ;; Keywords: news
@@ -255,7 +255,8 @@ Face: iVBORw0KGgoAAAANSUhEUgAAAHYAAAAQAgMAAAC+ZGPFAAAADFBMVEVLS0u8vLz///8ICAg
   (let ((start "\
 \\(?:\
 \\(?:<p[\t\n ]+\\(?:[^\t\n >]+[\t\n ]+\\)*class=\"post-author\"\
-\\|\\(<div[\t\n ]+\\(?:[^\t\n >]+[\t\n ]+\\)*class=\"post-content\"\\)\\)\
+\\|\\(<div[\t\n ]+\\(?:[^\t\n >]+[\t\n ]+\\)*class=\
+\"\\(?:entry\\|post\\)-content\"\\)\\)\
 \\(?:[\t\n ]+[^\t\n >]+\\)*[\t\n ]*>\
 \\|\
 <NYT_\\(?:BYLINE\\|TEXT\\)\\(?:[\t\n ]*\\|[\t\n ]+[^>]+\\)>\
@@ -366,20 +367,12 @@ Skip[\t\n ]+to[\t\n ]+next[\t\n ]+paragraph[\t\n ]*</a>[\t\n ]*"
 	  (delete-region (goto-char start) end)
 	  (insert "\n")))
       ;; Remove Next/Previous buttons.
-      (goto-char (point-min))
-      (when (and (re-search-forward "\
-<div[\t\n ]+\\(?:[^\t\n >]+[\t\n ]+\\)*id=\"pageLinks\""
-				    nil t)
-		 (shimbun-end-of-tag "div" t))
-	(replace-match "\n"))
+      (shimbun-remove-tags
+       "\\(div\\)[\t\n ]+\\(?:[^\t\n >]+[\t\n ]+\\)*id=\"pageLinks\"" t)
       ;; Remove `Enlarge This Image', `Multimedia', and `Video'.
-      (goto-char (point-min))
-      (while (and (re-search-forward "<div[\t\n ]+\
+      (shimbun-remove-tags "\\(div\\)[\t\n ]+\
 \\(?:class=\"enlargeThis\\|id=\"inlineMultimedia\
-\\|class=\"inlineVideo\\(?:[\t\n ]+[^\"]+\\)?\\)\""
-				     nil t)
-		  (shimbun-end-of-tag "div" t))
-	(replace-match "\n"))
+\\|class=\"inlineVideo\\(?:[\t\n ]+[^\"]+\\)?\\)\"" t)
       ;; Remove javascripts.
       (goto-char (point-min))
       (while (and (re-search-forward "[\t\n ]*\
@@ -416,6 +409,13 @@ Skip[\t\n ]+to[\t\n ]+next[\t\n ]+paragraph[\t\n ]*</a>[\t\n ]*"
 	(insert "\n"))
       t)))
 
+(luna-define-method shimbun-rss-build-message-id :around ((shimbun
+							   shimbun-nytimes)
+							  url &optional date)
+  ;; Don't strip string following "?" or "#" in url.  See sb-rss.el.
+  (concat "<" (md5 url) "%" (shimbun-current-group shimbun)
+	  "@" (shimbun-server shimbun) ".shimbun.namazu.org>"))
+
 (luna-define-method shimbun-get-headers :around ((shimbun shimbun-nytimes)
 						 &optional range)
   (let ((name (cadr (assoc (shimbun-current-group-internal shimbun)
@@ -423,12 +423,14 @@ Skip[\t\n ]+to[\t\n ]+next[\t\n ]+paragraph[\t\n ]*</a>[\t\n ]*"
 	(apostrophe (condition-case nil
 			(make-char 'japanese-jisx0208 33 71)
 		      (error nil)))
-	(headers (luna-call-next-method)))
+	(headers (luna-call-next-method))
+	from)
     (dolist (header headers headers)
       ;; Show the group name in the From header.
-      (shimbun-header-set-from header
-			       (concat (shimbun-header-from header)
-				       " <" name ">"))
+      (when (and (setq from (shimbun-header-from header))
+		 (string-match "\\`By [A-Z][A-Z]+" from))
+	(setq from (substring from 3)))
+      (shimbun-header-set-from header (concat from " <" name ">"))
       ;; Replace wide apostrophe with the normal one in the subject.
       (when apostrophe
 	(shimbun-header-set-subject

@@ -1,6 +1,6 @@
 ;;; sb-cnet-jp.el --- shimbun backend for CNET Japan -*- coding: iso-2022-7bit -*-
 
-;; Copyright (C) 2003, 2004, 2005, 2006, 2007
+;; Copyright (C) 2003, 2004, 2005, 2006, 2007, 2010
 ;; NAKAJIMA Mikio <minakaji@namazu.org>
 
 ;; Author: NAKAJIMA Mikio     <minakaji@namazu.org>,
@@ -97,10 +97,9 @@ _=ro*?]4:|n>]ZiLZ2LEo^2nr('C<+`lO~/!R[lH'N'4X&%\\I}8T!wt")))
 (luna-define-method shimbun-clear-contents :before ((shimbun shimbun-cnet-jp)
 						    header)
   (shimbun-strip-cr)
-  (shimbun-remove-tags "<script" "</script>")
-  (shimbun-remove-tags "<noscript" "</noscript>")
-  (shimbun-remove-tags "<div class=\"photor_thumb_wrap\"" "</div>")
-  (shimbun-remove-tags "<div class=\"block_infocnet_stb\">" "</div>")
+  (shimbun-remove-tags "script\\|noscript" t)
+  (shimbun-remove-tags
+   "\\(div\\) class=\"\\(?:photor_thumb_wrap\\|block_infocnet_stb\\)\"" t)
   (shimbun-remove-tags "<div class=\"block_ad_print\">"
 		       "<!-- block_ad_print END -->")
   (shimbun-remove-tags "<!--AD_ART_S-->" "<!--AD_ART_S END-->"))

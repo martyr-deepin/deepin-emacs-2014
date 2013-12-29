@@ -1,6 +1,6 @@
 ;;; sb-rediff.el --- shimbun backend for rediff.com
 
-;; Copyright (C) 2004, 2005, 2006 S V N Vishwanathan <vishketan@yahoo.com>
+;; Copyright (C) 2004, 2005, 2006, 2010 S V N Vishwanathan <vishketan@yahoo.com>
 
 ;; Author: S V N Vishwanathan <vishketan@yahoo.com>
 ;; Keywords: news
@@ -66,8 +66,7 @@ http://www.rediff.com/\\(.+\\.htm\\)"
 (luna-define-method shimbun-clear-contents :before
   ((shimbun shimbun-rediff) header)
   (when (luna-call-next-method)
-    (shimbun-remove-tags "<A class=\"\" [^>]+>" "</A>")
-    (shimbun-remove-tags "<A target=new [^>]+>" "</A>")
+    (shimbun-remove-tags "\\(A\\) \\(?:class=\"\"\\|target=new\\)" t)
     (shimbun-remove-tags "<P><STRONG>" "</STRONG></A>")
     (shimbun-remove-tags "<P><STRONG>Also read:" "</STRONG>\\(</P>\\)?")
     (shimbun-remove-tags "<UL[^>]*><LI[^>]*>" "</LI></UL>")

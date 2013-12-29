@@ -1,0 +1,3 @@
+version=3
+opts="uversionmangle=s/beta/~beta/;s/rc/~rc/" \
+http://emacs-w3m.namazu.org/ emacs-w3m-([0-9]+\..*)\.tar\.gz debian uupdate

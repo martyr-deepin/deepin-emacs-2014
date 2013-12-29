@@ -42,6 +42,7 @@ lisp: Makefile
 	env test ! -f w3m-proc.elc -o w3m-proc.elc -nt w3m-proc.el || $(MAKE) clean
 	$(XEMACSDEBUG)$(EMACS) $(FLAGS) -f w3mhack-compile
 
+# `w3mhack-what-where' respects DESTDIR
 what-where:
 	@$(XEMACSDEBUG)$(EMACS) $(FLAGS) -f w3mhack-what-where\
 	 "$(lispdir)" "$(ICONDIR)" "$(PACKAGEDIR)" "$(infodir)"
@@ -62,42 +63,42 @@ install-en: install-lisp install-info-en
 install-ja: install-lisp install-info-ja
 
 install-lisp: lisp
-	@$(SHELL) $(srcdir)/mkinstalldirs "$(lispdir)";\
+	@$(SHELL) $(srcdir)/mkinstalldirs "$(DESTDIR)$(lispdir)";\
 	for p in ChangeLog ChangeLog.[1-9] ChangeLog.[1-9][0-9] *.el; do\
 	  if test -f "$$p"; then\
 	    case "$$p" in\
 	      $(IGNORES)) ;;\
 	      w3m-ems\.el) if test -z "$(XEMACSDEBUG)"; then\
-	         echo "$(INSTALL_DATA) $$p \"$(lispdir)/$$p\"";\
-	         $(INSTALL_DATA) $$p "$(lispdir)/$$p"; fi;;\
+	         echo "$(INSTALL_DATA) $$p \"$(DESTDIR)$(lispdir)/$$p\"";\
+	         $(INSTALL_DATA) $$p "$(DESTDIR)$(lispdir)/$$p"; fi;;\
 	      w3m-xmas\.el) if test -n "$(XEMACSDEBUG)"; then\
-	         echo "$(INSTALL_DATA) $$p \"$(lispdir)/$$p\"";\
-	         $(INSTALL_DATA) $$p "$(lispdir)/$$p"; fi;;\
-	      *) echo "$(INSTALL_DATA) $$p \"$(lispdir)/$$p\"";\
-	         $(INSTALL_DATA) $$p "$(lispdir)/$$p";;\
+	         echo "$(INSTALL_DATA) $$p \"$(DESTDIR)$(lispdir)/$$p\"";\
+	         $(INSTALL_DATA) $$p "$(DESTDIR)$(lispdir)/$$p"; fi;;\
+	      *) echo "$(INSTALL_DATA) $$p \"$(DESTDIR)$(lispdir)/$$p\"";\
+	         $(INSTALL_DATA) $$p "$(DESTDIR)$(lispdir)/$$p";;\
 	    esac;\
 	  fi;\
 	done;\
 	for p in *.elc; do\
 	  if test -f "$$p"; then\
-	    echo "$(INSTALL_DATA) $$p \"$(lispdir)/$$p\"";\
-	    $(INSTALL_DATA) $$p "$(lispdir)/$$p";\
+	    echo "$(INSTALL_DATA) $$p \"$(DESTDIR)$(lispdir)/$$p\"";\
+	    $(INSTALL_DATA) $$p "$(DESTDIR)$(lispdir)/$$p";\
 	  fi;\
 	done;\
 	if test -f shimbun/shimbun.elc; then\
 	  for p in `cd shimbun && echo ChangeLog ChangeLog.[1-9] ChangeLog.[1-9][0-9]`; do\
 	    if test -f "shimbun/$$p"; then\
-	      echo "$(INSTALL_DATA) shimbun/$$p \"$(lispdir)/s$$p\"";\
-	      $(INSTALL_DATA) shimbun/$$p "$(lispdir)/s$$p";\
+	      echo "$(INSTALL_DATA) shimbun/$$p \"$(DESTDIR)$(lispdir)/s$$p\"";\
+	      $(INSTALL_DATA) shimbun/$$p "$(DESTDIR)$(lispdir)/s$$p";\
 	    fi;\
 	  done;\
 	  for p in `cd shimbun && echo *.el`; do\
-	    echo "$(INSTALL_DATA) shimbun/$$p \"$(lispdir)/$$p\"";\
-	    $(INSTALL_DATA) shimbun/$$p "$(lispdir)/$$p";\
+	    echo "$(INSTALL_DATA) shimbun/$$p \"$(DESTDIR)$(lispdir)/$$p\"";\
+	    $(INSTALL_DATA) shimbun/$$p "$(DESTDIR)$(lispdir)/$$p";\
 	  done;\
 	  for p in `cd shimbun && echo *.elc`; do\
-	    echo "$(INSTALL_DATA) shimbun/$$p \"$(lispdir)/$$p\"";\
-	    $(INSTALL_DATA) shimbun/$$p "$(lispdir)/$$p";\
+	    echo "$(INSTALL_DATA) shimbun/$$p \"$(DESTDIR)$(lispdir)/$$p\"";\
+	    $(INSTALL_DATA) shimbun/$$p "$(DESTDIR)$(lispdir)/$$p";\
 	  done;\
 	fi
 
@@ -105,10 +106,10 @@ install-icons:
 	@if test "$(ICONDIR)" = NONE; then\
 	  echo "You don't have to install icon files for \"$(EMACS)\".";\
 	else\
-	  $(SHELL) $(srcdir)/mkinstalldirs "$(ICONDIR)";\
+	  $(SHELL) $(srcdir)/mkinstalldirs "$(DESTDIR)$(ICONDIR)";\
 	  for i in `cd icons && echo *.gif *.png *.xpm`; do\
-	    echo "$(INSTALL_DATA) icons/$$i \"$(ICONDIR)/$$i\"";\
-	    $(INSTALL_DATA) icons/$$i "$(ICONDIR)/$$i";\
+	    echo "$(INSTALL_DATA) icons/$$i \"$(DESTDIR)$(ICONDIR)/$$i\"";\
+	    $(INSTALL_DATA) icons/$$i "$(DESTDIR)$(ICONDIR)/$$i";\
 	  done;\
 	fi
 
@@ -116,20 +117,23 @@ install-icons30:
 	@if test "$(ICONDIR)" = NONE; then\
 	  echo "You don't have to install icon files for \"$(EMACS)\".";\
 	else\
-	  $(SHELL) $(srcdir)/mkinstalldirs "$(ICONDIR)";\
+	  $(SHELL) $(srcdir)/mkinstalldirs "$(DESTDIR)$(ICONDIR)";\
 	  for i in `cd icons30 && echo *.gif *.png *.xpm`; do\
-	    echo "$(INSTALL_DATA) icons30/$$i \"$(ICONDIR)/$$i\"";\
-	    $(INSTALL_DATA) icons30/$$i "$(ICONDIR)/$$i";\
+	    echo "$(INSTALL_DATA) icons30/$$i \"$(DESTDIR)$(ICONDIR)/$$i\"";\
+	    $(INSTALL_DATA) icons30/$$i "$(DESTDIR)$(ICONDIR)/$$i";\
 	  done;\
 	fi
 
 install-info: info
+	@echo "cd doc && $(MAKE) EMACS=\"$(EMACS)\" infodir=\"$(DESTDIR)$(infodir)\" install";\
 	cd doc && $(MAKE) EMACS="$(EMACS)" infodir="$(infodir)" install
 
 install-info-en: info-en
+	@echo "cd doc && $(MAKE) EMACS=\"$(EMACS)\" infodir=\"$(DESTDIR)$(infodir)\" install-en";\
 	cd doc && $(MAKE) EMACS="$(EMACS)" infodir="$(infodir)" install-en
 
 install-info-ja: info-ja
+	@echo "cd doc && $(MAKE) EMACS=\"$(EMACS)\" infodir=\"$(DESTDIR)$(infodir)\" install-ja";\
 	cd doc && $(MAKE) EMACS="$(EMACS)" infodir="$(infodir)" install-ja
 
 install-package:
@@ -140,8 +144,8 @@ install-package:
 	  $(MAKE) lispdir="$(PACKAGEDIR)/lisp/w3m" install-lisp;\
 	  $(MAKE) ICONDIR="$(PACKAGEDIR)/etc/images/w3m" install-icons30;\
 	  $(MAKE) infodir="$(PACKAGEDIR)/info" install-info;\
-	  echo "$(XEMACSDEBUG)$(EMACS) $(FLAGS) -f w3mhack-make-package $(PACKAGEDIR)";\
-	  $(XEMACSDEBUG)$(EMACS) $(FLAGS) -f w3mhack-make-package $(PACKAGEDIR);\
+	  echo "$(XEMACSDEBUG)$(EMACS) $(FLAGS) -f w3mhack-make-package $(DESTDIR)$(PACKAGEDIR)";\
+	  $(XEMACSDEBUG)$(EMACS) $(FLAGS) -f w3mhack-make-package $(DESTDIR)$(PACKAGEDIR);\
 	fi
 
 install-package-ja:
@@ -152,8 +156,8 @@ install-package-ja:
 	  $(MAKE) lispdir="$(PACKAGEDIR)/lisp/w3m" install-lisp;\
 	  $(MAKE) ICONDIR="$(PACKAGEDIR)/etc/images/w3m" install-icons30;\
 	  $(MAKE) infodir="$(PACKAGEDIR)/info" install-info-ja;\
-	  echo "$(XEMACSDEBUG)$(EMACS) $(FLAGS) -f w3mhack-make-package $(PACKAGEDIR)";\
-	  $(XEMACSDEBUG)$(EMACS) $(FLAGS) -f w3mhack-make-package $(PACKAGEDIR);\
+	  echo "$(XEMACSDEBUG)$(EMACS) $(FLAGS) -f w3mhack-make-package $(DESTDIR)$(PACKAGEDIR)";\
+	  $(XEMACSDEBUG)$(EMACS) $(FLAGS) -f w3mhack-make-package $(DESTDIR)$(PACKAGEDIR);\
 	fi
 
 Makefile: Makefile.in config.status
@@ -202,7 +206,7 @@ distclean: clean
 .SUFFIXES: .elc .el
 
 .el.elc:
-	echo "$(XEMACSDEBUG)$(EMACS) $(FLAGS) -f batch-byte-compile $*.el";\
+	@echo "$(XEMACSDEBUG)$(EMACS) $(FLAGS) -f batch-byte-compile $*.el";\
 	$(XEMACSDEBUG)$(EMACS) $(FLAGS) -f batch-byte-compile $*.el
 
 slow: Makefile

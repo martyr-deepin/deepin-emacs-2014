@@ -1,6 +1,6 @@
 ;;; w3m-proc.el --- Functions and macros to control sub-processes
 
-;; Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009
+;; Copyright (C) 2001-2005, 2007-2010, 2012
 ;; TSUCHIYA Masatoshi <tsuchiya@namazu.org>
 
 ;; Authors: TSUCHIYA Masatoshi <tsuchiya@namazu.org>,
@@ -60,7 +60,7 @@
   (defvar w3m-work-buffer-list)
   (autoload 'w3m-idle-images-show-unqueue "w3m"))
 
-;; Silence the Emacs' byte-compiler that says ``might not be defined''.
+;; Silence the Emacs's byte-compiler that says ``might not be defined''.
 (eval-when-compile
   (defun w3m-decode-coding-string-with-priority (str coding)
     ()))
@@ -136,7 +136,7 @@
 (put 'w3m-process-with-environment 'lisp-indent-function 1)
 (put 'w3m-process-with-environment 'edebug-form-spec '(form body))
 
-(defsubst w3m-process-p (object)
+(defun w3m-process-p (object)
   "Return t if OBJECT is a `w3m-process' object."
   (and (consp object)
        (vectorp (cdr object))
@@ -187,7 +187,7 @@ return it."
     (with-current-buffer (w3m-process-buffer x)
       (setq w3m-process-object x))))
 
-(defsubst w3m-process-kill-process (process)
+(defun w3m-process-kill-process (process)
   "Kill process PROCESS safely."
   (when (processp process)
     (set-process-filter process 'ignore)
@@ -294,7 +294,6 @@ which have no handler."
 		       (w3m-kill-buffer (w3m-process-handler-buffer handler)))
 		     nil)))
 	       w3m-process-queue)))
-  (w3m-idle-images-show-unqueue buffer)
   (when (buffer-name buffer)
     (with-current-buffer buffer
       (setq w3m-current-process nil)))
@@ -328,7 +327,7 @@ handler."
 (put 'w3m-process-timeout 'error-conditions '(error w3m-process-timeout))
 (put 'w3m-process-timeout 'error-message "Time out")
 
-(defsubst w3m-process-error-handler (error-data process)
+(defun w3m-process-error-handler (error-data process)
   (setq w3m-process-queue (delq process w3m-process-queue))
   (w3m-process-kill-process (w3m-process-process process))
   (signal (car error-data) (cdr error-data)))
@@ -468,17 +467,18 @@ evaluated in a temporary buffer."
 		    (w3m-get-buffer-create
 		     (generate-new-buffer-name w3m-work-buffer-name)))
 		   (,current-buffer (current-buffer)))
-       (labels ((,post-body (,var)
-			    (when (buffer-name ,temp-buffer)
-			      (set-buffer ,temp-buffer))
-			    ,@body)
-		(,post-handler (,var)
-			       (w3m-kill-buffer ,temp-buffer)
-			       (when (buffer-name ,current-buffer)
-				 (set-buffer ,current-buffer))
-			       ,var))
+       (w3m-labels ((,post-body (,var)
+				(when (buffer-name ,temp-buffer)
+				  (set-buffer ,temp-buffer))
+				,@body)
+		    (,post-handler (,var)
+				   (w3m-kill-buffer ,temp-buffer)
+				   (when (buffer-name ,current-buffer)
+				     (set-buffer ,current-buffer))
+				   ,var))
 	 (let ((,var (let ((handler
-			    (cons ',post-body (cons ',post-handler handler))))
+			    (cons #',post-body
+				  (cons #',post-handler handler))))
 		       (with-current-buffer ,temp-buffer ,@form))))
 	   (if (w3m-process-p ,var)
 	       (if handler
@@ -486,7 +486,7 @@ evaluated in a temporary buffer."
 		 (w3m-process-start-process ,var))
 	     (if (w3m-process-p
 		  (setq ,var (save-current-buffer
-			       (let ((handler (cons ',post-handler handler)))
+			       (let ((handler (cons #',post-handler handler)))
 				 (,post-body ,var)))))
 		 (if handler
 		     ,var
@@ -584,7 +584,7 @@ evaluated in a temporary buffer."
 (defun w3m-process-filter (process string)
   (when (buffer-name (process-buffer process))
     (with-current-buffer (process-buffer process)
-      (let ((buffer-read-only nil)
+      (let ((inhibit-read-only t)
 	    (case-fold-search nil))
 	(goto-char (process-mark process))
 	(insert string)

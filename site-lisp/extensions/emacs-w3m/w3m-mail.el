@@ -1,6 +1,6 @@
 ;;; w3m-mail.el --- an interface to mail-user-agent for sending web pages
 
-;; Copyright (C) 2006 TSUCHIYA Masatoshi
+;; Copyright (C) 2006, 2009, 2010 TSUCHIYA Masatoshi
 
 ;; Author: Katsumi Yamaoka <yamaoka@jpl.org>
 ;; Keywords: w3m, WWW, hypermedia
@@ -129,32 +129,33 @@ the one such as \"text/html\", and the rest are the same as those of
 
 (defun w3m-mail-embed-base-url (source base-url)
   "Embed BASE-URL in SOURCE."
-  (let ((default-enable-multibyte-characters t))
-    (with-temp-buffer
-      (setq case-fold-search t)
-      (insert source)
-      (goto-char (point-min))
-      (while (search-forward "\r\n" nil t)
-	(replace-match "\n"))
-      (goto-char (point-min))
-      (let ((nohead t)
-	    (points (list (point-min) (point-min)))
-	    (margin 0))
-	(when (re-search-forward "\\(<html>\\)[\t\n ]*" nil t)
-	  (setq points (list (match-end 1) (match-end 0))
-		margin (current-column)))
-	(when (re-search-forward "\\(<head>\\)[\t\n ]*" nil t)
-	  (setq nohead nil
-		points (list (match-end 1) (match-end 0))
-		margin (current-column)))
-	(setq margin (make-string margin ? ))
-	(goto-char (car points))
-	(apply 'delete-region points)
-	(if nohead
-	    (insert "\n" margin "<head><base href=\"" base-url "\"></head>\n"
-		    margin)
-	  (insert "\n" margin "<base href=\"" base-url "\">\n" margin)))
-      (buffer-string))))
+  (with-temp-buffer
+    (w3m-static-unless (featurep 'xemacs)
+      (set-buffer-multibyte t))
+    (setq case-fold-search t)
+    (insert source)
+    (goto-char (point-min))
+    (while (search-forward "\r\n" nil t)
+      (replace-match "\n"))
+    (goto-char (point-min))
+    (let ((nohead t)
+	  (points (list (point-min) (point-min)))
+	  (margin 0))
+      (when (re-search-forward "\\(<html>\\)[\t\n ]*" nil t)
+	(setq points (list (match-end 1) (match-end 0))
+	      margin (current-column)))
+      (when (re-search-forward "\\(<head>\\)[\t\n ]*" nil t)
+	(setq nohead nil
+	      points (list (match-end 1) (match-end 0))
+	      margin (current-column)))
+      (setq margin (make-string margin ? ))
+      (goto-char (car points))
+      (apply 'delete-region points)
+      (if nohead
+	  (insert "\n" margin "<head><base href=\"" base-url "\"></head>\n"
+		  margin)
+	(insert "\n" margin "<base href=\"" base-url "\">\n" margin)))
+    (buffer-string)))
 
 (defun w3m-mail-goto-body-and-clear-body ()
   "Go to the beginning of the body and clear the body."
@@ -177,12 +178,10 @@ the one such as \"text/html\", and the rest are the same as those of
 (defun w3m-mail-compose-with-mml (source url charset content-type
 					 to subject other-headers)
   "Compose a mail using MML."
-  (let ((buffer (w3m-static-if (featurep 'xemacs)
-		    (generate-new-buffer " *w3m-mail*")
-		  (let ((default-enable-multibyte-characters
-			  (not (string-match "\\`image/" content-type))))
-		    (generate-new-buffer " *w3m-mail*")))))
+  (let ((buffer (generate-new-buffer " *w3m-mail*")))
     (with-current-buffer buffer
+      (w3m-static-unless (featurep 'xemacs)
+	(set-buffer-multibyte (not (string-match "\\`image/" content-type))))
       (insert source))
     (if (eq mail-user-agent 'gnus-user-agent)
 	(progn
@@ -222,12 +221,10 @@ the one such as \"text/html\", and the rest are the same as those of
 				   (w3m-static-if (featurep 'xemacs)
 				       (string-match "[^\000-\177]" source)
 				     (multibyte-string-p source))))))
-	 (buffer (w3m-static-if (featurep 'xemacs)
-		     (generate-new-buffer " *w3m-mail*")
-		   (let ((default-enable-multibyte-characters
-			   (and (not coding) multibytep)))
-		     (generate-new-buffer " *w3m-mail*")))))
+	 (buffer (generate-new-buffer " *w3m-mail*")))
     (with-current-buffer buffer
+      (w3m-static-unless (featurep 'xemacs)
+	(set-buffer-multibyte (and (not coding) multibytep)))
       (cond (coding
 	     (insert (encode-coding-string source coding)))
 	    (multibytep
@@ -246,7 +243,8 @@ the one such as \"text/html\", and the rest are the same as those of
     (require 'vm-startup)
     (compose-mail to subject other-headers)
     (add-to-list 'mail-send-actions `(kill-buffer ,buffer))
-    (w3m-add-local-hook 'kill-buffer-hook `(lambda nil (kill-buffer ,buffer)))
+    (w3m-make-local-hook 'kill-buffer-hook)
+    (add-hook 'kill-buffer-hook `(lambda nil (kill-buffer ,buffer)) nil t)
     (w3m-mail-goto-body-and-clear-body)
     (w3m-mail-position-point
      (prog1

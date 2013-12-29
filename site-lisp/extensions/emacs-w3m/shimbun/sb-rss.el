@@ -1,9 +1,7 @@
 ;;; sb-rss.el --- shimbun backend for RSS (Rich Site Summary).
 
-;; Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009
-;; Koichiro Ohba <koichiro@meadowy.org>
-;; Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009
-;; NAKAJIMA Mikio <minakaji@osaka.email.ne.jp>
+;; Copyright (C) 2003-2011, 2013 Koichiro Ohba <koichiro@meadowy.org>
+;; Copyright (C) 2003-2011, 2013 NAKAJIMA Mikio <minakaji@osaka.email.ne.jp>
 
 ;; Author: Koichiro Ohba <koichiro@meadowy.org>
 ;;         NAKAJIMA Mikio <minakaji@osaka.email.ne.jp>
@@ -42,18 +40,17 @@
 (eval '(require 'xml))
 
 (eval-and-compile
-  (luna-define-class shimbun-rss (shimbun) (ignored-subject))
-  (luna-define-internal-accessors 'shimbun-rss))
+  (luna-define-class shimbun-rss (shimbun) (ignored-subject)))
 
 (luna-define-method initialize-instance :after ((shimbun shimbun-rss)
 						&rest init-args)
   (shimbun-rss-initialize-ignored-subject shimbun))
 
 (defun shimbun-rss-initialize-ignored-subject (shimbun)
-  (shimbun-rss-set-ignored-subject-internal
-   shimbun
-   (symbol-value (intern-soft (format "shimbun-%s-ignored-subject"
-				      (shimbun-server shimbun)))))
+  (luna-set-slot-value shimbun 'ignored-subject
+		       (symbol-value
+			(intern-soft (format "shimbun-%s-ignored-subject"
+					     (shimbun-server shimbun)))))
   shimbun)
 
 (luna-define-generic shimbun-rss-process-date (shimbun-rss date)
@@ -146,10 +143,7 @@ but you can identify it from the URL, define this method in a backend.")
 
 (luna-define-generic shimbun-rss-build-message-id (shimbun-rss
 						   url &optional date)
-  "Build unique message-id from URL and DATE and return it.
-If return nil, it mean argument URL are not SHIMBUN entry.
-Basically, implement illeagal URL to generate error message.
-But clarify need ignored URL return nil.")
+  "Build unique message-id from URL and (optionally) DATE, and return it.")
 
 (luna-define-method shimbun-rss-build-message-id ((shimbun shimbun-rss)
 						  url &optional date)
@@ -178,21 +172,70 @@ But clarify need ignored URL return nil.")
 
 (defun shimbun-rss-get-headers (shimbun &optional range
 					need-descriptions need-all-items)
-  (let ((xml (condition-case err
-		 (xml-parse-region (point-min) (point-max))
-	       (error
-		(message "Error while parsing %s: %s"
-			 (shimbun-index-url shimbun)
-			 (error-message-string err))
-		nil)))
-	(ignored-subject (shimbun-rss-ignored-subject-internal shimbun))
-	dc-ns rss-ns author hankaku headers)
-    (when xml
-      (setq dc-ns (shimbun-rss-get-namespace-prefix
-		   xml "http://purl.org/dc/elements/1.1/")
-	    rss-ns (shimbun-rss-get-namespace-prefix
-		    xml "http://purl.org/rss/1.0/")
-	    author
+  "Get headers from rss feed described by SHIMBUN.
+RANGE is currently ignored.  If NEED-DESCRIPTIONS, include node
+text as description.  By default, only existing and new items
+from the feed are returned, i.e., those items which are newer
+than the oldest one in the shimbun.  If NEED-ALL-ITEMS is
+non-nil, all items from the feed are returned.  If the entries
+from the feed have date information, the result is sorted by
+ascending date."
+  (let* ((xml (if (or debug-on-error debug-on-quit)
+		  (shimbun-xml-parse-buffer)
+		(condition-case err
+		    (shimbun-xml-parse-buffer)
+		  (error
+		   (message "Error while parsing %s: %s"
+			    (shimbun-index-url shimbun)
+			    (error-message-string err))
+		   nil))))
+	 header headers oldheaders newheaders oldest)
+    (dolist (tmp (shimbun-rss-get-headers-1 xml shimbun need-descriptions))
+      (let* ((date (shimbun-header-date tmp))
+	     (ftime
+	      (when (and (stringp date)
+			 (> (length date) 1))
+		(w3m-float-time (date-to-time date)))))
+	(push (list tmp ftime) headers)))
+    (when headers
+      (if (or need-all-items
+	      ;; If there's a header without date information, we
+	      ;; return everything, just to be safe.
+	      (memq nil (mapcar 'cadr headers)))
+	  (mapcar 'car headers)
+	;; Otherwise, sort according to date.
+	(setq headers
+	      (sort headers (lambda (a b)
+			      (> (cadr a) (cadr b)))))
+	(while headers
+	  (setq header (pop headers))
+	  (if (shimbun-search-id shimbun (shimbun-header-id (car header)))
+	      (push header oldheaders)
+	    (push header newheaders)))
+	(if (null oldheaders)
+	    ;; All items are new
+	    (mapcar 'car newheaders)
+	  ;; Delete all items which are older than the ones we already
+	  ;; have
+	  (setq oldest (cadr (car oldheaders)))
+	  (while (and newheaders
+		      (> oldest (cadr (car newheaders))))
+	    (setq newheaders (cdr newheaders)))
+	  (append
+	   (mapcar 'car newheaders)
+	   (mapcar 'car oldheaders)))))))
+
+(defun shimbun-rss-get-headers-1 (xml shimbun need-descriptions)
+  "Retrieve all items found in XML for SHIMBUN and return headers.
+If NEED-DESCRIPTIONS, include node text as description."
+  (when xml
+    (let  ((dc-ns (shimbun-rss-get-namespace-prefix
+		   xml "http://purl.org/dc/elements/1.1/"))
+	   (rss-ns (shimbun-rss-get-namespace-prefix
+		    xml "http://purl.org/rss/1.0/"))
+	   (ignored-subject (luna-slot-value shimbun 'ignored-subject))
+	   author hankaku headers)
+      (setq author
 	    (catch 'found-author
 	      (dolist (channel
 		       (shimbun-rss-find-el (intern (concat rss-ns "channel"))
@@ -218,35 +261,32 @@ But clarify need ignored URL return nil.")
 				 (shimbun-rss-node-text rss-ns 'pubDate item)))
 		       (id (shimbun-rss-build-message-id shimbun url date))
 		       (subject (shimbun-rss-node-text rss-ns 'title item)))
-		  (when (and id
-			     (or need-all-items
-				 (not (shimbun-search-id shimbun id)))
-			     (if (and ignored-subject subject)
-				 (not (string-match ignored-subject subject))
-			       t))
-		    (push
-		     (shimbun-create-header
-		      0
-		      (if hankaku
-			  (with-current-buffer hankaku
-			    (insert (or subject ""))
-			    (shimbun-japanese-hankaku-region (point-min)
-							     (point-max))
-			    (prog1 (buffer-string) (erase-buffer)))
-			subject)
-		      (or (shimbun-rss-node-text rss-ns 'author item)
-			  (shimbun-rss-node-text dc-ns 'creator item)
-			  (shimbun-rss-node-text dc-ns 'contributor item)
-			  author
-			  (shimbun-from-address shimbun))
-		      (shimbun-rss-process-date shimbun date)
-		      id "" 0 0 url
-		      (when need-descriptions
-			(let ((description (shimbun-rss-node-text
-					    rss-ns 'description item)))
-			  (when description
-			    (list (cons 'description description))))))
-		     headers))))))
+		  (when id
+		    (unless (and ignored-subject subject
+				 (string-match ignored-subject subject))
+		      (push
+		       (shimbun-create-header
+			0
+			(if hankaku
+			    (with-current-buffer hankaku
+			      (insert (or subject ""))
+			      (shimbun-japanese-hankaku-region (point-min)
+							       (point-max))
+			      (prog1 (buffer-string) (erase-buffer)))
+			  subject)
+			(or (shimbun-rss-node-text rss-ns 'author item)
+			    (shimbun-rss-node-text dc-ns 'creator item)
+			    (shimbun-rss-node-text dc-ns 'contributor item)
+			    author
+			    (shimbun-from-address shimbun))
+			(shimbun-rss-process-date shimbun date)
+			id "" 0 0 url
+			(when need-descriptions
+			  (let ((description (shimbun-rss-node-text
+					      rss-ns 'description item)))
+			    (when description
+			      (list (cons 'description description))))))
+		       headers)))))))
 	(when (buffer-live-p hankaku)
 	  (kill-buffer hankaku))))))
 

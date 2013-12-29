@@ -1,7 +1,6 @@
-;;; w3m-filter.el --- filtering utility of advertisements on WEB sites -*- coding: euc-japan -*-
+;;; w3m-filter.el --- filtering utility of advertisements on WEB sites -*- coding: utf-8 -*-
 
-;; Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
-;; TSUCHIYA Masatoshi <tsuchiya@namazu.org>
+;; Copyright (C) 2001-2008, 2012, 2013 TSUCHIYA Masatoshi <tsuchiya@namazu.org>
 
 ;; Authors: TSUCHIYA Masatoshi <tsuchiya@namazu.org>
 ;; Keywords: w3m, WWW, hypermedia
@@ -39,42 +38,201 @@
 
 (require 'w3m)
 
-(defcustom w3m-filter-rules
-  `(("\\`http://www\\.geocities\\.co\\.jp/"
-     w3m-filter-delete-regions
-     "<DIV ALIGN=CENTER>\n<!--*/GeoGuide/*-->" "<!--*/GeoGuide/*-->\n</DIV>")
-    ("\\`http://[a-z]+\\.hp\\.infoseek\\.co\\.jp/"
-     w3m-filter-delete-regions
-     "<!-- start AD -->" "<!-- end AD -->")
-    ("\\`http://linux\\.ascii24\\.com/linux/"
-     w3m-filter-delete-regions
-     "<!-- DAC CHANNEL AD START -->" "<!-- DAC CHANNEL AD END -->")
-    ("\\`http://\\(www\\|images\\|news\\|maps\\|groups\\)\\.google\\."
+(defcustom w3m-filter-configuration
+  `((t
+     ("Strip Google's click-tracking code from link urls"
+      "Google の click-tracking コードをリンクの url から取り除きます")
+     "\\`https?://[a-z]+\\.google\\."
+     w3m-filter-google-click-tracking)
+    (t
+     ("Align table columns vertically to shrink the table width in Google"
+      "Google 検索結果のテーブルを縦方向で揃えて幅を狭めます")
+     "\\`http://\\(www\\|images\\|news\\|maps\\|groups\\)\\.google\\."
+     w3m-filter-google-shrink-table-width)
+    (t
+     ("Add name anchors that w3m can handle in all pages"
+      "すべてのページに w3m が扱える name アンカーを追加します")
+     ""
+     w3m-filter-add-name-anchors)
+    (nil
+     ("Render <tfoot>...</tfoot> after <tbody>...</tbody>"
+      "テーブル内の <tfoot> を <tbody> の後に描画します")
+     ""
+     w3m-filter-fix-tfoot-rendering)
+    (nil
+     ("Remove garbage in http://www.geocities.co.jp/*"
+      "http://www.geocities.co.jp/* でゴミを取り除きます")
+     "\\`http://www\\.geocities\\.co\\.jp/"
+     (w3m-filter-delete-regions
+      "<DIV ALIGN=CENTER>\n<!--*/GeoGuide/*-->" "<!--*/GeoGuide/*-->\n</DIV>"))
+    (nil
+     ("Remove ADV in http://*.hp.infoseek.co.jp/*"
+      "http://*.hp.infoseek.co.jp/* で広告を取り除きます")
+     "\\`http://[a-z]+\\.hp\\.infoseek\\.co\\.jp/"
+     (w3m-filter-delete-regions "<!-- start AD -->" "<!-- end AD -->"))
+    (nil
+     ("Remove ADV in http://linux.ascii24.com/linux/*"
+      "http://linux.ascii24.com/linux/* で広告を取り除きます")
+     "\\`http://linux\\.ascii24\\.com/linux/"
+     (w3m-filter-delete-regions
+      "<!-- DAC CHANNEL AD START -->" "<!-- DAC CHANNEL AD END -->"))
+    (nil
+     "A filter for Google"
+     "\\`http://\\(www\\|images\\|news\\|maps\\|groups\\)\\.google\\."
      w3m-filter-google)
-    ("\\`https?://\\(?:www\\.\\)?amazon\\.\
+    (nil
+     "A filter for Amazon"
+     "\\`https?://\\(?:www\\.\\)?amazon\\.\
 \\(?:com\\|co\\.\\(?:jp\\|uk\\)\\|fr\\|de\\)/"
      w3m-filter-amazon)
-    ("\\`https?://mixi\\.jp" w3m-filter-mixi)
-    ("\\`http://eow\\.alc\\.co\\.jp/[^/]+/UTF-8" w3m-filter-alc)
-    ("\\`http://www\\.asahi\\.com/" w3m-filter-asahi-shimbun)
-    ("\\`http://imepita\\.jp/[0-9]+/[0-9]+" w3m-filter-imepita)
-    ("\\`http://allatanys\\.jp/" w3m-filter-allatanys)
-    ("\\`http://.*\\.wikipedia\\.org/" w3m-filter-wikipedia)
-    ("" w3m-filter-iframe))
-  "Rules to filter advertisements on WEB sites."
+    (nil
+     ("A filter for Mixi.jp"
+      "ミクシィ用フィルタ")
+     "\\`https?://mixi\\.jp" w3m-filter-mixi)
+    (nil
+     "A filter for http://eow.alc.co.jp/*/UTF-8*"
+     "\\`http://eow\\.alc\\.co\\.jp/[^/]+/UTF-8" w3m-filter-alc)
+    (nil
+     ("A filter for Asahi Shimbun"
+      "朝日新聞用フィルタ")
+     "\\`http://www\\.asahi\\.com/" w3m-filter-asahi-shimbun)
+    (nil
+     "A filter for http://imepita.jp/NUM/NUM*"
+     "\\`http://imepita\\.jp/[0-9]+/[0-9]+" w3m-filter-imepita)
+    (nil
+     "A filter for http://allatanys.jp/*"
+     "\\`http://allatanys\\.jp/" w3m-filter-allatanys)
+    (nil
+     "A filter for Wikipedia"
+     "\\`http://.*\\.wikipedia\\.org/" w3m-filter-wikipedia)
+    (nil
+     ("Remove inline frames in all pages"
+      "すべてのページでインラインフレームを取り除きます")
+     ""
+     w3m-filter-iframe))
+  "List of filter configurations applied to web contents.
+Each filter configuration consists of the following form:
+
+\(FLAG DESCRIPTION REGEXP FUNCTION)
+
+FLAG
+  Non-nil means this filter is enabled.
+DESCRIPTION
+  Describe what this filter does.  The value may be a string or a list
+  of two strings; in the later case, those descriptions are written in
+  English and Japanese respectively, and only either one is displayed
+  in the customization buffer according to `w3m-language'.
+REGEXP
+  Regular expression to restrict this filter so as to run only on web
+  contents of which the url matches.
+FUNCTION
+  Filter function to run on web contents.  The value may be a function
+  or a list of a function and rest argument(s).  A function should take
+  at least one argument, a url of contents retrieved then, as the first
+  argument even if it is useless.  Use the later (i.e. a function and
+  arguments) if the function requires rest arguments."
   :group 'w3m
   :type '(repeat
-	  (cons :format "%v" :indent 4
-		(regexp :format "Regexp: %v\n" :size 0)
+	  :convert-widget w3m-widget-type-convert-widget
+	  (let ((locker (lambda (fn)
+			  `(lambda (&rest args)
+			     (when (and (not inhibit-read-only)
+					(eq (get-char-property (point) 'face)
+					    'widget-inactive))
+			       (when (and (not debug-on-error)
+					  (eventp (cadr args))
+					  (memq 'down
+						(event-modifiers (cadr args))))
+				 (setq before-change-functions
+				       `((lambda (from to)
+					   (setq before-change-functions
+						 ',before-change-functions)))))
+			       (error "The widget here is not active"))
+			     (apply #',fn args)))))
+	    `((group
+	       :indent 2
+
+	       ;; Work around a widget bug: the default value of `choice'
+	       ;; gets nil regardless of the type of items if it is within
+	       ;; (group :inline t ...).  Fixed in Emacs 24.4 (Bug#12670).
+	       :default-get (lambda (widget) '(t "Not documented" ".*" ignore))
+
+	       :value-create
+	       (lambda (widget)
+		 (widget-group-value-create widget)
+		 (unless (car (widget-value widget))
+		   (let ((children (widget-get widget :children)))
+		     (widget-specify-inactive
+		      (cadr (widget-get widget :args))
+		      (widget-get (car children) :to)
+		      (widget-get (car (last children)) :to)))))
+	       (checkbox
+		:format "\n%[%v%]"
+		:action
+		(lambda (widget &optional event)
+		  (let ((widget-edit-functions
+			 (lambda (widget)
+			   (let* ((parent (widget-get widget :parent))
+				  (child (cadr (widget-get parent :args))))
+			     (if (widget-value widget)
+				 (progn
+				   (widget-specify-active child)
+				   (widget-put child :inactive nil))
+			       (widget-specify-inactive
+				child
+				(widget-get widget :to)
+				(widget-get
+				 (car (last
+				       (widget-get
+					(car (last
+					      (widget-get parent :children)))
+					:children))) :to)))))))
+		    (widget-checkbox-action widget event))))
+	       (group
+		:inline t
 		(choice
-		 :tag "Filtering Rule"
-		 (list :tag "Delete regions surrounded with these patterns"
-		       (function-item :format "" w3m-filter-delete-region)
-		       (regexp :tag "Start")
-		       (regexp :tag "End"))
-		 (list :tag "Filter with a user defined function"
-		       function
-		       (repeat :tag "Arguments" sexp))))))
+		 :format " %v"
+		 (string :format "%v")
+		 (group ,@(if (equal "Japanese" w3m-language)
+			      '((sexp :format "") (string :format "%v"))
+			    '((string :format "%v") (sexp :format ""))))
+		 (const :format "Not documented\n" nil))
+		(regexp :format "Regexp matching url: %v")
+		(choice
+		 :tag "Type" :format "Function %[Type%]: %v"
+		 :action ,(funcall locker 'widget-choice-action)
+		 (function :tag "Function with no rest arg" :format "%v")
+		 (group
+		  :tag "Function and rest arg(s)" :indent 0 :offset 4
+		  (function :format "%v")
+		  (editable-list
+		   :inline t
+		   :entry-format "%i %d Arg: %v"
+		   :insert-before
+		   ,(funcall locker 'widget-editable-list-insert-before)
+		   :delete-at
+		   ,(funcall locker 'widget-editable-list-delete-at)
+		   (sexp :format "%v"))))))))))
+
+(defcustom w3m-filter-rules nil
+  "Rules to filter advertisements on WEB sites.
+This variable is semi-obsolete; use `w3m-filter-configuration' instead."
+  :group 'w3m
+  :type '(repeat
+	  (group :format "%v" :indent 2
+		 (regexp :format "Regexp: %v\n" :value ".*" :size 0)
+		 (choice
+		  :tag "Filtering Rule"
+		  (group :inline t
+			 :tag "Delete regions surrounded with these patterns"
+			 (const :format "Function: %v\n"
+				w3m-filter-delete-regions)
+			 (string :format "Start: %v\n" :size 0
+				 :value "not a regexp")
+			 (string :format "  End: %v\n" :size 0
+				 :value "not a regexp"))
+		  (function :tag "Filter with a user defined function"
+			    :format "Function: %v\n" :size 0)))))
 
 (defcustom w3m-filter-google-use-utf8
   (or (featurep 'un-define) (fboundp 'utf-translate-cjk-mode)
@@ -121,7 +279,15 @@
 (defun w3m-filter (url)
   "Apply filtering rule of URL against a content in this buffer."
   (save-match-data
-    (dolist (elem w3m-filter-rules)
+    (dolist (elem (append w3m-filter-rules
+			  (delq nil
+				(mapcar
+				 (lambda (config)
+				   (when (car config)
+				     (if (consp (nth 3 config))
+					 (cons (nth 2 config) (nth 3 config))
+				       (list (nth 2 config) (nth 3 config)))))
+				 w3m-filter-configuration))))
       (when (string-match (car elem) url)
 	(apply (cadr elem) url (cddr elem))))))
 
@@ -143,6 +309,125 @@
     (replace-match to-string nil nil)))
 
 ;; Filter functions:
+(defun w3m-filter-google-click-tracking (url)
+  "Strip Google's click-tracking code from link urls"
+  (goto-char (point-min))
+  (while (re-search-forward "\\(<a[\t\n ]+\\(?:[^\t\n >]+[\t\n ]+\\)*\
+href=\"\\)\\(?:[^\"]+\\)?/\\(?:imgres\\?imgurl\\|url\\?\\(?:q\\|url\\)\\)=\
+\\([^&]+\\)[^>]+>" nil t)
+    ;; In a search result Google encodes some special characters like "+"
+    ;; and "?" to "%2B" and "%3F" in a real url, so we need to decode them.
+    (insert (w3m-url-decode-string
+	     (prog1
+		 (concat (match-string 1) (match-string 2) "\">")
+	       (delete-region (match-beginning 0) (match-end 0)))))))
+
+(defun w3m-filter-google-shrink-table-width (url)
+  "Align table columns vertically to shrink the table width."
+  (let ((case-fold-search t)
+	last)
+    (goto-char (point-min))
+    (while (re-search-forward "<tr[\t\n\r >]" nil t)
+      (when (w3m-end-of-tag "tr")
+	(save-restriction
+	  (narrow-to-region (goto-char (match-beginning 0))
+			    (match-end 0))
+	  (setq last nil)
+	  (while (re-search-forward "<td[\t\n\r >]" nil t)
+	    (when (w3m-end-of-tag "td")
+	      (setq last (match-end 0))
+	      (replace-match "<tr>\\&</tr>")))
+	  (when last
+	    (goto-char (+ 4 last))
+	    (delete-char 4))
+	  (goto-char (point-max)))))
+    ;; Remove rowspan and width specs, and <br>s.
+    (goto-char (point-min))
+    (while (re-search-forward "<table[\t\n\r >]" nil t)
+      (when (w3m-end-of-tag "table")
+	(save-restriction
+	  (narrow-to-region (goto-char (match-beginning 0))
+			    (match-end 0))
+	  (while (re-search-forward "\
+\[\t\n\r ]*\\(?:\\(?:rowspan\\|width\\)=\"[^\"]+\"\\|<br>\\)[\t\n\r ]*"
+				    nil t)
+	    ;; Preserve a space at the line-break point.
+	    (replace-match " "))
+	  ;; Insert a space between ASCII and non-ASCII characters
+	  ;; and after a comma.
+	  (goto-char (point-min))
+	  (while (re-search-forward "\
+\\([!-;=?-~]\\)\\([^ -~]\\)\\|\\([^ -~]\\)\\([!-;=?-~]\\)\\|\\(,\\)\\([^ ]\\)"
+				    nil t)
+	    (forward-char -1)
+	    (insert " ")
+	    (forward-char))
+	  (goto-char (point-max)))))))
+
+(defun w3m-filter-add-name-anchors (url)
+  ;;  cf. [emacs-w3m:11153]
+  "Add name anchors that w3m can handle.
+This function adds ``<a name=\"FOO_BAR\"></a>'' in front of
+``<TAG ... id=\"FOO_BAR\" ...>FOO BAR</TAG>'' in the current buffer."
+  (let ((case-fold-search t) names st nd name)
+    (goto-char (point-min))
+    (while (re-search-forward "<a[\t\n\r ]+\\(?:[^\t\n\r >]+[\t\n\r ]+\\)*\
+href=\"#\\([a-z][-.0-9:_a-z]*\\)\"" nil t)
+      (add-to-list 'names (match-string 1)))
+    (when names
+      (setq names (concat "<\\(?:[^\t\n\r >]+\\)\
+\[\t\n\r ]+\\(?:[^\t\n\r >]+[\t\n\r ]+\\)*[Ii][Dd]=\"\\("
+			  (mapconcat 'regexp-quote names "\\|")
+			  "\\)\"")
+	    case-fold-search nil)
+      (goto-char (point-min))
+      (while (re-search-forward names nil t)
+	(goto-char (setq st (match-beginning 0)))
+	(setq nd (match-end 0)
+	      name (match-string 1))
+	(insert "<a name=" name "></a>")
+	(goto-char (+ nd (- (point) st)))))))
+
+(defun w3m-filter-fix-tfoot-rendering (url &optional recursion)
+  "Render <tfoot>...</tfoot> after <tbody>...</tbody>."
+  (let ((table-exists recursion)
+	(mark "!-- emacs-w3m-filter ")
+	(tbody-end (make-marker))
+	tfoots)
+    (goto-char (if table-exists (match-end 0) (point-min)))
+    (while (or table-exists (re-search-forward "<table[\t\n\r >]" nil t))
+      (setq table-exists nil)
+      (save-restriction
+	(if (w3m-end-of-tag "table")
+	    (narrow-to-region (match-beginning 0) (match-end 0))
+	  (narrow-to-region (match-beginning 0) (point-max)))
+	(goto-char (1+ (match-beginning 0)))
+	(insert mark)
+	(while (re-search-forward "<table[\t\n\r >]" nil t)
+	  (w3m-filter-fix-tfoot-rendering url t))
+	(goto-char (point-min))
+	(while (search-forward "</tbody>" nil t)
+	  (set-marker tbody-end (match-end 0))
+	  (goto-char (1+ (match-beginning 0)))
+	  (insert mark))
+	(unless (bobp)
+	  (setq tfoots nil)
+	  (goto-char (point-min))
+	  (while (re-search-forward "<tfoot[\t\n\r >]" nil t)
+	    (when (w3m-end-of-tag "tfoot")
+	      (push (match-string 0) tfoots)
+	      (delete-region (match-beginning 0) (match-end 0))))
+	  (when tfoots
+	    (goto-char tbody-end)
+	    (dolist (tfoot (nreverse tfoots))
+	      (insert "<" mark (substring tfoot 1)))))
+	(goto-char (point-max))))
+    (set-marker tbody-end nil)
+    (unless recursion
+      (goto-char (point-min))
+      (while (search-forward mark nil t)
+	(delete-region (match-beginning 0) (match-end 0))))))
+
 (defun w3m-filter-asahi-shimbun (url)
   "Convert entity reference of UCS."
   (when w3m-use-mule-ucs
@@ -238,23 +523,23 @@
       (setq cword (car (split-string (w3m-url-decode-string cword 'utf-8)
 				     " ")))
       (goto-char (point-min))
-      (while (search-forward "�ǡ�����ž�ܤ϶ؤ����Ƥ��ޤ�" nil t)
+      (while (search-forward "データの転載は禁じられています" nil t)
 	(delete-region (line-beginning-position) (line-end-position))
 	(insert "<br>"))
       (goto-char (point-min))
       (when (search-forward "<body" nil t)
 	(forward-line 1)
-	(insert "<h1>�Ѽ�ϯ on the WEB<h1>\n")
+	(insert "<h1>英辞朗 on the WEB<h1>\n")
 	(setq beg (point))
-	(when (search-forward "<!-- ������ʸ���� -->" nil t)
+	(when (search-forward "<!-- ▼検索文字列 -->" nil t)
 	  (forward-line 1)
 	  (delete-region beg (point)))
-	(when (search-forward "<!-- ����ɥ�� ���� -->" nil t)
+	(when (search-forward "<!-- ▼ワードリンク 履歴 -->" nil t)
 	  (forward-line 1)
 	  (setq beg (point))
 	  (when (search-forward "</body>" nil t)
 	    (delete-region beg (match-beginning 0))))
-	(insert "<br>���ǡ�����ž�ܤ϶ؤ����Ƥ��ޤ���")
+	(insert "<br>＊データの転載は禁じられています。")
 	;; next/previous page
 	(goto-char (point-min))
 	(while (re-search-forward
@@ -284,15 +569,15 @@
 	(while (search-forward "img/spacer.gif" nil t)
 	  (delete-region (line-beginning-position) (line-end-position)))
 	(goto-char (point-min))
-	;; remove ��ɥ��
-	(when (search-forward "alt=\"��ɥ��\"" nil t)
+	;; remove ワードリンク
+	(when (search-forward "alt=\"ワードリンク\"" nil t)
 	  (delete-region (line-beginning-position) (line-end-position)))
-	;; ��ʸ��ɽ�������̵��
+	;; 全文を表示するは無理
 	(goto-char (point-min))
 	(while (re-search-forward
-		(concat "<br */> *��<strong>"
+		(concat "<br */> *⇒<strong>"
 			"<a href='javascript:goFullText(\"[^\"]+\", \"[^\"]+\")'>"
-			"��ʸ��ɽ������</a>")
+			"全文を表示する</a>")
 		nil t)
 	  (delete-region (match-beginning 0) (match-end 0)))
 	;; Java Document write... ;_;
