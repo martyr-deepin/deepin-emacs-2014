@@ -83,6 +83,12 @@
     (autoload fun filename))
   )
 
+(defun lazy-set-prefix-autoload-key (key-alist keymap key-prefix filename)
+  (lazy-set-key key-alist keymap key-prefix)
+  (dolist (element key-alist)
+    (setq fun (cdr element))
+    (autoload fun filename)))
+
 (defun lazy-set-mode-autoload-key (key-alist keymap key-prefix filename)
   (lazy-set-key key-alist keymap key-prefix)
   (dolist (element key-alist)

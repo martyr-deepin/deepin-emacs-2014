@@ -205,7 +205,6 @@
    ("M-o" . w3m-open-link-file-under-current-directory) ;open link file under current directory
    )
  w3m-mode-map nil "w3m-extension")
-;; (lazy-set-key sdcv-key-alist w3m-mode-map) ;sdcv的局部按键绑定
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; W3m Search ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defvar one-key-menu-w3m-search-alist nil

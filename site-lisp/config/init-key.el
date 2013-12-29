@@ -13,6 +13,16 @@
         ("l" . forward-char)            ;向前移动
         ("e" . scroll-down)             ;向下滚动一屏
         ("SPC" . scroll-up)))           ;向上滚动一屏
+;;; ### Sdcv ###
+;;; --- 星际译王命令行
+(defvar sdcv-key-alist nil
+  "The key alist that sdcv.")
+(setq sdcv-key-alist
+      '(("p" . sdcv-search-pointer)     ;光标处的单词, buffer显示
+        ("y" . sdcv-search-pointer+)    ;光标处的单词, tooltip显示
+        ("i" . sdcv-search-input)       ;输入的单词, buffer显示
+        (";" . sdcv-search-input+)))    ;输入的单词, tooltip显示
+(lazy-set-prefix-autoload-key sdcv-key-alist nil "C-z" "sdcv")
 ;;; ### Toolkit ###
 ;;; --- 工具函数
 (lazy-set-key
