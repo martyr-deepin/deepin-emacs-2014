@@ -1,4 +1,5 @@
 (require 'theme)
+(require 'lazy-set-key)
 (require 'miniedit)
 (require 'paredit)
 (require 'tabbar)
@@ -10,7 +11,6 @@
 
 (require 'init-tabbar)
 (require 'init-mode)
-(require 'init-key)                     
 (require 'init-dired)
 (require 'init-session)
 (require 'init-yasnippet)
@@ -19,6 +19,8 @@
 (require 'init-backup)
 (require 'init-indent)
 (require 'init-time)
+(require 'init-auto-complete)
+(require 'init-key)                     
 (require 'init-startup)
 
 (provide 'init)

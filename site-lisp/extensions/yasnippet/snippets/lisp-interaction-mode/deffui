@@ -1,0 +1,6 @@
+#name : (defun function-name () ... (interactive) ...) 
+# --
+(defun ${1:function-name} ($2)
+ "${3:Function documantion}."
+ (interactive)
+ $0)

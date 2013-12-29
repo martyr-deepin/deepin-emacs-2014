@@ -1,0 +1,7 @@
+#name : foreign import ccall "wrapper" ...
+# --
+{#pointer ${1:Func}#}
+
+foreign import ccall "wrapper" mk$1 :: 
+  (${2:IO ()})
+  -> IO $1 $0

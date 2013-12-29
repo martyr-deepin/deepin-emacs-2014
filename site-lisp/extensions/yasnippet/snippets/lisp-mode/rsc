@@ -1,0 +1,3 @@
+#name : (run-shell-command ...)
+# --
+(run-shell-command $0)

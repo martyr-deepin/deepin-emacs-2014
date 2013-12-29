@@ -1,0 +1,3 @@
+#name : Lisp:file.el
+# --
+Lisp:${1:FileName}.el$0

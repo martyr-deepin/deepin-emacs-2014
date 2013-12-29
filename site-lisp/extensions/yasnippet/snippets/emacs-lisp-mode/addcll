@@ -1,0 +1,6 @@
+#name : Add change logs with details
+# --
+;; ${1:Date}
+;;  * ${2:Name}:
+;;      * $0
+;;

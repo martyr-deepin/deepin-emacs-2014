@@ -1,0 +1,6 @@
+#name : if ... : ... else: ...
+# --
+if ${condition}:
+    ${if code}
+else:
+    ${else code}	

@@ -1,0 +1,4 @@
+#name : [new:UTC time] -- UserName
+# --
+[new:`yaoddmuse-username`:`(format-time-string "%Y-%m-%d %H:%M")` UTC]
+$0 -- `yaoddmuse-username`

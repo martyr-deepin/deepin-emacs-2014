@@ -1,5 +1,3 @@
-(require 'lazy-set-key)                 ;懒惰按键设置扩展
-
 ;;; ### Unset key ###
 ;;; --- 卸载按键
 (lazy-unset-key                         ;全局按键的卸载
@@ -36,15 +34,15 @@
    ("<print>" . save-screenshots)           ;截屏
    ("<M-s-return>" . toggle-debug-on-error) ;切换调试模式
    ("s-R" . re-builder)                     ;可视化构建正则表达式
-   ("s-1" . sort-lines)                  ;排序
-   ("s-2" . elisp-depend-insert-comment) ;插入 `...' 注释代码
-   ("s-3" . hanconvert-region)           ;转换简体或繁体中文
-   ("s-4" . uniquify-all-lines-buffer)   ;删除重复的行
+   ("s-1" . sort-lines)                     ;排序
+   ("s-2" . elisp-depend-insert-comment)    ;插入 `...' 注释代码
+   ("s-3" . hanconvert-region)              ;转换简体或繁体中文
+   ("s-4" . uniquify-all-lines-buffer)      ;删除重复的行
    ("s-5" . elisp-depend-insert-require)    ;插入 (require '...) 语句
-   ("s-[" . eval-expression)             ;执行表达式
-   ("s-\\" . artist-mode)                ;绘制模式
-   ("M-s-u" . ediff-buffers)             ;ediff
-   ("C-s-q" . quoted-insert)             ;读取系一个输入字符并插入
+   ("s-[" . eval-expression)                ;执行表达式
+   ("s-\\" . artist-mode)                   ;绘制模式
+   ("M-s-u" . ediff-buffers)                ;ediff
+   ("C-s-q" . quoted-insert)                ;读取系一个输入字符并插入
    ))
 ;;; ### Color-moccur ###
 ;;; --- 增强的moccur
@@ -94,28 +92,28 @@
    ))
 (lazy-set-autoload-key
  '(
-   ("M-s" . lazy-search-menu)              ;懒惰搜索
+   ("M-s" . lazy-search-menu)           ;懒惰搜索
    )
  "lazy-search")
 (lazy-set-autoload-key
  '(
-   ("C-c j" . go-to-char-forward)          ;快速字母导航, 向前
-   ("C-c k" . go-to-char-backward)         ;快速字母导航, 向后
+   ("C-c j" . go-to-char-forward)       ;快速字母导航, 向前
+   ("C-c k" . go-to-char-backward)      ;快速字母导航, 向后
    )
  "go-to-char")
 (lazy-set-autoload-key
  '(
-   ("s-N" . move-text-down)                ;把光标所在的整行文字(或标记)下移一行
-   ("s-P" . move-text-up)                  ;把光标所在的整行文字(或标记)上移一行
+   ("s-N" . move-text-down)             ;把光标所在的整行文字(或标记)下移一行
+   ("s-P" . move-text-up)               ;把光标所在的整行文字(或标记)上移一行
    )
  "move-text")
 ;;; ### Buffer Name ###
 ;;; --- 缓存名字
 (lazy-set-autoload-key
  '(
-   ("s-c r" . rename-file-and-buffer)        ;更改当前文件的名字
-   ("s-c g" . move-buffer-file)              ;更改当前文件的目录
-   ("s-c n" . copy-buffer-file-name-as-kill) ;拷贝buffer名字
+   ("s-c r" . rename-file-and-buffer)                 ;更改当前文件的名字
+   ("s-c g" . move-buffer-file)                       ;更改当前文件的目录
+   ("s-c n" . copy-buffer-file-name-as-kill)          ;拷贝buffer名字
    ("C-M-;" . kill-other-window-buffer)               ;关闭其他窗口的buffer
    ("s-Q" . kill-current-mode-buffers)                ;关闭与当前模式相同的所有buffers
    ("s-q" . kill-current-mode-buffers-except-current) ;关闭当前模式所有buffers, 除了当前buffer
@@ -165,7 +163,7 @@
    ))
 (lazy-set-autoload-key
  '(
-   ("s-:" . mark-rectangle-to-end)       ;标记矩形到行末
+   ("s-:" . mark-rectangle-to-end)      ;标记矩形到行末
    )
  "rect-extension")
 ;;; ### Font ###
@@ -182,32 +180,32 @@
 ;;; --- 窗口操作
 (lazy-set-key
  '(
-   ("C-c v" . split-window-vertically)                ;纵向分割窗口
-   ("C-c h" . split-window-horizontally)              ;横向分割窗口
-   ("C-;" . kill-this-buffer)                         ;关闭当前buffer
-   ("C-x ;" . delete-other-windows)                   ;关闭其它窗口
-   ("s-;" . one-key-menu-window-navigation)           ;快速窗口导航
-   ("s-a" . window-number-jump)                       ;窗口快速选择
+   ("C-c v" . split-window-vertically)      ;纵向分割窗口
+   ("C-c h" . split-window-horizontally)    ;横向分割窗口
+   ("C-;" . kill-this-buffer)               ;关闭当前buffer
+   ("C-x ;" . delete-other-windows)         ;关闭其它窗口
+   ("s-;" . one-key-menu-window-navigation) ;快速窗口导航
+   ("s-a" . window-number-jump)             ;窗口快速选择
    ))
 (lazy-set-autoload-key
  '(
-   ("C-c V" . delete-other-windows-vertically+)       ;关闭上下的其他窗口
-   ("C-c H" . delete-other-windows-horizontally+)     ;关闭左右的其他窗口
-   ("C-'" . delete-current-buffer-and-window)         ;关闭当前buffer, 并关闭窗口
-   ("C-\"" . delete-current-buffer-window)            ;删除当前buffer的窗口
-   ("C-s-7" . select-next-window)                     ;选择下一个窗口
-   ("C-s-8" . select-prev-window)                     ;选择上一个窗口
-   ("M-s-o" . toggle-one-window)                      ;切换一个窗口
+   ("C-c V" . delete-other-windows-vertically+)   ;关闭上下的其他窗口
+   ("C-c H" . delete-other-windows-horizontally+) ;关闭左右的其他窗口
+   ("C-'" . delete-current-buffer-and-window)     ;关闭当前buffer, 并关闭窗口
+   ("C-\"" . delete-current-buffer-window)        ;删除当前buffer的窗口
+   ("C-s-7" . select-next-window)                 ;选择下一个窗口
+   ("C-s-8" . select-prev-window)                 ;选择上一个窗口
+   ("M-s-o" . toggle-one-window)                  ;切换一个窗口
    )
  "window-extension")
 ;;; ### Tabbar ###
 ;;; --- 多标签浏览
 (lazy-set-key
  '(
-   ("M-7" . tabbar-backward-tab)              ;移动到后一个标签
-   ("M-8" . tabbar-forward-tab)               ;移动到前一个标签
-   ("M-9" . tabbar-backward-group)            ;移动到后一个标签组
-   ("M-0" . tabbar-forward-group)             ;移动到前一个标签组
+   ("M-7" . tabbar-backward-tab)        ;移动到后一个标签
+   ("M-8" . tabbar-forward-tab)         ;移动到前一个标签
+   ("M-9" . tabbar-backward-group)      ;移动到后一个标签组
+   ("M-0" . tabbar-forward-group)       ;移动到前一个标签组
    ))
 (lazy-set-autoload-key
  '(
@@ -247,7 +245,7 @@
    ))
 (lazy-set-autoload-key
  '(
-   ("C-8" . find-function-or-variable-at-point)  ;查找符号的定义
+   ("C-8" . find-function-or-variable-at-point) ;查找符号的定义
    )
  "find-func-extension")
 ;;; ### Paredit ###
@@ -258,35 +256,35 @@
 (lazy-set-key
  '(
    ;; 符号插入
-   ("(" . paredit-open-parenthesis)             ;智能 (
-   (")" . paredit-close-parenthesis)            ;智能 )
-   ("[" . paredit-open-bracket)                 ;智能 [
-   ("]" . paredit-close-bracket)                ;智能 ]
-   ("{" . paredit-open-curly)                   ;智能 {
-   ("}" . paredit-close-curly)                  ;智能 }
-   ("C-s-," . paredit-open-angled)              ;智能 <
-   ("C-s-." . paredit-close-angled)             ;智能 >
-   ("\"" . paredit-doublequote)                 ;智能 "
-   ("\\" . paredit-backslash)                   ;智能 \
+   ("(" . paredit-open-parenthesis)           ;智能 (
+   (")" . paredit-close-parenthesis)          ;智能 )
+   ("[" . paredit-open-bracket)               ;智能 [
+   ("]" . paredit-close-bracket)              ;智能 ]
+   ("{" . paredit-open-curly)                 ;智能 {
+   ("}" . paredit-close-curly)                ;智能 }
+   ("C-s-," . paredit-open-angled)            ;智能 <
+   ("C-s-." . paredit-close-angled)           ;智能 >
+   ("\"" . paredit-doublequote)               ;智能 "
+   ("\\" . paredit-backslash)                 ;智能 \
    ;; 删除
-   ("M-o" . paredit-backward-delete)            ;向后删除
-   ("C-d" . paredit-forward-delete)             ;向前删除
-   ("C-k" . paredit-kill)                       ;删除
-   ("C-M-m" . paredit-forward-kill-word)        ;向前按词删除
-   ("C-M-n" . paredit-backward-kill-word)       ;向后按词删除
+   ("M-o" . paredit-backward-delete)          ;向后删除
+   ("C-d" . paredit-forward-delete)           ;向前删除
+   ("C-k" . paredit-kill)                     ;删除
+   ("C-M-m" . paredit-forward-kill-word)      ;向前按词删除
+   ("C-M-n" . paredit-backward-kill-word)     ;向后按词删除
    ;; 移动
-   ("C-M-S-m" . paredit-forward)                ;向前移动
-   ("C-M-S-n" . paredit-backward)               ;向后移动
+   ("C-M-S-m" . paredit-forward)              ;向前移动
+   ("C-M-S-n" . paredit-backward)             ;向后移动
    ;; 包围
-   ("M-\"" . paredit-meta-doublequote)          ;用 " " 包围对象, 或跳出字符串
-   ("M-(" . paredit-wrap-sexp)                  ;用 ( ) 包围当前对象
-   ("M-[" . paredit-wrap-square)                ;用 [ ] 包围对象
-   ("M-{" . paredit-wrap-curly)                 ;用 { } 包围对象
-   ("C-(" . paredit-wrap-angled)                ;用 < > 包围对象
+   ("M-\"" . paredit-meta-doublequote)        ;用 " " 包围对象, 或跳出字符串
+   ("M-(" . paredit-wrap-sexp)                ;用 ( ) 包围当前对象
+   ("M-[" . paredit-wrap-square)              ;用 [ ] 包围对象
+   ("M-{" . paredit-wrap-curly)               ;用 { } 包围对象
+   ("C-(" . paredit-wrap-angled)              ;用 < > 包围对象
    ;; 跳出并换行缩进
-   ("M-}" . paredit-close-curly-and-newline)    ;跳出 { } 并换行
-   ("M-]" . paredit-close-square-and-newline)   ;跳出 [ ] 并换行
-   ("C-)" . paredit-close-angled-and-newline)   ;跳出 < > 并换行
+   ("M-}" . paredit-close-curly-and-newline)  ;跳出 { } 并换行
+   ("M-]" . paredit-close-square-and-newline) ;跳出 [ ] 并换行
+   ("C-)" . paredit-close-angled-and-newline) ;跳出 < > 并换行
    ;; 其他
    ("C-j" . paredit-newline)            ;智能换行并缩进
    ("M-q" . paredit-reindent-defun)     ;重新格式化函数
@@ -327,8 +325,8 @@
 ;;; --- 网页浏览器
 (lazy-set-autoload-key
  '(
-   ("C-z C-z" . w3m)                          ;启动W3M
-   ("s-W" . one-key-menu-w3m-search)          ;w3m 搜索菜单
+   ("C-z C-z" . w3m)                    ;启动W3M
+   ("s-W" . one-key-menu-w3m-search)    ;w3m 搜索菜单
    )
  "init-w3m")
 (lazy-set-autoload-key
@@ -391,7 +389,7 @@
  )
 (lazy-set-autoload-key
  '(
-   ("M-l" . isearch-to-lazy-search)         ;切换到lazy-search
+   ("M-l" . isearch-to-lazy-search)     ;切换到lazy-search
    )
  "lazy-search")
 ;;; ### Help ###
@@ -418,5 +416,20 @@
    ("s-x z" . apt-utils-search)         ;APT搜索
    )
  "init-apt-utils")
+;;; ### Auto-complete ###
+;;; --- 自动补全
+(lazy-set-key
+ '(
+   ("M-h" . ac-complete)                ;补全当前选中的
+   ("M-H" . ac-expand-common)           ;补全公共部分
+   ("M-U" . ac-stop)                    ;停止
+   ("M-," . ac-next)                    ;下一个
+   ("M-." . ac-previous)                ;上一个
+   )
+ ac-complete-mode-map
+ )
+(lazy-set-key
+ '(
+   ("M-/" . auto-complete)))
 
 (provide 'init-key)

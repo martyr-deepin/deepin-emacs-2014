@@ -1,0 +1,5 @@
+#name : function :: Type function = body
+# --
+${1:function} :: String
+$1 = "$1"
+$0

@@ -1,0 +1,3 @@
+#name : maybeWith withUTFString ... $ \... ->
+# --
+maybeWith withUTFString ${1:name} $ \ $1Ptr -> $0

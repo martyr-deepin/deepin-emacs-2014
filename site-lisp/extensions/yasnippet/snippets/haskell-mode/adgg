@@ -1,0 +1,3 @@
+#name : {# fun #}
+# --
+{# call ${1:Function} #} $0

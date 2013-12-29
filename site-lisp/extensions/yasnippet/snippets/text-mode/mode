@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: mode
+# key: mode
+# --
+`(yas-with-comment "-*- mode: ${1:mode} -*-")`

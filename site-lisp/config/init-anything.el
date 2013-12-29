@@ -75,7 +75,7 @@
 
 (require 'anything)                     ;Anything
 (require 'anything-config)              ;Anything config
-(require 'anything-complete)            ;Anything 补全
+;; (require 'anything-complete)            ;Anything 补全
 (require 'anything-match-plugin)        ;Anything 匹配算法的人性话提升
 (require 'anything-gtags)               ;Anything 结合 Gtags
 ;; (require 'anything-c-yasnippet)         ;Anything yasnippet
@@ -95,8 +95,8 @@
 (setq anything-etags-enable-tag-file-dir-cache t) ;使用缓存的tag文件
 (setq anything-c-use-standard-keys nil)           ;不使用标准按键
 (setq anything-etags-cache-tag-file-dir "/usr/share/deepin-emacs/") ;tag缓存文件的目录
-(setq anything-c-google-suggest-url                                 ;设置Google建议允许访问的URL
-      "http://www.google.cn/complete/search?hl=en&js=true&qu=")
+;; (setq anything-c-google-suggest-url                                 ;设置Google建议允许访问的URL
+;;       "http://www.google.cn/complete/search?hl=en&js=true&qu=")
 (setq anything-sources                  ;Anything 源列表
       (list
        anything-c-source-ffap-guesser             ;光标处的文件
@@ -119,7 +119,7 @@
        ;; anything-c-source-gtags-select             ;Gtags
        anything-c-source-emacs-commands          ;Emacs 命令相关的
        anything-c-source-complex-command-history ;复杂命令历史
-       anything-c-source-complete-shell-history  ;Shell历史
+       ;; anything-c-source-complete-shell-history  ;Shell历史
        anything-c-source-occur                   ;occur 搜索, (后面一点, 增加性能)
        ;; anything-c-source-man-pages               ;man
        ;; anything-c-source-emacs-process            ;进程
