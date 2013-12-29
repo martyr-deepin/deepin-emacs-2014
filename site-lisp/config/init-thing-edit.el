@@ -10,12 +10,12 @@
 ;; Last-Updated: 2013-12-28 07:46:40
 ;;           By: Andy Stewart
 ;; URL: http://www.emacswiki.org/emacs/download/init-thing-edit.el
-;; Keywords: 
+;; Keywords:
 ;; Compatibility: GNU Emacs 24.3.50.1
 ;;
 ;; Features that might be required by this library:
 ;;
-;; 
+;;
 ;;
 
 ;;; This file is NOT part of GNU Emacs
@@ -37,10 +37,10 @@
 ;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth
 ;; Floor, Boston, MA 02110-1301, USA.
 
-;;; Commentary: 
-;; 
+;;; Commentary:
+;;
 ;; Thing edit
-;; 
+;;
 
 ;;; Installation:
 ;;
@@ -57,32 +57,32 @@
 
 ;;; Customize:
 ;;
-;; 
+;;
 ;;
 ;; All of the above can customize by:
 ;;      M-x customize-group RET init-thing-edit RET
 ;;
 
 ;;; Change log:
-;;	
+;;
 ;; 2013/12/28
 ;;      * First released.
-;; 
+;;
 
 ;;; Acknowledgements:
 ;;
-;; 
+;;
 ;;
 
 ;;; TODO
 ;;
-;; 
+;;
 ;;
 
 ;;; Require
 
 (require 'one-key)
-(require 'thing-edit)          
+(require 'thing-edit)
 (require 'thing-edit-extension)
 
 ;;; Code:

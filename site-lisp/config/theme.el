@@ -1,9 +1,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Emacs 主题设置 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (set-face-attribute 'default nil :height 130)
-(tool-bar-mode -1)                   ;禁用工具栏
-(menu-bar-mode -1)                   ;禁用菜单栏
-(scroll-bar-mode -1)                 ;禁用滚动条
-(toggle-frame-fullscreen)            ;全屏
+(tool-bar-mode -1)                      ;禁用工具栏
+(menu-bar-mode -1)                      ;禁用菜单栏
+(scroll-bar-mode -1)                    ;禁用滚动条
+(toggle-frame-fullscreen)               ;全屏
 
 ;; 用户自定义变量
 (custom-set-variables
@@ -1168,10 +1168,10 @@
  '(ac-gtags-candidate-face ((t (:background "#191919" :foreground "#878787"))))
  '(ac-gtags-selection-face ((t (:background "orangered4" :foreground "grey"))))
  '(ac-menu-face ((t (:background "Grey10" :foreground "Grey40"))))
- '(ac-selection-face ((t (:background "darkgreen" :foreground "grey"))))
+ '(ac-selection-face ((t (:background "darkred" :foreground "grey"))))
  '(ac-yasnippet-candidate-face ((t (:background "#191919" :foreground "#878787"))))
  '(ac-yasnippet-menu-face ((t (:background "Grey10" :foreground "Grey40"))))
- '(ac-yasnippet-selection-face ((t (:background "DarkRed" :foreground "Grey"))))
+ '(ac-yasnippet-selection-face ((t (:background "darkgreen" :foreground "Grey"))))
  ;; ERC
  '(erc-direct-msg-face                  ;直接消息
    ((t (:foreground "DodgerBlue"))))
@@ -1247,5 +1247,3 @@
  )
 
 (provide 'theme)
-
-
