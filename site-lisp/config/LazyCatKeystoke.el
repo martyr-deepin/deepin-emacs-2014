@@ -924,19 +924,6 @@
  '(
    ("s-j" . one-key-menu-android)
    ))
-(lazy-set-key
- '(
-   ("J" . scroll-up-one-line)           ;向下滚动一行
-   ("K" . scroll-down-one-line)         ;向上滚动一行
-   ("H" . describe-mode)                ;帮助
-   ("f" . help-go-forward)              ;前一个帮助
-   ("b" . help-go-back)                 ;后一个帮助
-   ("y" . sdcv-search-pointer+)         ;翻译
-   ("<tab>" . forward-button)           ;前一个按钮
-   )
- help-mode-map
- )
-(lazy-set-key vi-move-key-alist help-mode-map) ;vi-move 的局部按键
 ;;; ### Info ###
 ;;; --- Info 模式
 (lazy-set-key

@@ -2,6 +2,17 @@
 ;;; --- 卸载按键
 (lazy-unset-key                         ;全局按键的卸载
  '("C-x C-f" "C-z" "C-q" "s-W" "s-z" "M-h" "C-x C-c" "C-\\"))
+;;; ### Vi-move ###
+;;; --- Vi式移动
+(defvar vi-move-key-alist nil
+  "The key alist that like vi move.")
+(setq vi-move-key-alist
+      '(("j" . next-line)               ;上一行
+        ("k" . previous-line)           ;下一行
+        ("h" . backward-char)           ;向后移动
+        ("l" . forward-char)            ;向前移动
+        ("e" . scroll-down)             ;向下滚动一屏
+        ("SPC" . scroll-up)))           ;向上滚动一屏
 ;;; ### Toolkit ###
 ;;; --- 工具函数
 (lazy-set-key
@@ -118,18 +129,18 @@
 ;;; --- 矩形操作
 (lazy-set-key
  '(
-   ("s-M" . rm-set-mark)                         ;矩形标记
-   ("s-X" . rm-exchange-point-and-mark)          ;矩形对角交换
-   ("s-D" . rm-kill-region)                      ;矩形删除
-   ("s-S" . rm-kill-ring-save)                   ;矩形保存
-   ("s-Y" . yank-rectangle)                      ;粘帖矩形
-   ("s-O" . open-rectangle)                      ;用空白填充矩形, 并向右移动文本
-   ("s-C" . clear-rectangle)                     ;清空矩形
-   ("s-T" . string-rectangle)                    ;用字符串替代矩形的每一行
-   ("s-I" . string-insert-rectangle)             ;插入字符串在矩形的每一行
-   ("s-F" . delete-whitespace-rectangle)         ;删除矩形中空格
-   ("s-:" . mark-rectangle-to-end)               ;标记矩形到行末
-   ("s-\"" . copy-rectangle-to-register)         ;拷贝矩形到寄存器
+   ("s-M" . rm-set-mark)                 ;矩形标记
+   ("s-X" . rm-exchange-point-and-mark)  ;矩形对角交换
+   ("s-D" . rm-kill-region)              ;矩形删除
+   ("s-S" . rm-kill-ring-save)           ;矩形保存
+   ("s-Y" . yank-rectangle)              ;粘帖矩形
+   ("s-O" . open-rectangle)              ;用空白填充矩形, 并向右移动文本
+   ("s-C" . clear-rectangle)             ;清空矩形
+   ("s-T" . string-rectangle)            ;用字符串替代矩形的每一行
+   ("s-I" . string-insert-rectangle)     ;插入字符串在矩形的每一行
+   ("s-F" . delete-whitespace-rectangle) ;删除矩形中空格
+   ("s-:" . mark-rectangle-to-end)       ;标记矩形到行末
+   ("s-\"" . copy-rectangle-to-register) ;拷贝矩形到寄存器
    ))
 ;;; ### Font ###
 ;;; --- 字体命令
@@ -304,7 +315,7 @@
 
 (lazy-set-autoload-key
  '(
-   ("M-C" . one-key-menu-cycle-buffer)      ;特定模式切换
+   ("M-C" . one-key-menu-cycle-buffer)  ;特定模式切换
    )
  "init-cycle-buffer")
 ;;; ### Isearch ###
@@ -338,5 +349,19 @@
    )
  isearch-mode-map
  )
-
+;;; ### Help ###
+;;; --- 帮助模式
+(lazy-set-key
+ '(
+   ("J" . scroll-up-one-line)           ;向下滚动一行
+   ("K" . scroll-down-one-line)         ;向上滚动一行
+   ("H" . describe-mode)                ;帮助
+   ("f" . help-go-forward)              ;前一个帮助
+   ("b" . help-go-back)                 ;后一个帮助
+   ("y" . sdcv-search-pointer+)         ;翻译
+   ("<tab>" . forward-button)           ;前一个按钮
+   )
+ help-mode-map
+ )
+(lazy-set-key vi-move-key-alist help-mode-map)
 (provide 'init-key)
