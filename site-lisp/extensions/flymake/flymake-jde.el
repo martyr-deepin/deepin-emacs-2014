@@ -1,4 +1,4 @@
-;;; jde-flymake.el -- an extension to flymake that uses JDEE and Jikes
+;;; flymake-jde.el -- an extension to flymake that uses JDEE and Jikes
 
 ;; Copyright (C) 2004 Free Software Foundation
 
@@ -49,7 +49,7 @@
 ;; 1) Download and install Jikes from
 ;;    http://www-124.ibm.com/developerworks/opensource/jikes/
 ;;   1.1) Make sure it is in your path, OR 
-;;   1.2) Customize jde-flymake-jikes-app-name
+;;   1.2) Customize flymake-jde-jikes-app-name
 ;;
 ;; 2) Download and install flymake from 
 ;;    http://flymake.sourceforge.net/
@@ -86,14 +86,14 @@
 ;;  0.3 - Fixed problem with jde-find-project-file when running in Linux/
 ;;        Thanks to Milan Zimmermann for the bug report
 ;;  0.2 - Jikes configuration options, thanks to Christopher <plalleme at free.fr>
-;;      - Tested with new flymake.el 0.3 (added patches required by jde-flymake.el)
+;;      - Tested with new flymake.el 0.3 (added patches required by flymake-jde.el)
 ;;
 ;;  0.1 - Initial version
 
 (require 'jde)
 (require 'flymake)
 
-(defgroup jde-flymake nil
+(defgroup flymake-jde nil
   "JDE Jalopy Options"
   :group 'jde
   :group 'flymake
@@ -101,23 +101,23 @@
   )
 
 ;; (makunbound 'jde-sourcepath)
-(defcustom jde-flymake-sourcepath nil
+(defcustom flymake-jde-sourcepath nil
   "*List of source directory paths.  it should be a subset of jde-sourcepath.
   if nul try to get `jde-sourcepath'."
-  :group 'jde-flymake
+  :group 'flymake-jde
   :type '(repeat (file :tag "Path")))
 
-(defcustom jde-flymake-option-jikes-source "1.4"
+(defcustom flymake-jde-option-jikes-source "1.4"
   "*Specify which Java SDK release the source syntax obeys. For example,
   to compile code with the assert keyword, you would specify -source 1.4. 
   Recognized releases are 1.1 through 1.4. If unspecified, this defaults to 1.3."
-  :group 'jde-flymake
+  :group 'flymake-jde
   :type 'string)
 
-(defcustom jde-flymake-jikes-app-name "jikes"
+(defcustom flymake-jde-jikes-app-name "jikes"
   "*Allows an absolute path to be set for the jikes compiler.
   The default is to attempt to load it from the path."
-  :group 'jde-flymake
+  :group 'flymake-jde
   :type 'string)
 
 ;; since this
@@ -140,14 +140,14 @@
 
     (if jikes-args
         ;; assumes jikes is on the path
-        (list jde-flymake-jikes-app-name jikes-args)
+        (list flymake-jde-jikes-app-name jikes-args)
                                         ;else
       nil)))
 
-(defun jde-flymake-customize ()
+(defun flymake-jde-customize ()
   "Show the jde-javadoc options panel."
   (interactive)
-  (customize-group "jde-flymake"))
+  (customize-group "flymake-jde"))
 
 (defun flymake-get-jikes-args(source-file-name base-dir)
   "create a command line for the jikes syntax check command"
@@ -161,20 +161,20 @@
            (rt-jar (expand-file-name "jre/lib/rt.jar" (jde-normalize-path (jde-get-jdk-dir))))
            (proj-classpath (jde-build-classpath jde-global-classpath))
            (proj-sourcepath (jde-build-classpath 
-                             (if (not jde-flymake-sourcepath) 
+                             (if (not flymake-jde-sourcepath) 
                                  jde-sourcepath
-                               jde-flymake-sourcepath))))
+                               flymake-jde-sourcepath))))
   
       ;;TODO: make jikes flags configurable
-      ;;  (list jde-flymake-option-jikes
+      ;;  (list flymake-jde-option-jikes
       (list "-nowrite" "+E" "+D" "+P" "+Pno-naming-convention" "-deprecation" 
-            "-source" jde-flymake-option-jikes-source 
+            "-source" flymake-jde-option-jikes-source 
             "-bootclasspath" rt-jar 
             "-classpath" proj-classpath
             "-sourcepath" proj-sourcepath
             source-file-name))))
 
-(provide 'jde-flymake)
+(provide 'flymake-jde)
 
-                                        ; jde-flymake ends here
+                                        ; flymake-jde ends here
 

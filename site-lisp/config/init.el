@@ -8,6 +8,7 @@
 (require 'linum) 
 (require 'highlight-parentheses)
 (require 'auto-save)
+(require 'flymake-config)
 
 (require 'init-tabbar)
 (require 'init-mode)

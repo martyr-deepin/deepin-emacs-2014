@@ -429,8 +429,12 @@
    )
  ac-complete-mode-map
  )
-;; (lazy-set-key
-;;  '(
-;;    ("M-/" . auto-complete)))
+;;; ### Flymake ###
+;;; --- 及时拼写检查
+(lazy-set-key
+ '(
+   ("M-s-j" . flymake-show-next-error)  ;显示下一个错误
+   ("M-s-k" . flymake-show-prev-error)  ;显示上一个错误
+   ))
 
 (provide 'init-key)

@@ -39,4 +39,4 @@
 
 (add-hook 'go-mode-hook 'flymake-mode)
 
-(provide 'go-flymake)
+(provide 'flymake-go)

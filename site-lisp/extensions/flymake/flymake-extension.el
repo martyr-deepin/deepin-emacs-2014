@@ -96,7 +96,7 @@
   "Some extension functions for flymake."
   :group 'flymake)
 
-(defcustom flymake-extension-use-showtip nil
+(defcustom flymake-extension-use-showtip t
   "Display error or warning in showtip.
 If nil flymake display error or warning in minibuffer.
 Otherwise use `showtip' display.
@@ -173,19 +173,6 @@ Except don't display message when no error or waring."
   (flymake-extension-show nil t))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Rules for `flymake' ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Haskell mode.
-(defun flymake-Haskell-init ()
-  (flymake-simple-make-init-impl
-   'flymake-create-temp-with-folder-structure nil nil
-   (file-name-nondirectory buffer-file-name)
-   'flymake-get-Haskell-cmdline))
-
-(defun flymake-get-Haskell-cmdline (source base-dir)
-  (list "ghc"
-        (list "--make" "-fbyte-code" "-XFlexibleContexts"
-              (concat "-i" base-dir) ;; can be expanded for additional -i options as in the Perl script
-              source)))
-
 (defadvice flymake-split-output
   ;; this needs to be advised as flymake-split-string is used in other places
   ;; and I don't know of a better way to get at the caller's details
@@ -199,45 +186,6 @@ Except don't display message when no error or waring."
   (before flymake-split-string-multiline activate)
   (when flymake-split-output-multiline
     (ad-set-arg 1 "^\\s *$")))
-
-(add-hook
- 'haskell-mode-hook
- '(lambda ()
-    ;; use add-to-list rather than push to avoid growing the list for every Haskell file loaded
-    (add-to-list 'flymake-allowed-file-name-masks
-                 '("\\.l?hs$" flymake-Haskell-init flymake-simple-java-cleanup))
-    (add-to-list 'flymake-err-line-patterns
-                 '("^\\(.+\\.l?hs\\):\\([0-9]+\\):\\([0-9]+\\):\\(\\(?:.\\|\\W\\)+\\)"
-                   1 2 3 4))
-    (set (make-local-variable 'multiline-flymake-mode) t)))
-
-;; C mode.
-(defun flymake-c-init ()
-  (flymake-simple-make-init-impl 'flymake-create-temp-inplace t t (file-name-nondirectory buffer-file-name) 'flymake-get-c-cmdline))
-
-(defun flymake-get-c-cmdline (source base-dir)
-  (list "gcc" (list "-Wall" (concat base-dir source))))
-
-(push '(".+\\.c$" flymake-c-init) flymake-allowed-file-name-masks)
-(push '(".+\\.h$" flymake-c-init) flymake-allowed-file-name-masks)
-
-;; C++ mode.
-(defun flymake-c++-init ()
-  (flymake-simple-make-init-impl 'flymake-create-temp-inplace t t (file-name-nondirectory buffer-file-name) 'flymake-get-c++-cmdline))
-
-(defun flymake-get-c++-cmdline (source base-dir)
-  (list "g++" (list "-Wall" (concat base-dir source))))
-
-(push '(".+\\.cpp$" flymake-c++-init) flymake-allowed-file-name-masks)
-
-;; Java mode.
-(defun flymake-java-init ()
-  (flymake-simple-make-init-impl 'flymake-create-temp-inplace t t (file-name-nondirectory buffer-file-name) 'flymake-get-java-cmdline))
-
-(defun flymake-get-java-cmdline (source base-dir)
-  (list "javac" (list "-g" (concat base-dir source))))
-
-(push '(".+\\.java$" flymake-java-init) flymake-allowed-file-name-masks)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Fringe for `flymake' ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defadvice flymake-make-overlay (after add-to-fringe first

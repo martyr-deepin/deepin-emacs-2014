@@ -32,4 +32,6 @@
   (flymake-mode t)
   (local-set-key (kbd "C-c d") 'flymake-display-err-menu-for-current-line))
 
+(add-hook 'sh-mode-hook 'flymake-shell-load)
+
 (provide 'flymake-shell)

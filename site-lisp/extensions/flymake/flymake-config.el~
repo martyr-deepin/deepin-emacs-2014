@@ -1,21 +1,21 @@
-;;; init-flymake.el --- Flymake configuration
+;;; flymake-config.el --- Config for flymake
 
-;; Filename: init-flymake.el
-;; Description: Flymake configuration
-;; Author: Andy Stewart lazycat.manatee@gmail.com
-;; Maintainer: Andy Stewart lazycat.manatee@gmail.com
-;; Copyright (C) 2008, 2009, Andy Stewart, all rights reserved.
-;; Created: 2008-10-20 09:43:11
+;; Filename: flymake-config.el
+;; Description: Config for flymake
+;; Author: Andy Stewart <andy@freedom>
+;; Maintainer: Andy Stewart <andy@freedom>
+;; Copyright (C) 2013, Andy Stewart, all rights reserved.
+;; Created: 2013-12-30 03:51:42
 ;; Version: 0.1
-;; Last-Updated: 2008-10-20 09:43:11
+;; Last-Updated: 2013-12-30 03:51:42
 ;;           By: Andy Stewart
-;; URL:
-;; Keywords: flymake
-;; Compatibility: GNU Emacs 23.0.60.1
+;; URL: http://www.emacswiki.org/emacs/download/flymake-config.el
+;; Keywords: 
+;; Compatibility: GNU Emacs 24.3.50.1
 ;;
 ;; Features that might be required by this library:
 ;;
-;;
+;; 
 ;;
 
 ;;; This file is NOT part of GNU Emacs
@@ -37,57 +37,65 @@
 ;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth
 ;; Floor, Boston, MA 02110-1301, USA.
 
-;;; Commentary:
-;;
-;; Flymake configuration
-;;
+;;; Commentary: 
+;; 
+;; Config for flymake
+;; 
 
 ;;; Installation:
 ;;
-;; Put init-flymake.el to your load-path.
+;; Put flymake-config.el to your load-path.
 ;; The load-path is usually ~/elisp/.
 ;; It's set in your ~/.emacs like this:
 ;; (add-to-list 'load-path (expand-file-name "~/elisp"))
 ;;
 ;; And the following to your ~/.emacs startup file.
 ;;
-;; (require 'init-flymake)
+;; (require 'flymake)
 ;;
 ;; No need more.
 
+;;; Customize:
+;;
+;; 
+;;
+;; All of the above can customize by:
+;;      M-x customize-group RET flymake RET
+;;
+
 ;;; Change log:
-;;
-;; 2008/10/20
-;;      First released.
-;;
+;;	
+;; 2013/12/30
+;;      * First released.
+;; 
 
 ;;; Acknowledgements:
 ;;
-;;
+;; 
 ;;
 
 ;;; TODO
 ;;
-;;
+;; 
 ;;
 
 ;;; Require
 
+(require 'flymake)          
+(require 'flymake-extension)
+(require 'flymake-shell)    
+(require 'flymake-java)    
+(require 'flymake-c++)    
+(require 'flymake-c)    
+(require 'flymake-haskell)    
+(require 'flymake-python)   
+(require 'flymake-jslint)   
+(require 'flymake-go)       
 
 ;;; Code:
 
-;; flymake
-(dolist (hook (list
-               ;; 'c-mode-hook
-               'c++-mode-hook
-               'java-mode-hook
-               ))
-  (add-hook hook 'flymake-find-file-hook))
-;; flymake-shell
-(add-hook 'sh-mode-hook 'flymake-shell-load)
-;; flymake extension
-(setq flymake-extension-use-showtip t)  ;use `shotip' display error or warning.
 
-(provide 'init-flymake)
 
-;;; init-flymake.el ends here
+(provide 'flymake)
+
+;;; flymake-config.el ends here
