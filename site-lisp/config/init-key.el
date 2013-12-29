@@ -364,4 +364,12 @@
  help-mode-map
  )
 (lazy-set-key vi-move-key-alist help-mode-map)
+;;; ### Apt-utils ###
+;;; --- Apt 管理工具
+(lazy-set-autoload-key
+ '(
+   ("s-x z" . apt-utils-search)         ;APT搜索
+   )
+ "init-apt-utils")
+
 (provide 'init-key)

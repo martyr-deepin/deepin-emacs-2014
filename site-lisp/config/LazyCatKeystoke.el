@@ -793,38 +793,6 @@
  gnus-browse-mode-map
  )
 (lazy-set-key vi-move-key-alist gnus-browse-mode-map) ;vi-move 的局部按键
-;;; ### Apt-utils ###
-;;; --- Apt 管理工具
-(lazy-unset-key
- '("s")
- apt-utils-mode-map)                    ;卸载按键
-(lazy-set-key
- '(
-   ("s-x z" . apt-utils-search)         ;APT搜索
-   ))
-(lazy-set-key
- '(
-   ("#" . apt-utils-rebuild-package-lists)    ;重建包列表
-   ("*" . apt-utils-list-package-files)       ;列出包文件
-   ("F" . apt-utils-choose-package-link)      ;选择包连接
-   ("f" . apt-utils-follow-link)              ;进入连接
-   ("<backtab>" . apt-utils-previous-package) ;上一个连接
-   ("TAB" . apt-utils-next-package)           ;下一个连接
-   ("q" . apt-utils-quit)                     ;退出
-   ("d" . apt-utils-describe-package)         ;解释
-   ("B" . apt-utils-view-previous-package)    ;上一个视图
-   ("J" . scroll-up-one-line)                 ;向上滚动一行
-   ("K" . scroll-down-one-line)               ;向下滚动一行
-   ("t" . apt-utils-toggle-package-info)      ;切换info
-   ("S" . apt-utils-show-package)             ;显示包
-   ("v" . one-key-menu-apt-utils-view)        ;查看菜单
-   ("s" . one-key-menu-apt-utils-search)      ;搜索菜单
-   ("b" . one-key-menu-apt-utils-browse)      ;浏览菜单
-   )
- apt-utils-mode-map
- )
-(lazy-set-key sdcv-key-alist apt-utils-mode-map)    ;sdcv的局部按键绑定
-(lazy-set-key vi-move-key-alist apt-utils-mode-map) ;vi-move 的局部按键
 ;;; ### Haskell ###
 ;;; --- Haskell 语言模式
 (lazy-set-key

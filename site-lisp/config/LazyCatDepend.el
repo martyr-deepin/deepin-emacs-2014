@@ -34,7 +34,6 @@
 (require 'uniquify)                     ;如果有两个重名buffer, 则再前面加上路径区别
 (require 'org)                          ;个人信息管理
 (require 'moccur-edit)                  ;搜索编辑
-(require 'apt-utils)                    ;APT搜索管理工具
 ;; (require 'g)                  ;Google Client, 包括Google日历, 博客, 阅读器
 ;; (require 'tramp)            ;很强大远程文件访问工具
 ;; (require 'rcirc)                        ;Emacs里面一个轻量IRC客户端

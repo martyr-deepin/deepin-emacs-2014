@@ -1,0 +1,116 @@
+;;; init-apt-utils.el --- Init for apt utils
+
+;; Filename: init-apt-utils.el
+;; Description: Init for apt utils
+;; Author: Andy Stewart <andy@freedom>
+;; Maintainer: Andy Stewart <andy@freedom>
+;; Copyright (C) 2013, Andy Stewart, all rights reserved.
+;; Created: 2013-12-29 22:43:13
+;; Version: 0.1
+;; Last-Updated: 2013-12-29 22:43:13
+;;           By: Andy Stewart
+;; URL: http://www.emacswiki.org/emacs/download/init-apt-utils.el
+;; Keywords:
+;; Compatibility: GNU Emacs 24.3.50.1
+;;
+;; Features that might be required by this library:
+;;
+;;
+;;
+
+;;; This file is NOT part of GNU Emacs
+
+;;; License
+;;
+;; This program is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation; either version 3, or (at your option)
+;; any later version.
+
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with this program; see the file COPYING.  If not, write to
+;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth
+;; Floor, Boston, MA 02110-1301, USA.
+
+;;; Commentary:
+;;
+;; Init for apt utils
+;;
+
+;;; Installation:
+;;
+;; Put init-apt-utils.el to your load-path.
+;; The load-path is usually ~/elisp/.
+;; It's set in your ~/.emacs like this:
+;; (add-to-list 'load-path (expand-file-name "~/elisp"))
+;;
+;; And the following to your ~/.emacs startup file.
+;;
+;; (require 'init-apt-utils)
+;;
+;; No need more.
+
+;;; Customize:
+;;
+;;
+;;
+;; All of the above can customize by:
+;;      M-x customize-group RET init-apt-utils RET
+;;
+
+;;; Change log:
+;;
+;; 2013/12/29
+;;      * First released.
+;;
+
+;;; Acknowledgements:
+;;
+;;
+;;
+
+;;; TODO
+;;
+;;
+;;
+
+;;; Require
+
+(require 'apt-utils)                    ;APT搜索管理工具
+
+;;; Code:
+
+(lazy-unset-key
+ '("s")
+ apt-utils-mode-map)                    ;卸载按键
+(lazy-set-key
+ '(
+   ("#" . apt-utils-rebuild-package-lists)    ;重建包列表
+   ("*" . apt-utils-list-package-files)       ;列出包文件
+   ("F" . apt-utils-choose-package-link)      ;选择包连接
+   ("f" . apt-utils-follow-link)              ;进入连接
+   ("<backtab>" . apt-utils-previous-package) ;上一个连接
+   ("TAB" . apt-utils-next-package)           ;下一个连接
+   ("q" . apt-utils-quit)                     ;退出
+   ("d" . apt-utils-describe-package)         ;解释
+   ("B" . apt-utils-view-previous-package)    ;上一个视图
+   ("J" . scroll-up-one-line)                 ;向上滚动一行
+   ("K" . scroll-down-one-line)               ;向下滚动一行
+   ("t" . apt-utils-toggle-package-info)      ;切换info
+   ("S" . apt-utils-show-package)             ;显示包
+   ("v" . one-key-menu-apt-utils-view)        ;查看菜单
+   ("s" . one-key-menu-apt-utils-search)      ;搜索菜单
+   ("b" . one-key-menu-apt-utils-browse)      ;浏览菜单
+   )
+ apt-utils-mode-map
+ )
+(lazy-set-key vi-move-key-alist apt-utils-mode-map) ;vi-move 的局部按键
+
+(provide 'init-apt-utils)
+
+;;; init-apt-utils.el ends here
