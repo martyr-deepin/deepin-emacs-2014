@@ -24,7 +24,7 @@
 (setq auto-revert-mode 1)         ;自动更新buffer
 (setq max-lisp-eval-depth 40000)  ;lisp最大执行深度
 (setq max-specpdl-size 10000)     ;最大容量
-(setq kill-ring-max 1024) ;用一个很大的 kill ring. 这样防止我不小心删掉重要的东西
+(setq kill-ring-max 1024)         ;用一个很大的 kill ring. 这样防止我不小心删掉重要的东西
 (setq undo-outer-limit 5000000)   ;撤销限制
 (setq mark-ring-max 1024)         ;设置的mark ring容量
 (setq message-log-max t)          ;设置message记录全部消息, 而不用截去
@@ -38,23 +38,20 @@
 (put 'narrow-to-region 'disabled nil)   ;开启变窄区域
 (setq print-escape-newlines t)          ;显示字符窗中的换行符为 \n
 (setq minibuffer-message-timeout 1)     ;显示消息超时的时间
-(setq require-final-newline nil) ;不自动添加换行符到末尾, 有些情况会出现错误
-(tabbar-mode t)                  ;多标签模式
-(scroll-mode-line-mode 1)        ;滚动信息栏
-(which-function-mode t)        ;在状态条上显示当前光标在哪个函数体内部
-(auto-compression-mode 1)      ;打开压缩文件时自动解压缩
+(setq require-final-newline nil)        ;不自动添加换行符到末尾, 有些情况会出现错误
+(tabbar-mode t)                         ;多标签模式
+(scroll-mode-line-mode 1)               ;滚动信息栏
+(which-function-mode t)                 ;在状态条上显示当前光标在哪个函数体内部
+(auto-compression-mode 1)               ;打开压缩文件时自动解压缩
 (delete 'win:mode-string global-mode-string) ;在 `global-mode-string' 中去掉窗口数字
+(setq uniquify-separator "/")                ;分隔符
 (setq uniquify-buffer-name-style 'post-forward-angle-brackets) ;反方向的显示重复的Buffer名字
-(setq uniquify-separator "/")                                  ;分隔符
-(setq uniquify-after-kill-buffer-p t)   ;删除重复名字的Buffer后重命名
-(miniedit-install)               ;在 minibuffer, 按C-M-e编辑minibuffer
-(global-hl-line-mode 1)          ;高亮当前行
+(setq uniquify-after-kill-buffer-p t)                          ;删除重复名字的Buffer后重命名
+(miniedit-install)                                             ;在 minibuffer, 按C-M-e编辑minibuffer
+(global-hl-line-mode 1)                                        ;高亮当前行
 (setq ediff-window-setup-function (quote ediff-setup-windows-plain)) ;比较窗口设置在同一个frame里
-(setq make-backup-files nil)
-(setq auto-save-default nil)            ;不生成 ~ # 备份文件
-(setq backup-directory-alist (quote (("." . "/tmp/emacs-backup")))) ;把备份文件放到 /tmp/emacs-backup 下
 (setq split-width-threshold nil)                                    ;分屏的时候使用上下分屏
-(setq one-key-popup-window nil)         ;禁止自动弹出窗口
-(add-hook 'find-file-hook 'highlight-parentheses-mode t) ;增强的括号高亮
+(setq one-key-popup-window nil)                                     ;禁止自动弹出窗口
+(add-hook 'find-file-hook 'highlight-parentheses-mode t)            ;增强的括号高亮
 
 (provide 'init-startup)

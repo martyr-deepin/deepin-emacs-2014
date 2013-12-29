@@ -1,7 +1,7 @@
-;;; init-auto-save.el --- 自动保存的设置
+;;; auto-save.el --- Auto save files when idle
 
-;; Filename: init-auto-save.el
-;; Description: 自动保存的设置设置
+;; Filename: auto-save.el
+;; Description: Auto save files when idle
 ;; Author: Andy Stewart lazycat.manatee@gmail.com
 ;; Maintainer: Andy Stewart lazycat.manatee@gmail.com
 ;; Copyright (C) 2008, 2009, Andy Stewart, all rights reserved.
@@ -44,7 +44,7 @@
 
 ;;; Installation:
 ;;
-;; Put init-auto-save.el to your load-path.
+;; Put auto-save.el to your load-path.
 ;; The load-path is usually ~/elisp/.
 ;; It's set in your ~/.emacs like this:
 ;; (add-to-list 'load-path (expand-file-name "~/elisp"))
@@ -76,10 +76,32 @@
 
 ;;; Code:
 
-(setq auto-save-interval 10)            ;击键10次保存
-(setq auto-save-timeout 1)              ;空闲1秒时就保存
-(setq auto-save-visited-file-name t)    ;当前buffer关联一个已存在的文件名时才保存
+;; Emacs' default auto-save is stupid to generate #foo# files!
+(setq auto-save-default nil)
 
-(provide 'init-auto-save)
+(defun autosave-buffers ()
+  (interactive)
+  (let ((autosave-buffer-list))
+	(save-excursion
+	 (dolist (buf (buffer-list))
+	   (set-buffer buf)
+	   (if (and (buffer-file-name) (buffer-modified-p))
+		   (progn
+			 (push (buffer-name) autosave-buffer-list)
+			 (basic-save-buffer))))
+	 ;; Tell user when auto save files.
+	 (cond
+	  ;; It's stupid tell user if nothing to save.
+	  ((= (length autosave-buffer-list) 1)
+	   (message "# Saved %s" (car autosave-buffer-list)))
+	  ((> (length autosave-buffer-list) 1)
+	   (message "# Saved %d files: %s"
+		     (length autosave-buffer-list)
+		     (mapconcat 'identity autosave-buffer-list ", "))))
+	 )))
 
-;;; init-auto-save.el ends here
+(run-with-idle-timer 1 t #'autosave-buffers)
+
+(provide 'auto-save)
+
+;;; auto-save.el ends here

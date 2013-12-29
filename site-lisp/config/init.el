@@ -17,6 +17,8 @@
 (require 'buffer-extension)
 (require 'find-func-extension)
 (require 'highlight-parentheses)   ;智能括号
+(require 'auto-save)               ;自动保存文件， say goodbye to #foo# files!
+(require 'move-text)
 
 (require 'init-mode)
 (require 'init-key)                     
@@ -26,7 +28,7 @@
 (require 'init-linum)
 (require 'init-paredit)
 (require 'init-startup)                 ;启动设置
-(require 'init-auto-save)
+(require 'init-backup)
 (require 'init-indent)
 
 (provide 'init)

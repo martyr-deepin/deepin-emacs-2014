@@ -10,12 +10,12 @@
 ;; Last-Updated: 2013-12-28 01:19:38
 ;;           By: Andy Stewart
 ;; URL: http://www.emacswiki.org/emacs/download/init-session.el
-;; Keywords: 
+;; Keywords:
 ;; Compatibility: GNU Emacs 24.3.50.1
 ;;
 ;; Features that might be required by this library:
 ;;
-;; 
+;;
 ;;
 
 ;;; This file is NOT part of GNU Emacs
@@ -37,10 +37,10 @@
 ;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth
 ;; Floor, Boston, MA 02110-1301, USA.
 
-;;; Commentary: 
-;; 
+;;; Commentary:
+;;
 ;; Init for session save/restore
-;; 
+;;
 
 ;;; Installation:
 ;;
@@ -57,32 +57,33 @@
 
 ;;; Customize:
 ;;
-;; 
+;;
 ;;
 ;; All of the above can customize by:
 ;;      M-x customize-group RET init-session RET
 ;;
 
 ;;; Change log:
-;;	
+;;
 ;; 2013/12/28
 ;;      * First released.
-;; 
+;;
 
 ;;; Acknowledgements:
 ;;
-;; 
+;;
 ;;
 
 ;;; TODO
 ;;
-;; 
+;;
 ;;
 
 ;;; Require
 
 (require 'windows)
 (require 'revive)
+(require 'auto-save)
 
 ;;; Code:
 
@@ -101,6 +102,7 @@
   "Exit emacs."
   (interactive)
   (kill-unused-buffers)
+  (autosave-buffers)
   (see-you-again))
 
 ;;; ### Windows ###
@@ -118,5 +120,3 @@
 (provide 'init-session)
 
 ;;; init-session.el ends here
-
-

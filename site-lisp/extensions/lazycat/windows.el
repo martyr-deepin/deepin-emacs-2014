@@ -1734,9 +1734,7 @@ INDEX is referred to decide the frame position."
   (interactive)
   (if win:current-config
       (progn (win-save-all-configurations)
-             (message "See you again!")
-             (sit-for 1)
-             (save-buffers-kill-emacs))))
+             (kill-emacs))))
 
 ;;;###autoload
 (defun resume-windows (&optional preserve)
