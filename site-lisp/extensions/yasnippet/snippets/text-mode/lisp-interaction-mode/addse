@@ -1,3 +1,0 @@
-#name : (setq ... ...)
-# --
-(setq ${1:variable-name} ${0:variable-value})

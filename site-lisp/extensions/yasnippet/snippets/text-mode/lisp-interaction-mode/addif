@@ -1,4 +1,0 @@
-#name : (if ... ... ...)
-# --
-(if ${1:conditional}
-    ${2:then})

@@ -1,3 +1,0 @@
-#name : (global-set-key (kbd "...") ...)
-# --
-(global-set-key (kbd "${1:some-key}") ${0:some-command})

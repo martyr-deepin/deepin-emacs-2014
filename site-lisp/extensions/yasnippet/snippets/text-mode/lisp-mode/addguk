@@ -1,3 +1,0 @@
-#name : (global-unset-key ...)
-# --
-(global-unset-key (kbd ${0:key-value}))

@@ -1,3 +1,0 @@
-#name : (in-package :...)
-# --
-(in-package :${0:library-name})

@@ -1,4 +1,0 @@
-#name : (eval-after-load ... ...)
-# --
-(eval-after-load ${1:file-name}
-  ${0:form})

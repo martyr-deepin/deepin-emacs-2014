@@ -79,6 +79,8 @@
 
 ;;; Require
 
+(require 'color-moccur)
+
 ;;; Code:
 (defvar my-dired-omit-status t
   "The status of dired omit file.")

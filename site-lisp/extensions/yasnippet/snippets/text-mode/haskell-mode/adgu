@@ -1,3 +1,0 @@
-#name : withUTFString ... $ \... ->
-# --
-withUTFString ${1:name} $ \ $1Ptr -> $0

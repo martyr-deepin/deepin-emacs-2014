@@ -1,3 +1,0 @@
-#name : = Signal (connect_... "...")
-# --
-= Signal (connect_${1:NONE__NONE} "$0")

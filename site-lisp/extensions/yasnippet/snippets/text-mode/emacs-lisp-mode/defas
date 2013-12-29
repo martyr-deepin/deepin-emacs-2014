@@ -1,3 +1,0 @@
-#name : (defalias ... ...)
-# --
-(defalias ${1:symbol} ${0:define})

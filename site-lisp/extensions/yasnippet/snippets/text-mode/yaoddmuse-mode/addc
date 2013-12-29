@@ -1,3 +1,0 @@
-#name : /italic/
-# --
-/${1:name}/$0

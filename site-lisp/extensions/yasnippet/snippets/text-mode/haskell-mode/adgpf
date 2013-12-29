@@ -1,3 +1,0 @@
-#name : {#pointer ... #}
-# --
-{#pointer *${1:type} foreign newtype#}

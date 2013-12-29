@@ -1,6 +1,0 @@
-#name : (dolist (hook (list ... )) (add-hook hook '...))
-# --
-(dolist (hook (list
-               ${1:mode-list}
-               ))
-  (add-hook hook '${0:mode-hook}))

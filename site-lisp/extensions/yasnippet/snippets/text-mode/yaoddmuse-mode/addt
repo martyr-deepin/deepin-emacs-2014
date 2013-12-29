@@ -1,3 +1,0 @@
-#name : <tag>content</tag>
-# --
-<${1:tag}>${1:name}</$1>$0

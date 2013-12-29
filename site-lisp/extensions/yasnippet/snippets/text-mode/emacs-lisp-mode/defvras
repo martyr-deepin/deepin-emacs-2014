@@ -1,5 +1,0 @@
-#name : (defvar anything-c-source-* '((name . "...") ...))
-# --
-(defvar anything-c-source-${1:name}
- '((name . "${2:describe}")
-   $0))

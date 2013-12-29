@@ -1,3 +1,0 @@
-#name : (provide '...)
-# --
-(provide '${0:library-name})

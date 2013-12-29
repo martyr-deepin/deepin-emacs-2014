@@ -1,3 +1,0 @@
-#name : (basic-unset-key-list ... ...)
-# --
-(basic-unset-key-list ${1:keymap} '("${0:key-list}"))

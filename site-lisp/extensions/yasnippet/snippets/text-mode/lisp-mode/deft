@@ -1,7 +1,0 @@
-#name : (defun test () "Just for test" (interactive) ...)
-# --
-(defun test ()
-  "Just for test"        
-  (interactive)
-  $0
-)

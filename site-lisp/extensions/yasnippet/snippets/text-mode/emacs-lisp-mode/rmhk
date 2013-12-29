@@ -1,3 +1,0 @@
-#name : (remove-hook ... ...)
-# --
-(remove-hook '${1:Hook} '${2:Function})

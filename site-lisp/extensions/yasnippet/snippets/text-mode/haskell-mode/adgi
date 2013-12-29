@@ -1,3 +1,0 @@
-#name : with ... $ \... ->
-# --
-with ${1:name} $ \ $1Ptr -> $0

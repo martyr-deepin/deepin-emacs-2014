@@ -1,5 +1,0 @@
-#name : (dolist (... (...)) (add-to-alist '... ...))
-# --
-(dolist (${1:elt-cons} '(${2:elt-cons-list}))
-  (add-to-alist '${0:alist} $1))
- 

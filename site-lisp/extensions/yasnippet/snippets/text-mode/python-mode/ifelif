@@ -1,6 +1,0 @@
-#name : if ... : ... elif: ... 
-# --
-if ${condition1}:
-    ${if code}
-elif ${condition2}:
-    ${elif code}	

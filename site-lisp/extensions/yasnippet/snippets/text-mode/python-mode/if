@@ -1,4 +1,0 @@
-#name : if ... : ...
-# --
-if ${condition}:
-    $0

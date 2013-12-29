@@ -1,3 +1,0 @@
-#name : module ... where
-# --
-module ${1:module-name} (${0:module-interface}) where

@@ -1,6 +1,0 @@
-#name : Add change logs
-# --
-;; `(format-time-string "%Y/%m/%d")`
-;;  * `user-full-name`:
-;;      * $0
-;;

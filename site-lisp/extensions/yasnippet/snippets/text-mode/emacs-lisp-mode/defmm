@@ -1,8 +1,0 @@
-#name : (define-minor-mode ... ... ... ... ... ...)
-# --
-(define-minor-mode ${1:mode-name}
-  "${2:Document}"
-  :init-value ${3:init-value}
-  :lighter "${4:highlight-name}"
-  :keymap ${5:keymap}
-  :group '${6:group})

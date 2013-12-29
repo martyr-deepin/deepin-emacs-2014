@@ -1,3 +1,0 @@
-#name : (lazy-set-key ...)
-# --
-(lazy-set-key ${0:rest})

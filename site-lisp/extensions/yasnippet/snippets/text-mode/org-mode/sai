@@ -1,3 +1,0 @@
-#name : sudo aptitude install ... -y
-# --
-sudo aptitude install ${0:content} -y

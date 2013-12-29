@@ -1,4 +1,0 @@
-#name : (defvar ... ... "...")
-# --
-(defvar ${1:variable-name} ${2:variable-varlue}
-  "${0:document}")

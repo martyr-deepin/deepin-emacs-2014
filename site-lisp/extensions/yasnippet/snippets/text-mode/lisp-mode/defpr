@@ -1,3 +1,0 @@
-#name : (defparameter ... ...)
-# --
-(defparameter ${1:name} ${0:value})

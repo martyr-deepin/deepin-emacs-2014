@@ -1,3 +1,0 @@
-#name : (lazy-unset-key ... ...)
-# --
-(lazy-unset-key '("${1:key-list}")$0)

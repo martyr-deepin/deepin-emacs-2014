@@ -1,6 +1,0 @@
-#name : (defface ... ... ... ...)
-# --
-(defface ${1:face}
-  ${2:spec}
-  "${3:doc}"
-  ${0:args})

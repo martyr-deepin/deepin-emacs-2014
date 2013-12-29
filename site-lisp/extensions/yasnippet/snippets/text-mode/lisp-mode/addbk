@@ -1,3 +1,0 @@
-#name : (basic-set-key-alist ...)
-# --
-(basic-set-key-alist ${0:rest})

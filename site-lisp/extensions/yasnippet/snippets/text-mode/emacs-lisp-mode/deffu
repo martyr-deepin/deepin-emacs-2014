@@ -1,5 +1,0 @@
-#name : (defun ... (...) "..." ...)
-# --
-(defun ${1:Function Name} ($2)
-  "${3:Function document}"
-  $0)

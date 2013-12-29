@@ -77,8 +77,8 @@
 
 ;;; Code:
 
-(yas/initialize)
-(yas/load-directory "/usr/share/deepin-emacs/site-lisp/extensions/yasnippet/snippets/")
+(add-to-list `yas/root-directory "/usr/share/deepin-emacs/site-lisp/extensions/yasnippet/snippets/")
+(yas-global-mode 1)
 
 (provide 'init-yasnippet)
 

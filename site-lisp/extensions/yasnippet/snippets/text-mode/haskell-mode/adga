@@ -1,3 +1,0 @@
-#name : alloca ...
-# --
-alloca $ \ ${1:ptr}Ptr -> $0

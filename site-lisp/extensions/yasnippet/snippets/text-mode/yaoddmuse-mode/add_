@@ -1,3 +1,0 @@
-#name : _underline-
-# --
-_${1:name}_$0

@@ -1,4 +1,0 @@
-#name : (defconst ... ... "...")
-# --
-(defconst ${1:symbol} ${2:initvalue}
-  "${0:document}")

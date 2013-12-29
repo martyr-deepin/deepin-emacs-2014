@@ -1,5 +1,0 @@
-#name : (defgroup ... ... ... ...)
-# --
-(defgroup ${1:Group-Name} ${2:Group-value}
-  "${3:Group-doc}"
-  $0)

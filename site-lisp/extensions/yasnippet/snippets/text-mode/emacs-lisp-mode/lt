@@ -1,4 +1,0 @@
-#name : (let ... ...)
-# --
-(let (${1:varlist})
-  ${0:body})

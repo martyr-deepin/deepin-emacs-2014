@@ -1,3 +1,0 @@
-#name : print "..." % (...)
-# --
-print "${format}" % (${content})

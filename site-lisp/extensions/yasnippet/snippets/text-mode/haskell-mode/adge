@@ -1,3 +1,0 @@
-#name : {#enum ... #}
-# --
-{#enum ${1:enum} {underscoreToCase} deriving (Bounded,Eq,Show)#}$0

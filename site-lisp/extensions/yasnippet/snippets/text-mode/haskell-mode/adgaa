@@ -1,3 +1,0 @@
-#name : alloca ...
-# --
-allocaArray 0 $ \ ${1:ptr}Ptr -> $0

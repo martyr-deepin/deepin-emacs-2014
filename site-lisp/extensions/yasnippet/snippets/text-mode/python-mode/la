@@ -1,3 +1,0 @@
-#name : (lambda n: ...)
-# --
-(lambda ${name}: $0)

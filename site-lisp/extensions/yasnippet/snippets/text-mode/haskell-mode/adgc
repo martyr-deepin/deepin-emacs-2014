@@ -1,3 +1,0 @@
-#name : ...Class self => self
-# --
-:: ${1:...}Class self => ${2:Signal} self ${3:(IO ())}$0
