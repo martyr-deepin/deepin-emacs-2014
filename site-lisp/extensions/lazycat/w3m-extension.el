@@ -28,7 +28,7 @@
 ;; Features that might be required by this library:
 ;;
 ;; `w3m-util' `w3m-proc' `w3m-form' `w3m-lnum' `w3m'
-;; `basic-edit-toolkit'
+;; `basic-toolkit'
 ;;
 
 ;;; Installation:
@@ -97,7 +97,7 @@
 (require 'w3m-form)
 (require 'w3m-lnum)
 (require 'w3m)
-(require 'basic-edit-toolkit)
+(require 'basic-toolkit)
 
 ;;; Code:
 

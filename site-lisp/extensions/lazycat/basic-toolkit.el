@@ -1,6 +1,6 @@
-;;; basic-edit-toolkit.el --- Basic edit toolkit.
+;;; basic-toolkit.el --- Basic edit toolkit.
 
-;; Filename: basic-edit-toolkit.el
+;; Filename: basic-toolkit.el
 ;; Description: Basic edit toolkit.
 ;; Author: Andy Stewart <lazycat.manatee@gmail.com>
 ;; Maintainer: Andy Stewart <lazycat.manatee@gmail.com>
@@ -9,7 +9,7 @@
 ;; Version: 0.1
 ;; Last-Updated: 2009-02-07 20:56:08
 ;;           By: Andy Stewart
-;; URL: http://www.emacswiki.org/emacs/download/basic-edit-toolkit.el
+;; URL: http://www.emacswiki.org/emacs/download/basic-toolkit.el
 ;; Keywords: edit, toolkit
 ;; Compatibility: GNU Emacs 23.0.60.1
 ;;
@@ -46,14 +46,14 @@
 
 ;;; Installation:
 ;;
-;; Put basic-edit-toolkit.el to your load-path.
+;; Put basic-toolkit.el to your load-path.
 ;; The load-path is usually ~/elisp/.
 ;; It's set in your ~/.emacs like this:
 ;; (add-to-list 'load-path (expand-file-name "~/elisp"))
 ;;
 ;; And the following to your ~/.emacs startup file.
 ;;
-;; (require 'basic-edit-toolkit)
+;; (require 'basic-toolkit)
 ;;
 ;; No need more.
 
@@ -80,6 +80,30 @@
 (require 'tramp)
 
 ;;; Code:
+
+(defun unmark-all-buffers ()
+  "Unmark all have marked buffers."
+  (interactive)
+  (let ((current-element (current-buffer)))
+    (save-excursion
+      (dolist (element (buffer-list))
+        (set-buffer element)
+        (deactivate-mark)))
+    (switch-to-buffer current-element)
+    (deactivate-mark)))
+
+(defun add-to-alist (alist-var elt-cons &optional no-replace)
+  "Add to the value of ALIST-VAR an element ELT-CONS if it isn't there yet.
+If an element with the same car as the car of ELT-CONS is already present,
+replace it with ELT-CONS unless NO-REPLACE is non-nil; if a matching
+element is not already present, add ELT-CONS to the front of the alist.
+The test for presence of the car of ELT-CONS is done with `equal'."
+  (let ((existing-element (assoc (car elt-cons) (symbol-value alist-var))))
+    (if existing-element
+        (or no-replace
+            (rplacd existing-element (cdr elt-cons)))
+      (set alist-var (cons elt-cons (symbol-value alist-var)))))
+  (symbol-value alist-var))
 
 (defun open-newline-above (arg)
   "Move to the previous line (like vi) and then opens a line."
@@ -728,6 +752,6 @@ use function `completion-delete'."
   (interactive "fFind file as samba: ")
   (find-file (concat "/smb:" file)))
 
-(provide 'basic-edit-toolkit)
+(provide 'basic-toolkit)
 
-;;; basic-edit-toolkit.el ends here
+;;; basic-toolkit.el ends here

@@ -1,5 +1,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Emacs 主题设置 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (set-face-attribute 'default nil :height 130)
+(tool-bar-mode -1)                   ;禁用工具栏
+(menu-bar-mode -1)                   ;禁用菜单栏
+(scroll-bar-mode -1)                 ;禁用滚动条
+(toggle-frame-fullscreen)            ;全屏
 
 ;; 用户自定义变量
 (custom-set-variables

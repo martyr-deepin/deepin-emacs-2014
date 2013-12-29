@@ -231,7 +231,7 @@
 (require 'slime)
 
 ;;; 自己的扩展加载
-(require 'basic-edit-toolkit)           ;基础编辑包
+(require 'basic-toolkit)           ;基础编辑包
 (require 'fullscreen)                   ;全屏
 (require 'shell-command-extension)      ;shell command 扩展
 (require 'lazycat-toolkit)              ;工具包

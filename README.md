@@ -2,7 +2,7 @@ Deepin Emacs
 
 * Compile emacs git:
 
-sudo apt-get install build-essential git autoconf texinfo libxaw7-dev libxpm-dev libpng12-dev libjpeg-dev libtiff4-dev libgif-dev libncurses5-dev libxpm-dev libdbus-1-dev libgtk-3-dev -y
+sudo apt-get install build-essential git autoconf texinfo libxaw7-dev libxpm-dev libpng12-dev libjpeg-dev libtiff4-dev libgif-dev libncurses5-dev libxpm-dev libdbus-1-dev libgtk-3-dev w3m w3m-img -y
 sudo mkdir -p /usr/share/deepin-emacs/common
 cd ./emacs-git
 ./autogen.sh

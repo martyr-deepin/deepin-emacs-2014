@@ -28,7 +28,7 @@
 ;; Features that might be required by this library:
 ;;
 ;; `emms' `emms-playlist-mode' `emms-source-file' `emms-playlist-sort'
-;; `emms-mark' `basic-edit-toolkit' `emms-last-played'
+;; `emms-mark' `basic-toolkit' `emms-last-played'
 ;;
 
 ;;; Installation:
@@ -73,7 +73,7 @@
 (require 'emms-source-file)
 (require 'emms-playlist-sort)
 (require 'emms)
-(require 'basic-edit-toolkit)
+(require 'basic-toolkit)
 
 (defadvice emms-play-directory-tree (after emms-random-play-1 activate)
   "This advice to make `emms-random' execute after emms-play-directory-tree"

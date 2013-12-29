@@ -3,7 +3,7 @@
 ;; Filename: move-text.el
 ;; Description: Move current line or region with M-up or M-down.
 ;; Author: Jason M <jasonm23@gmail.com>
-;; Extracted from basic-edit-toolkit.el by Andy Stewart.
+;; Extracted from basic-toolkit.el by Andy Stewart.
 ;; Copyright (C) 2009, Andy Stewart, all rights reserved.
 ;; Keywords: edit
 ;; Compatibility: GNU Emacs 23.0.60.1

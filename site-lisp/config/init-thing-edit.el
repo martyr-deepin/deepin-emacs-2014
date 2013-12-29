@@ -81,6 +81,7 @@
 
 ;;; Require
 
+(require 'one-key)
 (require 'thing-edit)          
 (require 'thing-edit-extension)
 

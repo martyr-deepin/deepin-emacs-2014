@@ -18,7 +18,7 @@
 ;; `mwe-log-commands' `ecb'
 ;; `shell-command-extension'
 ;; `ascii' `window-number' `windows' `color-moccur'
-;; `cycle-buffer' `basic-edit-toolkit' 
+;; `cycle-buffer' `basic-toolkit' 
 ;;
 
 ;;; This file is NOT part of GNU Emacs
@@ -90,7 +90,7 @@
 (require 'shell-command-extension)
 (require 'window-number)
 (require 'color-moccur)
-(require 'basic-edit-toolkit)
+(require 'basic-toolkit)
 
 ;;; Code:
 

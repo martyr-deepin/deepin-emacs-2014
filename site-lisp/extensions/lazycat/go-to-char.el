@@ -110,6 +110,7 @@
     (delete-overlay go-to-char-highlight-overlay)
     (setq go-to-char-highlight-overlay nil)))
 
+;;;###autoload
 (defun go-to-char-forward (n char)
   "Go to same character as input forward."
   (interactive "p\ncGo to char (forward): ")
@@ -125,6 +126,7 @@
         (setq unread-command-events (list last-input-event)))
     (go-to-char-clean-highlight-overlay)))
 
+;;;###autoload
 (defun go-to-char-backward (n char)
   "Go to same character as input backward."
   (interactive "p\ncGo to char (backward): ")
@@ -140,6 +142,7 @@
         (setq unread-command-events (list last-input-event)))
     (go-to-char-clean-highlight-overlay)))
 
+;;;###autoload
 (defun go-to-char-forward-word (n char)
   "Go to same character as input forward."
   (interactive "p\ncGo to char (forward word): ")
@@ -156,9 +159,10 @@
         (setq unread-command-events (list last-input-event)))
     (go-to-char-clean-highlight-overlay)))
 
+;;;###autoload
 (defun go-to-char-backward-word (n char)
   "Go to same character as input backward."
-  (interactive "p\ncGo to char (backward word): ")
+  (interactivea "p\ncGo to char (backward word): ")
   (unwind-protect
       (progn
         (search-backward (string char) nil nil n)

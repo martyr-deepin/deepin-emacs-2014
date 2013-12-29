@@ -1,3 +1,5 @@
+(require 'lazy-set-key)                 ;懒惰按键设置扩展
+
 ;;; ### Unset key ###
 ;;; --- 卸载按键
 (lazy-unset-key                         ;全局按键的卸载
@@ -34,11 +36,11 @@
    ("<print>" . save-screenshots)           ;截屏
    ("<M-s-return>" . toggle-debug-on-error) ;切换调试模式
    ("s-R" . re-builder)                     ;可视化构建正则表达式
-   ;; ("s-1" . elisp-depend-insert-require)    ;插入 (require '...) 语句
    ("s-1" . sort-lines)                  ;排序
    ("s-2" . elisp-depend-insert-comment) ;插入 `...' 注释代码
    ("s-3" . hanconvert-region)           ;转换简体或繁体中文
    ("s-4" . uniquify-all-lines-buffer)   ;删除重复的行
+   ("s-5" . elisp-depend-insert-require)    ;插入 (require '...) 语句
    ("s-[" . eval-expression)             ;执行表达式
    ("s-\\" . artist-mode)                ;绘制模式
    ("M-s-u" . ediff-buffers)             ;ediff
@@ -56,8 +58,6 @@
 ;;; --- 缓存移动
 (lazy-set-key
  '(
-   ("s-N" . move-text-down)                ;把光标所在的整行文字(或标记)下移一行
-   ("s-P" . move-text-up)                  ;把光标所在的整行文字(或标记)上移一行
    ("s-J" . scroll-up-one-line)            ;向上滚动一行
    ("s-K" . scroll-down-one-line)          ;向下滚动一行
    ("M-J" . scroll-other-window)           ;向下滚动其他窗口
@@ -82,23 +82,41 @@
    ("C-M-i" . down-list)                   ;向右跳进 LIST
    ("C-M-a" . beginning-of-defun)          ;函数开头
    ("C-M-e" . end-of-defun)                ;函数末尾
-   ("C-c j" . go-to-char-forward)          ;快速字母导航, 向前
-   ("C-c k" . go-to-char-backward)         ;快速字母导航, 向后
    ("C->" . remember-init)                 ;记忆初始函数
    ("C-<" . remember-jump)                 ;记忆跳转函数
-   ("M-s" . lazy-search-menu)              ;懒惰搜索
    ("M-s-," . point-stack-pop)             ;buffer索引跳转
    ("M-s-." . point-stack-push)            ;buffer索引标记
    ("s-{" . current-line-move-to-top)      ;移动当前行到最上面一行
    ))
+(lazy-set-autoload-key
+ '(
+   ("M-s" . lazy-search-menu)              ;懒惰搜索
+   )
+ "lazy-search")
+(lazy-set-autoload-key
+ '(
+   ("C-c j" . go-to-char-forward)          ;快速字母导航, 向前
+   ("C-c k" . go-to-char-backward)         ;快速字母导航, 向后
+   )
+ "go-to-char")
+(lazy-set-autoload-key
+ '(
+   ("s-N" . move-text-down)                ;把光标所在的整行文字(或标记)下移一行
+   ("s-P" . move-text-up)                  ;把光标所在的整行文字(或标记)上移一行
+   )
+ "move-text")
 ;;; ### Buffer Name ###
 ;;; --- 缓存名字
-(lazy-set-key
+(lazy-set-autoload-key
  '(
    ("s-c r" . rename-file-and-buffer)        ;更改当前文件的名字
    ("s-c g" . move-buffer-file)              ;更改当前文件的目录
    ("s-c n" . copy-buffer-file-name-as-kill) ;拷贝buffer名字
-   ))
+   ("C-M-;" . kill-other-window-buffer)               ;关闭其他窗口的buffer
+   ("s-Q" . kill-current-mode-buffers)                ;关闭与当前模式相同的所有buffers
+   ("s-q" . kill-current-mode-buffers-except-current) ;关闭当前模式所有buffers, 除了当前buffer
+   )
+ "buffer-extension")
 ;;; ### Buffer Edit ###
 ;;; --- 缓存编辑
 (lazy-set-key
@@ -139,9 +157,13 @@
    ("s-T" . string-rectangle)            ;用字符串替代矩形的每一行
    ("s-I" . string-insert-rectangle)     ;插入字符串在矩形的每一行
    ("s-F" . delete-whitespace-rectangle) ;删除矩形中空格
-   ("s-:" . mark-rectangle-to-end)       ;标记矩形到行末
    ("s-\"" . copy-rectangle-to-register) ;拷贝矩形到寄存器
    ))
+(lazy-set-autoload-key
+ '(
+   ("s-:" . mark-rectangle-to-end)       ;标记矩形到行末
+   )
+ "rect-extension")
 ;;; ### Font ###
 ;;; --- 字体命令
 (lazy-set-key
@@ -158,21 +180,22 @@
  '(
    ("C-c v" . split-window-vertically)                ;纵向分割窗口
    ("C-c h" . split-window-horizontally)              ;横向分割窗口
-   ("C-'" . delete-current-buffer-and-window)         ;关闭当前buffer, 并关闭窗口
-   ("C-\"" . delete-current-buffer-window)            ;删除当前buffer的窗口
    ("C-;" . kill-this-buffer)                         ;关闭当前buffer
-   ("C-M-;" . kill-other-window-buffer)               ;关闭其他窗口的buffer
    ("C-x ;" . delete-other-windows)                   ;关闭其它窗口
-   ("C-c V" . delete-other-windows-vertically+)       ;关闭上下的其他窗口
-   ("C-c H" . delete-other-windows-horizontally+)     ;关闭左右的其他窗口
-   ("s-Q" . kill-current-mode-buffers)                ;关闭与当前模式相同的所有buffers
-   ("s-q" . kill-current-mode-buffers-except-current) ;关闭当前模式所有buffers, 除了当前buffer
    ("s-;" . one-key-menu-window-navigation)           ;快速窗口导航
    ("s-a" . window-number-jump)                       ;窗口快速选择
+   ))
+(lazy-set-autoload-key
+ '(
+   ("C-c V" . delete-other-windows-vertically+)       ;关闭上下的其他窗口
+   ("C-c H" . delete-other-windows-horizontally+)     ;关闭左右的其他窗口
+   ("C-'" . delete-current-buffer-and-window)         ;关闭当前buffer, 并关闭窗口
+   ("C-\"" . delete-current-buffer-window)            ;删除当前buffer的窗口
    ("C-s-7" . select-next-window)                     ;选择下一个窗口
    ("C-s-8" . select-prev-window)                     ;选择上一个窗口
    ("M-s-o" . toggle-one-window)                      ;切换一个窗口
-   ))
+   )
+ "window-extension")
 ;;; ### Tabbar ###
 ;;; --- 多标签浏览
 (lazy-set-key
@@ -181,11 +204,15 @@
    ("M-8" . tabbar-forward-tab)               ;移动到前一个标签
    ("M-9" . tabbar-backward-group)            ;移动到后一个标签组
    ("M-0" . tabbar-forward-group)             ;移动到前一个标签组
+   ))
+(lazy-set-autoload-key
+ '(
    ("M-&" . tabbar-backward-tab-other-window) ;向前移动其他窗口的标签
    ("M-*" . tabbar-forward-tab-other-window)  ;向后移动其他窗口的标签
    ("M-s-7" . tabbar-select-beg-tab)          ;移动到最左边的标签
    ("M-s-8" . tabbar-select-end-tab)          ;移动到最右边的标签
-   ))
+   )
+ "tabbar-extension")
 ;;; ### Functin key ###
 ;;; --- 功能函数
 (lazy-set-key
@@ -212,9 +239,13 @@
    ("C-5" . insert-standard-date)                ;插入标准时间 (%Y-%m-%d %T)
    ("C-&" . switch-to-messages)                  ;跳转到 *Messages* buffer
    ("C-7" . jump-back)                           ;返回查找符号定义前的位置
-   ("C-8" . find-function-or-variable-at-point)  ;查找符号的定义
    ("M-I" . backward-indent)                     ;向后移动4个字符
    ))
+(lazy-set-autoload-key
+ '(
+   ("C-8" . find-function-or-variable-at-point)  ;查找符号的定义
+   )
+ "find-func-extension")
 ;;; ### Paredit ###
 ;;; --- 结构化编程
 (lazy-unset-key
@@ -248,15 +279,10 @@
    ("M-[" . paredit-wrap-square)                ;用 [ ] 包围对象
    ("M-{" . paredit-wrap-curly)                 ;用 { } 包围对象
    ("C-(" . paredit-wrap-angled)                ;用 < > 包围对象
-   ("M-)" . paredit-splice-sexp+)               ;去除包围对象的括号, 并删除空行
    ;; 跳出并换行缩进
-   ("M-:" . paredit-close-round-and-newline+)   ;跳出 ( ) 或 " " 并换行
-   ("M-?" . paredit-forward-sexp-and-newline)   ;移动到下一个表达式, 并换行
    ("M-}" . paredit-close-curly-and-newline)    ;跳出 { } 并换行
    ("M-]" . paredit-close-square-and-newline)   ;跳出 [ ] 并换行
    ("C-)" . paredit-close-angled-and-newline)   ;跳出 < > 并换行
-   ;; 注释
-   ("C-M-:" . paredit-comment-list-and-newline) ;注释当前LIST并换行
    ;; 其他
    ("C-j" . paredit-newline)            ;智能换行并缩进
    ("M-q" . paredit-reindent-defun)     ;重新格式化函数
@@ -266,6 +292,14 @@
    )
  paredit-mode-map
  )
+(lazy-set-autoload-key
+ '(
+   ("C-M-:" . paredit-comment-list-and-newline) ;注释当前LIST并换行
+   ("M-:" . paredit-close-round-and-newline+)   ;跳出 ( ) 或 " " 并换行
+   ("M-?" . paredit-forward-sexp-and-newline)   ;移动到下一个表达式, 并换行
+   ("M-)" . paredit-splice-sexp+)               ;去除包围对象的括号, 并删除空行
+   )
+ "paredit-extension")
 ;;; ### Thingh-edit ###
 ;;; --- 增强式编辑当前光标的对象
 (lazy-set-autoload-key
@@ -329,7 +363,6 @@
    ("C-w" . isearch-yank-word-or-char)      ;粘帖光标后的词或字符作为搜索对象
    ("C-y" . isearch-yank-line)              ;粘帖光标后的行作为搜索对象
    ("M-o" . isearch-delete-char)            ;删除
-   ("M-l" . isearch-to-lazy-search)         ;切换到lazy-search
    ("M-p" . isearch-ring-retreat)           ;搜索历史向后
    ("M-n" . isearch-ring-adjust)            ;搜索历史向前
    ("M-y" . isearch-yank-kill)              ;从 kill ring 中粘帖最后一项到搜索对象后
@@ -349,21 +382,28 @@
    )
  isearch-mode-map
  )
+(lazy-set-autoload-key
+ '(
+   ("M-l" . isearch-to-lazy-search)         ;切换到lazy-search
+   )
+ "lazy-search")
 ;;; ### Help ###
 ;;; --- 帮助模式
-(lazy-set-key
- '(
-   ("J" . scroll-up-one-line)           ;向下滚动一行
-   ("K" . scroll-down-one-line)         ;向上滚动一行
-   ("H" . describe-mode)                ;帮助
-   ("f" . help-go-forward)              ;前一个帮助
-   ("b" . help-go-back)                 ;后一个帮助
-   ("y" . sdcv-search-pointer+)         ;翻译
-   ("<tab>" . forward-button)           ;前一个按钮
-   )
- help-mode-map
- )
-(lazy-set-key vi-move-key-alist help-mode-map)
+(eval-after-load 'help-mode
+  '(progn
+     (lazy-set-key
+      '(
+        ("J" . scroll-up-one-line)      ;向下滚动一行
+        ("K" . scroll-down-one-line)    ;向上滚动一行
+        ("H" . describe-mode)           ;帮助
+        ("f" . help-go-forward)         ;前一个帮助
+        ("b" . help-go-back)            ;后一个帮助
+        ("y" . sdcv-search-pointer+)    ;翻译
+        ("<tab>" . forward-button)      ;前一个按钮
+        )
+      help-mode-map)
+     (lazy-set-key vi-move-key-alist help-mode-map)
+     ))
 ;;; ### Apt-utils ###
 ;;; --- Apt 管理工具
 (lazy-set-autoload-key
