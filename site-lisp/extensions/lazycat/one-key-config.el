@@ -439,24 +439,6 @@
   (interactive)
   (one-key-menu "CSCOPE" one-key-menu-cscope-alist t))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Dired Sort ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defvar one-key-menu-dired-sort-alist nil
-  "The `one-key' menu alist for DIRED-SORT.")
-
-(setq one-key-menu-dired-sort-alist
-      '(
-        (("s" . "Size") . dired-sort-size)
-        (("x" . "Extension") . dired-sort-extension)
-        (("n" . "Name") . dired-sort-name)
-        (("t" . "Modified Time") . dired-sort-time)
-        (("u" . "Access Time") . dired-sort-utime)
-        (("c" . "Create Time") . dired-sort-ctime)))
-
-(defun one-key-menu-dired-sort ()
-  "The `one-key' menu for DIRED-SORT."
-  (interactive)
-  (one-key-menu "DIRED-SORT" one-key-menu-dired-sort-alist t))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Window Navigation ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defvar one-key-menu-window-navigation-alist nil
   "The `one-key' menu alist for WINDOW-NAVIGATION.")

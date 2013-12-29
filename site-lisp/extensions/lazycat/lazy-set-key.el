@@ -83,6 +83,13 @@
     (autoload fun filename))
   )
 
+(defun lazy-set-mode-autoload-key (key-alist keymap key-prefix filename)
+  (lazy-set-key key-alist keymap key-prefix)
+  (dolist (element key-alist)
+    (setq fun (cdr element))
+    (autoload fun filename))
+  )
+
 (defun lazy-set-key (key-alist &optional keymap key-prefix)
   "This function is to little type when define key binding.
 `KEYMAP' is a add keymap for some binding, default is `current-global-map'.

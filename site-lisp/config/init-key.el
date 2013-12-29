@@ -51,9 +51,13 @@
 (lazy-set-autoload-key
  '(
    ("s-x v" . moccur-grep)              ;搜索当前目录下的文件
-   ("s-x g" . moccur-grep-find-pwd)     ;递归搜索当前目录下的文件
    )
  "init-moccur")
+(lazy-set-autoload-key
+ '(
+   ("s-x g" . moccur-grep-find-pwd)     ;递归搜索当前目录下的文件
+   )
+ "dired-extension")
 ;;; ### Buffer Move ###
 ;;; --- 缓存移动
 (lazy-set-key
