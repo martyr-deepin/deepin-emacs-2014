@@ -1163,18 +1163,15 @@
                           :foreground "black"))
     (((class color) (min-colors 88)) (:background "orange1"))))
  ;; Auto-complete
- '(ac-menu-face                         ;菜单颜色
-   ((t (:background "Grey10"
-                    :foreground "Grey40"))))
- '(ac-selection-face                    ;选择颜色
-   ((t (:background "Green4"
-                    :foreground "Green"))))
- '(ac-yasnippet-menu-face               ;Yasnippet 菜单颜色
-   ((t (:background "Grey10"
-                    :foreground "Grey40"))))
- '(ac-yasnippet-selection-face          ;Yasnippet 选择颜色
-   ((t (:background "DarkRed"
-                    :foreground "Grey"))))
+ '(ac-candidate-face ((t (:background "#191919" :foreground "#878787"))))
+ '(ac-completion-face ((t (:foreground "#878787"))))
+ '(ac-gtags-candidate-face ((t (:background "#191919" :foreground "#878787"))))
+ '(ac-gtags-selection-face ((t (:background "orangered4" :foreground "grey"))))
+ '(ac-menu-face ((t (:background "Grey10" :foreground "Grey40"))))
+ '(ac-selection-face ((t (:background "darkgreen" :foreground "grey"))))
+ '(ac-yasnippet-candidate-face ((t (:background "#191919" :foreground "#878787"))))
+ '(ac-yasnippet-menu-face ((t (:background "Grey10" :foreground "Grey40"))))
+ '(ac-yasnippet-selection-face ((t (:background "DarkRed" :foreground "Grey"))))
  ;; ERC
  '(erc-direct-msg-face                  ;直接消息
    ((t (:foreground "DodgerBlue"))))
@@ -1250,3 +1247,5 @@
  )
 
 (provide 'theme)
+
+

@@ -428,8 +428,8 @@
    )
  ac-complete-mode-map
  )
-(lazy-set-key
- '(
-   ("M-/" . auto-complete)))
+;; (lazy-set-key
+;;  '(
+;;    ("M-/" . auto-complete)))
 
 (provide 'init-key)
