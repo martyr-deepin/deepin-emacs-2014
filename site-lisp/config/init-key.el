@@ -425,6 +425,7 @@
    ("M-U" . ac-stop)                    ;停止
    ("M-," . ac-next)                    ;下一个
    ("M-." . ac-previous)                ;上一个
+   ("M-s" . ac-isearch)                 ;搜索补全
    )
  ac-complete-mode-map
  )

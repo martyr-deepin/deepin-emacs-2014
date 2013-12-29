@@ -1172,6 +1172,7 @@
  '(ac-yasnippet-candidate-face ((t (:background "#191919" :foreground "#878787"))))
  '(ac-yasnippet-menu-face ((t (:background "Grey10" :foreground "Grey40"))))
  '(ac-yasnippet-selection-face ((t (:background "darkgreen" :foreground "Grey"))))
+ '(popup-isearch-match ((t (:background "#191919" :foreground "#ffffff"))))
  ;; ERC
  '(erc-direct-msg-face                  ;直接消息
    ((t (:foreground "DodgerBlue"))))
