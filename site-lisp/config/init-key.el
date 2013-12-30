@@ -365,15 +365,14 @@
    ("C-x C-f" . find-file)
    )
  "init-dired")
-
 ;;; ### Anything ###
 ;;; --- 快速buffer切换
 (lazy-set-autoload-key
- '(("s-y" . anything)                   ;anything
-   ("C-s-y" . anything-call-source)     ;调用特定的源
+ '(
+   ("s-y" . helm-dwim)
    )
- "init-anything")
-
+ "init-helm")
+;; Cycle buffer
 (lazy-set-autoload-key
  '(
    ("M-C" . one-key-menu-cycle-buffer)  ;特定模式切换

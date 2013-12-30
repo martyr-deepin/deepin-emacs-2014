@@ -762,6 +762,15 @@
         :background "DarkRed"
                     :foreground "grey"
                     :box (:line-width 2 :color "grey75" :style released-button)))))
+ ;; Helm
+ '(helm-ff-directory ((t (:background "black" :foreground "dodgerblue"))))
+ '(helm-ff-file ((t (:background "black" :foreground "darkgreen"))))
+ '(helm-ff-invalid-symlink ((t (:background "black" :foreground "red"))))
+ '(helm-ff-prefix ((t (:background "black" :foreground "yellow"))))
+ '(helm-ff-symlink ((t (:foreground "DarkOrange4"))))
+ '(helm-selection ((t (:background "darkred" :foreground "grey"))))
+ '(helm-source-header ((t (:background "black" :foreground "gold" :underline t :height 1.1))))
+ '(helm-visible-mark ((t (:background "darkgreen" :foreground "grey"))))
  ;; Anything
  '(anything-header                      ;标题
    ((t (
@@ -1173,6 +1182,8 @@
  '(ac-yasnippet-menu-face ((t (:background "Grey10" :foreground "Grey40"))))
  '(ac-yasnippet-selection-face ((t (:background "darkgreen" :foreground "Grey"))))
  '(popup-isearch-match ((t (:background "#191919" :foreground "#ffffff"))))
+ '(popup-scroll-bar-background-face ((t (:background "#191919"))))
+ '(popup-scroll-bar-foreground-face ((t (:background "#393939"))))
  ;; ERC
  '(erc-direct-msg-face                  ;直接消息
    ((t (:foreground "DodgerBlue"))))
