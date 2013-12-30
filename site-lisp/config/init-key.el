@@ -446,5 +446,12 @@
    ("M-s-j" . flymake-show-next-error)  ;显示下一个错误
    ("M-s-k" . flymake-show-prev-error)  ;显示上一个错误
    ))
+;;; ### kill-ring-search ###
+;;; --- 删除环的递增式搜索
+(lazy-set-autoload-key
+ '(
+   ("M-s-y" . kill-ring-search)         ;kill ring 搜索
+   )
+ "init-kill-ring-search")
 
 (provide 'init-key)
