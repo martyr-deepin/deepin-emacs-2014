@@ -10,12 +10,12 @@
 ;; Last-Updated: 2013-12-30 16:00:06
 ;;           By: Andy Stewart
 ;; URL: http://www.emacswiki.org/emacs/download/init-auto-install.el
-;; Keywords: 
+;; Keywords:
 ;; Compatibility: GNU Emacs 24.3.50.1
 ;;
 ;; Features that might be required by this library:
 ;;
-;; 
+;;
 ;;
 
 ;;; This file is NOT part of GNU Emacs
@@ -37,10 +37,10 @@
 ;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth
 ;; Floor, Boston, MA 02110-1301, USA.
 
-;;; Commentary: 
-;; 
+;;; Commentary:
+;;
 ;; Init for auto-install
-;; 
+;;
 
 ;;; Installation:
 ;;
@@ -57,26 +57,26 @@
 
 ;;; Customize:
 ;;
-;; 
+;;
 ;;
 ;; All of the above can customize by:
 ;;      M-x customize-group RET init-auto-install RET
 ;;
 
 ;;; Change log:
-;;	
+;;
 ;; 2013/12/30
 ;;      * First released.
-;; 
+;;
 
 ;;; Acknowledgements:
 ;;
-;; 
+;;
 ;;
 
 ;;; TODO
 ;;
-;; 
+;;
 ;;
 
 ;;; Require
@@ -85,9 +85,10 @@
 
 ;;; Code:
 
-(setq auto-install-directory "/usr/share/deepin-emacs/Site-Lisp/Packages/LazyCatCollect/") ;设置默认的安装目录
+(setq auto-install-directory "/usr/share/deepin-emacs/site-lisp/extensions/lazycat/") ;设置默认的安装目录
 (setq auto-install-from-w3m-confirm nil) ;从w3m安装不提醒
 (setq auto-install-save-confirm nil)     ;不需要确认保存
+(setq auto-install-install-compile nil)  ;默认不编译文件
 
 (provide 'init-auto-install)
 

@@ -13,7 +13,6 @@
 (require 'pretty-lambdada)
 
 (require 'init-tempbuf)
-(require 'init-eldoc)
 (require 'init-tabbar)
 (require 'init-mode)
 (require 'init-dired)

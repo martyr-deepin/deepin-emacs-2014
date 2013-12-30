@@ -83,6 +83,7 @@
 
 (require 'helm-files)
 (require 'helm-config)
+(require 'helm-helm-commands)
 
 ;;; Code:
 
@@ -97,6 +98,7 @@
        helm-source-files-in-current-dir
        helm-source-moccur
        helm-source-occur
+       helm-source-helm-commands
        )
      "*helm search*")))
 

@@ -506,6 +506,11 @@ Otherwise, the existing file of the same name is replaced."
   :type 'string
   :group 'auto-install)
 
+(defcustom auto-install-install-compile t
+  "Whether compile when intall."
+  :type 'boolean
+  :group 'auto-install)
+
 (defcustom auto-install-emacswiki-base-url "http://www.emacswiki.org/cgi-bin/wiki/download/"
   "The base emacswiki.org url from which to download elisp files."
   :type 'string
@@ -854,25 +859,25 @@ EXTENSION-NAME is extension name for batch install."
                     (> extension-limit-number 0)))
               (auto-install-from-url-list extension-library-list)
             (let ((delay-counter 0)
-                    install-list)
-                (while extension-library-list
-                  (if (> (length extension-library-list) extension-limit-number)
-                      ;; Install apart libraries list under `extension-limit-number'
-                      (progn
-                        (setq install-list (nthcar extension-limit-number extension-library-list))
-                        (run-with-timer
-                         (* delay-counter extension-delay-time)
-                         nil
-                         'auto-install-from-url-list install-list)
-                        (setq extension-library-list (nthcdr+ extension-limit-number extension-library-list))
-                        (incf delay-counter))
-                    ;; Install remain libraries list.
-                    (setq install-list extension-library-list)
-                    (run-with-timer
-                     (* delay-counter extension-delay-time)
-                     nil
-                     'auto-install-from-url-list install-list)
-                    (setq extension-library-list nil))))))
+                  install-list)
+              (while extension-library-list
+                (if (> (length extension-library-list) extension-limit-number)
+                    ;; Install apart libraries list under `extension-limit-number'
+                    (progn
+                      (setq install-list (nthcar extension-limit-number extension-library-list))
+                      (run-with-timer
+                       (* delay-counter extension-delay-time)
+                       nil
+                       'auto-install-from-url-list install-list)
+                      (setq extension-library-list (nthcdr+ extension-limit-number extension-library-list))
+                      (incf delay-counter))
+                  ;; Install remain libraries list.
+                  (setq install-list extension-library-list)
+                  (run-with-timer
+                   (* delay-counter extension-delay-time)
+                   nil
+                   'auto-install-from-url-list install-list)
+                  (setq extension-library-list nil))))))
       ;; Notify message when haven't install information
       ;; for libraries that user given.
       (message "Haven't install information for `%s'." extension-name))))
@@ -886,7 +891,7 @@ default is `auto-install-handle-download-content'."
   (unless (file-exists-p auto-install-directory)
     (make-directory auto-install-directory)
     (when auto-install-add-load-path-flag
-      (add-to-list 'load-path auto-install-directory)) 
+      (add-to-list 'load-path auto-install-directory))
     (message "Create directory %s for install elisp file." auto-install-directory))
   ;; Download.
   (let* ((url-request-method "GET")
@@ -1057,9 +1062,11 @@ This command just run when have exist old version."
     (let (byte-compile-warnings) ;; suppress compile warnings
       ;; Compile and load file.
       (setq auto-install-url-queue (cdr auto-install-url-queue))
-      (unless (ignore-errors (byte-compile-file file-path t))
-        ;; Show `ERROR' message if compile failed.
-        (message (format "Auto-Install ERROR: Compiled file '%s' failed." file-path)))
+      (if auto-install-url-queue
+          (progn
+            (unless (ignore-errors (byte-compile-file file-path t))
+              ;; Show `ERROR' message if compile failed.
+              (message (format "Auto-Install ERROR: Compiled file '%s' failed." file-path)))))
       ;; Install next file.
       (cond ((car auto-install-url-queue)
              (switch-to-buffer (assoc-default (car auto-install-url-queue)
