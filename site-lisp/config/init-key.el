@@ -262,7 +262,7 @@
    ))
 (lazy-set-autoload-key
  '(
-   ("<f7>" . one-key-menu-ui)                    ;用户界面菜单
+   ("<f7>" . one-key-menu-ui)           ;用户界面菜单
    )
  "init-one-key")
 (lazy-set-autoload-key
@@ -411,7 +411,7 @@
  )
 (lazy-set-autoload-key
  '(
-   ("M-l" . isearch-to-lazy-search)     ;切换到lazy-search
+   ("M-L" . isearch-to-lazy-search)     ;切换到lazy-search
    )
  "lazy-search")
 ;;; ### Help ###
@@ -493,5 +493,20 @@
    ("s-x r" . one-key-menu-festival)    ;语音阅读菜单
    )
  "init-festival")
+;;; ### Less ###
+;;; --- 快速浏览模式
+(lazy-set-autoload-key
+ '(
+   ("M-s-l" . less-minor-mode)          ;打开less模式
+   )
+ "init-less")
+;;; ### Speedbar ###
+;;; --- 快速访问文件和tags
+(lazy-set-autoload-key
+ '(
+   ("s-z s-z" . sr-speedbar-toggle)        ;显示/隐藏speedbar
+   ("s-z s-x" . sr-speedbar-select-window) ;选中speedbar窗口
+   )
+ "init-speedbar")
 
 (provide 'init-key)

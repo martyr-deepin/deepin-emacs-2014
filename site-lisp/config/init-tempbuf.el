@@ -1,15 +1,15 @@
-;;; init-multiterm.el --- Init for multi-term.el
+;;; init-tempbuf.el --- Init tempbuf
 
-;; Filename: init-multiterm.el
-;; Description: Init for multi-term.el
+;; Filename: init-tempbuf.el
+;; Description: Init tempbuf
 ;; Author: Andy Stewart <andy@freedom>
 ;; Maintainer: Andy Stewart <andy@freedom>
 ;; Copyright (C) 2013, Andy Stewart, all rights reserved.
-;; Created: 2013-12-27 23:36:59
+;; Created: 2013-12-30 16:06:54
 ;; Version: 0.1
-;; Last-Updated: 2013-12-27 23:36:59
+;; Last-Updated: 2013-12-30 16:06:54
 ;;           By: Andy Stewart
-;; URL: http://www.emacswiki.org/emacs/download/init-multiterm.el
+;; URL: http://www.emacswiki.org/emacs/download/init-tempbuf.el
 ;; Keywords: 
 ;; Compatibility: GNU Emacs 24.3.50.1
 ;;
@@ -39,19 +39,19 @@
 
 ;;; Commentary: 
 ;; 
-;; Init for multi-term.el
+;; Init tempbuf
 ;; 
 
 ;;; Installation:
 ;;
-;; Put init-multiterm.el to your load-path.
+;; Put init-tempbuf.el to your load-path.
 ;; The load-path is usually ~/elisp/.
 ;; It's set in your ~/.emacs like this:
 ;; (add-to-list 'load-path (expand-file-name "~/elisp"))
 ;;
 ;; And the following to your ~/.emacs startup file.
 ;;
-;; (require 'init-multiterm)
+;; (require 'init-tempbuf)
 ;;
 ;; No need more.
 
@@ -60,12 +60,12 @@
 ;; 
 ;;
 ;; All of the above can customize by:
-;;      M-x customize-group RET init-multiterm RET
+;;      M-x customize-group RET init-tempbuf RET
 ;;
 
 ;;; Change log:
 ;;	
-;; 2013/12/27
+;; 2013/12/30
 ;;      * First released.
 ;; 
 
@@ -81,18 +81,24 @@
 
 ;;; Require
 
-(require 'multi-term)                   ;多标签SHELL
+(require 'tempbuf)
 
 ;;; Code:
 
-;;; ### Multi-term ###
-;;; --- 多标签 term
-(setq term-eol-on-send t)                         ;输入前跳转到最后一行
-(setq multi-term-dedicated-skip-other-window-p t) ;`other-window' 不在专注窗口中经过
-(setq multi-term-scroll-show-maximum-output t)    ;最大输出时滚动
-(setq multi-term-scroll-to-bottom-on-output nil)  ;到达底部时不滚动
-(setq multi-term-dedicated-select-after-open-p t) ;打开专注终端窗口时聚焦
+(setq tempbuf-kill-message nil)         ;不在Mode-line显示删除临时buffer提示消息
+(setq tempbuf-minimum-timeout 30)       ;删除 buffer 的最低期限
+(dolist (hook (list
+               'compilation-mode-hook     ;编译模式
+               'comint-mode-hook          ;comint 模式
+               'completion-list-mode-hook ;补全列表模式
+               'help-mode-hook            ;帮助模式
+               'Info-mode-hook            ;Info 模式
+               'calc-mode-hook            ;计算器模式
+               'gnus-article-mode-hook    ;Gnus 文章模式
+               'gnus-kill-file-mode       ;Gnus 删除文件模糊
+               ))
+  (add-hook hook 'turn-on-tempbuf-mode)) ;加载自动清理临时buffer
 
-(provide 'init-multiterm)
+(provide 'init-tempbuf)
 
-;;; init-multiterm.el ends here
+;;; init-tempbuf.el ends here

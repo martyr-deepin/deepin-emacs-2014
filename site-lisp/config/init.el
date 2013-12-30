@@ -10,7 +10,10 @@
 (require 'highlight-parentheses)
 (require 'auto-save)
 (require 'flymake-config)
+(require 'pretty-lambdada)
 
+(require 'init-tempbuf)
+(require 'init-eldoc)
 (require 'init-tabbar)
 (require 'init-mode)
 (require 'init-dired)

@@ -1,15 +1,15 @@
-;;; init-multiterm.el --- Init for multi-term.el
+;;; init-auto-install.el --- Init for auto-install
 
-;; Filename: init-multiterm.el
-;; Description: Init for multi-term.el
+;; Filename: init-auto-install.el
+;; Description: Init for auto-install
 ;; Author: Andy Stewart <andy@freedom>
 ;; Maintainer: Andy Stewart <andy@freedom>
 ;; Copyright (C) 2013, Andy Stewart, all rights reserved.
-;; Created: 2013-12-27 23:36:59
+;; Created: 2013-12-30 16:00:06
 ;; Version: 0.1
-;; Last-Updated: 2013-12-27 23:36:59
+;; Last-Updated: 2013-12-30 16:00:06
 ;;           By: Andy Stewart
-;; URL: http://www.emacswiki.org/emacs/download/init-multiterm.el
+;; URL: http://www.emacswiki.org/emacs/download/init-auto-install.el
 ;; Keywords: 
 ;; Compatibility: GNU Emacs 24.3.50.1
 ;;
@@ -39,19 +39,19 @@
 
 ;;; Commentary: 
 ;; 
-;; Init for multi-term.el
+;; Init for auto-install
 ;; 
 
 ;;; Installation:
 ;;
-;; Put init-multiterm.el to your load-path.
+;; Put init-auto-install.el to your load-path.
 ;; The load-path is usually ~/elisp/.
 ;; It's set in your ~/.emacs like this:
 ;; (add-to-list 'load-path (expand-file-name "~/elisp"))
 ;;
 ;; And the following to your ~/.emacs startup file.
 ;;
-;; (require 'init-multiterm)
+;; (require 'init-auto-install)
 ;;
 ;; No need more.
 
@@ -60,12 +60,12 @@
 ;; 
 ;;
 ;; All of the above can customize by:
-;;      M-x customize-group RET init-multiterm RET
+;;      M-x customize-group RET init-auto-install RET
 ;;
 
 ;;; Change log:
 ;;	
-;; 2013/12/27
+;; 2013/12/30
 ;;      * First released.
 ;; 
 
@@ -81,18 +81,14 @@
 
 ;;; Require
 
-(require 'multi-term)                   ;多标签SHELL
+(require 'auto-install)
 
 ;;; Code:
 
-;;; ### Multi-term ###
-;;; --- 多标签 term
-(setq term-eol-on-send t)                         ;输入前跳转到最后一行
-(setq multi-term-dedicated-skip-other-window-p t) ;`other-window' 不在专注窗口中经过
-(setq multi-term-scroll-show-maximum-output t)    ;最大输出时滚动
-(setq multi-term-scroll-to-bottom-on-output nil)  ;到达底部时不滚动
-(setq multi-term-dedicated-select-after-open-p t) ;打开专注终端窗口时聚焦
+(setq auto-install-directory "/usr/share/deepin-emacs/Site-Lisp/Packages/LazyCatCollect/") ;设置默认的安装目录
+(setq auto-install-from-w3m-confirm nil) ;从w3m安装不提醒
+(setq auto-install-save-confirm nil)     ;不需要确认保存
 
-(provide 'init-multiterm)
+(provide 'init-auto-install)
 
-;;; init-multiterm.el ends here
+;;; init-auto-install.el ends here

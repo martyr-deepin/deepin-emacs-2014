@@ -48,5 +48,19 @@
 (setq split-width-threshold nil)                                    ;分屏的时候使用上下分屏
 (setq one-key-popup-window nil)                                     ;禁止自动弹出窗口
 (add-hook 'find-file-hook 'highlight-parentheses-mode t)            ;增强的括号高亮
+(add-hook 'python-mode-hook 'pretty-lambda)
+(setq scroll-step 1                     ;流畅滚屏
+      scroll-conservatively 10000
+      auto-window-vscroll nil)
+(autoload 'hanconvert-region "hanconvert" ;简繁中文互相转换
+  "Convert a region from simple chinese to tradition chinese or
+from tradition chinese to simple chinese" t)
+(autoload 'kill-ring-search "kill-ring-search"
+  "Search the kill ring in the minibuffer."
+  (interactive))
+(setq isearch-allow-scroll t)           ;isearch搜索时是可以滚动屏幕的
+(autoload 'auto-install "init-auto-install")
+(autoload 'irfc "init-irfc")
+(autoload 'doc-view-mode "init-doc-view")
 
 (provide 'init-startup)

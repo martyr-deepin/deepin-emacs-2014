@@ -128,6 +128,16 @@
                ))
   (add-hook hook '(lambda () (auto-fill-mode 1))))
 
+;; Zencoding code
+(autoload 'zencoding-mode "zencoding-mode")
+(eval-after-load 'zencoding-mode
+  '(lambda ()
+     (prog
+      (add-hook 'sgml-mode-hook 'zencoding-mode)
+      (add-hook 'html-helper-mode-hook 'zencoding-mode)
+      (setq zencoding-preview-default nil)
+      n)))
+
 (provide 'init-mode)
 
 ;;; init-mode.el ends here

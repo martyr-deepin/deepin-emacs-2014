@@ -1,15 +1,15 @@
-;;; init-multiterm.el --- Init for multi-term.el
+;;; init-less.el --- Init less
 
-;; Filename: init-multiterm.el
-;; Description: Init for multi-term.el
+;; Filename: init-less.el
+;; Description: Init less
 ;; Author: Andy Stewart <andy@freedom>
 ;; Maintainer: Andy Stewart <andy@freedom>
 ;; Copyright (C) 2013, Andy Stewart, all rights reserved.
-;; Created: 2013-12-27 23:36:59
+;; Created: 2013-12-30 15:38:12
 ;; Version: 0.1
-;; Last-Updated: 2013-12-27 23:36:59
+;; Last-Updated: 2013-12-30 15:38:12
 ;;           By: Andy Stewart
-;; URL: http://www.emacswiki.org/emacs/download/init-multiterm.el
+;; URL: http://www.emacswiki.org/emacs/download/init-less.el
 ;; Keywords: 
 ;; Compatibility: GNU Emacs 24.3.50.1
 ;;
@@ -39,19 +39,19 @@
 
 ;;; Commentary: 
 ;; 
-;; Init for multi-term.el
+;; Init less
 ;; 
 
 ;;; Installation:
 ;;
-;; Put init-multiterm.el to your load-path.
+;; Put init-less.el to your load-path.
 ;; The load-path is usually ~/elisp/.
 ;; It's set in your ~/.emacs like this:
 ;; (add-to-list 'load-path (expand-file-name "~/elisp"))
 ;;
 ;; And the following to your ~/.emacs startup file.
 ;;
-;; (require 'init-multiterm)
+;; (require 'init-less)
 ;;
 ;; No need more.
 
@@ -60,12 +60,12 @@
 ;; 
 ;;
 ;; All of the above can customize by:
-;;      M-x customize-group RET init-multiterm RET
+;;      M-x customize-group RET init-less RET
 ;;
 
 ;;; Change log:
 ;;	
-;; 2013/12/27
+;; 2013/12/30
 ;;      * First released.
 ;; 
 
@@ -81,18 +81,31 @@
 
 ;;; Require
 
-(require 'multi-term)                   ;多标签SHELL
+(require 'less)
 
 ;;; Code:
 
-;;; ### Multi-term ###
-;;; --- 多标签 term
-(setq term-eol-on-send t)                         ;输入前跳转到最后一行
-(setq multi-term-dedicated-skip-other-window-p t) ;`other-window' 不在专注窗口中经过
-(setq multi-term-scroll-show-maximum-output t)    ;最大输出时滚动
-(setq multi-term-scroll-to-bottom-on-output nil)  ;到达底部时不滚动
-(setq multi-term-dedicated-select-after-open-p t) ;打开专注终端窗口时聚焦
+(lazy-set-key
+ '(
+   ("J" . less-scroll-up-one-line)      ;向下浏览
+   ("K" . less-scroll-down-one-line)    ;向上浏览
+   ("." . go-to-char-forward)           ;向后查找某一个字符
+   ("," . go-to-char-backward)          ;向前查找某一个字符
+   (">" . beginning-of-buffer)          ;BUFFER结尾
+   ("<" . end-of-buffer)                ;BUFFER开始
+   ("q" . less-quit)                    ;退出less模式
+   ("b" . one-key-menu-hideshow)        ;hideshow 菜单
+   ("t" . one-key-menu-etags)           ;Etags 菜单
+   ("dd" . auto-scroll-mode)            ;开始滚屏
+   ("df" . auto-scroll-faster)          ;滚动的快一点
+   ("ds" . auto-scroll-slower)          ;滚动的慢一点
+   )
+ less-minor-mode-map
+ )
+(lazy-set-autoload-key sdcv-key-alist less-minor-mode-map "sdcv")    ;sdcv的局部按键绑定
+(lazy-set-key vi-move-key-alist less-minor-mode-map)                 ;vi-move 的局部按键
 
-(provide 'init-multiterm)
+(provide 'init-less)
 
-;;; init-multiterm.el ends here
+;;; init-less.el ends here
+

@@ -1,15 +1,15 @@
-;;; init-multiterm.el --- Init for multi-term.el
+;;; init-doc-view.el --- Init doc view
 
-;; Filename: init-multiterm.el
-;; Description: Init for multi-term.el
+;; Filename: init-doc-view.el
+;; Description: Init doc view
 ;; Author: Andy Stewart <andy@freedom>
 ;; Maintainer: Andy Stewart <andy@freedom>
 ;; Copyright (C) 2013, Andy Stewart, all rights reserved.
-;; Created: 2013-12-27 23:36:59
+;; Created: 2013-12-30 16:03:55
 ;; Version: 0.1
-;; Last-Updated: 2013-12-27 23:36:59
+;; Last-Updated: 2013-12-30 16:03:55
 ;;           By: Andy Stewart
-;; URL: http://www.emacswiki.org/emacs/download/init-multiterm.el
+;; URL: http://www.emacswiki.org/emacs/download/init-doc-view.el
 ;; Keywords: 
 ;; Compatibility: GNU Emacs 24.3.50.1
 ;;
@@ -39,19 +39,19 @@
 
 ;;; Commentary: 
 ;; 
-;; Init for multi-term.el
+;; Init doc view
 ;; 
 
 ;;; Installation:
 ;;
-;; Put init-multiterm.el to your load-path.
+;; Put init-doc-view.el to your load-path.
 ;; The load-path is usually ~/elisp/.
 ;; It's set in your ~/.emacs like this:
 ;; (add-to-list 'load-path (expand-file-name "~/elisp"))
 ;;
 ;; And the following to your ~/.emacs startup file.
 ;;
-;; (require 'init-multiterm)
+;; (require 'init-doc-view)
 ;;
 ;; No need more.
 
@@ -60,12 +60,12 @@
 ;; 
 ;;
 ;; All of the above can customize by:
-;;      M-x customize-group RET init-multiterm RET
+;;      M-x customize-group RET init-doc-view RET
 ;;
 
 ;;; Change log:
 ;;	
-;; 2013/12/27
+;; 2013/12/30
 ;;      * First released.
 ;; 
 
@@ -81,18 +81,16 @@
 
 ;;; Require
 
-(require 'multi-term)                   ;多标签SHELL
+(require 'doc-view)
+(require 'doc-view-extension)
 
 ;;; Code:
 
-;;; ### Multi-term ###
-;;; --- 多标签 term
-(setq term-eol-on-send t)                         ;输入前跳转到最后一行
-(setq multi-term-dedicated-skip-other-window-p t) ;`other-window' 不在专注窗口中经过
-(setq multi-term-scroll-show-maximum-output t)    ;最大输出时滚动
-(setq multi-term-scroll-to-bottom-on-output nil)  ;到达底部时不滚动
-(setq multi-term-dedicated-select-after-open-p t) ;打开专注终端窗口时聚焦
+(setq doc-view-cache-directory my-translate-png-directory) ;doc-view转换的图书目录
+(setq doc-view-image-width (- (display-pixel-width) 16))
+(setq doc-view-resolution 300)
 
-(provide 'init-multiterm)
+(provide 'init-doc-view)
 
-;;; init-multiterm.el ends here
+;;; init-doc-view.el ends here
+

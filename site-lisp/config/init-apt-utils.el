@@ -85,6 +85,7 @@
 
 ;;; Code:
 
+(setq apt-utils-automatic-update t)     ;总是自动重建包列表， 不用询问
 (lazy-unset-key
  '("s")
  apt-utils-mode-map)                    ;卸载按键
