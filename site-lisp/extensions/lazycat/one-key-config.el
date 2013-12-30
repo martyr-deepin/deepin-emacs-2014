@@ -324,42 +324,6 @@
   (interactive)
   (one-key-menu "UI" one-key-menu-ui-alist t))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Open Directory ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defvar one-key-menu-directory-alist nil
-  "The `one-key' menu alist for DIRECTORY.")
-
-(setq one-key-menu-directory-alist
-      '(
-        (("h" . "Home") . (lambda () (interactive) (dired-x-find-file my-home-directory)))
-        (("d" . "Download") . (lambda () (interactive) (dired-x-find-file my-default-download-directory)))
-        (("b" . "Book") . (lambda () (interactive) (dired-x-find-file my-book-directory)))
-        (("i" . "Image") . (lambda () (interactive) (dired-x-find-file my-picture-directory)))
-        (("p" . "Emacs Package") . (lambda () (interactive) (dired-x-find-file my-emacs-lisp-package-directory)))
-        (("k" . "Amue") . (lambda () (interactive) (dired-x-find-file my-mldonkey-download-directory)))
-        (("m" . "Music") . (lambda () (interactive) (dired-x-find-file emms-source-file-default-directory)))
-        (("s" . "Screenshots") . (lambda () (interactive) (dired-x-find-file my-screenshots-storage-directory)))
-        (("r" . "Resource Backup") . (lambda () (interactive) (dired-x-find-file my-resource-backup-directory)))
-        (("n" . "Notes") . (lambda () (interactive) (dired-x-find-file my-notes-directory)))
-        (("x" . "Reading") . (lambda () (interactive) (dired-x-find-file my-reading-directory)))
-        (("l" . "Lyrics") . (lambda () (interactive) (dired-x-find-file my-lyrics-directory)))
-        (("u" . "Emule") . (lambda () (interactive) (dired-x-find-file my-emlue-download-directory)))
-        (("z" . "Elisp") . (lambda () (interactive) (dired-x-find-file my-elisp-directory)))
-        (("c" . "Config") . (lambda () (interactive) (dired-x-find-file my-config-directory)))
-        (("v" . "Windows Share") . (lambda () (interactive) (dired-x-find-file my-windows-share-directory)))
-        (("o" . "Manatee") . (lambda () (interactive) (dired-x-find-file "~/Manatee/")))
-        (("j" . "Hanatee") . (lambda () (interactive) (dired-x-find-file "~/Projects/Haskell/Hanatee/")))
-        (("g" . "gtk2hs") . (lambda () (interactive) (dired-x-find-file "/test/Download/gtk2hs")))
-        (("f" . "gtk-module") . (lambda () (interactive) (dired-x-find-file "/test/Download/gtk-modules/")))
-        (("a" . "Android Project") . (lambda () (interactive) (dired-x-find-file "~/Projects/Android/")))
-        ((";" . "Android SDK") . (lambda () (interactive) (dired-x-find-file "/usr/local/android-sdk-linux_86")))
-        (("e" . "Emacs") . (lambda () (interactive) (dired-x-find-file "/usr/share/deepin-emacs/")))
-        ))
-
-(defun one-key-menu-directory ()
-  "The `one-key' menu for DIRECTORY."
-  (interactive)
-  (one-key-menu "DIRECTORY" one-key-menu-directory-alist t))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Backup File ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defvar one-key-menu-backup-file-alist nil
   "The `one-key' menu alist for BACKUP-FILE.")
@@ -584,62 +548,9 @@
   (one-key-menu "GNUS-TOPIC-SORT" one-key-menu-gnus-topic-sort-alist t t))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Apt-utils View ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defvar one-key-menu-apt-utils-view-alist nil
-  "The `one-key' menu alist for APT-UTILS-VIEW.")
-
-(setq one-key-menu-apt-utils-view-alist
-      '(
-        (("c" . "Changelog") . apt-utils-view-changelog)
-        (("C" . "Debian Changelog") . apt-utils-view-debian-changelog)
-        (("r" . "Readme") . apt-utils-view-readme)
-        (("R" . "Debian Readme") . apt-utils-view-debian-readme)
-        (("n" . "News ") . apt-utils-view-news)
-        (("N" . "Debian News") . apt-utils-view-debian-news)
-        (("e" . "Emacs Startup File") . apt-utils-view-emacs-startup-file)
-        (("f" . "Package Files") . apt-utils-view-package-files)
-        (("p" . "Copyright") . apt-utils-view-copyright)
-        (("m" . "Man Page") . apt-utils-view-man-page)
-        (("v" . "Version") . apt-utils-view-version)
-        ))
-
-(defun one-key-menu-apt-utils-view ()
-  "The `one-key' menu for APT-UTILS-VIEW."
-  (interactive)
-  (one-key-menu "APT-UTILS-VIEW" one-key-menu-apt-utils-view-alist t t))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Apt-utils Search ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defvar one-key-menu-apt-utils-search-alist nil
-  "The `one-key' menu alist for APT-UTILS-SEARCH.")
-
-(setq one-key-menu-apt-utils-search-alist
-      '(
-        (("s" . "Search") . apt-utils-search)
-        (("f" . "Search Filename") . apt-utils-search-file-names)
-        (("g" . "Search Grep") . apt-utils-search-grep-dctrl)
-        (("n" . "Search Name Only") . apt-utils-search-names-only)
-        ))
-
-(defun one-key-menu-apt-utils-search ()
-  "The `one-key' menu for APT-UTILS-SEARCH."
-  (interactive)
-  (one-key-menu "APT-UTILS-SEARCH" one-key-menu-apt-utils-search-alist t t))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Apt-utils Browse ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defvar one-key-menu-apt-utils-browse-alist nil
-  "The `one-key' menu alist for APT-UTILS-BROWSE.")
-
-(setq one-key-menu-apt-utils-browse-alist
-      '(
-        (("c" . "Browse Changelog") . apt-utils-web-browse-debian-changelog)
-        ((("b" . "Browse Bur Reports") . apt-utils-web-browse-bug-reports))
-        (("l" . "Browse Copyright") . apt-utils-web-browse-copyright)
-        (("v" . "Browse Versions") . apt-utils-web-browse-versions)
-        ))
-
-(defun one-key-menu-apt-utils-browse ()
-  "The `one-key' menu for APT-UTILS-BROWSE."
-  (interactive)
-  (one-key-menu "APT-UTILS-BROWSE" one-key-menu-apt-utils-browse-alist t t))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Yaoddmuse ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defvar one-key-menu-yaoddmuse-alist nil
@@ -680,136 +591,8 @@
   (interactive)
   (one-key-menu "YAODDMUSE" one-key-menu-yaoddmuse-alist t))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Org-mode ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defvar one-key-menu-org-mode-alist nil
-  "The `one-key' menu alist for ORG-MODE.")
-
-(setq one-key-menu-org-mode-alist
-      '(
-        ;; Move
-        (("h" . "Backward Char") . backward-char)
-        (("l" . "Forward Char") . forward-char)
-        (("j" . "Next Line") . next-line)
-        (("k" . "Previous Line") . previous-line)
-        (("e" . "Scroll Down") . scroll-down)
-        (("SPC" . "Scroll Up") . scroll-up)
-        (("J" . "Scroll Up One Line") . scroll-up-one-line)
-        (("K" . "Scroll Down One Line") . scroll-down-one-line)
-        (("H" . "Next Title") . outline-next-visible-heading)
-        (("L" . "Prev Title") . outline-previous-visible-heading)
-        (("N" . "Next Same Level") . outline-forward-same-level)
-        (("P" . "Prev Same Level") . outline-backward-same-level)
-        (("O" . "Up Level") . outline-up-heading)
-        ;; TODO item.
-        (("y" . "Insert sup TODO heading") . org-insert-sup-todo-heading)
-        (("u" . "Insert cur TODO heading") . org-insert-cur-todo-heading)
-        (("i" . "Insert sub TODO heading") . org-insert-sub-todo-heading)
-        ;; Item.
-        (("Y" . "Insert sup item") . org-insert-sup-item)
-        (("U" . "Insert cur item") . org-insert-cur-item)
-        (("I" . "Insert sub item") . org-insert-sub-item)
-        ;; Move current item.
-        (("a" . "Move item to left") . org-metaleft)
-        (("f" . "Move item to right") . org-metaright)
-        (("s" . "Move item to down") . org-metadown)
-        (("d" . "Move item to up") . org-metaup)
-        ;; Move sub-tree.
-        (("A" . "Move tree to left") . org-shiftmetaleft)
-        (("F" . "Move tree to right") . org-shiftmetaright)
-        (("S" . "Move tree to down") . org-shiftmetadown)
-        (("D" . "Move tree to up") . org-shiftmetaup)
-        ;; Switch current item mission status.
-        (("," . "Switch item status left") . org-shiftleft)
-        (("." . "Swtich item status right") . org-shiftright)
-        ;; Switch sub-tree misssion status.
-        (("<" . "Swtich tree status left") . org-subtree-shiftleft)
-        ((">" . "Swtich tree status right") . org-subtree-shiftright)
-        ;; Switch priority.
-        (("p" . "Up priority") . org-priority-up)
-        (("n" . "Down priority") . org-priority-down)
-        ;; Copy or Paste.
-        (("w" . "Copy Speical") . org-copy-special)
-        (("W" . "Paste Speical") . org-cut-special)
-        ;; Misc.
-        (("TAB" . "Org Cycle") . org-cycle)
-        (("c" . "Switch to DONE") . org-switch-item-to-done)
-        (("x" . "Archive all done item.") . org-archive-all-done-item)
-        (("z" . "Switch and Archive DONE") . org-switch-done-and-archive)
-        (("Z" . "Switch and Archive DONE") . org-switch-done-and-archive_)
-        (("o" . "Show all TODO item.") . org-display-all-todo-item)
-        (("g" . "Org Goto") . org-goto)
-        (("/" . "Org Spare Tree") . org-sparse-tree)
-        (("^" . "Org Sort") . org-sort)
-        ))
-
-(defun one-key-menu-org-mode ()
-  "The `one-key' menu for ORG-MODE."
-  (interactive)
-  (one-key-menu "ORG-MODE" one-key-menu-org-mode-alist t nil nil nil t))
-
-(defun one-key-menu-org-mode-recursive ()
-  "This function like `one-key-menu-org-mode', but recursive."
-  (interactive)
-  (one-key-menu "ORG-MODE RECURSIVE" one-key-menu-org-mode-alist t t nil nil t))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Org File ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defvar one-key-menu-org-file-alist nil
-  "The `one-key' menu alist for ORG-FILE.")
-
-(setq one-key-menu-org-file-alist
-      '(
-        (("s" . "Dream") . (lambda () (interactive) (find-file "~/.emacs.d/deepin-emacs/Org/Dream.org")))
-        (("p" . "Projects") . (lambda () (interactive) (find-file "~/.emacs.d/deepin-emacs/Org/LazyCat.org")))
-        (("d" . "Debian") . (lambda () (interactive) (find-file "~/.emacs.d/deepin-emacs/Org/DebianInstall.org")))
-        (("l" . "Living") . (lambda () (interactive) (find-file "~/.emacs.d/deepin-emacs/Org/Living.org")))
-        (("r" . "ReadingNotes") . (lambda () (interactive) (find-file "~/.emacs.d/deepin-emacs/Org/ReadingNotes.org")))
-        (("o" . "Others") . (lambda () (interactive) (find-file "~/.emacs.d/deepin-emacs/Org/Other.org")))
-        (("u" . "Ubuntu") . (lambda () (interactive) (find-file "~/.emacs.d/deepin-emacs/Org/UbuntuInstall.org")))
-        (("a" . "Haskell Article") . (lambda () (interactive) (find-file "~/.emacs.d/deepin-emacs/Org/Haskell_Article.org")))
-        (("g" . "Gtk2hs API") . (lambda () (interactive) (find-file "~/.emacs.d/deepin-emacs/Org/UpdateGtk2hsApi.org")))
-        (("h" . "Hs4Gi") . (lambda () (interactive) (find-file "~/.emacs.d/deepin-emacs/Org/Hs4Gi.org")))
-        (("i" . "Android") . (lambda () (interactive) (find-file "~/.emacs.d/deepin-emacs/Org/AndroidInstall.org")))
-        (("n" . "AndroidTodo") . (lambda () (interactive) (find-file "~/.emacs.d/deepin-emacs/Org/Android.org")))
-        (("m" . "Linux Deepin") . (lambda () (interactive) (find-file "~/.emacs.d/deepin-emacs/Org/LinuxDeepin.org")))
-        ))
-
-(defun one-key-menu-org-file ()
-  "The `one-key' menu for ORG-FILE."
-  (interactive)
-  (one-key-menu "ORG-FILE" one-key-menu-org-file-alist t))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Paredit ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defvar one-key-menu-paredit-alist nil
-  "The `one-key' menu alist for PAREDIT.")
-
-(setq one-key-menu-paredit-alist
-      '(
-        ;; Wrap.
-        (("h" . "Wrap Left Object") . paredit-backward-slurp-sexp)
-        (("l" . "Wrap Right Object") . paredit-forward-slurp-sexp)
-        ;; Free.
-        (("," . "Free Left Object") . paredit-backward-barf-sexp)
-        (("." . "Free Right Object") . paredit-forward-barf-sexp)
-        ;; Remove.
-        (("<" . "Remove Paren And Left Object") . paredit-splice-sexp-killing-backward)
-        ((">" . "Remove Paren And Right Object") . paredit-splice-sexp-killing-forward)
-        ;; Join or Split.
-        (("j" . "Join Sexps") . paredit-join-sexps)
-        (("k" . "Split Sexps") . paredit-split-sexp)
-        (("n" . "Join next list") . paredit-join-with-next-list)
-        (("p" . "Join previous list") . paredit-join-with-previous-list)
-        (("N" . "Add next list") . paredit-add-to-next-list)
-        (("P" . "Add previous list") . paredit-add-to-previous-list)
-        ;; Move.
-        (("u" . "Move list forward") . paredit-move-list-forward)
-        (("i" . "Move list backward") . paredit-move-list-backward)
-        ))
-
-(defun one-key-menu-paredit ()
-  "The `one-key' menu for PAREDIT."
-  (interactive)
-  (one-key-menu "PAREDIT" one-key-menu-paredit-alist t t nil nil t))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Irc-Channel ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defvar one-key-menu-irc-channel-alist nil
   "The `one-key' menu alist for IRC-CHANNEL.")

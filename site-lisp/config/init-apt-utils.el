@@ -111,6 +111,61 @@
  )
 (lazy-set-key vi-move-key-alist apt-utils-mode-map) ;vi-move 的局部按键
 
+(defvar one-key-menu-apt-utils-view-alist nil
+  "The `one-key' menu alist for APT-UTILS-VIEW.")
+
+(setq one-key-menu-apt-utils-view-alist
+      '(
+        (("c" . "Changelog") . apt-utils-view-changelog)
+        (("C" . "Debian Changelog") . apt-utils-view-debian-changelog)
+        (("r" . "Readme") . apt-utils-view-readme)
+        (("R" . "Debian Readme") . apt-utils-view-debian-readme)
+        (("n" . "News ") . apt-utils-view-news)
+        (("N" . "Debian News") . apt-utils-view-debian-news)
+        (("e" . "Emacs Startup File") . apt-utils-view-emacs-startup-file)
+        (("f" . "Package Files") . apt-utils-view-package-files)
+        (("p" . "Copyright") . apt-utils-view-copyright)
+        (("m" . "Man Page") . apt-utils-view-man-page)
+        (("v" . "Version") . apt-utils-view-version)
+        ))
+
+(defun one-key-menu-apt-utils-view ()
+  "The `one-key' menu for APT-UTILS-VIEW."
+  (interactive)
+  (one-key-menu "APT-UTILS-VIEW" one-key-menu-apt-utils-view-alist t t))
+
+(defvar one-key-menu-apt-utils-search-alist nil
+  "The `one-key' menu alist for APT-UTILS-SEARCH.")
+
+(setq one-key-menu-apt-utils-search-alist
+      '(
+        (("s" . "Search") . apt-utils-search)
+        (("f" . "Search Filename") . apt-utils-search-file-names)
+        (("g" . "Search Grep") . apt-utils-search-grep-dctrl)
+        (("n" . "Search Name Only") . apt-utils-search-names-only)
+        ))
+
+(defun one-key-menu-apt-utils-search ()
+  "The `one-key' menu for APT-UTILS-SEARCH."
+  (interactive)
+  (one-key-menu "APT-UTILS-SEARCH" one-key-menu-apt-utils-search-alist t t))
+
+(defvar one-key-menu-apt-utils-browse-alist nil
+  "The `one-key' menu alist for APT-UTILS-BROWSE.")
+
+(setq one-key-menu-apt-utils-browse-alist
+      '(
+        (("c" . "Browse Changelog") . apt-utils-web-browse-debian-changelog)
+        ((("b" . "Browse Bur Reports") . apt-utils-web-browse-bug-reports))
+        (("l" . "Browse Copyright") . apt-utils-web-browse-copyright)
+        (("v" . "Browse Versions") . apt-utils-web-browse-versions)
+        ))
+
+(defun one-key-menu-apt-utils-browse ()
+  "The `one-key' menu for APT-UTILS-BROWSE."
+  (interactive)
+  (one-key-menu "APT-UTILS-BROWSE" one-key-menu-apt-utils-browse-alist t t))
+
 (provide 'init-apt-utils)
 
 ;;; init-apt-utils.el ends here
