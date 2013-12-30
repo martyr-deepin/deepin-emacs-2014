@@ -103,6 +103,20 @@
   (interactive)
   (one-key-menu "DIRECTORY" one-key-menu-directory-alist t))
 
+(defvar one-key-menu-ui-alist nil
+  "The `one-key' menu alist for UI.")
+
+(setq one-key-menu-ui-alist
+      '(
+        (("t" . "Tool-Bar") . tool-bar-mode)
+        (("m" . "Menu-Bar") . menu-bar-mode)
+        (("c" . "Scroll-Bar") . scroll-bar-mode)))
+
+(defun one-key-menu-ui ()
+  "The `one-key' menu for UI."
+  (interactive)
+  (one-key-menu "UI" one-key-menu-ui-alist t))
+
 (provide 'init-one-key)
 
 ;;; init-one-key.el ends here

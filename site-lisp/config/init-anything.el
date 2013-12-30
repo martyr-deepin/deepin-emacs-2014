@@ -155,6 +155,20 @@
    )
  anything-map
  )
+(defvar one-key-menu-anything-alist nil
+  "The `one-key' menu alist for anything.")
+
+(setq one-key-menu-anything-alist
+      '(
+        (("i" . "Auto Install") . anything-auto-install)
+        (("e" . "Edit or View EmacsWiki page") . anything-yaoddmuse-emacswiki-edit-or-view)
+        (("p" . "Post library to EmacsWiki") . anything-yaoddmuse-emacswiki-post-library)
+        ))
+
+(defun one-key-menu-anything ()
+  "The `one-key' menu for anything."
+  (interactive)
+  (one-key-menu "anything" one-key-menu-anything-alist t))
 
 (provide 'init-anything)
 

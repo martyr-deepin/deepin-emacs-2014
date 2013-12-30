@@ -150,6 +150,125 @@
 (emms-player-set emms-player-mplayer 'regex
                  "\\.ogg\\|\\.mp3\\|\\.wav\\|\\.mpg\\|\\.mpeg\\|\\.wmv\\|\\.wma\\|\\.mov\\|\\.avi\\|\\.divx\\|\\.ogm\\|\\.asf\\|\\.mkv\\|http://\\|mms://\\|\\.rm\\|\\.rmvb\\|\\.mp4\\|\\.flac\\|\\.vob\\|\\.m4a\\|\\.ape\\|\\.mpc")
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; EMMS ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defvar one-key-menu-emms-alist nil
+  "The `one-key' menu alist for EMMS.")
+
+(setq one-key-menu-emms-alist
+      '(
+        (("g" . "Playlist Go") . emms-playlist-mode-go)
+        (("d" . "Play Directory Tree") . emms-play-directory-tree)
+        (("f" . "Play File") . emms-play-file)
+        (("i" . "Play Playlist") . emms-play-playlist)
+        (("m" . "Play Matching") . emms-play-matching)
+        (("t" . "Add Directory Tree") . emms-add-directory-tree)
+        (("c" . "Toggle Repeat Track") . emms-toggle-repeat-track)
+        (("v" . "Jump To File") . emms-jump-to-file)
+        (("w" . "Toggle Repeat Playlist") . emms-toggle-repeat-playlist)
+        (("u" . "Play Now") . emms-play-now)
+        (("z" . "Show") . emms-show)
+        (("l" . "Lyrics Toggle Show") . emms-lyrics-toggle-display-on-minibuffer)
+        (("r" . "Lyrics Re download") . emms-lyrics-redownload-lyric)
+        (("e" . "Lyrics Visit") . emms-lyrics-visit-lyric)
+        (("s" . "Emms Streams") . emms-streams)
+        (("b" . "Emms Browser") . emms-browser)
+        (("p" . "Anything Playlist") . anything-emms-playlist)
+        (("o" . "Anything Directory") . anything-emms-directory)
+        ((";" . "Anything File") . anything-emms-file)
+        ))
+
+(defun one-key-menu-emms ()
+  "The `one-key' menu for EMMS."
+  (interactive)
+  (one-key-menu "EMMS" one-key-menu-emms-alist t))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; EMMS Playlist Sort ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defvar one-key-menu-emms-playlist-sort-alist nil
+  "The `one-key' menu alist for EMMS-PLAYLIST-SORT.")
+
+(setq one-key-menu-emms-playlist-sort-alist
+      '(
+        (("h" . "Shuffle") . emms-shuffle)
+        (("n" . "Name") . emms-playlist-sort-by-name)
+        (("t" . "Title") . emms-playlist-sort-by-info-title)
+        (("a" . "Artist") . emms-playlist-sort-by-info-artist)
+        (("b" . "Album") . emms-playlist-sort-by-info-album)
+        (("y" . "Year") . emms-playlist-sort-by-info-year)
+        (("e" . "Note") . emms-playlist-sort-by-info-note)
+        (("s" . "Scroe") . emms-playlist-sort-by-score)
+        (("i" . "List") . emms-playlist-sort-by-list)
+        (("o" . "Natural Order") . emms-playlist-sort-by-natural-order)
+        (("l" . "Last Played") . emms-playlist-sort-by-last-played)
+        (("c" . "Play Count") . emms-playlist-sort-by-play-count)
+        ))
+
+(defun one-key-menu-emms-playlist-sort ()
+  "The `one-key' menu for EMMS-PLAYLIST-SORT."
+  (interactive)
+  (one-key-menu "EMMS-PLAYLIST-SORT" one-key-menu-emms-playlist-sort-alist t))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; EMMS Playlist Mark ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defvar one-key-menu-emms-playlist-mark-alist nil
+  "The `one-key' menu alist for EMMS-PLAYLIST-MARK.")
+
+(setq one-key-menu-emms-playlist-mark-alist
+      '(
+        (("m" . "Mark Current and Move Next") . emms-mark-track-and-move-next)
+        (("a" . "Mark All") . emms-mark-all)
+        (("r" . "Mark Regexp") . emms-mark-regexp)
+        (("c" . "Mark Copy") . emms-mark-copy-marked-tracks)
+        (("x" . "Mark Delete") . emms-mark-delete-marked-tracks)
+        (("d" . "Mark Duplicate") . emms-mark-duplicate-track)
+        (("t" . "Mark Toggle") . emms-mark-toggle)
+        (("u" . "Umark Current") . emms-mark-unmark-track-and-move-next)
+        (("U" . "Umark All") . emms-mark-unmark-all)
+        ))
+
+(defun one-key-menu-emms-playlist-mark ()
+  "The `one-key' menu for EMMS-PLAYLIST-MARK."
+  (interactive)
+  (one-key-menu "EMMS-PLAYLIST-MARK" one-key-menu-emms-playlist-mark-alist t))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; EMMS Browser Search ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defvar one-key-menu-emms-browser-search-alist nil
+  "The `one-key' menu alist for EMMS-BROWSER-SEARCH.")
+
+(setq one-key-menu-emms-browser-search-alist
+      '(
+        (("a" . "Search Artist") . emms-browser-search-by-artist)
+        (("b" . "Search Album") . emms-browser-search-by-album)
+        (("c" . "Search Composer") . emms-browser-search-by-composer)
+        (("n" . "Search Name") . emms-browser-search-by-names)
+        (("p" . "Search Performer") . emms-browser-search-by-performer)
+        (("t" . "Search Title") . emms-browser-search-by-title)
+        ))
+
+(defun one-key-menu-emms-browser-search ()
+  "The `one-key' menu for EMMS-BROWSER-SEARCH."
+  (interactive)
+  (one-key-menu "EMMS-BROWSER-SEARCH" one-key-menu-emms-browser-search-alist t))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; EMMS Browser Lookup ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defvar one-key-menu-emms-browser-lookup-alist nil
+  "The `one-key' menu alist for EMMS-BROWSER-LOOKUP.")
+
+(setq one-key-menu-emms-browser-lookup-alist
+      '(
+        (("b" . "Lookup Album Pitchfork") . EMMS-browser-lookup-album-on-pitchfork)
+        (("p" . "Lookup Performer Pitchfork") . emms-browser-lookup-performer-on-pitchfork)
+        (("c" . "Lookup Composer Pitchfork") . emms-browser-lookup-composer-on-pitchfork)
+        (("a" . "Lookup Artist Pitchfork") . emms-browser-lookup-artist-on-pitchfork)
+        (("B" . "Lookup Album Wikipedia") . emms-browser-lookup-album-on-wikipedia)
+        (("P" . "Lookup Performer Wikipedia") . emms-browser-lookup-performer-on-wikipedia)
+        (("C" . "Lookup Composer Wikipedia") . emms-browser-lookup-composer-on-wikipedia)
+        (("A" . "Lookup Artist Wikipeda") . emms-browser-lookup-artist-on-wikipedia)
+        ))
+
+(defun one-key-menu-emms-browser-lookup ()
+  "The `one-key' menu for EMMS-BROWSER-LOOKUP."
+  (interactive)
+  (one-key-menu "EMMS-BROWSER-LOOKUP" one-key-menu-emms-browser-lookup-alist t))
+
 (provide 'init-emms)
 
 ;;; init-emms.el ends here

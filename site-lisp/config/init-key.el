@@ -31,7 +31,6 @@
    ("C-c ns" . notes-search)                ;便签搜索
    ("C-c nn" . notes-new)                   ;新建便签
    ("s-c o" . one-key-menu-directory)       ;目录打开菜单
-   ("s-*" . one-key-menu-backup-file)       ;备份资料
    ("s-," . bury-buffer)                    ;隐藏当前buffer
    ("s-." . unbury-buffer)                  ;反隐藏当前buffer
    ("s-&" . killall)                        ;杀掉进程
@@ -54,6 +53,11 @@
    ("M-s-u" . ediff-buffers)                ;ediff
    ("C-s-q" . quoted-insert)                ;读取系一个输入字符并插入
    ))
+(lazy-set-autoload-key
+ '(
+   ("s-*" . one-key-menu-backup-file)   ;备份资料
+   )
+ "init-shell-command")
 ;;; ### Color-moccur ###
 ;;; --- 增强的moccur
 (lazy-set-autoload-key
@@ -190,13 +194,17 @@
 ;;; --- 窗口操作
 (lazy-set-key
  '(
-   ("C-c v" . split-window-vertically)      ;纵向分割窗口
-   ("C-c h" . split-window-horizontally)    ;横向分割窗口
-   ("C-;" . kill-this-buffer)               ;关闭当前buffer
-   ("C-x ;" . delete-other-windows)         ;关闭其它窗口
-   ("s-;" . one-key-menu-window-navigation) ;快速窗口导航
-   ("s-a" . window-number-jump)             ;窗口快速选择
+   ("C-c v" . split-window-vertically)   ;纵向分割窗口
+   ("C-c h" . split-window-horizontally) ;横向分割窗口
+   ("C-;" . kill-this-buffer)            ;关闭当前buffer
+   ("C-x ;" . delete-other-windows)      ;关闭其它窗口
+   ("s-a" . window-number-jump)          ;窗口快速选择
    ))
+(lazy-set-autoload-key
+ '(
+   ("s-;" . one-key-menu-window-navigation) ;快速窗口导航
+   )
+ "init-window")
 (lazy-set-autoload-key
  '(
    ("C-c V" . delete-other-windows-vertically+)   ;关闭上下的其他窗口
@@ -235,7 +243,6 @@
    ("<f4>" . generate-gtags-files)               ;生成gtags引用文件
    ("<f5>" . emacs-session-save)                 ;退出emacs
    ("<f6>" . lock-screen)                        ;锁屏
-   ("<f7>" . one-key-menu-ui)                    ;用户界面菜单
    ("<f8>" . dired-jump)                         ;文件管理起
    ("<f9>" . list-load-path-shadows)             ;显示重复加载的库
    ("<f10>" . open-current-log-keyboard-command) ;打开命令日志
@@ -253,6 +260,11 @@
    ("C-7" . jump-back)                           ;返回查找符号定义前的位置
    ("M-I" . backward-indent)                     ;向后移动4个字符
    ))
+(lazy-set-autoload-key
+ '(
+   ("<f7>" . one-key-menu-ui)                    ;用户界面菜单
+   )
+ "init-one-key")
 (lazy-set-autoload-key
  '(
    ("C-8" . find-function-or-variable-at-point) ;查找符号的定义
@@ -453,5 +465,33 @@
    ("M-s-y" . kill-ring-search)         ;kill ring 搜索
    )
  "init-kill-ring-search")
+;;; ### Help ###
+;;; --- 帮助模式
+(lazy-set-autoload-key
+ '(
+   ("C-h". one-key-menu-help)           ;帮助菜单
+   )
+ "init-help-mode")
+;;; ### IRC ###
+;;; --- 聊天
+(lazy-set-autoload-key
+ '(
+   ("M-U" . one-key-menu-irc-channel)   ;跳转到IRC频道
+   )
+ "init-irc")
+;;; ### Yoaddmuse ###
+;;; --- Yet another oddmuse mode
+(lazy-set-autoload-key
+ '(
+   ("M-s-;" . one-key-menu-yaoddmuse)   ;yaoddmuse 菜单
+   )
+ "init-yaoddmuse")
+;;; ### Festival ###
+;;; --- 语音阅读
+(lazy-set-autoload-key
+ '(
+   ("s-x r" . one-key-menu-festival)    ;语音阅读菜单
+   )
+ "init-festival")
 
 (provide 'init-key)

@@ -487,12 +487,6 @@
      )
     map)
   "Mode map for newsticker treeview.")
-;;; ### Festival ###
-;;; --- ÓïÒôÔÄ¶Á
-(lazy-set-key
- '(
-   ("s-x r" . one-key-menu-festival)    ;ÓïÒôÔÄ¶Á²Ëµ¥
-   ))
 ;;; ### Revie ###
 ;;; --- ´°¿ÚÅäÖÃ¹ÜÀí
 (lazy-set-key
