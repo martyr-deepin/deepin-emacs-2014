@@ -1182,8 +1182,11 @@
  '(ac-yasnippet-menu-face ((t (:background "Grey10" :foreground "Grey40"))))
  '(ac-yasnippet-selection-face ((t (:background "darkgreen" :foreground "Grey"))))
  '(popup-isearch-match ((t (:background "#191919" :foreground "#ffffff"))))
+ '(popup-menu-mouse-face ((t (:background "gold" :foreground "white"))))
+ '(popup-menu-summary-face ((t (:background "#191919" :foreground "grey"))))
  '(popup-scroll-bar-background-face ((t (:background "#191919"))))
  '(popup-scroll-bar-foreground-face ((t (:background "#393939"))))
+ '(popup-summary-face ((t (:background "#191919" :foreground "grey"))))
  ;; ERC
  '(erc-direct-msg-face                  ;直接消息
    ((t (:foreground "DodgerBlue"))))

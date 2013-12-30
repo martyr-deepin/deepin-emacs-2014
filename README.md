@@ -17,3 +17,7 @@ sudo ln -s /usr/share/deepin-emacs/common/bin/emacs /usr/bin/deepin-emacs
 sudo cp ./deepin-emacs.desktop /usr/share/applications/
 
 http://dynamic-thinking.blogspot.com/2012/07/emacs-speeding-up-loading-your-emacs.html
+
+* Install depend for python auto-complete:
+sudo apt-get install python-pip
+sudo pip install jdei epc mocker
