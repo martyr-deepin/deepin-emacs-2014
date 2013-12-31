@@ -36,7 +36,6 @@
    ("s-&" . killall)                        ;杀掉进程
    ("C-x w" . count-words)                  ;计算单词的数量
    ("C-z l" . linum-mode)                   ;行号模式切换
-   ("s-Z" . dot-emacs)                      ;打开dot-emacs文件
    ("C-x f" . find-file-at-point)           ;文件跳转
    ("s-f" . find-file-root)                 ;用root打开文件
    ("s-r" . find-file-smb)                  ;访问samba
@@ -506,5 +505,19 @@
    ("s-z s-x" . sr-speedbar-select-window) ;选中speedbar窗口
    )
  "init-speedbar")
+;;; ### Multiple-cursors ###
+;;; --- Multiple cursors, awesome
+(lazy-set-autoload-key
+ '(
+   ("s-o" . mc/mark-all-dwim)
+   ("s-j" . mc/mark-next-like-this)
+   ("s-k" . mc/mark-previous-like-this)
+   ("s-u" . mc/unmark-next-like-this)
+   ("s-i" . mc/unmark-previous-like-this)
+   ("s-?" . mc/keyboard-quit)
+   ("s-Z" . one-key-menu-multiple-cursors)
+   )
+ "init-multiple-cursors"
+ )
 
 (provide 'init-key)
