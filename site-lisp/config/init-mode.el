@@ -139,7 +139,7 @@
       (add-hook 'sgml-mode-hook 'zencoding-mode)
       (add-hook 'html-helper-mode-hook 'zencoding-mode)
       (setq zencoding-preview-default nil)
-      n)))
+      )))
 
 (provide 'init-mode)
 
