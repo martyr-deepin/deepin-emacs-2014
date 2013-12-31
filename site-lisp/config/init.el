@@ -12,6 +12,7 @@
 (require 'flymake-config)
 (require 'pretty-lambdada)
 
+(require 'init-eldoc)
 (require 'init-jedi)
 (require 'init-tempbuf)
 (require 'init-tabbar)

@@ -82,7 +82,7 @@
               'face 'font-lock-variable-name-face))
 
 (defadvice eldoc-highlight-function-argument
-  (around my-formatting (sym args index) compile activate preactivate)
+    (around my-formatting (sym args index) compile activate preactivate)
   "Replace original to apply my style of formatting."
   ;; HACK: intercept the call to eldoc-docstring-format-sym-doc at the
   ;; end of the advices function. This is obviously brittle, but the
