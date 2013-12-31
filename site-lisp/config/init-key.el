@@ -273,7 +273,7 @@
 ;;; ### Paredit ###
 ;;; --- 结构化编程
 (lazy-unset-key
- '("M-J" "M-r" "M-s" "M-;" "C-M-f" "C-M-b")
+ '("M-J" "M-r" "M-s" "M-;" "C-M-f" "C-M-b" "M-)")
  paredit-mode-map)                      ;卸载按键
 (lazy-set-key
  '(
@@ -312,7 +312,7 @@
    ("M-q" . paredit-reindent-defun)     ;重新格式化函数
    ("M-s-r" . paredit-raise-sexp)       ;提取表达式, 并删除同一等级的其他表达式
    ("M-s-b" . paredit-convolute-sexp)   ;嵌套表达式
-   ;; ("M-s-'" . one-key-menu-paredit)     ;Paredit 菜单
+   ("M-s-'" . one-key-menu-paredit)     ;Paredit 菜单
    )
  paredit-mode-map)
 (lazy-set-autoload-key
