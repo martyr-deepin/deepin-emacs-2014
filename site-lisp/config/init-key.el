@@ -239,7 +239,6 @@
    ("<f8>" . dired-jump)                         ;文件管理起
    ("<f9>" . list-load-path-shadows)             ;显示重复加载的库
    ("<f10>" . open-current-log-keyboard-command) ;打开命令日志
-   ("<f11>" . fullscreen-toggle)                 ;全屏切换
    ("<f12>" . hibernate-disk)                    ;休眠
    ("M-1" . strip-blank-lines)                   ;删除选中区域的所有空行
    ("M-2" . indent-buffer)                       ;自动格式化当前Buffer
@@ -253,6 +252,11 @@
    ("C-7" . jump-back)                           ;返回查找符号定义前的位置
    ("M-I" . backward-indent)                     ;向后移动4个字符
    ))
+(lazy-set-autoload-key
+ '(
+   ("<f11>" . fullscreen-toggle)        ;全屏切换
+   )
+ "fullscreen")
 (lazy-set-autoload-key
  '(
    ("<f7>" . one-key-menu-ui)           ;用户界面菜单
