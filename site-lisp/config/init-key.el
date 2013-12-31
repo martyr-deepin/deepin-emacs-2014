@@ -514,7 +514,6 @@
    ("s-k" . mc/mark-previous-like-this)
    ("s-u" . mc/unmark-next-like-this)
    ("s-i" . mc/unmark-previous-like-this)
-   ("s-?" . mc/keyboard-quit)
    ("s-Z" . one-key-menu-multiple-cursors)
    )
  "init-multiple-cursors"
@@ -523,7 +522,9 @@
 (lazy-set-autoload-key
  '(
    ("s-<" . ace-jump-word-mode)
-   ("s->" . ace-jump-line-mode))
+   ("s->" . ace-jump-char-mode)
+   ("s-?" . ace-jump-line-mode)
+   )
  "ace-jump-mode")
 
 (provide 'init-key)

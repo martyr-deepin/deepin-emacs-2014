@@ -763,7 +763,7 @@
                     :foreground "grey"
                     :box (:line-width 2 :color "grey75" :style released-button)))))
  ;; Ace jump
- '(ace-jump-face-foreground ((t (:background "darkorange" :foreground "black" :weight ultra-bold))))
+ '(ace-jump-face-foreground ((t (:background "darkorange" :foreground "black" :box (:line-width 1 :color "#333333") :weight ultra-bold))))
  ;; Helm
  '(helm-ff-directory ((t (:background "black" :foreground "dodgerblue"))))
  '(helm-ff-file ((t (:background "black" :foreground "darkgreen"))))
