@@ -1730,6 +1730,7 @@ Uses `current-time' to make buffer name unique."
 
 (defun yaoddmuse-get-library ()
   "Get library name."
+  (require 'find-func)
   (let* ((dirs load-path)
          (suffixes (find-library-suffixes)))
     (completing-read (format "Library name (%s): " (or (yaoddmuse-region-or-thing) ""))
