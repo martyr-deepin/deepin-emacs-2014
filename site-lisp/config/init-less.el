@@ -89,8 +89,6 @@
  '(
    ("J" . less-scroll-up-one-line)      ;向下浏览
    ("K" . less-scroll-down-one-line)    ;向上浏览
-   ("." . go-to-char-forward)           ;向后查找某一个字符
-   ("," . go-to-char-backward)          ;向前查找某一个字符
    (">" . beginning-of-buffer)          ;BUFFER结尾
    ("<" . end-of-buffer)                ;BUFFER开始
    ("q" . less-quit)                    ;退出less模式

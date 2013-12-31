@@ -110,12 +110,6 @@
  "lazy-search-extension")
 (lazy-set-autoload-key
  '(
-   ("C-c j" . go-to-char-forward)       ;快速字母导航, 向前
-   ("C-c k" . go-to-char-backward)      ;快速字母导航, 向后
-   )
- "go-to-char")
-(lazy-set-autoload-key
- '(
    ("s-N" . move-text-down)             ;把光标所在的整行文字(或标记)下移一行
    ("s-P" . move-text-up)               ;把光标所在的整行文字(或标记)上移一行
    )

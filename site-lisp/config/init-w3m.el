@@ -171,8 +171,6 @@
    ("M-A" . emms-pause)                    ;暂停
    ("<" . w3m-shift-left)                  ;向左滚动屏幕一像素
    (">" . w3m-shift-right)                 ;向右滚动屏幕一像素
-   ("." . go-to-char-forward-word)         ;向后查找某一个字符, 以单词为单位前进
-   ("," . go-to-char-backward-word)        ;向前查找某一个字符, 以单词为单位后退
    ("M-s" . lazy-search-menu)              ;懒惰搜索
    ("C-M-7" . w3m-tab-move-left)           ;移动当前标签到左边
    ("C-M-8" . w3m-tab-move-right)          ;移动当前标签到右边

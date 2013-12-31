@@ -254,8 +254,6 @@
    ("C" . kill-current-mode-buffers-except-current) ;关闭所有后台标签
    ("m" . tabbar-forward-tab)                       ;向右一个标签
    ("n" . tabbar-backward-tab)                      ;向左一个标签
-   ("." . go-to-char-forward-word)                  ;向左快速移动
-   ("," . go-to-char-backward-word)                 ;向右快速移动
    ("<" . end-of-buffer)                            ;最下面
    (">" . beginning-of-buffer)                      ;最上面
    )
