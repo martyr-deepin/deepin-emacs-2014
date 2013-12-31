@@ -10,12 +10,12 @@
 ;; Last-Updated: 2013-12-28 01:18:27
 ;;           By: Andy Stewart
 ;; URL: http://www.emacswiki.org/emacs/download/init-indent.el
-;; Keywords: 
+;; Keywords:
 ;; Compatibility: GNU Emacs 24.3.50.1
 ;;
 ;; Features that might be required by this library:
 ;;
-;; 
+;;
 ;;
 
 ;;; This file is NOT part of GNU Emacs
@@ -37,10 +37,10 @@
 ;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth
 ;; Floor, Boston, MA 02110-1301, USA.
 
-;;; Commentary: 
-;; 
+;;; Commentary:
+;;
 ;; Init indent config
-;; 
+;;
 
 ;;; Installation:
 ;;
@@ -57,26 +57,26 @@
 
 ;;; Customize:
 ;;
-;; 
+;;
 ;;
 ;; All of the above can customize by:
 ;;      M-x customize-group RET init-indent RET
 ;;
 
 ;;; Change log:
-;;	
+;;
 ;; 2013/12/28
 ;;      * First released.
-;; 
+;;
 
 ;;; Acknowledgements:
 ;;
-;; 
+;;
 ;;
 
 ;;; TODO
 ;;
-;; 
+;;
 ;;
 
 ;;; Require
@@ -86,7 +86,7 @@
 
 ;;; ### Indent ###
 ;;; --- 缩进设置
-(setq-default indent-tabs-mode t)       ;默认不用空格替代TAB
+(setq-default indent-tabs-mode t)       ;默认用Tab模式
 (setq default-tab-width 4)              ;设置TAB默认的宽度
 (dolist (hook (list                     ;设置用空格替代TAB的模式
                'emacs-lisp-mode-hook

@@ -140,45 +140,45 @@
  '("s")
  w3m-mode-map)                          ;卸载按键
 (lazy-set-key
- '(("1" . emms-play-online)                ;在线听音乐
-   ("2" . kill-google-define-windows)      ;关闭Google定义窗口
-   ("3" . google-define)                   ;查找输入单词的Google定义
-   ("4" . google-define-pointer)           ;查找当前光标处的Google定义
-   ("6" . w3m-session-save)                ;保存浏览纪录
-   ("7" . w3m-session-select)              ;加载退出前的浏览器纪录
-   ("/" . w3m-next-form)                   ;下一个表格处
-   ("e" . w3m-scroll-down-or-previous-url) ;向上翻页
-   ("b" . w3m-edit-current-url)            ;编辑当前页面
-   ("z" . w3m-zoom-in-image)               ;放大图片
-   ("x" . w3m-zoom-out-image)              ;缩小图片
-   ("f" . w3m-view-this-url)               ;在当前标签打开
-   ("o" . w3m-view-this-url-new-session)   ;在后台标签打开
-   ("m" . tabbar-forward-tab)              ;切换到右边的标签
-   ("n" . tabbar-backward-tab)             ;切换到左边的标签
-   ("b" . w3m-history)                     ;历史
-   ("D" . w3m-dtree)                       ;显示本地目录树
-   ("B" . w3m-view-previous-page)          ;后退
-   ("F" . w3m-view-next-page)              ;前进
-   ("L" . w3m-submit-form)                 ;提交form中的内容
-   ("C" . w3m-delete-other-buffers)        ;关闭后台标签
-   ("Y" . wget-web-page)                   ;网页下载
-   ("-" . org-w3m-copy-for-org-mode)       ;转换网页成 `org-mode' 的链接格式
-   ("C-u s" . w3m-db-history)              ;历史数据库
-   ("<up>" . emms-volume-mode-plus)        ;增加音量
-   ("<down>" . emms-volume-mode-minus)     ;减少音量
-   ("<left>" . emms-seek-backward)         ;后退
-   ("<right>" . emms-seek-forward)         ;前进
-   ("M-A" . emms-pause)                    ;暂停
-   ("<" . w3m-shift-left)                  ;向左滚动屏幕一像素
-   (">" . w3m-shift-right)                 ;向右滚动屏幕一像素
-   ("." . go-to-char-forward-word)         ;向后查找某一个字符, 以单词为单位前进
-   ("," . go-to-char-backward-word)        ;向前查找某一个字符, 以单词为单位后退
-   ("M-s" . lazy-search-menu)              ;懒惰搜索
-   ("C-M-7" . w3m-tab-move-left)           ;移动当前标签到左边
-   ("C-M-8" . w3m-tab-move-right)          ;移动当前标签到右边
-   ("C-S-7" . w3m-delete-left-tabs)        ;删除左边的标签
-   ("C-S-8" . w3m-delete-right-tabs)       ;删除右边的标签
-   ("s" . one-key-menu-w3m-search)         ;w3m 搜索菜单
+ '(("1" . emms-play-online)                             ;在线听音乐
+   ("2" . kill-google-define-windows)                   ;关闭Google定义窗口
+   ("3" . google-define)                                ;查找输入单词的Google定义
+   ("4" . google-define-pointer)                        ;查找当前光标处的Google定义
+   ("6" . w3m-session-save)                             ;保存浏览纪录
+   ("7" . w3m-session-select)                           ;加载退出前的浏览器纪录
+   ("/" . w3m-next-form)                                ;下一个表格处
+   ("e" . w3m-scroll-down-or-previous-url)              ;向上翻页
+   ("b" . w3m-edit-current-url)                         ;编辑当前页面
+   ("z" . w3m-zoom-in-image)                            ;放大图片
+   ("x" . w3m-zoom-out-image)                           ;缩小图片
+   ("f" . w3m-view-this-url)                            ;在当前标签打开
+   ("o" . w3m-view-this-url-new-session)                ;在后台标签打开
+   ("m" . tabbar-forward-tab)                           ;切换到右边的标签
+   ("n" . tabbar-backward-tab)                          ;切换到左边的标签
+   ("b" . w3m-history)                                  ;历史
+   ("D" . w3m-dtree)                                    ;显示本地目录树
+   ("B" . w3m-view-previous-page)                       ;后退
+   ("F" . w3m-view-next-page)                           ;前进
+   ("L" . w3m-submit-form)                              ;提交form中的内容
+   ("C" . w3m-delete-other-buffers)                     ;关闭后台标签
+   ("Y" . wget-web-page)                                ;网页下载
+   ("-" . org-w3m-copy-for-org-mode)                    ;转换网页成 `org-mode' 的链接格式
+   ("C-u s" . w3m-db-history)                           ;历史数据库
+   ("<up>" . emms-volume-mode-plus)                     ;增加音量
+   ("<down>" . emms-volume-mode-minus)                  ;减少音量
+   ("<left>" . emms-seek-backward)                      ;后退
+   ("<right>" . emms-seek-forward)                      ;前进
+   ("M-A" . emms-pause)                                 ;暂停
+   ("<" . w3m-shift-left)                               ;向左滚动屏幕一像素
+   (">" . w3m-shift-right)                              ;向右滚动屏幕一像素
+   ("." . go-to-char-forward-word)                      ;向后查找某一个字符, 以单词为单位前进
+   ("," . go-to-char-backward-word)                     ;向前查找某一个字符, 以单词为单位后退
+   ("M-s" . lazy-search-menu)                           ;懒惰搜索
+   ("C-M-7" . w3m-tab-move-left)                        ;移动当前标签到左边
+   ("C-M-8" . w3m-tab-move-right)                       ;移动当前标签到右边
+   ("C-S-7" . w3m-delete-left-tabs)                     ;删除左边的标签
+   ("C-S-8" . w3m-delete-right-tabs)                    ;删除右边的标签
+   ("s" . one-key-menu-w3m-search)      ;w3m 搜索菜单
    )
  w3m-mode-map
  )
@@ -198,17 +198,13 @@
    ("'" . w3m-open-dead-link-with-external-browser)     ;打开死的连接
    ("*" . w3m-emacswiki-view-diff)                      ;查看当前wiki页面的不同
    ("8" . w3m-emacswiki-view-other-version)             ;查看当前wiki页面的其他版本
+   ("&" . yaoddmuse-w3m-edit-emacswiki-page)            ;编辑 emacswiki 页面
    ("\"" . w3m-emacswiki-recent-changes)                ;最近的修改
    ("_" . w3m-copy-link-in-region)                      ;拷贝w3m buffer 的所有链接
    ("M" . w3m-open-link-in-chromium)                    ;Open link in chromium browser
    ("M-o" . w3m-open-link-file-under-current-directory) ;open link file under current directory
    )
  w3m-mode-map nil "w3m-extension")
-(lazy-set-mode-autoload-key
- '(
-   ("&" . yaoddmuse-w3m-edit-emacswiki-page) ;编辑 emacswiki 页面
-   )
- w3m-mode-map nil "yaoddmuse-extension")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; W3m Search ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defvar one-key-menu-w3m-search-alist nil
@@ -250,7 +246,7 @@
   "The `one-key' menu for W3M-SEARCH."
   (interactive)
   (require 'one-key)
-  (require 'w3m-search)                 ;w3m搜索
+  (require 'w3m-search)                   ;w3m搜索
   (require 'w3m-extension)
   (one-key-menu "W3M-SEARCH" one-key-menu-w3m-search-alist t nil nil
                 '(lambda ()

@@ -108,7 +108,7 @@
  '(
    ("M-s" . lazy-search-menu)           ;懒惰搜索
    )
- "lazy-search")
+ "lazy-search-extension")
 (lazy-set-autoload-key
  '(
    ("C-c j" . go-to-char-forward)       ;快速字母导航, 向前
@@ -314,8 +314,7 @@
    ("M-s-b" . paredit-convolute-sexp)   ;嵌套表达式
    ;; ("M-s-'" . one-key-menu-paredit)     ;Paredit 菜单
    )
- paredit-mode-map
- )
+ paredit-mode-map)
 (lazy-set-autoload-key
  '(
    ("C-M-:" . paredit-comment-list-and-newline) ;注释当前LIST并换行
@@ -412,7 +411,7 @@
  '(
    ("M-L" . isearch-to-lazy-search)     ;切换到lazy-search
    )
- "lazy-search")
+ "lazy-search-extension")
 ;;; ### Help ###
 ;;; --- 帮助模式
 (eval-after-load 'help-mode
