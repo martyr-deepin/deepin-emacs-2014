@@ -90,7 +90,8 @@
 Open file use another tool"
   (interactive)
   (dolist (file (dired-get-marked-files))
-    (dired-open-file-internal file)))
+    (dired-open-file-internal file)
+    ))
 
 (defun dired-open-buffer ()
   (interactive)
@@ -100,24 +101,24 @@ Open file use another tool"
   "Open diversified format FILE."
   (interactive "fFile: ")
   (let ((file-extension (file-name-extension file)))
-    (if file-extension
-        (cond ((string-match "\\(s?html?\\)$" file-extension)
-               (w3m-copy-buffer)
-               (message "%s" file)
-               (w3m-find-file file))
-              ((string-match "\\(chm\\)$" file-extension)
-               (chm-view-file file))
-              ((string-match "\\(pdf\\|ps\\|dvi\\)$" file-extension)
-               (dired-view-file)
-               (doc-view-mode))
-              ((string-match (emms-player-get (emms-player-for (emms-playlist-current-selected-track)) 'regex) file)
-               (emms-add-file file)
-               (with-current-emms-playlist
-                 (goto-char (point-max))
-                 (forward-line -1)
-                 (emms-playlist-mode-play-smart)))
-              (t (find-file file)))
-      (find-file file))))
+    (cond ((or file-extension))
+          ((string-match "\\(s?html?\\)$" file-extension)
+           (w3m-copy-buffer)
+           (message "%s" file)
+           (w3m-find-file file))
+          ((string-match "\\(chm\\)$" file-extension)
+           (chm-view-file file))
+          ((string-match "\\(pdf\\|ps\\|dvi\\)$" file-extension)
+           (dired-view-file)
+           (doc-view-mode))
+          ((string-match (emms-player-get (emms-player-for (emms-playlist-current-selected-track)) 'regex) file)
+           (emms-add-file file)
+           (with-current-emms-playlist
+             (goto-char (point-max))
+             (forward-line -1)
+             (emms-playlist-mode-play-smart)))
+          (t (find-file file)))
+    (find-file file)))
 
 (provide 'dired-open)
 
