@@ -82,19 +82,19 @@
 
 ;;; Code:
 
-(setq dired-recursive-copies t)                        ;可以递归的进行拷贝
-(setq dired-recursive-deletes t)                       ;可以递归的删除目录
-(setq dired-recursive-deletes 'always)                 ;删除东西时不提示
-(setq dired-recursive-copies 'always)                  ;拷贝东西时不提示
-(toggle-dired-find-file-reuse-dir 1)                   ;使用单一模式浏览Dired
-(setq dired-details-hidden-string "[ ... ] ")          ;设置隐藏dired里面详细信息的字符串
-(setq dired-listing-switches "-aluh")                  ;传给 ls 的参数
-(setq directory-free-space-args "-Pkh")                ;目录空间选项
-(setq dired-omit-size-limit nil)                       ;dired忽略的上限
-(setq dired-dwim-target t)                             ;Dired试着猜处默认的目标目录
-(setq my-dired-omit-status t)                          ;设置默认忽略文件
-(setq my-dired-omit-regexp "^\\.?#\\|^\\..*")          ;设置忽略文件的匹配正则表达式
-(setq my-dired-omit-extensions '(".cache"))            ;设置忽略文件的扩展名列表
+(setq dired-recursive-copies t)               ;可以递归的进行拷贝
+(setq dired-recursive-deletes t)              ;可以递归的删除目录
+(setq dired-recursive-deletes 'always)        ;删除东西时不提示
+(setq dired-recursive-copies 'always)         ;拷贝东西时不提示
+(toggle-dired-find-file-reuse-dir 1)          ;使用单一模式浏览Dired
+(setq dired-details-hidden-string "[ ... ] ") ;设置隐藏dired里面详细信息的字符串
+(setq dired-listing-switches "-aluh")         ;传给 ls 的参数
+(setq directory-free-space-args "-Pkh")       ;目录空间选项
+(setq dired-omit-size-limit nil)              ;dired忽略的上限
+(setq dired-dwim-target t)                    ;Dired试着猜处默认的目标目录
+(setq my-dired-omit-status t)                 ;设置默认忽略文件
+(setq my-dired-omit-regexp "^\\.?#\\|^\\..*") ;设置忽略文件的匹配正则表达式
+(setq my-dired-omit-extensions '(".cache"))   ;设置忽略文件的扩展名列表
 (add-hook 'dired-after-readin-hook '(lambda ()
                                       (progn
                                         (require 'dired-extension)
@@ -140,7 +140,6 @@
    ("I" . image-dired)                         ;打开浏览模式
    ("W" . dired-x-find-file)                   ;查找文件
    ("J" . dired-goto-file)                     ;跳到某个文件
-   ("K" . dired-open-file)                     ;用W3M打开各种文件
    ("X" . traverse-cp-or-mv-extfiles-in-dir)   ;拷贝或移动目录下指定扩展名的文件
    ("V" . traverse-dired-browse-archive)       ;浏览压缩文件
    ("," . dired-diff)                          ;比较文件
@@ -159,7 +158,12 @@
  )
 (lazy-set-mode-autoload-key
  '(
-   (";" . dired-view-minor-mode-toggle)        ;字母输入导航模式
+   ("K" . dired-open-file)              ;用W3M打开各种文件
+   )
+ dired-mode-map nil "dired-open")
+(lazy-set-mode-autoload-key
+ '(
+   (";" . dired-view-minor-mode-toggle) ;字母输入导航模式
    )
  dired-mode-map nil "dired-view")
 (lazy-set-mode-autoload-key
@@ -169,21 +173,21 @@
  dired-mode-map nil "dired-tar")
 (lazy-set-mode-autoload-key
  '(
-   ("M-o" . dired-toggle-omit)                 ;切换忽略状态
-   ("?" . dired-get-size)                      ;得到文件的大小
-   ("[" . dired-rename-with-copy)              ;重命名函数
-   ("'" . dired-up-directory-single)           ;返回上一级目录
-   ("4" . dired-serial-rename)                 ;批量重命名
-   ("7" . dired-move-to-last-file)             ;移动到最后一个文件
-   ("8" . dired-move-to-first-file)            ;移动到第一个文件
-   ("k" . dired-previous-file-line)            ;上一行
-   ("j" . dired-next-file-line)                ;下一行
-   ("{" . dired-gnome-open-file)               ;用GNOME方式打开文件
-   ("E" . dired-touch-now)                     ;Touch命令
-   ("]" . dired-nautilus)                      ;用 Nautils 加载当前目录
-   ("f" . dired-find-file+)                    ;打开当前文件或目录
-   ("\"" . find-lisp-find-dired-pwd)           ;查找特定的lisp文件
-   ("C-m" . dired-find-file+)                  ;打开当前文件或目录
+   ("M-o" . dired-toggle-omit)          ;切换忽略状态
+   ("?" . dired-get-size)               ;得到文件的大小
+   ("[" . dired-rename-with-copy)       ;重命名函数
+   ("'" . dired-up-directory-single)    ;返回上一级目录
+   ("4" . dired-serial-rename)          ;批量重命名
+   ("7" . dired-move-to-last-file)      ;移动到最后一个文件
+   ("8" . dired-move-to-first-file)     ;移动到第一个文件
+   ("k" . dired-previous-file-line)     ;上一行
+   ("j" . dired-next-file-line)         ;下一行
+   ("{" . dired-gnome-open-file)        ;用GNOME方式打开文件
+   ("E" . dired-touch-now)              ;Touch命令
+   ("]" . dired-nautilus)               ;用 Nautils 加载当前目录
+   ("f" . dired-find-file+)             ;打开当前文件或目录
+   ("\"" . find-lisp-find-dired-pwd)    ;查找特定的lisp文件
+   ("C-m" . dired-find-file+)           ;打开当前文件或目录
    )
  dired-mode-map nil "dired-extension")
 ;;; ### Wdired ###
@@ -215,7 +219,7 @@
   "The `one-key' menu for DIRED-SORT."
   (interactive)
   (require 'one-key)
-  (require 'dired-sort)                   ;排序 dired 文件
+  (require 'dired-sort)                 ;排序 dired 文件
   (one-key-menu "DIRED-SORT" one-key-menu-dired-sort-alist t))
 
 (provide 'init-dired)

@@ -107,6 +107,7 @@ Open file use another tool"
            (message "%s" file)
            (w3m-find-file file))
           ((string-match "\\(chm\\)$" file-extension)
+           (require 'chm-view)
            (chm-view-file file))
           ((string-match "\\(pdf\\|ps\\|dvi\\)$" file-extension)
            (dired-view-file)

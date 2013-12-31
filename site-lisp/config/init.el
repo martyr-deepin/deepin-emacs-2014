@@ -14,6 +14,7 @@
 (require 'rect)
 (require 'rect-mark)
 
+(require 'init-doc-view)
 (require 'init-eldoc)
 (require 'init-jedi)
 (require 'init-tempbuf)
