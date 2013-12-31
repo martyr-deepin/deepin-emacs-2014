@@ -99,6 +99,7 @@
        helm-source-moccur
        helm-source-occur
        helm-source-helm-commands
+       helm-source-find-files
        )
      "*helm search*")))
 

@@ -519,5 +519,11 @@
    )
  "init-multiple-cursors"
  )
+;;; ### Ace jump ###
+(lazy-set-autoload-key
+ '(
+   ("s-<" . ace-jump-word-mode)
+   ("s->" . ace-jump-line-mode))
+ "ace-jump-mode")
 
 (provide 'init-key)
