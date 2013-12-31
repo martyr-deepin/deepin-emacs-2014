@@ -1,39 +1,82 @@
-;;; qml-mode.el --- Major mode for editing Qt QML files
+(defcustom qml-mode-hook '()
+  "Called upon entry into term mode.
+This is run before the process is cranked up."
+  :type 'hook
+  :group 'qml-mode)
 
-;; Copyright (C) 2010 William Xu
+(defvar qml-indent-width 4)
 
-;; Author: William Xu <william.xwl@gmail.com>
-;; Version: 0.1
+(defconst qml-block-re "\\(^[ \t]*\\)\\([a-zA-Z0-9]*\\)[ \t]*[a-zA-Z0-9_]*[ \t]*[a-zA-Z0-9_(),: \t]*{")
 
-;; This program is free software; you can redistribute it and/or modify
-;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 3, or (at your option)
-;; any later version.
+(defun qml-get-beg-of-block ()
+  (save-excursion
+    (when (re-search-backward qml-block-re nil t)
+      (match-beginning 2)))
+  )
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+(defun qml-get-end-of-block ()
+  (save-excursion
+    (when (re-search-backward qml-block-re nil t)
+      (goto-char (match-end 0))
+      (backward-char)
+      (condition-case nil
+          (save-restriction
+            (forward-list)
+            (point))
+        (error nil))
+      ))
+  )
 
-;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
-;; MA 02110-1301, USA.
+(defun qml-indent-line ()
+  (let ((cur (point))
+        (start (qml-get-beg-of-block))
+        (end (qml-get-end-of-block))
+        (cur-indent nil))
+    (save-excursion
+      (if (not (and start end (> cur start) (< cur end)))
+          (progn
+            (if start
+                (goto-char start))
+            (setq start (qml-get-beg-of-block))
+            (setq end (qml-get-end-of-block))
+            (while (and (not (eq start nil)) (not (eq end nil)) (not (and (> cur start) (< cur end))))
+              (goto-char start)
+              (setq start (qml-get-beg-of-block))
+              (setq end (qml-get-end-of-block))
+              )
+            (if (or (eq start nil) (= (point) (point-min)))
+                (progn
+                  (goto-char (point-min))
+                  (when (re-search-forward qml-block-re nil t)
+                    (goto-char (match-beginning 2))
+                    (setq start (point))
+                    (goto-char (match-end 0))
+                    (backward-char)
+                    (condition-case nil
+                        (save-restriction
+                          (forward-list)
+                          (setq end (point))
+                          (setq cur-indent 0))
+                      (error nil)))))))
+      (if (not cur-indent)
+          (progn
+            (goto-char start)
+            (setq cur-indent (current-indentation))
+            (goto-char cur)
+            (setq cur-indent (+ cur-indent default-tab-width))
+            )))
+    (indent-line-to cur-indent)
+    (if (string= (string (char-after (point))) "}")
+        (indent-line-to (- cur-indent default-tab-width))
+      )
+    ))
 
-;;; Commentary:
-
-;; This is a simple major mode for editing editing Qt QML files.
-
-;; Put this file into your load-path and the following into your
-;; ~/.emacs:
-;;           (autoload 'qml-mode "qml-mode")
-;;           (add-to-list 'auto-mode-alist '("\\.qml$" . qml-mode))
-
-;;; Code:
+(defun qml-indent-region (start end)
+  (let ((indent-region-function nil))
+    (indent-region start end nil)))
 
 (require 'css-mode)
 (require 'js)
-(require 'cc-mode)
 
 (defvar qml-keywords
   (concat "\\<" (regexp-opt '("import")) "\\>\\|" js--keyword-re))
@@ -61,21 +104,41 @@
     table))
 
 ;;;###autoload
-(define-derived-mode qml-mode css-mode "QML"
-  "Major mode for editing Qt QML files.
-\\{qml-mode-map}"
-  :syntax-table qml-mode-syntax-table
-  (setq font-lock-defaults '(qml-font-lock-keywords))
-  (set (make-local-variable 'comment-start) "/* ")
-  (set (make-local-variable 'comment-end) " */")
-  (set (make-local-variable 'indent-line-function) 'indent-relative)
-  (run-hooks 'qml-mode-hook))
 
-(define-key qml-mode-map (kbd "C-M-q") 'qml-indent-exp)
+(defun qml-mode()
+  "Major mode for Qt declarative UI"
+  (interactive)
+  (kill-all-local-variables)
+  (set-syntax-table qml-mode-syntax-table)
+  (set (make-local-variable 'font-lock-defaults) '(qml-font-lock-keywords))
+  (set (make-local-variable 'tab-width) qml-indent-width)
+  (set (make-local-variable 'indent-tabs-mode) nil)
+  (set (make-local-variable 'indent-line-function) 'qml-indent-line)
+  (set (make-local-variable 'indent-region-function) 'qml-indent-region)
+  (local-set-key (kbd "M-;") #'(lambda (arg) (interactive "*P")
+                                 (require 'newcomment)
+                                 (let ((deactivate-mark t)
+                                       (comment-start "//") (comment-end ""))
+                                   (comment-dwim arg)
+                                   (if mark-active
+                                       (deactivate-mark)))))
+  (setq major-mode 'qml-mode)
+  (setq mode-name "qml")
+  (use-local-map qml-mode-map)
+  (run-hooks 'qml-mode-hook)
+  )
+
+(defvar qml-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "C-M-q") 'qml-indent-exp)
+    map)
+  "Keymap used by `yaoddmuse-mode'.")
 
 (defun qml-indent-exp ()
   (interactive)
-  (indent-region (point) (save-excursion (forward-list) (point))))
+  (save-excursion
+    (indent-buffer))
+  )
 
 (provide 'qml-mode)
 
