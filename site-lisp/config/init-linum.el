@@ -102,6 +102,7 @@
                'qml-mode-hook
                'markdown-mode-hook
                'slime-repl-mode-hook
+               'package-menu-mode-hook
                ))
   (add-hook hook (lambda () (linum-mode 1))))
 

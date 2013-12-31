@@ -422,6 +422,8 @@
       help-mode-map)
      (lazy-set-key vi-move-key-alist help-mode-map)
      ))
+(add-hook 'package-menu-mode-hook
+          '(lambda () (lazy-set-key vi-move-key-alist package-menu-mode-map)))
 ;;; ### Apt-utils ###
 ;;; --- Apt 管理工具
 (lazy-set-autoload-key
