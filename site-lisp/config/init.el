@@ -11,6 +11,8 @@
 (require 'auto-save)
 (require 'flymake-config)
 (require 'pretty-lambdada)
+(require 'rect)
+(require 'rect-mark)
 
 (require 'init-eldoc)
 (require 'init-jedi)
