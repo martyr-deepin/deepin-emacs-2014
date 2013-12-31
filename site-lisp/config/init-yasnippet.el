@@ -86,6 +86,14 @@
                ))
   (add-hook hook '(lambda () (yas-minor-mode -1))))
 
+(defun get-git-user-name ()
+  (interactive)
+  (replace-regexp-in-string "\n$" "" (shell-command-to-string "git config --get user.name")))
+
+(defun get-git-user-email ()
+  (interactive)
+  (replace-regexp-in-string "\n$" "" (shell-command-to-string "git config --get user.email")))
+
 (provide 'init-yasnippet)
 
 ;;; init-yasnippet.el ends here

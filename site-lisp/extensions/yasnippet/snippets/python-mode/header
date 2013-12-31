@@ -1,11 +1,11 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2011 ~ 2012 ${1:Deepin, Inc}.
-#               2011 ~ 2012 ${2:Wang Yong}
+# Copyright (C) 2011 ~ `(format-time-string "%Y")` ${1:Deepin, Inc}.
+#               2011 ~ `(format-time-string "%Y")` ${2:`(get-git-user-name)`}
 # 
-# Author:     $2 <${3:lazycat.manatee@gmail.com}>
-# Maintainer: $2 <$3>
+# Author:     $2 ${3:<`(get-git-user-email)`>}
+# Maintainer: $2 $3
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,3 +19,5 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+$0

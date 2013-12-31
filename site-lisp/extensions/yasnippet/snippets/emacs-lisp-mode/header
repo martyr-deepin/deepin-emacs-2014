@@ -4,20 +4,20 @@
 
 ;; Filename: $1.el
 ;; Description: $2
-;; Author: `user-full-name` <`user-mail-address`>
-;; Maintainer: `user-full-name` <`user-mail-address`>
-;; Copyright (C) `(format-time-string "%Y")`, `user-full-name`, all rights reserved.
+;; Author: ${3:`(get-git-user-name)`} ${4:<`(get-git-user-email)`>}
+;; Maintainer: $3 $4
+;; Copyright (C) `(format-time-string "%Y")`, $3, all rights reserved.
 ;; Created: `(format-time-string "%Y-%m-%d %T")`
 ;; Version: 0.1
 ;; Last-Updated: `(format-time-string "%Y-%m-%d %T")`
-;;           By: `user-full-name`
+;;           By: $3
 ;; URL: http://www.emacswiki.org/emacs/download/$1.el
-;; Keywords: $3
+;; Keywords: $5
 ;; Compatibility: `(substring (emacs-version) 0 (string-match " (" (emacs-version))))`
 ;;
 ;; Features that might be required by this library:
 ;;
-;; $4
+;; $6
 ;;
 
 ;;; This file is NOT part of GNU Emacs
@@ -42,7 +42,7 @@
 ;;; Commentary: 
 ;; 
 ;; $2
-;; $5
+;; $7
 
 ;;; Installation:
 ;;
@@ -55,11 +55,11 @@
 ;;
 ;; (require '$1)
 ;;
-;; ${6:No need more.}
+;; ${8:No need more.}
 
 ;;; Customize:
 ;;
-;; $7
+;; $9
 ;;
 ;; All of the above can customize by:
 ;;      M-x customize-group RET $1 RET
@@ -73,16 +73,16 @@
 
 ;;; Acknowledgements:
 ;;
-;; $8
+;; $10
 ;;
 
 ;;; TODO
 ;;
-;; $9
+;; $11
 ;;
 
 ;;; Require
-$10
+$12
 
 ;;; Code:
 
