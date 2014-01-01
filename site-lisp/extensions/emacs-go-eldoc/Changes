@@ -1,0 +1,43 @@
+Revision history for go-eldoc.el
+
+Version 0.12 2013/12/16 syohex
+  - Fix type only argument case(#10)
+    Reported by Bad-ptr
+
+Version 0.11 2013/12/15 syohex
+  - Fix invalid argument analyze(#8)
+    Reported by Bad-ptr
+
+Version 0.10  2013/10/29 syohex
+  - Remove go-autocomplete dependency
+    Thanks dominikh
+
+Version 0.09  2013/10/16 syohex
+  - Fix case of channel slice
+
+Version 0.08  2013/10/15 syohex
+  - Fix case of channel type display
+
+Version 0.07  2013/08/13 syohex
+  - Fix case of `fmt.Fprint(os.Stdout, ",})", <here>`
+
+Version 0.06  2013/08/06 syohex
+  - Support builtin functions('append', 'copy' etc)
+
+Version 0.05  2013/07/12 syohex
+  - Improve calculating current index of arguments(Thanks dominikh)
+
+Version 0.04  2013/07/11 syohex
+  - Fix case that function type has return types
+  - Improve for anonymous function
+  - Improve for highlighting current argument index
+
+Version 0.03  2013/07/08 syohex
+  - Fix case that return type is slice
+
+Version 0.02  2013/07/07 syohex
+  - Fix bug for not saving old-point(dominikh)
+  - improve regular expression searching(dominikh)
+
+Version 0.01  2013/07/06 syohex
+  - init version
