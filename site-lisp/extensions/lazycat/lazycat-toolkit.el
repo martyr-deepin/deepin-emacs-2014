@@ -17,7 +17,7 @@
 ;;
 ;; `mwe-log-commands' `ecb'
 ;; `shell-command-extension'
-;; `ascii' `window-number' `windows' `color-moccur'
+;; `ascii' `windows' `color-moccur'
 ;; `cycle-buffer' `basic-toolkit'
 ;;
 
@@ -88,7 +88,6 @@
 ;;; Require
 (require 'mwe-log-commands)
 (require 'shell-command-extension)
-(require 'window-number)
 (require 'color-moccur)
 (require 'basic-toolkit)
 
@@ -211,18 +210,6 @@
   (other-window 1)
   (with-current-buffer (current-buffer)
     (call-interactively 'run-lisp)))
-
-(defun window-number-jump ()
-  "Jump to nth window."
-  (interactive)
-  (window-number-select (read-number "Window number: ")))
-
-;;(defun ascii-toggle ()
-;;  "Toggle ascii table"
-;;  (interactive)
-;;  (if ascii-display
-;;      (ascii-off)
-;;    (ascii-on)))
 
 (defun dot-emacs()
   "Open dot emacs file."

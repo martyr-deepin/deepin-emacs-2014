@@ -1138,10 +1138,6 @@
  '(
    ("C-x v" . one-key-menu-VC)          ;版本控制
    ))
-;;; ### Ispell ###
-;;; --- 拼写检查
-(lazy-set-key
- '(("s-v s-v" . ispell-buffer)))        ;检查当前buffer
 ;;; ### Slime mode ###
 (lazy-set-key
  '(

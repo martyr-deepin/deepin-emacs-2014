@@ -63,5 +63,6 @@ from tradition chinese to simple chinese" t)
 (autoload 'auto-install-from-emacswiki "init-auto-install")
 (autoload 'irfc "init-irfc")
 (autoload 'doc-view-mode "init-doc-view")
+(window-number-mode 1)
 
 (provide 'init-startup)

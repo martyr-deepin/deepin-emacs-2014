@@ -13,6 +13,7 @@
 (require 'pretty-lambdada)
 (require 'rect)
 (require 'rect-mark)
+(require 'window-number)
 
 (require 'init-doc-view)
 (require 'init-eldoc)

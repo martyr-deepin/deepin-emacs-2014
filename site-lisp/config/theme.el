@@ -1096,8 +1096,6 @@
                   :box (:line-width -1
                                     :color "Grey20"
                                     :style released-button)))))
- ;; Window nubmer
- '(window-number-face ((((type x w32 mac)) (:foreground "Gold"))))
  ;; re-builder
  '(reb-match-0
    ((((class color) (background dark))
