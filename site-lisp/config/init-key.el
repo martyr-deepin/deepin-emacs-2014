@@ -191,8 +191,14 @@
    ("C-c h" . split-window-horizontally) ;横向分割窗口
    ("C-;" . kill-this-buffer)            ;关闭当前buffer
    ("C-x ;" . delete-other-windows)      ;关闭其它窗口
-   ("s-a" . window-number-jump)          ;窗口快速选择
    ))
+;;; ### Multi-Scratch
+(lazy-set-autoload-key
+ '(
+   ("s-a" . multi-scratch-new)
+   ("s-A" . multi-scratch-next)
+   )
+ "multi-scratch")
 (lazy-set-autoload-key
  '(
    ("s-;" . one-key-menu-window-navigation) ;快速窗口导航
@@ -526,5 +532,50 @@
    ("s-?" . ace-jump-line-mode)
    )
  "ace-jump-mode")
+;;; ### Python ###
+;;; --- Python mode
+(eval-after-load 'python-mode
+  '(lambda ()
+     (lazy-set-mode-autoload-key
+      '(
+        ("C-S-j" . jump-to-import)
+        )
+      python-mode-map nil "python-mode-utils")
+     ))
+;;; ### Ielm ###
+;;; --- Emacs Lisp 解释模式
+(autoload 'ielm-map "ielm")
+(lazy-set-autoload-key
+ '(
+   ("M-s-i" . ielm-toggle)              ;切换ielm
+   )
+ "lazycat-toolkit")
+(eval-after-load 'ielm-mode
+  '(lambda ()
+     (progn
+       (lazy-unset-key
+        '("M-p" "M-n")
+        ielm-map)                       ;卸载按键
+       (lazy-set-key
+        '(
+          ("C-s-p" . comint-previous-input) ;上一个输入
+          ("C-s-n" . comint-next-input)     ;下一个输入
+          )
+        ielm-map
+        )
+       )))
+;;; ### Man ###
+;;; --- Man
+(lazy-set-autoload-key
+ '(
+   ("C-<f1>" . woman))
+ "init-woman")
+;;; ### Predictive ###
+;;; --- 英文助手
+(lazy-set-autoload-key
+ '(
+   ("M-r" . predictive-mode)            ;英文助手
+   )
+ "init-predictive")
 
 (provide 'init-key)

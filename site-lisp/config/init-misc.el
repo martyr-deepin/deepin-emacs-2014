@@ -274,9 +274,6 @@ from tradition chinese to simple chinese" t)
 (add-hook 'emacs-lisp-mode-hook 'highlight-cl-add-font-lock-keywords)
 (add-hook 'lisp-interaction-mode-hook 'highlight-cl-add-font-lock-keywords)
 
-;;; ### apt-utils ###
-;;; --- apt 工具
-
 ;;; ### Compilation ###
 ;;; --- 编译选项
 (compilation-always-kill-mode 1)

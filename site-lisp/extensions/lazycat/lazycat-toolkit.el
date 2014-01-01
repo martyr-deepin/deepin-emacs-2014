@@ -18,7 +18,7 @@
 ;; `mwe-log-commands' `ecb'
 ;; `shell-command-extension'
 ;; `ascii' `window-number' `windows' `color-moccur'
-;; `cycle-buffer' `basic-toolkit' 
+;; `cycle-buffer' `basic-toolkit'
 ;;
 
 ;;; This file is NOT part of GNU Emacs
@@ -265,6 +265,7 @@
 (defun ielm-toggle ()
   "Toggle ielm buffer."
   (interactive)
+  (require 'ielm)
   (let ((ielm-buffer-name "*ielm*"))
     (if (get-buffer ielm-buffer-name)
         (if (string-equal ielm-buffer-name (buffer-name))

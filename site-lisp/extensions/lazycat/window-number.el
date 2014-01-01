@@ -60,7 +60,7 @@
 
 ;; ----------------------------------------------------------------------------
 
-(require 'cl); for set-difference and loop
+(require 'cl)                           ; for set-difference and loop
 
 (defun window-number-list ()
   "Returns a list of the windows, in fixed order and the
@@ -108,21 +108,21 @@ minibuffer (even if not active) last."
   "Keymap for the window number meta mode.")
 
 (defmacro window-number-define-keys (mode-map prefix)
-  `(progn 
+  `(progn
      ,@(loop for number from 1 to 10 collect
-             `(define-key ,mode-map 
-                (kbd ,(concat prefix (number-to-string 
+             `(define-key ,mode-map
+                (kbd ,(concat prefix (number-to-string
                                       (if (>= number 10) 0 number))))
                 (lambda nil (interactive)
                   (window-number-select ,number))))))
 
-; define C-x C-j 1 to switch to win 1, etc (C-x C-j 0 = win 10)
+                                        ; define C-x C-j 1 to switch to win 1, etc (C-x C-j 0 = win 10)
 (unless window-number-mode-map
   (setq window-number-mode-map (make-sparse-keymap))
-  ; space after C-j is important
+                                        ; space after C-j is important
   (window-number-define-keys window-number-mode-map "C-x C-j "))
 
-; define M-1 to switch to win 1, etc (M-0 = win 10)
+                                        ; define M-1 to switch to win 1, etc (M-0 = win 10)
 (unless window-number-meta-mode-map
   (setq window-number-meta-mode-map (make-sparse-keymap))
   (window-number-define-keys window-number-meta-mode-map "M-"))

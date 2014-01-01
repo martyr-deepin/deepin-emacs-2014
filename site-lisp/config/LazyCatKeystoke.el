@@ -563,22 +563,6 @@
    ("M-s-x" . icicle-switch-to/from-minibuffer) ;在minibuffer和其他buffer之间切换
    ("M-s-m" . icicle-complete-keys)             ;查看当前模式的按键
    ))
-;;; ### Predictive ###
-;;; --- 英文助手
-(lazy-unset-key
- '("TAB")
- completion-dynamic-map)                ;卸载按键
-(lazy-set-key
- '(
-   ("M-r" . predictive-mode)            ;英文助手
-   ))
-(lazy-set-key
- '(
-   ("M-h" . completion-accept)          ;接受辅助补全
-   ("M-H" . completion-reject)          ;拒绝辅助补全
-   )
- completion-map
- )
 ;;; ### Maxima ###
 ;;; --- 代数计算系统
 (lazy-set-key
@@ -1003,31 +987,6 @@
    ("M-s-f" . insert-kbd-macro)                     ;插入键盘宏
    ("M-s-q" . apply-macro-to-region-lines)          ;应用键盘宏到选择的区域
    ))
-;;; ### Man ###
-;;; --- Man
-(lazy-set-key
- '(("C-<f1>" . woman)))
-(lazy-set-key
- '(
-   ("J" . scroll-up-one-line)           ;向上滚动一行
-   ("K" . scroll-down-one-line)         ;向下滚动一行
-   ("," . end-of-buffer)                ;buffer末尾
-   ("." . beginning-of-buffer)          ;buffer开始
-   ("M-n" . Man-next-section)           ;下一节
-   ("M-p" . Man-previous-section)       ;上一节
-   ("g" . Man-goto-section)             ;跳转到某一节
-   ("G" . Man-goto-see-also-section)    ;跳转到 see-also
-   ("f" . Man-follow-manual-reference)  ;当前处的man手册引用
-   ("F" . man-follow)                   ;某man手册引用
-   ("N" . Man-next-manpage)             ;下一个页面
-   ("P" . Man-previous-manpage)         ;上一个页面
-   ("q" . Man-quit)                     ;隐藏
-   ("Q" . Man-kill)                     ;退出
-   )
- Man-mode-map
- )
-(lazy-set-key sdcv-key-alist Man-mode-map)    ;sdcv的局部按键绑定
-(lazy-set-key vi-move-key-alist Man-mode-map) ;vi-move 的局部按键
 ;;; ### Ielm ###
 ;;; --- Emacs Lisp 解释模式
 (lazy-unset-key
