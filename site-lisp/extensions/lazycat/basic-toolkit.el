@@ -745,7 +745,7 @@ use function `completion-delete'."
   "Find file with root."
   (interactive "fFind file as sudo: ")
   (tramp-cleanup-all-connections)
-  (find-file (concat find-file-root-prefix file)))
+  (find-file (concat "/sudo:root@localhost:" file)))
 
 (defun find-file-smb(file)
   "Access file through samba protocol."
