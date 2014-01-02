@@ -172,10 +172,10 @@ This is run before the process is cranked up."
      (0 font-lock-comment-face t t))
     ;; Constants.
     ("\\<\\(true\\|false\\|[A-Z][a-zA-Z0-9]*\\.[A-Z][a-zA-Z0-9]*\\)\\>"
-     (0 font-lock-constant-face))
+     (1 font-lock-constant-face nil t))
     ;; Keyword.
-    ("\\(\\<parent\\|import\\|if\\|else[ \t]+if\\>\\)"
-     (0 font-lock-keyword-face nil t))
+    ("\\<\\(parent\\|import\\|if\\|else[ \t]+if\\)\\>"
+     (1 font-lock-keyword-face nil t))
     ;; Import
     ("\\(^import\\)[ \t]+\\([a-zA-Z0-9\.]+\\)[ \t]+\\([^ /\*]+\\)"
      (1 font-lock-keyword-face nil t)
@@ -206,7 +206,6 @@ This is run before the process is cranked up."
     table))
 
 ;;;###autoload
-
 (define-derived-mode qml-mode prog-mode "QML"
   "Major mode for Qt declarative UI"
   (interactive)
@@ -221,6 +220,7 @@ This is run before the process is cranked up."
   (setq major-mode 'qml-mode)
   (setq mode-name "qml")
   (use-local-map qml-mode-map)
+  (run-hooks 'prog-mode-hook)
   (run-hooks 'qml-mode-hook)
   )
 
