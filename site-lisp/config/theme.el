@@ -1,9 +1,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Emacs 主题设置 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(set-face-attribute 'default nil :height 130)
 (tool-bar-mode -1)                      ;禁用工具栏
 (menu-bar-mode -1)                      ;禁用菜单栏
 (scroll-bar-mode -1)                    ;禁用滚动条
 (toggle-frame-fullscreen)               ;全屏
+
+(set-face-attribute 'default nil :height 130)
 
 ;; 用户自定义变量
 (custom-set-variables
@@ -1074,6 +1075,8 @@
  '(eldoc-highlight-function-argument    ;参数颜色
    ((t (:inherit bold
                  :foreground "Red"))))
+ ;; Jedi
+ '(jedi:highlight-function-argument ((t (:foreground "gold"))))
  ;; elscreen
  '(elscreen-tab-background-face         ;背景标签
    ((((type x w32 mac) (class color))
