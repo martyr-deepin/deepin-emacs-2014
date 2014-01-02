@@ -85,6 +85,8 @@
 
 ;;; Require
 
+(require 'css-mode)
+(require 'js)
 
 ;;; Code:
 
@@ -97,8 +99,6 @@ This is run before the process is cranked up."
 (defvar qml-indent-width 4)
 
 (defconst qml-block-re "\\(^[ \t]*\\)\\([a-zA-Z0-9]*\\)[ \t]*[a-zA-Z0-9_]*[ \t]*.*{")
-
-(setq qml-block-re "\\(^[ \t]*\\)\\([a-zA-Z0-9]*\\)[ \t]*[a-zA-Z0-9_]*[ \t]*.*{")
 
 (defun qml-get-beg-of-block ()
   (save-excursion
@@ -155,23 +155,15 @@ This is run before the process is cranked up."
             (goto-char start)
             (setq cur-indent (current-indentation))
             (goto-char cur)
-            (setq cur-indent (+ cur-indent default-tab-width))
+            (unless (string= (string (char-after (- (point) 1))) "{")
+              (setq cur-indent (+ cur-indent default-tab-width))
+              )
             )))
     (indent-line-to cur-indent)
     (if (string= (string (char-after (point))) "}")
         (indent-line-to (- cur-indent default-tab-width))
       )
     ))
-
-(defun qml-indent-region (start end)
-  (let ((indent-region-function nil))
-    (indent-region start end nil)))
-
-(require 'css-mode)
-(require 'js)
-
-(defvar qml-keywords
-  (concat "\\<" (regexp-opt '("import")) "\\>\\|" js--keyword-re))
 
 (defvar qml-font-lock-keywords
   `(
@@ -224,7 +216,6 @@ This is run before the process is cranked up."
   (set (make-local-variable 'tab-width) qml-indent-width)
   (set (make-local-variable 'indent-tabs-mode) nil)
   (set (make-local-variable 'indent-line-function) 'qml-indent-line)
-  (set (make-local-variable 'indent-region-function) 'qml-indent-region)
   (set (make-local-variable 'comment-start) "/* ")
   (set (make-local-variable 'comment-end) " */")
   (setq major-mode 'qml-mode)
