@@ -207,7 +207,7 @@ This is run before the process is cranked up."
 
 ;;;###autoload
 
-(defun qml-mode()
+(define-derived-mode qml-mode prog-mode "QML"
   "Major mode for Qt declarative UI"
   (interactive)
   (kill-all-local-variables)
