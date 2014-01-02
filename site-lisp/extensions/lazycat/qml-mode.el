@@ -10,12 +10,12 @@
 ;; Last-Updated: 2013-12-31 21:23:56
 ;;           By: Andy Stewart
 ;; URL: http://www.emacswiki.org/emacs/download/qml-mode.el
-;; Keywords: 
+;; Keywords:
 ;; Compatibility: GNU Emacs 24.3.50.1
 ;;
 ;; Features that might be required by this library:
 ;;
-;; 
+;;
 ;;
 
 ;;; This file is NOT part of GNU Emacs
@@ -37,10 +37,10 @@
 ;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth
 ;; Floor, Boston, MA 02110-1301, USA.
 
-;;; Commentary: 
-;; 
+;;; Commentary:
+;;
 ;; Mode for Qt QML file
-;; 
+;;
 
 ;;; Installation:
 ;;
@@ -57,26 +57,26 @@
 
 ;;; Customize:
 ;;
-;; 
+;;
 ;;
 ;; All of the above can customize by:
 ;;      M-x customize-group RET qml-mode RET
 ;;
 
 ;;; Change log:
-;;	
+;;
 ;; 2013/12/31
 ;;      * First released.
-;; 
+;;
 
 ;;; Acknowledgements:
 ;;
-;; 
+;;
 ;;
 
 ;;; TODO
 ;;
-;; 
+;;
 ;;
 
 ;;; Require
@@ -121,6 +121,7 @@ This is run before the process is cranked up."
     (save-excursion
       (if (not (and start end (> cur start) (< cur end)))
           (progn
+            (message "*********************")
             (if start
                 (goto-char start))
             (setq start (qml-get-beg-of-block))
@@ -146,6 +147,7 @@ This is run before the process is cranked up."
                       (error nil)))))))
       (if (not cur-indent)
           (progn
+            (message  "################")
             (goto-char start)
             (setq cur-indent (current-indentation))
             (goto-char cur)
