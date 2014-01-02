@@ -4,10 +4,10 @@
 ;; Description: Mode for Qt QML file
 ;; Author: Andy Stewart <lazycat.manatee@gmail.com>
 ;; Maintainer: Andy Stewart <lazycat.manatee@gmail.com>
-;; Copyright (C) 2013, Andy Stewart, all rights reserved.
+;; Copyright (C) 2013 ~ 2014, Andy Stewart, all rights reserved.
 ;; Created: 2013-12-31 21:23:56
 ;; Version: 0.1
-;; Last-Updated: 2013-12-31 21:23:56
+;; Last-Updated: 2014-01-01 13:23:56
 ;;           By: Andy Stewart
 ;; URL: http://www.emacswiki.org/emacs/download/qml-mode.el
 ;; Keywords:
@@ -65,6 +65,10 @@
 
 ;;; Change log:
 ;;
+;; 2014/01/01
+;;      * Fixed keywords regexp
+;;      * Fxied qml-indent-line
+;;
 ;; 2013/12/31
 ;;      * First released.
 ;;
@@ -92,7 +96,9 @@ This is run before the process is cranked up."
 
 (defvar qml-indent-width 4)
 
-(defconst qml-block-re "\\(^[ \t]*\\)\\([a-zA-Z0-9]*\\)[ \t]*[a-zA-Z0-9_]*[ \t]*[a-zA-Z0-9_(),: \t]*{")
+(defconst qml-block-re "\\(^[ \t]*\\)\\([a-zA-Z0-9]*\\)[ \t]*[a-zA-Z0-9_]*[ \t]*.*{")
+
+(setq qml-block-re "\\(^[ \t]*\\)\\([a-zA-Z0-9]*\\)[ \t]*[a-zA-Z0-9_]*[ \t]*.*{")
 
 (defun qml-get-beg-of-block ()
   (save-excursion
@@ -121,7 +127,6 @@ This is run before the process is cranked up."
     (save-excursion
       (if (not (and start end (> cur start) (< cur end)))
           (progn
-            (message "*********************")
             (if start
                 (goto-char start))
             (setq start (qml-get-beg-of-block))
@@ -147,7 +152,6 @@ This is run before the process is cranked up."
                       (error nil)))))))
       (if (not cur-indent)
           (progn
-            (message  "################")
             (goto-char start)
             (setq cur-indent (current-indentation))
             (goto-char cur)
@@ -178,7 +182,7 @@ This is run before the process is cranked up."
     ("\\<\\(true\\|false\\|[A-Z][a-zA-Z0-9]*\\.[A-Z][a-zA-Z0-9]*\\)\\>"
      (0 font-lock-constant-face))
     ;; Keyword.
-    ("\\(\\<parent\\|import\\>\\)"
+    ("\\(\\<parent\\|import\\|if\\|else[ \t]+if\\>\\)"
      (0 font-lock-keyword-face nil t))
     ;; Import
     ("\\(^import\\)[ \t]+\\([a-zA-Z0-9\.]+\\)[ \t]+\\([^ /\*]+\\)"
