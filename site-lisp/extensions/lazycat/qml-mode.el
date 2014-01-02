@@ -221,6 +221,7 @@ This is run before the process is cranked up."
   (setq major-mode 'qml-mode)
   (setq mode-name "qml")
   (use-local-map qml-mode-map)
+  (run-hooks 'pron-mode-hook)
   (run-hooks 'qml-mode-hook)
   )
 
