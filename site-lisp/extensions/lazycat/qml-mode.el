@@ -228,7 +228,7 @@ This is run before the process is cranked up."
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-M-q") 'qml-indent-exp)
     map)
-  "Keymap used by `yaoddmuse-mode'.")
+  "Keymap used by `qml-mode'.")
 
 (defun qml-indent-exp ()
   (interactive)
