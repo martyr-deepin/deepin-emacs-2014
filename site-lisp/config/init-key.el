@@ -1,7 +1,7 @@
 ;;; ### Unset key ###
 ;;; --- 卸载按键
 (lazy-unset-key                         ;全局按键的卸载
- '("C-x C-f" "C-z" "C-q" "s-W" "s-z" "M-h" "C-x C-c" "C-\\" "C-x o" "M-x"))
+ '("C-x C-f" "C-z" "C-q" "s-W" "s-z" "M-h" "C-x C-c" "C-\\" "C-x o"))
 ;;; ### Vi-move ###
 ;;; --- Vi式移动
 (defvar vi-move-key-alist nil
@@ -612,14 +612,5 @@
      )
    keymap
    ))
-;;; ### Icicle ###
-(lazy-set-autoload-key
- '(
-   ("M-x" . icicle-execute-extended-command)
-   ("M-s-z" . icicle-switch-to-Completions-buf) ;切换到提示buffer
-   ("M-s-x" . icicle-switch-to/from-minibuffer) ;在minibuffer和其他buffer之间切换
-   ("M-s-m" . icicle-complete-keys)             ;查看当前模式的按键
-   )
- "init-icicles")
 
 (provide 'init-key)

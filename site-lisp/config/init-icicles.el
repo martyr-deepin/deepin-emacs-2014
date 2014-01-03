@@ -87,6 +87,49 @@
 
 (icy-mode 1)
 
+;;; ### Icicles ###
+;;; --- Minibuffer的智能补全
+(setq icicle-top-level-key-bindings nil) ;禁止icicles的按键生效
+(setq icicle-key-complete-keys nil)      ;禁止icicles的补全按键加载
+(setq icicle-download-dir "/usr/share/deepin-emacs/site-lisp/extensions/icicles/") ;设置icicles的下载目录, 运行 'icicle-download-wizard' 即可更新
+(setq icicle-highlight-input-completion-failure-delay 0.0) ;输入补全失败延迟高亮
+(setq icicle-incremental-completion-delay 0.0)             ;增量补全延迟
+(setq icicle-default-value nil)                            ;不显示默认的值
+(setq icicle-highlight-lighter-flag nil)                   ;不显示 Icicles 标志
+(setq icicle-unpropertize-completion-result-flag t)        ;解决Gnus附件产生文本属性的bug
+(setq icicle-redefine-standard-commands-flag nil)          ;不要重新定义标准按键
+
+;; ### Icicles ###
+;; --- Minibuffer 输入补全和切换
+(add-hook 'icicle-mode-hook 'bind-icicles-minibuffer-keys)
+(defun bind-icicles-minibuffer-keys ()
+  "Replace some default Icicles minibuffer bindings with others."
+  (dolist
+      (map (list
+            minibuffer-local-isearch-map             ;isearch
+            minibuffer-local-ns-map                  ;当空格不允许时
+            minibuffer-local-shell-command-map       ;补全shell命令时
+            minibuffer-local-map                     ;从minibuffer读取
+            minibuffer-local-completion-map          ;输入补全
+            minibuffer-local-must-match-map          ;输入补全精确匹配
+            minibuffer-local-filename-completion-map ;文件名补全
+            ))
+    (when icicle-mode
+      (lazy-set-key
+       '(
+         ("s-o" . icicle-insert-history-element) ;插入历史元素
+         )
+       map
+       )
+      (ido-my-keys map)))
+  (when icicle-mode
+    (lazy-set-key
+     '(
+       ("TAB" . isearch-complete-edit)
+       ("M-k" . isearch-delete-ring-element))
+     minibuffer-local-isearch-map
+     )))
+
 (provide 'init-icicles)
 
 ;;; init-icicles.el ends here
