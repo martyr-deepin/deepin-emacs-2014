@@ -3,23 +3,21 @@
 ;; Filename: icicles-face.el
 ;; Description: Faces for Icicles
 ;; Author: Drew Adams
-;; Maintainer: Drew Adams
-;; Copyright (C) 1996-2009, Drew Adams, all rights reserved.
+;; Maintainer: Drew Adams (concat "drew.adams" "@" "oracle" ".com")
+;; Copyright (C) 1996-2014, Drew Adams, all rights reserved.
 ;; Created: Mon Feb 27 09:19:43 2006
-;; Version: 22.0
-;; Last-Updated: Sat Aug  1 15:32:21 2009 (-0700)
+;; Last-Updated: Thu Dec 26 09:30:35 2013 (-0800)
 ;;           By: dradams
-;;     Update #: 503
-;; URL: http://www.emacswiki.org/cgi-bin/wiki/icicles-face.el
+;;     Update #: 713
+;; URL: http://www.emacswiki.org/icicles-face.el
+;; Doc URL: http://www.emacswiki.org/Icicles
 ;; Keywords: internal, extensions, help, abbrev, local, minibuffer,
 ;;           keys, apropos, completion, matching, regexp, command
-;; Compatibility: GNU Emacs: 20.x, 21.x, 22.x, 23.x
+;; Compatibility: GNU Emacs: 20.x, 21.x, 22.x, 23.x, 24.x
 ;;
 ;; Features that might be required by this library:
 ;;
-;;   `cl', `color-theme', `cus-face', `easymenu', `ffap', `ffap-',
-;;   `hexrgb', `icicles-opt', `kmacro', `levenshtein', `thingatpt',
-;;   `thingatpt+', `wid-edit', `widget'.
+;;   None
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -39,17 +37,20 @@
 ;;
 ;;  Faces defined here:
 ;;
-;;    `icicle-candidate-part',
+;;    `icicle-annotation', `icicle-candidate-part',
 ;;    `icicle-common-match-highlight-Completions',
 ;;    `icicle-complete-input', `icicle-completion',
 ;;    `icicle-Completions-instruction-1',
 ;;    `icicle-Completions-instruction-2',
 ;;    `icicle-current-candidate-highlight', `icicle-extra-candidate',
-;;    `icicle-historical-candidate', `icicle-input-completion-fail',
-;;    `icicle-input-completion-fail-lax',
+;;    `icicle-historical-candidate',
+;;    `icicle-historical-candidate-other',
+;;    `icicle-input-completion-fail',
+;;    `icicle-input-completion-fail-lax', `icicle-key-complete-menu',
+;;    `icicle-key-complete-menu-local',
 ;;    `icicle-match-highlight-Completions',
 ;;    `icicle-match-highlight-minibuffer', `icicle-mode-line-help',
-;;    `icicle-multi-command-completion',
+;;    `icicle-msg-emphasis', `icicle-multi-command-completion',
 ;;    `icicle-mustmatch-completion', `icicle-proxy-candidate',
 ;;    `icicle-saved-candidate', `icicle-search-context-level-1',
 ;;    `icicle-search-context-level-2',
@@ -74,8 +75,9 @@
 ;;  headings throughout this file.  You can get `linkd.el' here:
 ;;  http://dto.freeshell.org/notebook/Linkd.html.
 ;;
-;;  (@> "Groups, organized alphabetically")
-;;  (@> "Faces, organized alphabetically")
+;;  (@> "Icicles Commands for Other Packages")
+;;  (@> "Groups, Organized Alphabetically")
+;;  (@> "Faces, Organized Alphabetically")
  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -98,14 +100,11 @@
 ;;
 ;;; Code:
 
-(require 'icicles-opt) ;; icicle-increment-color-hue,
-                       ;; icicle-increment-color-saturation
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
  
-;;(@* "Groups, organized alphabetically")
+;;(@* "Groups, Organized Alphabetically")
 
-;;; Groups, organized alphabetically ---------------------------------
+;;; Groups, Organized Alphabetically ---------------------------------
 
 (defgroup Icicles nil
   "Minibuffer input completion and cycling of completion candidates."
@@ -118,11 +117,11 @@
 &body=Describe bug here, starting with `emacs -q'.  \
 Don't forget to mention your Emacs and Icicles library versions."))
   :link '(url-link :tag "Other Libraries by Drew"
-          "http://www.emacswiki.org/cgi-bin/wiki/DrewsElispLibraries")
+          "http://www.emacswiki.org/DrewsElispLibraries")
   :link '(url-link :tag "Download"
-          "http://www.emacswiki.org/cgi-bin/wiki/icicles.el")
+          "http://www.emacswiki.org/icicles.el")
   :link '(url-link :tag "Description"
-          "http://www.emacswiki.org/cgi-bin/wiki/Icicles")
+          "http://www.emacswiki.org/Icicles")
   :link '(emacs-commentary-link :tag "Doc-Part2" "icicles-doc2")
   :link '(emacs-commentary-link :tag "Doc-Part1" "icicles-doc1")
   )
@@ -136,11 +135,11 @@ Don't forget to mention your Emacs and Icicles library versions."))
 &body=Describe bug here, starting with `emacs -q'.  \
 Don't forget to mention your Emacs and Icicles library versions."))
   :link '(url-link :tag "Other Libraries by Drew"
-          "http://www.emacswiki.org/cgi-bin/wiki/DrewsElispLibraries")
+          "http://www.emacswiki.org/DrewsElispLibraries")
   :link '(url-link :tag "Download"
-          "http://www.emacswiki.org/cgi-bin/wiki/icicles.el")
+          "http://www.emacswiki.org/icicles.el")
   :link '(url-link :tag "Description"
-          "http://www.emacswiki.org/cgi-bin/wiki/Icicles")
+          "http://www.emacswiki.org/Icicles")
   :link '(emacs-commentary-link :tag "Doc-Part2" "icicles-doc2")
   :link '(emacs-commentary-link :tag "Doc-Part1" "icicles-doc1")
   )
@@ -154,11 +153,11 @@ Don't forget to mention your Emacs and Icicles library versions."))
 &body=Describe bug here, starting with `emacs -q'.  \
 Don't forget to mention your Emacs and Icicles library versions."))
   :link '(url-link :tag "Other Libraries by Drew"
-          "http://www.emacswiki.org/cgi-bin/wiki/DrewsElispLibraries")
+          "http://www.emacswiki.org/DrewsElispLibraries")
   :link '(url-link :tag "Download"
-          "http://www.emacswiki.org/cgi-bin/wiki/icicles.el")
+          "http://www.emacswiki.org/icicles.el")
   :link '(url-link :tag "Description"
-          "http://www.emacswiki.org/cgi-bin/wiki/Icicles")
+          "http://www.emacswiki.org/Icicles")
   :link '(emacs-commentary-link :tag "Doc-Part2" "icicles-doc2")
   :link '(emacs-commentary-link :tag "Doc-Part1" "icicles-doc1")
   )
@@ -172,11 +171,11 @@ Don't forget to mention your Emacs and Icicles library versions."))
 &body=Describe bug here, starting with `emacs -q'.  \
 Don't forget to mention your Emacs and Icicles library versions."))
   :link '(url-link :tag "Other Libraries by Drew"
-          "http://www.emacswiki.org/cgi-bin/wiki/DrewsElispLibraries")
+          "http://www.emacswiki.org/DrewsElispLibraries")
   :link '(url-link :tag "Download"
-          "http://www.emacswiki.org/cgi-bin/wiki/icicles.el")
+          "http://www.emacswiki.org/icicles.el")
   :link '(url-link :tag "Description"
-          "http://www.emacswiki.org/cgi-bin/wiki/Icicles")
+          "http://www.emacswiki.org/Icicles")
   :link '(emacs-commentary-link :tag "Doc-Part2" "icicles-doc2")
   :link '(emacs-commentary-link :tag "Doc-Part1" "icicles-doc1")
   )
@@ -190,11 +189,11 @@ Don't forget to mention your Emacs and Icicles library versions."))
 &body=Describe bug here, starting with `emacs -q'.  \
 Don't forget to mention your Emacs and Icicles library versions."))
   :link '(url-link :tag "Other Libraries by Drew"
-          "http://www.emacswiki.org/cgi-bin/wiki/DrewsElispLibraries")
+          "http://www.emacswiki.org/DrewsElispLibraries")
   :link '(url-link :tag "Download"
-          "http://www.emacswiki.org/cgi-bin/wiki/icicles.el")
+          "http://www.emacswiki.org/icicles.el")
   :link '(url-link :tag "Description"
-          "http://www.emacswiki.org/cgi-bin/wiki/Icicles")
+          "http://www.emacswiki.org/Icicles")
   :link '(emacs-commentary-link :tag "Doc-Part2" "icicles-doc2")
   :link '(emacs-commentary-link :tag "Doc-Part1" "icicles-doc1")
   )
@@ -208,11 +207,11 @@ Don't forget to mention your Emacs and Icicles library versions."))
 &body=Describe bug here, starting with `emacs -q'.  \
 Don't forget to mention your Emacs and Icicles library versions."))
   :link '(url-link :tag "Other Libraries by Drew"
-          "http://www.emacswiki.org/cgi-bin/wiki/DrewsElispLibraries")
+          "http://www.emacswiki.org/DrewsElispLibraries")
   :link '(url-link :tag "Download"
-          "http://www.emacswiki.org/cgi-bin/wiki/icicles.el")
+          "http://www.emacswiki.org/icicles.el")
   :link '(url-link :tag "Description"
-          "http://www.emacswiki.org/cgi-bin/wiki/Icicles")
+          "http://www.emacswiki.org/Icicles")
   :link '(emacs-commentary-link :tag "Doc-Part2" "icicles-doc2")
   :link '(emacs-commentary-link :tag "Doc-Part1" "icicles-doc1")
   )
@@ -226,11 +225,11 @@ Don't forget to mention your Emacs and Icicles library versions."))
 &body=Describe bug here, starting with `emacs -q'.  \
 Don't forget to mention your Emacs and Icicles library versions."))
   :link '(url-link :tag "Other Libraries by Drew"
-          "http://www.emacswiki.org/cgi-bin/wiki/DrewsElispLibraries")
+          "http://www.emacswiki.org/DrewsElispLibraries")
   :link '(url-link :tag "Download"
-          "http://www.emacswiki.org/cgi-bin/wiki/icicles.el")
+          "http://www.emacswiki.org/icicles.el")
   :link '(url-link :tag "Description"
-          "http://www.emacswiki.org/cgi-bin/wiki/Icicles")
+          "http://www.emacswiki.org/Icicles")
   :link '(emacs-commentary-link :tag "Doc-Part2" "icicles-doc2")
   :link '(emacs-commentary-link :tag "Doc-Part1" "icicles-doc1")
   )
@@ -244,11 +243,11 @@ Don't forget to mention your Emacs and Icicles library versions."))
 &body=Describe bug here, starting with `emacs -q'.  \
 Don't forget to mention your Emacs and Icicles library versions."))
   :link '(url-link :tag "Other Libraries by Drew"
-          "http://www.emacswiki.org/cgi-bin/wiki/DrewsElispLibraries")
+          "http://www.emacswiki.org/DrewsElispLibraries")
   :link '(url-link :tag "Download"
-          "http://www.emacswiki.org/cgi-bin/wiki/icicles.el")
+          "http://www.emacswiki.org/icicles.el")
   :link '(url-link :tag "Description"
-          "http://www.emacswiki.org/cgi-bin/wiki/Icicles")
+          "http://www.emacswiki.org/Icicles")
   :link '(emacs-commentary-link :tag "Doc-Part2" "icicles-doc2")
   :link '(emacs-commentary-link :tag "Doc-Part1" "icicles-doc1")
   )
@@ -262,11 +261,11 @@ Don't forget to mention your Emacs and Icicles library versions."))
 &body=Describe bug here, starting with `emacs -q'.  \
 Don't forget to mention your Emacs and Icicles library versions."))
   :link '(url-link :tag "Other Libraries by Drew"
-          "http://www.emacswiki.org/cgi-bin/wiki/DrewsElispLibraries")
+          "http://www.emacswiki.org/DrewsElispLibraries")
   :link '(url-link :tag "Download"
-          "http://www.emacswiki.org/cgi-bin/wiki/icicles.el")
+          "http://www.emacswiki.org/icicles.el")
   :link '(url-link :tag "Description"
-          "http://www.emacswiki.org/cgi-bin/wiki/Icicles")
+          "http://www.emacswiki.org/Icicles")
   :link '(emacs-commentary-link :tag "Doc-Part2" "icicles-doc2")
   :link '(emacs-commentary-link :tag "Doc-Part1" "icicles-doc1")
   )
@@ -280,40 +279,46 @@ Don't forget to mention your Emacs and Icicles library versions."))
 &body=Describe bug here, starting with `emacs -q'.  \
 Don't forget to mention your Emacs and Icicles library versions."))
   :link '(url-link :tag "Other Libraries by Drew"
-          "http://www.emacswiki.org/cgi-bin/wiki/DrewsElispLibraries")
+          "http://www.emacswiki.org/DrewsElispLibraries")
   :link '(url-link :tag "Download"
-          "http://www.emacswiki.org/cgi-bin/wiki/icicles.el")
+          "http://www.emacswiki.org/icicles.el")
   :link '(url-link :tag "Description"
-          "http://www.emacswiki.org/cgi-bin/wiki/Icicles")
+          "http://www.emacswiki.org/Icicles")
   :link '(emacs-commentary-link :tag "Doc-Part2" "icicles-doc2")
   :link '(emacs-commentary-link :tag "Doc-Part1" "icicles-doc1")
   )
  
-;;(@* "Faces, organized alphabetically")
+;;(@* "Faces, Organized Alphabetically")
 
-;;; Faces, organized alphabetically ----------------------------------
+;;; Faces, Organized Alphabetically ----------------------------------
+
+(defface icicle-annotation              ; Same grays as for `shadow'.
+    '((((background dark)) (:foreground "gray70"))
+      (t (:foreground "gray50")))
+  "*Face used to highlight a candidate annotation in `*Completions*'."
+  :group 'Icicles-Completions-Display :group 'faces)
 
 (defface icicle-candidate-part
     '((((background dark)) (:background "#451700143197")) ; a very dark magenta
-      (t (:background "#DB17FFF4E581"))) ; A light green.
-  "*Face used to highlight part(s) of a candidate in *Completions*."
+      (t (:background "#EF84FFEAF427"))) ; A light green.
+  "*Face used to highlight part(s) of a candidate in `*Completions*'."
   :group 'Icicles-Completions-Display :group 'faces)
 
 (defface icicle-common-match-highlight-Completions
     '((((background dark)) (:foreground "#2017A71F2017")) ; a dark green
       (t (:foreground "magenta3")))
-  "*Face used to highlight candidates common match, in *Completions*."
+  "*Face used to highlight candidates common match, in `*Completions*'."
   :group 'Icicles-Completions-Display :group 'faces)
 
 (defface icicle-complete-input
-  '((((background dark)) (:foreground "#B19E6A64B19E")) ; a dark magenta
-    (t (:foreground "DarkGreen")))
+    '((((background dark)) (:foreground "#B19E6A64B19E")) ; a dark magenta
+      (t (:foreground "DarkGreen")))
   "*Face used to highlight input when it is complete."
   :group 'Icicles-Minibuffer-Display :group 'faces)
 
 (defface icicle-completion
     '((((background dark)) (:foreground "#0000D53CD53C")) ; a dark cyan
-      (t (:foreground "Red")))                            ; red
+      (t (:foreground "Red")))          ; red
   "*Face used to indicate minibuffer completion.
 It highlights the minibuffer indicator and the `Icy' minor-mode
 lighter during completion.
@@ -321,35 +326,49 @@ Not used for versions of Emacs before version 21."
   :group 'Icicles-Minibuffer-Display :group 'Icicles-Miscellaneous :group 'faces)
 
 (defface icicle-Completions-instruction-1
-  '((((background dark)) (:foreground "#AC4AAC4A0000")) ; a dark yellow
-    (t (:foreground "Blue")))
-  "*Face used to highlight first line of *Completions* buffer."
+    '((((background dark)) (:foreground "#AC4AAC4A0000")) ; a dark yellow
+      (t (:foreground "Blue")))
+  "*Face used to highlight first line of `*Completions*' buffer."
   :group 'Icicles-Completions-Display :group 'faces)
 
 (defface icicle-Completions-instruction-2
     '((((background dark)) (:foreground "#0000D53CD53C")) ; a dark cyan
       (t (:foreground "Red")))
-  "*Face used to highlight second line of *Completions* buffer."
+  "*Face used to highlight second line of `*Completions*' buffer."
   :group 'Icicles-Completions-Display :group 'faces)
 
 (defface icicle-current-candidate-highlight
-  '((((background dark)) (:background "#69D40A460000")) ; a red brown
-    (t (:background "CadetBlue1")))
-  "*Face used to highlight the current candidate, in *Completions*."
+    '((((background dark)) (:background "#69D40A460000")) ; a red brown
+      (t (:background "CadetBlue1")))
+  "*Face used to highlight the current candidate, in `*Completions*'."
   :group 'Icicles-Completions-Display :group 'faces)
 
 (defface icicle-extra-candidate
     '((((background dark)) (:background "#4517305D0000")) ; a dark brown
       (t (:background "#C847D8FEFFFF"))) ; a light blue
-  "*Face used to highlight *Completions* candidates that are extra.
+  "*Face used to highlight `*Completions*' candidates that are extra.
 This means that they belong to list `icicle-extra-candidates'."
   :group 'Icicles-Completions-Display :group 'faces)
 
 (defface icicle-historical-candidate
-  '((((background dark)) (:foreground "#DBD599DF0000")) ; a dark orange
-    (t (:foreground "Blue")))
-  "*Face used to highlight *Completions* candidates that have been used."
+    '((((background dark)) (:foreground "#DBD599DF0000")) ; a dark orange
+      (t (:foreground "Blue")))
+  "*Face used to highlight `*Completions*' candidates that have been used."
   :group 'Icicles-Completions-Display :group 'faces)
+
+(when (> emacs-major-version 21)
+  (defface icicle-historical-candidate-other '((t (:inherit icicle-historical-candidate
+                                                   :underline t)))
+    "*Face to highlight `*Completions*' candidates that were used indirectly.
+That is, you might or might not have entered these candidates but in
+some sense you have used or visited them.  Example: index topics that
+point to Info nodes that you have visited.
+
+Whether or not such highlighting is done at all is governed by option
+`icicle-highlight-historical-candidates-flag'.  Whether it is done for
+a given set of candidates is governed by option
+`icicle-Info-visited-max-candidates'."
+    :group 'Icicles-Completions-Display :group 'faces))
 
 (defface icicle-input-completion-fail
     '((((background dark)) (:background "#22225F5F2222")) ; a dark green
@@ -363,10 +382,38 @@ This means that they belong to list `icicle-extra-candidates'."
   "*Face for highlighting failed part of input during lax completion."
   :group 'Icicles-Minibuffer-Display :group 'faces)
 
+;; By default, these two faces have the same backgrounds as faces
+;; `icicle-candidate-part' and `icicle-special-candidate', respectively.  They differ
+;; only in being boxed as well.
+(when (fboundp 'map-keymap)             ; Emacs 22+.
+  (defface icicle-key-complete-menu
+      '((((background dark))
+         (:background "#451700143197"   ; a very dark magenta
+          :box (:line-width 1 :color "#FA6CC847FFFF"))) ; a light magenta box
+        (t (:background "#EF84FFEAF427" ; a light green.
+            :box (:line-width 1 :color "#34F393F434F3")))) ; a green box
+    "*Face used to highlight non-local menu items when completing keys.
+Non-local keys that are not menu items are highlighted with face
+`icicle-candidate-part'.  Menu items for the current mode (i.e., local
+keymap) are highlighted with face `icicle-key-complete-menu-local'."
+    :group 'Icicles-Searching :group 'faces)
+
+  (defface icicle-key-complete-menu-local
+      '((((background dark))
+         (:background "#176900004E0A"   ; a dark blue
+          :box (:line-width 1 :color "#E1E1EAEAFFFF"))) ; a light blue box
+        (t (:background "#EF47FFFFC847" ; a light yellow.
+            :box (:line-width 1 :color "#AC4AAC4A0000")))) ; a dark yellow box
+    "*Face used to highlight local menu items when completing keys.
+Local keys that are not menu items are highlighted with face
+`icicle-special-candidate'.  Non-local menu items (i.e., not for the
+current mode) are highlighted with face `icicle-key-complete-menu'."
+    :group 'Icicles-Searching :group 'faces))
+
 (defface icicle-match-highlight-Completions
     '((((background dark)) (:foreground "#1F1FA21CA21C")) ; a very dark cyan
       (t (:foreground "Red3")))
-  "*Face used to highlight root that was completed, in *Completions*."
+  "*Face used to highlight root that was completed, in `*Completions*'."
   :group 'Icicles-Completions-Display :group 'faces)
 
 (defface icicle-match-highlight-minibuffer '((t (:underline t)))
@@ -374,13 +421,19 @@ This means that they belong to list `icicle-extra-candidates'."
   :group 'Icicles-Minibuffer-Display :group 'faces)
 
 (defface icicle-mode-line-help
-  '((((background dark)) (:foreground "#AC4AAC4A0000")) ; a dark yellow
-    (t (:foreground "Blue")))
+    '((((background dark)) (:foreground "#AC4AAC4A0000")) ; a dark yellow
+      (t (:foreground "Blue")))
   "*Face used to highlight help shown in the mode-line."
   :group 'Icicles-Completions-Display :group 'Icicles-Miscellaneous :group 'faces)
 
+(defface icicle-msg-emphasis
+    '((((background dark)) (:foreground "#B19E6A64B19E")) ; a dark magenta
+      (t (:foreground "DarkGreen")))
+  "*Face used to emphasize (part of) a message."
+  :group 'Icicles-Minibuffer-Display :group 'faces)
+
 (defface icicle-multi-command-completion
-    '((((background dark)) ; a dark cyan on a dark magenta
+    '((((background dark))              ; a dark cyan on a dark magenta
        (:foreground "#0000D53CD53C" :background "#8B3500007533"))
       (t (:foreground "Red" :background "#78F6FFFF8E4F"))) ; red on a light green
   "*Face used to indicate Icicles multi-command completion.
@@ -391,7 +444,7 @@ Not used for versions of Emacs before version 21."
 
 (defface icicle-mustmatch-completion
     '((((type x w32 mac graphic) (class color))
-       (:box (:line-width 2 :color "Blue"))) ; blue box
+       (:box (:line-width -2 :color "Blue"))) ; blue box
       (t (:inverse-video t)))
   "*Face used to indicate strict minibuffer completion.
 It highlights the minibuffer indicator and the `Icy' or `Icy+'
@@ -403,18 +456,18 @@ Not used for versions of Emacs before version 21."
     '((((background dark)) (:background "#316B22970000")) ; a very dark brown
       (t (:background "#E1E1EAEAFFFF"   ; A light blue.
           :box (:line-width 2 :color "White" :style released-button))))
-  "*Face used to highlight proxy candidates."
+  "*Face used to highlight proxy candidates in `*Completions*'."
   :group 'Icicles-Completions-Display :group 'faces)
 
 (defface icicle-saved-candidate
-    '((((background dark)) (:background "gray20"))   ; a dark gray
-      (t (:background "gray80"))) ; a light gray
-  "*Face used to highlight *Completions* candidates that have been saved."
+    '((((background dark)) (:background "gray20")) ; a dark gray
+      (t (:background "gray80")))       ; a light gray
+  "*Face used to highlight `*Completions*' candidates that have been saved."
   :group 'Icicles-Completions-Display :group 'faces)
 
 (defface icicle-search-main-regexp-current
-  '((((background dark)) (:background "#00004AA652F1")) ; a dark cyan
-    (t (:background "misty rose")))
+    '((((background dark)) (:background "#00004AA652F1")) ; a dark cyan
+      (t (:background "misty rose")))
   "*Face used to highlight current match of your search context regexp.
 This highlighting is done during Icicles searching."
   :group 'Icicles-Searching :group 'faces)
@@ -422,13 +475,13 @@ This highlighting is done during Icicles searching."
 (defface icicle-search-context-level-1
     (let ((context-bg  (face-background 'icicle-search-main-regexp-current)))
       `((((background dark))
-         (:background ,(if (featurep 'hexrgb)
-                           (icicle-increment-color-saturation
-                            (icicle-increment-color-hue context-bg 80) 10)
+         (:background ,(if (fboundp 'hexrgb-increment-saturation)
+                           (hexrgb-increment-saturation
+                            (hexrgb-increment-hue context-bg 0.80) 0.10)
                            "#071F473A0000"))) ; a dark green
-        (t (:background ,(if (featurep 'hexrgb)
-                             (icicle-increment-color-saturation
-                              (icicle-increment-color-hue context-bg 80) 10)
+        (t (:background ,(if (fboundp 'hexrgb-increment-saturation)
+                             (hexrgb-increment-saturation
+                              (hexrgb-increment-hue context-bg 0.80) 0.10)
                              "#FA6CC847FFFF"))))) ; a light magenta
   "*Face used to highlight level (subgroup match) 1 of your search context.
 This highlighting is done during Icicles searching whenever
@@ -439,13 +492,13 @@ search context corresponds to the entire regexp."
 (defface icicle-search-context-level-2
     (let ((context-bg  (face-background 'icicle-search-main-regexp-current)))
       `((((background dark))
-         (:background ,(if (featurep 'hexrgb)
-                           (icicle-increment-color-saturation
-                            (icicle-increment-color-hue context-bg 40) 10)
+         (:background ,(if (fboundp 'hexrgb-increment-saturation)
+                           (hexrgb-increment-saturation
+                            (hexrgb-increment-hue context-bg 0.40) 0.10)
                            "#507400002839"))) ; a dark red
-        (t (:background ,(if (featurep 'hexrgb)
-                             (icicle-increment-color-saturation
-                              (icicle-increment-color-hue context-bg 40) 10)
+        (t (:background ,(if (fboundp 'hexrgb-increment-saturation)
+                             (hexrgb-increment-saturation
+                              (hexrgb-increment-hue context-bg 0.40) 0.10)
                              "#C847FFFFE423"))))) ; a light cyan
   "*Face used to highlight level (subgroup match) 2 of your search context.
 This highlighting is done during Icicles searching whenever
@@ -456,13 +509,13 @@ search context corresponds to the entire regexp."
 (defface icicle-search-context-level-3
     (let ((context-bg  (face-background 'icicle-search-main-regexp-current)))
       `((((background dark))
-         (:background ,(if (featurep 'hexrgb)
-                           (icicle-increment-color-saturation
-                            (icicle-increment-color-hue context-bg 60) 10)
+         (:background ,(if (fboundp 'hexrgb-increment-saturation)
+                           (hexrgb-increment-saturation
+                            (hexrgb-increment-hue context-bg 0.60) 0.10)
                            "#4517305D0000"))) ; a dark brown
-        (t (:background ,(if (featurep 'hexrgb)
-                             (icicle-increment-color-saturation
-                              (icicle-increment-color-hue context-bg 60) 10)
+        (t (:background ,(if (fboundp 'hexrgb-increment-saturation)
+                             (hexrgb-increment-saturation
+                              (hexrgb-increment-hue context-bg 0.60) 0.10)
                              "#C847D8FEFFFF"))))) ; a light blue
   "*Face used to highlight level (subgroup match) 3 of your search context.
 This highlighting is done during Icicles searching whenever
@@ -473,13 +526,13 @@ search context corresponds to the entire regexp."
 (defface icicle-search-context-level-4
     (let ((context-bg  (face-background 'icicle-search-main-regexp-current)))
       `((((background dark))
-         (:background ,(if (featurep 'hexrgb)
-                           (icicle-increment-color-saturation
-                            (icicle-increment-color-hue context-bg 20) 10)
+         (:background ,(if (fboundp 'hexrgb-increment-saturation)
+                           (hexrgb-increment-saturation
+                            (hexrgb-increment-hue context-bg 0.20) 0.10)
                            "#176900004E0A"))) ; a dark blue
-        (t (:background ,(if (featurep 'hexrgb)
-                             (icicle-increment-color-saturation
-                              (icicle-increment-color-hue context-bg 20) 10)
+        (t (:background ,(if (fboundp 'hexrgb-increment-saturation)
+                             (hexrgb-increment-saturation
+                              (hexrgb-increment-hue context-bg 0.20) 0.10)
                              "#EF47FFFFC847"))))) ; a light yellow
   "*Face used to highlight level (subgroup match) 4 of your search context.
 This highlighting is done during Icicles searching whenever
@@ -490,11 +543,11 @@ search context corresponds to the entire regexp."
 (defface icicle-search-context-level-5
     (let ((context-bg  (face-background 'icicle-search-main-regexp-current)))
       `((((background dark))
-         (:background ,(if (featurep 'hexrgb)
-                           (icicle-increment-color-hue context-bg 80)
+         (:background ,(if (fboundp 'hexrgb-increment-saturation)
+                           (hexrgb-increment-hue context-bg 0.80)
                            "#04602BC00000"))) ; a very dark green
-        (t (:background ,(if (featurep 'hexrgb)
-                             (icicle-increment-color-hue context-bg 80)
+        (t (:background ,(if (fboundp 'hexrgb-increment-saturation)
+                             (hexrgb-increment-hue context-bg 0.80)
                              "#FCFCE1E1FFFF"))))) ; a light magenta
   "*Face used to highlight level (subgroup match) 5 of your search context.
 This highlighting is done during Icicles searching whenever
@@ -505,11 +558,11 @@ search context corresponds to the entire regexp."
 (defface icicle-search-context-level-6
     (let ((context-bg  (face-background 'icicle-search-main-regexp-current)))
       `((((background dark))
-         (:background ,(if (featurep 'hexrgb)
-                           (icicle-increment-color-hue context-bg 40)
+         (:background ,(if (fboundp 'hexrgb-increment-saturation)
+                           (hexrgb-increment-hue context-bg 0.40)
                            "#32F200001979"))) ; a very dark red
-        (t (:background ,(if (featurep 'hexrgb)
-                             (icicle-increment-color-hue context-bg 40)
+        (t (:background ,(if (fboundp 'hexrgb-increment-saturation)
+                             (hexrgb-increment-hue context-bg 0.40)
                              "#E1E1FFFFF0F0"))))) ; a light cyan
   "*Face used to highlight level (subgroup match) 6 of your search context.
 This highlighting is done during Icicles searching whenever
@@ -520,11 +573,11 @@ search context corresponds to the entire regexp."
 (defface icicle-search-context-level-7
     (let ((context-bg  (face-background 'icicle-search-main-regexp-current)))
       `((((background dark))
-         (:background ,(if (featurep 'hexrgb)
-                           (icicle-increment-color-hue context-bg 60)
+         (:background ,(if (fboundp 'hexrgb-increment-saturation)
+                           (hexrgb-increment-hue context-bg 0.60)
                            "#316B22970000"))) ; a very dark brown
-        (t (:background ,(if (featurep 'hexrgb)
-                             (icicle-increment-color-hue context-bg 60)
+        (t (:background ,(if (fboundp 'hexrgb-increment-saturation)
+                             (hexrgb-increment-hue context-bg 0.60)
                              "#E1E1EAEAFFFF"))))) ; a light blue
   "*Face used to highlight level (subgroup match) 7 of your search context.
 This highlighting is done during Icicles searching whenever
@@ -532,14 +585,15 @@ This highlighting is done during Icicles searching whenever
 search context corresponds to the entire regexp."
   :group 'Icicles-Searching :group 'faces)
 
+;; NO AUTOLOAD COOKIE HERE.
 (defface icicle-search-context-level-8
     (let ((context-bg  (face-background 'icicle-search-main-regexp-current)))
       `((((background dark))
-         (:background ,(if (featurep 'hexrgb)
-                           (icicle-increment-color-hue context-bg 20)
+         (:background ,(if (fboundp 'hexrgb-increment-saturation)
+                           (hexrgb-increment-hue context-bg 0.20)
                            "#12EC00003F0E"))) ; a very dark blue
-        (t (:background ,(if (featurep 'hexrgb)
-                             (icicle-increment-color-hue context-bg 20)
+        (t (:background ,(if (fboundp 'hexrgb-increment-saturation)
+                             (hexrgb-increment-hue context-bg 0.20)
                              "#F6F5FFFFE1E1"))))) ; a light yellow
   "*Face used to highlight level (subgroup match) 8 of your search context.
 This highlighting is done during Icicles searching whenever
@@ -558,8 +612,8 @@ search context corresponds to the entire regexp."
   :group 'Icicles-Searching :group 'faces)
 
 (defface icicle-search-main-regexp-others
-  '((((background dark)) (:background "#348608690000")) ; a very dark brown
-    (t (:background "CadetBlue1")))
+    '((((background dark)) (:background "#348608690000")) ; a very dark brown
+      (t (:background "CadetBlue1")))
   "*Face used to highlight other matches of your search context regexp.
 If user option `icicle-search-highlight-threshold' is less than one,
 then this face is not used.
@@ -568,8 +622,8 @@ This highlighting is done during Icicles searching."
 
 (defface icicle-special-candidate
     '((((background dark)) (:background "#176900004E0A")) ; a dark blue
-      (t (:background "#EF47FFFFC847")))   ; A light yellow.
-  "*Face used to highlight *Completions* candidates that are special.
+      (t (:background "#EF47FFFFC847"))) ; A light yellow.
+  "*Face used to highlight `*Completions*' candidates that are special.
 The meaning of special is that their names match
 `icicle-special-candidate-regexp'."
   :group 'Icicles-Completions-Display :group 'faces)
@@ -585,7 +639,7 @@ The meaning of special is that their names match
 (unless (facep 'minibuffer-prompt)
   (defface minibuffer-prompt '((((background dark)) (:foreground "cyan"))
                                (t (:foreground "dark blue")))
-    "Face for minibuffer prompts."
+    "*Face for minibuffer prompts."
     :group 'basic-faces))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

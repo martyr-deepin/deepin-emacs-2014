@@ -1,15 +1,15 @@
-;;; init-icicles.el --- Init for iciciles
+;;; init-package.el --- Init package
 
-;; Filename: init-icicles.el
-;; Description: Init for iciciles
+;; Filename: init-package.el
+;; Description: Init package
 ;; Author: Andy Stewart <lazycat.manatee@gmail.com>
 ;; Maintainer: Andy Stewart <lazycat.manatee@gmail.com>
 ;; Copyright (C) 2014, Andy Stewart, all rights reserved.
-;; Created: 2014-01-03 19:37:23
+;; Created: 2014-01-03 19:29:01
 ;; Version: 0.1
-;; Last-Updated: 2014-01-03 19:37:23
+;; Last-Updated: 2014-01-03 19:29:01
 ;;           By: Andy Stewart
-;; URL: http://www.emacswiki.org/emacs/download/init-icicles.el
+;; URL: http://www.emacswiki.org/emacs/download/init-package.el
 ;; Keywords:
 ;; Compatibility: GNU Emacs 24.3.50.1
 ;;
@@ -39,19 +39,19 @@
 
 ;;; Commentary:
 ;;
-;; Init for iciciles
+;; Init package
 ;;
 
 ;;; Installation:
 ;;
-;; Put init-icicles.el to your load-path.
+;; Put init-package.el to your load-path.
 ;; The load-path is usually ~/elisp/.
 ;; It's set in your ~/.emacs like this:
 ;; (add-to-list 'load-path (expand-file-name "~/elisp"))
 ;;
 ;; And the following to your ~/.emacs startup file.
 ;;
-;; (require 'init-icicles)
+;; (require 'init-package)
 ;;
 ;; No need more.
 
@@ -60,7 +60,7 @@
 ;;
 ;;
 ;; All of the above can customize by:
-;;      M-x customize-group RET init-icicles RET
+;;      M-x customize-group RET init-package RET
 ;;
 
 ;;; Change log:
@@ -81,12 +81,15 @@
 
 ;;; Require
 
-(require 'icicles)
+(require 'package)
 
 ;;; Code:
 
-(icy-mode 1)
+(package-initialize)
+(add-to-list 'package-archives
+             '("melpa" . "http://melpa.milkbox.net/packages/")
+             'APPEND)
 
-(provide 'init-icicles)
+(provide 'init-package)
 
-;;; init-icicles.el ends here
+;;; init-package.el ends here

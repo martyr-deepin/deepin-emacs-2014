@@ -33,5 +33,6 @@
 (require 'init-one-key)
 (require 'init-key)
 (require 'init-startup)
+(require 'init-package)
 
 (provide 'init)
