@@ -14,6 +14,7 @@
 (require 'rect)
 (require 'rect-mark)
 (require 'window-number)
+(require 'anzu)
 
 (require 'init-doc-view)
 (require 'init-eldoc)

@@ -172,6 +172,8 @@
    ((t (:background "black" :underline "yellow" :slant italic))))
  '(flymake-warnline                     ;¾¯¸æÐÐ
    ((((class color)) (:background "Gold3" :foreground "Black"))))
+ ;; Anzu
+ '(anzu-mode-line ((t (:foreground "gold" :weight bold))))
  ;; Dired
  '(dired-directory                      ;Ä¿Â¼
    ((t (:inherit font-lock-function-name-face

@@ -64,5 +64,6 @@ from tradition chinese to simple chinese" t)
 (autoload 'irfc "init-irfc")
 (autoload 'doc-view-mode "init-doc-view")
 (window-number-mode 1)
+(global-anzu-mode 1)                    ;显示搜索的数字
 
 (provide 'init-startup)
