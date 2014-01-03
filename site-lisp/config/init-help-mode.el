@@ -10,12 +10,12 @@
 ;; Last-Updated: 2013-12-30 14:47:42
 ;;           By: Andy Stewart
 ;; URL: http://www.emacswiki.org/emacs/download/init-help-mode.el
-;; Keywords: 
+;; Keywords:
 ;; Compatibility: GNU Emacs 24.3.50.1
 ;;
 ;; Features that might be required by this library:
 ;;
-;; 
+;;
 ;;
 
 ;;; This file is NOT part of GNU Emacs
@@ -37,10 +37,10 @@
 ;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth
 ;; Floor, Boston, MA 02110-1301, USA.
 
-;;; Commentary: 
-;; 
+;;; Commentary:
+;;
 ;; Init help mode
-;; 
+;;
 
 ;;; Installation:
 ;;
@@ -57,31 +57,32 @@
 
 ;;; Customize:
 ;;
-;; 
+;;
 ;;
 ;; All of the above can customize by:
 ;;      M-x customize-group RET init-help-mode RET
 ;;
 
 ;;; Change log:
-;;	
+;;
 ;; 2013/12/30
 ;;      * First released.
-;; 
+;;
 
 ;;; Acknowledgements:
 ;;
-;; 
+;;
 ;;
 
 ;;; TODO
 ;;
-;; 
+;;
 ;;
 
 ;;; Require
 
 (require 'one-key)
+(require 'apropos-fn+var)
 
 ;;; Code:
 
@@ -173,4 +174,3 @@
 (provide 'init-help-mode)
 
 ;;; init-help-mode.el ends here
-
