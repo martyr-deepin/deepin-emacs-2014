@@ -20,5 +20,5 @@ sudo cp ./deepin-emacs.desktop /usr/share/applications/
 * Install depend for python auto-complete:
 <pre><code>
 sudo apt-get install python-pip
-sudo pip install jdei epc mocker
+sudo pip install jedi epc mocker
 </pre></code>

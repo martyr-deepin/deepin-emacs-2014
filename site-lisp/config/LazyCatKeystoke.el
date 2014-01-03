@@ -501,68 +501,6 @@
    ("C-2" . multi-scratch-next)         ;下一个草稿
    ("C-3" . multi-scratch-new)          ;新建草稿
    ))
-;;; ### Ido ###
-;;; --- 交互式管理文件和缓存
-(lazy-set-key
- '(
-   ("C-x C-f" . ido-find-file)          ;交互式查找文件
-   ("C-x b" . ido-switch-buffer)        ;交互式切换buffer
-   ("C-x i" . ido-insert-buffer)        ;插入缓存
-   ("C-x I" . ido-insert-file)          ;插入文件
-   ))
-(add-hook 'ido-setup-hook
-          '(lambda ()
-             (interactive)
-             (ido-my-keys ido-completion-map)))
-(defun ido-my-keys (keymap)
-  "Add my keybindings for ido."
-  (lazy-set-key
-   '(
-     ("M-s-p" . ido-prev-match)              ;上一个匹配
-     ("M-s-n" . ido-next-match)              ;下一个匹配
-     ("M-s-h" . ido-next-work-directory)     ;下一个工作目录
-     ("M-s-l" . ido-prev-work-directory)     ;上一个工作目录
-     ("M-o" . backward-delete-char-untabify) ;向前删除字符
-     ("M-O" . ido-delete-backward-updir)     ;删除字符或进入上一级目录
-     )
-   keymap
-   ))
-;; ### Icicles ###
-;; --- Minibuffer 输入补全和切换
-(add-hook 'icicle-mode-hook 'bind-icicles-minibuffer-keys)
-(defun bind-icicles-minibuffer-keys ()
-  "Replace some default Icicles minibuffer bindings with others."
-  (dolist
-      (map (list
-            minibuffer-local-isearch-map             ;isearch
-            minibuffer-local-ns-map                  ;当空格不允许时
-            minibuffer-local-shell-command-map       ;补全shell命令时
-            minibuffer-local-map                     ;从minibuffer读取
-            minibuffer-local-completion-map          ;输入补全
-            minibuffer-local-must-match-map          ;输入补全精确匹配
-            minibuffer-local-filename-completion-map ;文件名补全
-            ))
-    (when icicle-mode
-      (lazy-set-key
-       '(
-         ("s-o" . icicle-insert-history-element) ;插入历史元素
-         )
-       map
-       )
-      (ido-my-keys map)))
-  (when icicle-mode
-    (lazy-set-key
-     '(
-       ("TAB" . isearch-complete-edit)
-       ("M-k" . isearch-delete-ring-element))
-     minibuffer-local-isearch-map
-     )))
-(lazy-set-key
- '(
-   ("M-s-z" . icicle-switch-to-Completions-buf) ;切换到提示buffer
-   ("M-s-x" . icicle-switch-to/from-minibuffer) ;在minibuffer和其他buffer之间切换
-   ("M-s-m" . icicle-complete-keys)             ;查看当前模式的按键
-   ))
 ;;; ### Maxima ###
 ;;; --- 代数计算系统
 (lazy-set-key

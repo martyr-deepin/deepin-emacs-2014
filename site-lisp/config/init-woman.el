@@ -105,8 +105,8 @@
    )
  Man-mode-map
  )
-(lazy-set-key sdcv-key-alist Man-mode-map)    ;sdcv的局部按键绑定
-(lazy-set-key vi-move-key-alist Man-mode-map) ;vi-move 的局部按键
+(lazy-set-mode-autoload-key sdcv-key-alist Man-mode-map nil "woman")    ;sdcv的局部按键绑定
+(lazy-set-mode-autoload-key vi-move-key-alist Man-mode-map nil "woman") ;vi-move 的局部按键
 
 (provide 'init-woman)
 

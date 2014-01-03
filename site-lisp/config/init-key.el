@@ -1,7 +1,7 @@
 ;;; ### Unset key ###
 ;;; --- 卸载按键
 (lazy-unset-key                         ;全局按键的卸载
- '("C-x C-f" "C-z" "C-q" "s-W" "s-z" "M-h" "C-x C-c" "C-\\" "C-x o"))
+ '("C-x C-f" "C-z" "C-q" "s-W" "s-z" "M-h" "C-x C-c" "C-\\" "C-x o" "M-x"))
 ;;; ### Vi-move ###
 ;;; --- Vi式移动
 (defvar vi-move-key-alist nil
@@ -586,5 +586,40 @@
 (lazy-set-autoload-key
  '(("s-v s-v" . ispell-buffer))
  "init-ispell")                         ;检查当前buffer
+;;; ### Ido ###
+;;; --- 交互式管理文件和缓存
+(lazy-set-key
+ '(
+   ("C-x C-f" . ido-find-file)          ;交互式查找文件
+   ("C-x b" . ido-switch-buffer)        ;交互式切换buffer
+   ("C-x i" . ido-insert-buffer)        ;插入缓存
+   ("C-x I" . ido-insert-file)          ;插入文件
+   ))
+(add-hook 'ido-setup-hook
+          '(lambda ()
+             (interactive)
+             (ido-my-keys ido-completion-map)))
+(defun ido-my-keys (keymap)
+  "Add my keybindings for ido."
+  (lazy-set-key
+   '(
+     ("M-s-p" . ido-prev-match)              ;上一个匹配
+     ("M-s-n" . ido-next-match)              ;下一个匹配
+     ("M-s-h" . ido-next-work-directory)     ;下一个工作目录
+     ("M-s-l" . ido-prev-work-directory)     ;上一个工作目录
+     ("M-o" . backward-delete-char-untabify) ;向前删除字符
+     ("M-O" . ido-delete-backward-updir)     ;删除字符或进入上一级目录
+     )
+   keymap
+   ))
+;;; ### Icicle ###
+(lazy-set-autoload-key
+ '(
+   ("M-x" . icicle-execute-extended-command)
+   ("M-s-z" . icicle-switch-to-Completions-buf) ;切换到提示buffer
+   ("M-s-x" . icicle-switch-to/from-minibuffer) ;在minibuffer和其他buffer之间切换
+   ("M-s-m" . icicle-complete-keys)             ;查看当前模式的按键
+   )
+ "init-icicles")
 
 (provide 'init-key)
