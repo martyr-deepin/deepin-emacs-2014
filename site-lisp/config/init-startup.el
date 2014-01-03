@@ -48,7 +48,7 @@
 (setq split-width-threshold nil)                                     ;分屏的时候使用上下分屏
 (setq one-key-popup-window nil)                                      ;禁止自动弹出窗口
 (add-hook 'find-file-hook 'highlight-parentheses-mode t)             ;增强的括号高亮
-(add-hook 'python-mode-hook 'pretty-lambda)
+(pretty-lambda-for-modes)
 (setq scroll-step 1                     ;流畅滚屏
       scroll-conservatively 10000
       auto-window-vscroll nil)

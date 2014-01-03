@@ -1,0 +1,111 @@
+* sublimity.el
+
+sublime text風のぬるぬるスクロール＆ミニマップ
+
+smooth-scrolling and minimap, like sublime editor
+
+** NOTE: sublimity NOW DEPENDS ON "cl-lib.el"
+
+cl-lib.el is a lisp library which is bundled from Emacs version
+24.3. If you use Emacs<24.3, you must download and put cl-lib.el to
+your load-path.
+
+** Installation
+
+Require this script and some of "sublimity-scroll" "sublimity-map".
+
+: (require 'sublimity)
+: (require 'sublimity-scroll)
+: (require 'sublimity-map)
+
+and call command "M-x sublimity-mode".
+
+If you want to enable sublimity everywhere, call function
+sublimity-global-mode instead.
+
+: (sublimity-global-mode)
+
+** Notes
+
+When you load this script, "auto-hscroll-mode" is automatically
+disabled, and "sublimity-auto-hscroll-mode" will work
+instead. Therefore, to disable horizontal scrolling, set
+"sublimity-auto-hscroll-mode" but not "auto-hscroll-mode".
+
+** sublimity-scroll Settings
+
+You may configure speed of scroll by setting two variables.
+
+: (setq sublimity-scroll-weight 10
+:       sublimity-scroll-drift-length 5)
+
+scroll is divided into (about) =weight + drift-length= steps. for
+example, with the configuration above, 100 lines of scrolling is
+divided into 15 steps
+
+: (17 15 14 12 11 8 7 5 4 2 1 1 1 1 1)
+
+and it looks smoother than 1 step scroll. note that last 5 steps are
+all 1 line scrolls, because drift-length is set 5. so you may make
+scroll more smooth by setting drift-length greater. try :
+
+: (setq sublimity-scroll-weight 5
+:       sublimity-scroll-drift-length 10)
+
+with the configuration above, scroll is divided into 15 steps again,
+
+: (30 24 18 12 6 1 1 1 1 1 1 1 1 1 1)
+
+but last *10* steps are all 1 line scrollings. this looks smoother but
+perhaps more annoying for some users.
+
+** sublimity-map Settings
+*** sublimity-map-size, sublimity-map-fraction
+
+: (setq sublimity-map-size 20)
+: (setq sublimity-map-fraction 0.3)
+
+"sublimity-map-fraction" defines the maximum fraction of width that
+minimap can get.
+
+*** sublimity-map-setup-hook
+
+: (add-hook 'sublimity-map-setup-hook
+:           (lambda ()
+:             (setq buffer-face-mode-face '(:family "Monospace"))
+:             (buffer-face-mode)))
+
+"sublimity-map-setup-hook" will run when minimap is created.
+
+*** sublimity-map-on-scroll
+
+: (setq sublimity-map-on-scroll t)
+
+When non-nil, minimap is automatically displayed on every scrolling.
+
+*** sublimity-map-on-commands
+
+: (setq sublimity-map-on-commands
+:       '(previous-line next-line backward-paragraph forward-paragraph
+:                       end-of-defun beginning-of-defun))
+
+Set this variable to a list of command names, after which minimap
+should be updated. If one of these commands are invoked, minimap is
+updated even when scroll does not occur.
+
+*** sublimity-map-set-delay
+
+: (sublimity-map-set-delay 5)
+
+With settings above, minimap is displayed after 5 seconds of idle
+time. You can also cancel this timer, by passing "'inf" to
+sublimity-map-delay.
+
+: (sublimity-map-set-delay 'inf)
+
+** Known Bugs, Limitations
+
++ if sublimity-scroll does not animate scroll correctly, try to load
+  sublimity at the bottom of your init file (perhaps some libraries
+  conflict with sublimity in post/pre-command-hook, and reordering hooks
+  possibly solve the problem)
