@@ -84,6 +84,7 @@
 (require 'helm-files)
 (require 'helm-config)
 (require 'helm-helm-commands)
+(require 'helm-c-yasnippet)
 
 ;;; Code:
 
@@ -99,6 +100,7 @@
        helm-source-moccur
        helm-source-occur
        helm-source-helm-commands
+       helm-c-source-yasnippet
        )
      "*helm search*")))
 

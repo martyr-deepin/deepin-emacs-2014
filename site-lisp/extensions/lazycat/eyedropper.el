@@ -1,5 +1,5 @@
 ;;; eyedropper.el --- Pick foreground and background colors at cursor or pointer.
-;; 
+;;
 ;; Filename: eyedropper.el
 ;; Description: Pick foreground and background colors at cursor or pointer.
 ;; Author: Drew Adams
@@ -13,15 +13,15 @@
 ;; URL: http://www.emacswiki.org/cgi-bin/wiki/eyedropper.el
 ;; Keywords: color, rgb, hsv, hexadecimal, face, frame
 ;; Compatibility: GNU Emacs 20.x, GNU Emacs 21.x, GNU Emacs 22.x
-;; 
+;;
 ;; Features that might be required by this library:
 ;;
 ;;   `hexrgb'.
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; 
+;;
 ;;; Commentary:
-;; 
+;;
 ;;  Use the commands defined here to examine or save the background or
 ;;  foreground color at the text cursor or the mouse pointer.
 ;;
@@ -45,11 +45,11 @@
 ;;    Add this to your initialization file (~/.emacs or ~/_emacs):
 ;;
 ;;      (require 'eyedropper) ; Load this library.
-;; 
+;;
 ;;    You will also need my library `hexrgb.el'; it is loaded
 ;;    automatically by `eyedropper.el'.  Get it here:
 ;;    http://www.emacswiki.org/cgi-bin/wiki/hexrgb.el.
-;; 
+;;
 ;;  Commands defined here:
 ;;
 ;;    `background-color', `eyedrop-background-at-mouse',
@@ -71,7 +71,7 @@
 ;;    `eyedrop-picked-foreground'.
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; 
+;;
 ;;; Change log:
 ;;
 ;; 2007/10/11 dadams
@@ -87,26 +87,26 @@
 ;;     eyedrop-(back|fore)ground-at-point: Use eyedrop-face-at-point also.
 ;; 2006/06/23 dadams
 ;;     Created.
-;; 
+;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; 
+;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
 ;; published by the Free Software Foundation; either version 2, or
 ;; (at your option) any later version.
-;; 
+;;
 ;; This program is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 ;; General Public License for more details.
-;; 
+;;
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program; see the file COPYING.  If not, write to
 ;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth
 ;; Floor, Boston, MA 02110-1301, USA.
-;; 
+;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; 
+;;
 ;;; Code:
 
 (require 'hexrgb) ;; hexrgb-hex-to-rgb, hexrgb-rgb-to-hsv
@@ -194,7 +194,7 @@ Non-nil optional arg MSG-P means display an informative message."
          (bg (cond ((and face (symbolp face))
                     (condition-case nil
                         (face-background face nil 'default) ; Emacs 22.
-                      (error (or (face-background face) ; Emacs 20
+                      (error (or (face-background face)     ; Emacs 20
                                  (cdr (assq 'background-color (frame-parameters)))))))
                    ((consp face)
                     (cond ((memq 'background-color face) (cdr (memq 'background-color face)))
@@ -217,7 +217,7 @@ Non-nil optional arg MSG-P means display an informative message."
          (fg (cond ((and face (symbolp face))
                     (condition-case nil
                         (face-foreground face nil 'default) ; Emacs 22.
-                      (error (or (face-foreground face) ; Emacs 20
+                      (error (or (face-foreground face)     ; Emacs 20
                                  (cdr (assq 'foreground-color (frame-parameters)))))))
                    ((consp face)
                     (cond ((memq 'foreground-color face) (cdr (memq 'foreground-color face)))
