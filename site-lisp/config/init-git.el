@@ -1,21 +1,21 @@
-;;; init-yasnippet.el --- Yasnippet configuration
+;;; init-git.el --- Init for git
 
-;; Filename: init-yasnippet.el
-;; Description: Yasnippet configuration
-;; Author: Andy Stewart lazycat.manatee@gmail.com
-;; Maintainer: Andy Stewart lazycat.manatee@gmail.com
-;; Copyright (C) 2008, 2009, Andy Stewart, all rights reserved.
-;; Created: 2008-10-20 10:29:11
+;; Filename: init-git.el
+;; Description: Init for git
+;; Author: Andy Stewart <lazycat.manatee@gmail.com>
+;; Maintainer: Andy Stewart <lazycat.manatee@gmail.com>
+;; Copyright (C) 2014, Andy Stewart, all rights reserved.
+;; Created: 2014-01-03 23:04:31
 ;; Version: 0.1
-;; Last-Updated: 2008-10-20 10:29:14
+;; Last-Updated: 2014-01-03 23:04:31
 ;;           By: Andy Stewart
-;; URL:
-;; Keywords: yasnippet
-;; Compatibility: GNU Emacs 23.0.60.1
+;; URL: http://www.emacswiki.org/emacs/download/init-git.el
+;; Keywords: 
+;; Compatibility: GNU Emacs 24.3.50.1
 ;;
 ;; Features that might be required by this library:
 ;;
-;;
+;; 
 ;;
 
 ;;; This file is NOT part of GNU Emacs
@@ -37,56 +37,61 @@
 ;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth
 ;; Floor, Boston, MA 02110-1301, USA.
 
-;;; Commentary:
-;;
-;; Yasnippet configuration
-;;
+;;; Commentary: 
+;; 
+;; Init for git
+;; 
 
 ;;; Installation:
 ;;
-;; Put init-yasnippet.el to your load-path.
+;; Put init-git.el to your load-path.
 ;; The load-path is usually ~/elisp/.
 ;; It's set in your ~/.emacs like this:
 ;; (add-to-list 'load-path (expand-file-name "~/elisp"))
 ;;
 ;; And the following to your ~/.emacs startup file.
 ;;
-;; (require 'init-yasnippet)
+;; (require 'init-git)
 ;;
 ;; No need more.
 
+;;; Customize:
+;;
+;; 
+;;
+;; All of the above can customize by:
+;;      M-x customize-group RET init-git RET
+;;
+
 ;;; Change log:
-;;
-;; 2008/10/20
-;;      First released.
-;;
+;;	
+;; 2014/01/03
+;;      * First released.
+;; 
 
 ;;; Acknowledgements:
 ;;
-;;
+;; 
 ;;
 
 ;;; TODO
 ;;
-;;
+;; 
 ;;
 
 ;;; Require
 
-(require 'yasnippet)
-(require 'init-git)
 
 ;;; Code:
 
-(add-to-list `yas/root-directory "/usr/share/deepin-emacs/site-lisp/extensions/yasnippet/snippets/")
-(yas-global-mode 1)
+(defun get-git-user-name ()
+  (interactive)
+  (replace-regexp-in-string "\n$" "" (shell-command-to-string "git config --get user.name")))
 
-;; Disable yasnippet mode on some mode.
-(dolist (hook (list
-               'term-mode-hook
-               ))
-  (add-hook hook '(lambda () (yas-minor-mode -1))))
+(defun get-git-user-email ()
+  (interactive)
+  (replace-regexp-in-string "\n$" "" (shell-command-to-string "git config --get user.email")))
 
-(provide 'init-yasnippet)
+(provide 'init-git)
 
-;;; init-yasnippet.el ends here
+;;; init-git.el ends here

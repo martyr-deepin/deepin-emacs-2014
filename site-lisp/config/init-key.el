@@ -612,5 +612,14 @@
      )
    keymap
    ))
+;;; ### IRC ###
+;;; --- 聊天
+(lazy-set-autoload-key
+ '(
+   ("C-c i" . switch-to-erc)                     ;切换到IRC或自动登录IRC
+   ("C-c I" . erc-nick-notify-jump-last-channel) ;自动跳转到最后收到消息的频道
+   ("M-U" . one-key-menu-irc-channel)            ;跳转到IRC频道
+   )
+ "init-erc")
 
 (provide 'init-key)

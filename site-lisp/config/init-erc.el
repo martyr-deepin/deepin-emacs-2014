@@ -73,12 +73,19 @@
 
 ;;; Require
 
+(require 'erc)
+(require 'erc-highlight-nicknames)
+(require 'erc-extension)
+(require 'erc-nick-notify)
+(require 'init-doi)
+(require 'init-irc)
+(require 'init-git)
+(require 'paste2)
+(require 'doi-extension)
 
 ;;; Code:
 
-(setq erc-user-full-name (eval my-full-name))                         ;设置全名
-(setq erc-nick (eval my-irc-nick))                                    ;设置昵称
-(setq erc-password (eval my-irc-passwd))                              ;设置登录密码
+(setq erc-user-full-name (get-git-user-name))                         ;设置全名
 (setq erc-autojoin-mode t)                                            ;自动加入
 (setq erc-join-buffer 'bury)                                          ;在隐藏的Buffer中加入
 (setq erc-autoaway-mode t)                                            ;开启自动离开模块
@@ -102,7 +109,7 @@
 (setq erc-nickserv-passwords                                          ;设置自动登录时需要的密码
       '((freenode (((eval erc-nick) . (eval erc-password))))))
 (setq erc-autojoin-channels-alist       ;自动加入的服务器和频道
-      `(,(cons "freenode.net" my-irc-channel-list)))
+      `(,(cons "freenode.net" '("#emacs"))))
 (setq erc-log-channels-directory        ;日志的记录目录
       "~/.emacs.d/deepin-emacs/Configure-File/ERC/logs/")
 (dolist (hooked (list
@@ -141,6 +148,14 @@
         ;; "PART"                          ;离开
         ;; "QUIT"                          ;退出
         ))
+(lazy-set-mode-autoload-key
+ '(
+   ("C-c C-y" . paste2-buffer-create)   ;粘贴大段内容
+   ("/" . doi-erc-command)              ;erc命令
+   )
+ erc-mode-map nil "init-erc"
+ )
+(lazy-set-mode-autoload-key doi-key-alist erc-mode-map nil "init-erc") ;doi 的局部按键
 
 (provide 'init-erc)
 
