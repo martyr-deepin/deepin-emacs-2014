@@ -101,6 +101,7 @@
        helm-source-occur
        helm-source-helm-commands
        helm-c-source-yasnippet
+       helm-source-apt
        )
      "*helm search*")))
 

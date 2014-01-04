@@ -1,6 +1,6 @@
 ;;; helm-yaoddmuse.el --- Helm extension for yaoddmuse -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2013 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2014 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -38,8 +38,8 @@
           (setq helm-yaoddmuse-ew-cache
                 (gethash "EmacsWiki" yaoddmuse-pages-hash)))
         helm-yaoddmuse-ew-cache)
-      (yaoddmuse-update-pagename t)
-      (gethash "EmacsWiki" yaoddmuse-pages-hash)))
+    (yaoddmuse-update-pagename t)
+    (gethash "EmacsWiki" yaoddmuse-pages-hash)))
 
 (defvar helm-source-yaoddmuse-emacswiki-edit-or-view
   '((name . "Yaoddmuse Edit or View (EmacsWiki)")
@@ -71,7 +71,7 @@
                           (helm-yaoddmuse-cache-pages t)
                           (setq helm-yaoddmuse-ew-cache
                                 (gethash "EmacsWiki" yaoddmuse-pages-hash)))
-                        (yaoddmuse-update-pagename))))))
+                      (yaoddmuse-update-pagename))))))
     (action-transformer helm-yaoddmuse-action-transformer))
   "Needs yaoddmuse.el.
 
@@ -107,7 +107,7 @@ http://www.emacswiki.org/emacs/download/yaoddmuse.el")
       (append actions '(("Install Elisp"
                          . (lambda (elm)
                              (install-elisp-from-emacswiki elm)))))
-      actions))
+    actions))
 
 ;;;###autoload
 (defun helm-yaoddmuse-cache-pages (&optional load)

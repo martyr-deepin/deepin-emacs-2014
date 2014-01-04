@@ -1,6 +1,6 @@
 ;;; helm-emms.el --- Emms for Helm. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2013 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2014 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@
   :group 'helm)
 
 (defface helm-emms-playlist
-    '((t (:foreground "Springgreen4" :underline t)))
+  '((t (:foreground "Springgreen4" :underline t)))
   "Face used for tracks in current emms playlist."
   :group 'helm-emms)
 
@@ -103,16 +103,16 @@
     (candidates . (lambda ()
                     (cddr (directory-files emms-source-file-default-directory))))
     (action .
-     (("Play Directory" . (lambda (item)
-                            (emms-play-directory
-                             (expand-file-name
-                              item
-                              emms-source-file-default-directory))))
-      ("Open dired in file's directory" . (lambda (item)
-                                            (helm-open-dired
-                                             (expand-file-name
-                                              item
-                                              emms-source-file-default-directory))))))
+            (("Play Directory" . (lambda (item)
+                                   (emms-play-directory
+                                    (expand-file-name
+                                     item
+                                     emms-source-file-default-directory))))
+             ("Open dired in file's directory" . (lambda (item)
+                                                   (helm-open-dired
+                                                    (expand-file-name
+                                                     item
+                                                     emms-source-file-default-directory))))))
     (filtered-candidate-transformer . helm-adaptive-sort)))
 
 (defvar helm-emms-current-playlist nil)
@@ -135,12 +135,12 @@
     (init . (lambda ()
               (setq helm-emms-current-playlist
                     (with-current-emms-playlist
-                      (cl-loop with cur-list = (emms-playlist-tracks-in-region
-                                                (point-min) (point-max))
-                               for i in cur-list
-                               for name = (assoc-default 'name i)
-                               when name
-                               collect name)))))
+                     (cl-loop with cur-list = (emms-playlist-tracks-in-region
+                                               (point-min) (point-max))
+                              for i in cur-list
+                              for name = (assoc-default 'name i)
+                              when name
+                              collect name)))))
     (candidates . (lambda ()
                     (cl-loop for v being the hash-values in emms-cache-db
                              for name      = (assoc-default 'name v)
@@ -157,12 +157,12 @@
                ("Add to Playlist and play (C-u clear current)"
                 . (lambda (candidate)
                     (with-current-emms-playlist
-                      (when helm-current-prefix-arg
-                        (emms-playlist-current-clear))
-                      (emms-playlist-new)
-                      (mapc 'emms-add-playlist-file (helm-marked-candidates))
-                      (unless emms-player-playing-p
-                        (helm-emms-play-current-playlist)))))))))
+                     (when helm-current-prefix-arg
+                       (emms-playlist-current-clear))
+                     (emms-playlist-new)
+                     (mapc 'emms-add-playlist-file (helm-marked-candidates))
+                     (unless emms-player-playing-p
+                       (helm-emms-play-current-playlist)))))))))
 
 ;;;###autoload
 (defun helm-emms ()

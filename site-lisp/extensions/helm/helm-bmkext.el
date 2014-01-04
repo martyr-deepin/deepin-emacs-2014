@@ -1,6 +1,6 @@
 ;;; helm-bmkext.el --- Sources to filter bookmark-extensions bookmarks. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2013 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2014 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -27,6 +27,8 @@
 (require 'helm-adaptative)
 
 (declare-function bookmark-get-filename "bookmark" (bookmark-name-or-record))
+(declare-function bmkext-bmenu-maybe-sort "ext:bookmark-extensions.el" (&optional alist))
+(defvar bmkext-bmenu-sort-function)
 
 
 ;;; Filter functions
@@ -34,15 +36,49 @@
 (defun helm-bmkext-filter-setup-alist (fn &rest args)
   "Return a filtered `bookmark-alist' sorted alphabetically."
   (cl-loop
-   with alist = (if args
-                    (apply #'(lambda (x) (funcall fn x)) args)
-                    (funcall fn))
+   with alist = (bmkext-bmenu-maybe-sort
+                 (if args
+                     (apply #'(lambda (x) (funcall fn x)) args)
+                     (funcall fn)))
    for i in alist
    for b = (car i)
-   collect (propertize b 'location (bookmark-location b)) into sa
-   finally return (sort sa 'string-lessp)))
+   collect (propertize b 'location (bookmark-location b))))
 
-;;;###autoload
+(defun helm-bmkext-run-sort-by-frequency ()
+  (interactive)
+  (helm-bmkext-set-mode-line "FREQ")
+  (setq bmkext-bmenu-sort-function 'bmkext-visited-more-p)
+  (helm-force-update))
+
+(defun helm-bmkext-run-sort-by-last-visit ()
+  (interactive)
+  (helm-bmkext-set-mode-line "LAST")
+  (setq bmkext-bmenu-sort-function 'bmkext-last-time-more-p)
+  (helm-force-update))
+
+(defun helm-bmkext-run-sort-alphabetically ()
+  (interactive)
+  (helm-bmkext-set-mode-line "ALPHA")
+  (setq bmkext-bmenu-sort-function 'bmkext-alpha-more-p)
+  (helm-force-update))
+
+(defun helm-bmkext-set-mode-line (str)
+  (if (string-match "Sort:\\[\\(.*\\)\\] " (cadr helm-bookmark-mode-line-string))
+      (setq helm-bookmark-mode-line-string (list (car helm-bookmark-mode-line-string)
+                                                 (replace-match
+                                                  str nil nil
+                                                  (cadr helm-bookmark-mode-line-string) 1)))
+      (setq helm-bookmark-mode-line-string (list (car helm-bookmark-mode-line-string)
+                                                 (concat (format "Sort:[%s] " str)
+                                                         (cadr helm-bookmark-mode-line-string))))))
+
+(defun helm-bmkext-init-mode-line ()
+  (helm-bmkext-set-mode-line (cl-case bmkext-bmenu-sort-function
+                               (bmkext-visited-more-p "FREQ")
+                               (bmkext-last-time-more-p "LAST")
+                               (bmkext-alpha-more-p "ALPHA")
+                               (t "ALPHA"))))
+
 (defun helm-bmkext-run-edit ()
   "Run `bmkext-edit-bookmark' from keyboard."
   (interactive)
@@ -56,6 +92,7 @@
   '((name . "Bookmark Addressbook")
     (init . (lambda ()
               (require 'bookmark-extensions)
+              (helm-bmkext-init-mode-line)
               (bookmark-maybe-load-default-file)
               (helm-init-candidates-in-buffer
                'global
@@ -69,9 +106,7 @@
                      candidate)))
            (bookmark--jump-via bmk 'switch-to-buffer))))
     (persistent-help . "Show contact - Prefix with C-u to append")
-    (filtered-candidate-transformer
-     helm-adaptive-sort
-     helm-highlight-bookmark)
+    (filtered-candidate-transformer . helm-highlight-bookmark)
     (action . (("Show Contact(s)"
                 . (lambda (candidate)
                     (let* ((contacts (helm-marked-candidates))
@@ -145,15 +180,14 @@
   '((name . "Bookmark W3m")
     (init . (lambda ()
               (require 'bookmark-extensions)
+              (helm-bmkext-init-mode-line)
               (bookmark-maybe-load-default-file)
               (helm-init-candidates-in-buffer
                'global (helm-bookmark-w3m-setup-alist))))
     (candidates-in-buffer)
     (search helm-bookmark-search-fn)
     (match-part . helm-pp-bookmark-match-fn)
-    (filtered-candidate-transformer
-     helm-adaptive-sort
-     helm-highlight-bookmark)
+    (filtered-candidate-transformer . helm-highlight-bookmark)
     (type . bookmark)))
 
 (defun helm-bookmark-w3m-setup-alist ()
@@ -167,15 +201,14 @@
   '((name . "Bookmark Images")
     (init . (lambda ()
               (require 'bookmark-extensions)
+              (helm-bmkext-init-mode-line)
               (bookmark-maybe-load-default-file)
               (helm-init-candidates-in-buffer
                'global (helm-bookmark-images-setup-alist))))
     (candidates-in-buffer)
     (search helm-bookmark-search-fn)
     (match-part . helm-pp-bookmark-match-fn)
-    (filtered-candidate-transformer
-     helm-adaptive-sort
-     helm-highlight-bookmark)
+    (filtered-candidate-transformer . helm-highlight-bookmark)
     (type . bookmark)))
 
 (defun helm-bookmark-images-setup-alist ()
@@ -189,21 +222,19 @@
   '((name . "Bookmark Woman&Man")
     (init . (lambda ()
               (require 'bookmark-extensions)
+              (helm-bmkext-init-mode-line)
               (bookmark-maybe-load-default-file)
               (helm-init-candidates-in-buffer
                'global (helm-bookmark-man-setup-alist))))
     (candidates-in-buffer)
     (search helm-bookmark-search-fn)
     (match-part . helm-pp-bookmark-match-fn)
-    (filtered-candidate-transformer
-     helm-adaptive-sort
-     helm-highlight-bookmark)
+    (filtered-candidate-transformer . helm-highlight-bookmark)
     (type . bookmark)))
 
 (defun helm-bookmark-man-setup-alist ()
   "Specialized filter function for bookmarks w3m."
-  (append (helm-bmkext-filter-setup-alist 'bmkext-man-alist-only)
-          (helm-bmkext-filter-setup-alist 'bmkext-woman-alist-only)))
+  (helm-bmkext-filter-setup-alist 'bmkext-woman-man-alist-only))
 
 
 ;;; Gnus
@@ -212,15 +243,14 @@
   '((name . "Bookmark Gnus")
     (init . (lambda ()
               (require 'bookmark-extensions)
+              (helm-bmkext-init-mode-line)
               (bookmark-maybe-load-default-file)
               (helm-init-candidates-in-buffer
                'global (helm-bookmark-gnus-setup-alist))))
     (candidates-in-buffer)
     (search helm-bookmark-search-fn)
     (match-part . helm-pp-bookmark-match-fn)
-    (filtered-candidate-transformer
-     helm-adaptive-sort
-     helm-highlight-bookmark)
+    (filtered-candidate-transformer . helm-highlight-bookmark)
     (type . bookmark)))
 
 (defun helm-bookmark-gnus-setup-alist ()
@@ -234,15 +264,14 @@
   '((name . "Bookmark Info")
     (init . (lambda ()
               (require 'bookmark-extensions)
+              (helm-bmkext-init-mode-line)
               (bookmark-maybe-load-default-file)
               (helm-init-candidates-in-buffer
                'global (helm-bookmark-info-setup-alist))))
     (candidates-in-buffer)
     (search helm-bookmark-search-fn)
     (match-part . helm-pp-bookmark-match-fn)
-    (filtered-candidate-transformer
-     helm-adaptive-sort
-     helm-highlight-bookmark)
+    (filtered-candidate-transformer . helm-highlight-bookmark)
     (type . bookmark)))
 
 (defun helm-bookmark-info-setup-alist ()
@@ -256,15 +285,14 @@
   '((name . "Bookmark Files&Directories")
     (init . (lambda ()
               (require 'bookmark-extensions)
+              (helm-bmkext-init-mode-line)
               (bookmark-maybe-load-default-file)
               (helm-init-candidates-in-buffer
                'global (helm-bookmark-local-files-setup-alist))))
     (candidates-in-buffer)
     (search helm-bookmark-search-fn)
     (match-part . helm-pp-bookmark-match-fn)
-    (filtered-candidate-transformer
-     helm-adaptive-sort
-     helm-highlight-bookmark)
+    (filtered-candidate-transformer . helm-highlight-bookmark)
     (type . bookmark)))
 
 (defun helm-bookmark-local-files-setup-alist ()
@@ -283,7 +311,6 @@ Contain also `helm-source-google-suggest'."
    :sources
    '(helm-source-bookmark-files&dirs
      helm-source-bookmark-w3m
-     helm-source-google-suggest
      helm-source-bmkext-addressbook
      helm-source-bookmark-gnus
      helm-source-bookmark-info

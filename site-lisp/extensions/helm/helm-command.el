@@ -1,6 +1,6 @@
 ;;; helm-command.el --- Helm execute-exended-command. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2013 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2014 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -128,8 +128,8 @@ It is `helm' replacement of regular `M-x' `execute-extended-command'."
                                   (set-window-buffer (get-buffer-window hbuf)
                                                      helm-current-buffer))
                                 (setq in-help nil))
-                              (helm-describe-function candidate)
-                              (setq in-help t))
+                            (helm-describe-function candidate)
+                            (setq in-help t))
                           (setq help-cand candidate)))))
     (setq command (helm-comp-read
                    "M-x " obarray

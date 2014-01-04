@@ -1,6 +1,6 @@
 ;;; helm-bookmark.el --- Helm for Emacs regular Bookmarks. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2013 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2014 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -77,7 +77,10 @@
     (define-key map (kbd "C-d")   'helm-bookmark-run-delete)
     (define-key map (kbd "M-t")   'helm-bookmark-toggle-filename)
     (when (locate-library "bookmark-extensions")
-      (define-key map (kbd "M-e") 'helm-bmkext-run-edit))
+      (define-key map (kbd "M-e") 'helm-bmkext-run-edit)
+      (define-key map (kbd "M-F") 'helm-bmkext-run-sort-by-frequency)
+      (define-key map (kbd "M-V") 'helm-bmkext-run-sort-by-last-visit)
+      (define-key map (kbd "M-A") 'helm-bmkext-run-sort-alphabetically))
     (define-key map (kbd "C-c ?") 'helm-bookmark-help)
     (delq nil map))
   "Generic Keymap for emacs bookmark sources.")
@@ -87,6 +90,10 @@
   `((name . "Bookmarks")
     (init . (lambda ()
               (require 'bookmark)
+              (setq helm-bookmark-mode-line-string
+                    (list (car helm-bookmark-mode-line-string)
+                          (replace-regexp-in-string "Sort:\\[.*\\] " ""
+                                                    (cadr helm-bookmark-mode-line-string))))                          
               (setq helm-bookmarks-cache
                     (bookmark-all-names))))
     (no-delay-on-input) ; Issue #173 needed for helm-for-files.
@@ -152,6 +159,10 @@
   '((name . "PP-Bookmarks")
     (init . (lambda ()
               (require 'bookmark)
+              (setq helm-bookmark-mode-line-string
+                    (list (car helm-bookmark-mode-line-string)
+                          (replace-regexp-in-string "Sort:\\[.*\\] " ""
+                                                    (cadr helm-bookmark-mode-line-string))))
               (helm-init-candidates-in-buffer
                'global (cl-loop for b in (bookmark-all-names) collect
                                 (propertize b 'location (bookmark-location b))))))
