@@ -85,6 +85,7 @@
 (require 'helm-config)
 (require 'helm-helm-commands)
 (require 'helm-c-yasnippet)
+(require 'helm-apt)
 
 ;;; Code:
 
