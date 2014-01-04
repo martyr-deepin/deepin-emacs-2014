@@ -102,7 +102,8 @@
   "Exit emacs."
   (interactive)
   (kill-unused-buffers)
-  (autosave-buffers)
+  (auto-save-buffers)
+  (make-directory "~/.emacs.d/deepin-emacs/Configure-File/Windows/" t)
   (see-you-again))
 
 ;;; ### Windows ###
