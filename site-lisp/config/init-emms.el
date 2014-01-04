@@ -73,17 +73,39 @@
 
 ;;; Require
 
+(require 'emms-source-file)             ;Emms 文件
+(require 'emms-source-playlist)         ;Emms 列表
+(require 'emms-player-simple)           ;Emms simple
+(require 'emms-player-mplayer)          ;Emms mplayer播放器
+(require 'emms-playlist-mode)           ;Emms 播放列表模式
+(require 'emms-info)                    ;Emms信息模式
+(require 'emms-cache)                   ;Emms缓存
+(require 'emms-playing-time)            ;Emms 播放时间
+(require 'emms-volume)                  ;Emms 声音调节
+(require 'emms-lyrics)                  ;Emms 歌词
+(require 'emms-setup)                   ;Emms 设置
+(require 'emms-player-mpg321-remote)    ;Emms 远程播放
+(require 'emms-streams)                 ;Emms 流媒体
+(require 'emms-volume-amixer)           ;Emms 声音控制
+(require 'emms-lyrics-download)         ;自动下载歌词
+(require 'emms-i18n)                    ;自动识别音乐标签的编码
+(require 'emms-history)                 ;自动保存和导入上次的播放列表
+(require 'emms-browser)                 ;EMMS 浏览器
+(require 'emms-cache)                   ;EMMS 缓存
+(require 'emms-tag-editor)              ;EMMS 标签编辑器
+(require 'emms-extension)               ;emms扩展
 
 ;;; Code:
 
-(emms-devel)                                                              ;选择开发者模式
+(emms-devel)                            ;选择开发者模式
 ;; 目录
-(setq emms-directory "~/.emacs.d/deepin-emacs/Configure-File/Emms/")                    ;设置EMMS的目录
-(setq emms-history-file "~/.emacs.d/deepin-emacs/Configure-File/Emms/history")          ;播放列表历史记录
-(setq emms-cache-file "~/.emacs.d/deepin-emacs/Configure-File/Emms/cache")              ;缓存文件
+(make-directory "~/.emacs.d/deepin-emacs/Configure-File/Emms/" t)
+(setq emms-directory "~/.emacs.d/deepin-emacs/Configure-File/Emms/")           ;设置EMMS的目录
+(setq emms-history-file "~/.emacs.d/deepin-emacs/Configure-File/Emms/history") ;播放列表历史记录
+(setq emms-cache-file "~/.emacs.d/deepin-emacs/Configure-File/Emms/cache")     ;缓存文件
 (setq emms-stream-bookmarks-file "~/.emacs.d/deepin-emacs/Configure-File/Emms/streams") ;网络电台保存文件
 (setq emms-score-file "~/.emacs.d/deepin-emacs/Configure-File/Emms/scores")             ;分数文件
-(setq emms-source-file-default-directory "/data/Music/")                  ;设定默认的播放目录
+(setq emms-source-file-default-directory "/data/Music/")    ;设定默认的播放目录
 ;; 播放设置
 (add-hook 'emms-player-finished-hook 'emms-random)          ;当播放完当前的歌曲时随机选择下一首歌曲
 (setq emms-playlist-default-major-mode 'emms-playlist-mode) ;设定EMMS用播放列表的主模式
@@ -108,7 +130,7 @@
 (setq emms-show-format "%s")                 ;设置 `emms-show' 的显示格式
 ;; 歌词设置
 (ad-activate 'emms-lyrics-find-lyric)        ;自动下载歌词
-(setq emms-lyrics-dir my-lyrics-directory)   ;EMMS的歌词目录
+(setq emms-lyrics-dir "~/.lyrcis")           ;EMMS的歌词目录
 (setq emms-lyrics-display-format "%s")       ;设置歌词显示格式
 (setq emms-lyrics-scroll-timer-interval 1.0) ;歌词滚动延迟
 (setq emms-lyrics-display-on-minibuffer nil) ;在minibuffer中显示歌词
@@ -270,5 +292,97 @@
   (one-key-menu "EMMS-BROWSER-LOOKUP" one-key-menu-emms-browser-lookup-alist t))
 
 (provide 'init-emms)
+
+;;; ### Emms Playlist ###
+;;; --- EMMS 播放列表
+(lazy-unset-key
+ '("s" "m" "u" "M-<" "M->")
+ emms-playlist-mode-map)                ;卸载按键
+(lazy-set-key
+ '(
+   ("C-x C-s" . emms-playlist-save)             ;保存播放列表
+   ("C-y" . emms-playlist-mode-yank)            ;剪切
+   ("C-k" . emms-playlist-mode-kill-track)      ;删除当前TRACK
+   ("C-w" . emms-playlist-mode-kill)            ;删除
+   ("C-/" . emms-playlist-mode-undo)            ;撤销
+   ("J" . scroll-up-one-line)                   ;向上滚动一行
+   ("K" . scroll-down-one-line)                 ;向下滚动一行
+   ("." . emms-playlist-mode-first)             ;浏览最上面一行
+   ("," . emms-playlist-mode-last)              ;浏览最下面一行
+   ("C-j" . emms-playlist-mode-insert-newline)  ;新建一行
+   ("M-y" . emms-playlist-mode-yank-pop)        ;YANK弹出
+   ("M-n" . emms-playlist-mode-next)            ;下一个播放列表
+   ("M-p" . emms-playlist-mode-previous)        ;上一个播放列表
+   ("a" . emms-playlist-mode-add-contents)      ;向当前播放列表添加内容
+   ("d" . emms-playlist-mode-kill-entire-track) ;从播放列表中移除当前TRACK
+   ("C" . emms-playlist-mode-clear)             ;清空当前的播放列表
+   ("f" . emms-playlist-mode-play-smart)        ;播放当前TRACK
+   ("b" . emms-playlist-set-playlist-buffer)    ;设定当前播放列表BUFFER
+   ("n" . emms-next)                            ;播放下一首
+   ("p" . emms-previous)                        ;播放上一首
+   ("r" . emms-random)                          ;随机播放下一首
+   (">" . emms-seek-forward)                    ;前进
+   ("<" . emms-seek-backward)                   ;后退
+   ("X" . emms-pause)                           ;暂停
+   ("T" . emms-stop)                            ;停止
+   ("Z" . emms-show)                            ;显示播放信息
+   ("q" . emms-playlist-mode-bury-buffer)       ;退出
+   ("?" . describe-mode)                        ;帮助
+   ("g" . emms-playlist-mode-center-current)    ;跳转到当前播放TRACK
+   ("G" . emms-jump-to-file)                    ;定位当前音乐文件的位置
+   ("D" . emms-delete-file-from-disk)           ;丛磁盘删除当前的文件
+   (";" . emms-tag-editor-edit-marked-tracks)   ;编辑标记的TAG
+   ("H" . emms-last-mark-track)                 ;最后一个标记
+   ("L" . emms-first-mark-track)                ;第一个标记
+   ("N" . emms-next-mark-track)                 ;下一个标记
+   ("P" . emms-prev-mark-track)                 ;上一个标记
+   ("s" . one-key-menu-emms-playlist-sort)      ;列表排序菜单
+   ("m" . one-key-menu-emms-playlist-mark)      ;列表标记菜单
+   )
+ emms-playlist-mode-map
+ )
+(lazy-set-key vi-move-key-alist emms-playlist-mode-map) ;vi-move 的局部按键
+;;; ### Emms Tag Editor ###
+;;; --- Emms 标签编辑器
+(lazy-set-key
+ '(
+   ("C-c C-j" . emms-tag-editor-next-same-field)  ;下一个相同的区域
+   ("C-c C-k" . emms-tag-editor-prev-same-field)  ;上一个相同的区域
+   ("C-c C-r" . emms-tag-editor-set-all+)         ;替换所有标签
+   ("C-c C-l" . emms-tag-editor-set-tracknumber)  ;插入轨迹序号, 要确认
+   ("C-c C-i" . emms-tag-editor-set-tracknumber+) ;插入轨迹序号, 不用确认
+   )
+ emms-tag-editor-mode-map
+ )
+;;; ### EMMS Browser ###
+;;; --- EMMS 浏览器
+(lazy-set-key
+ '(
+   ("J" . emms-browser-next-non-track)      ;下一个节点
+   ("K" . emms-browser-prev-non-track)      ;上一个节点
+   ("f" . emms-browser-toggle-subitems)     ;显示
+   ("s" . one-key-menu-emms-browser-search) ;搜索菜单
+   ("L" . one-key-menu-emms-browser-lookup) ;查询菜单
+   )
+ emms-browser-mode-map
+ )
+(lazy-set-key sdcv-key-alist emms-browser-mode-map)    ;sdcv 的局部按键
+(lazy-set-key vi-move-key-alist emms-browser-mode-map) ;vi-move 的局部按键
+;;; ### EMMS Stream ###
+;;; --- EMMS 流媒体
+(lazy-set-key
+ '(
+   ("a" . emms-stream-add-bookmark)          ;添加
+   ("d" . emms-stream-delete-bookmark)       ;删除
+   ("E" . emms-stream-edit-bookmark)         ;编辑
+   ("q" . emms-stream-quit)                  ;退出
+   ("s" . emms-stream-save-bookmarks-file)   ;保存
+   ("t" . emms-stream-toggle-default-action) ;切换
+   ("i" . emms-stream-info-bookmark)         ;信息
+   ("f" . emms-stream-play)                  ;播放
+   )
+ emms-stream-mode-map
+ )
+(lazy-set-key vi-move-key-alist emms-stream-mode-map) ;vi-move 的局部按键
 
 ;;; init-emms.el ends here

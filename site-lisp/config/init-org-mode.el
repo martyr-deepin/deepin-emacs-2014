@@ -81,6 +81,10 @@
 
 ;;; Require
 
+(require 'org)                          ;个人信息管理
+(require 'org-extension)                ;Org增强
+(require 'org-w3m)                      ;Org w3m 交互转换
+(require 'org-oddmuse)                  ;转换 Org-mode 到 Oddmuse 模式
 
 ;;; Code:
 
@@ -181,6 +185,15 @@
   "The `one-key' menu for ORG-FILE."
   (interactive)
   (one-key-menu "ORG-FILE" one-key-menu-org-file-alist t))
+
+(lazy-set-key
+ '(
+   ("s-u" . one-key-menu-org-mode)           ;Org-mode 菜单
+   ("s-U" . one-key-menu-org-mode-recursive) ;Org-mode 菜单, 但是递归的
+   ("M-O" . org-display-all-todo-item)       ;显示所有TODO列表
+   )
+ org-mode-map
+ )
 
 (provide 'init-org-mode)
 

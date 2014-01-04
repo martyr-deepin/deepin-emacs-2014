@@ -65,5 +65,30 @@ from tradition chinese to simple chinese" t)
 (autoload 'doc-view-mode "init-doc-view")
 (window-number-mode 1)
 (global-anzu-mode 1)                    ;显示搜索的数字
+(size-indication-mode 1)                ;显示当前文件的大小
+(browse-kill-ring-default-keybindings)  ;加载默认的按键邦定
+(setq browse-kill-ring-quit-action      ;设置退出动作
+      (quote save-and-restore))         ;保存还原窗口设置
+(setq byte-compile-warnings
+      (quote (
+              ;; 显示的警告
+              free-vars                 ;不在当前范围的引用变量
+              unresolved                ;不知道的函数
+              callargs                  ;函数调用的参数和定义的不匹配
+              obsolete                  ;荒废的变量和函数
+              noruntime                 ;函数没有定义在运行时期
+              interactive-only          ;正常不被调用的命令
+              make-local                ;调用 `make-variable-buffer-local' 可能会不正确的
+              mapcar                    ;`mapcar' 调用
+              ;; 抑制的警告
+              (not redefine)            ;重新定义的函数 (比如参数数量改变)
+              (not cl-functions)        ;`CL' 包中的运行时调用的函数
+              )))
+(icomplete-mode 1)                      ;minibuffer补全反馈
+(winner-mode 1)                         ;窗口状态 undo/redo
+(window-point-remember-mode 1)
+(setq winpoint-non-restore-buffer-list '("*Group*"))
+(setq tramp-default-method "ssh")         ;设置传送文件默认的方法
+(custom-set-variables '(tramp-verbose 0)) ;设置tramp的响应方式, 关闭后不弹出消息
 
 (provide 'init-startup)

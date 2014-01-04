@@ -1,15 +1,15 @@
-;;; init-irfc.el --- Init irfc
+;;; init-python.el --- Init python
 
-;; Filename: init-irfc.el
-;; Description: Init irfc
-;; Author: Andy Stewart <andy@freedom>
-;; Maintainer: Andy Stewart <andy@freedom>
-;; Copyright (C) 2013, Andy Stewart, all rights reserved.
-;; Created: 2013-12-30 16:01:24
+;; Filename: init-python.el
+;; Description: Init python
+;; Author: Andy Stewart <lazycat.manatee@gmail.com>
+;; Maintainer: Andy Stewart <lazycat.manatee@gmail.com>
+;; Copyright (C) 2014, Andy Stewart, all rights reserved.
+;; Created: 2014-01-04 11:10:45
 ;; Version: 0.1
-;; Last-Updated: 2013-12-30 16:01:24
+;; Last-Updated: 2014-01-04 11:10:45
 ;;           By: Andy Stewart
-;; URL: http://www.emacswiki.org/emacs/download/init-irfc.el
+;; URL: http://www.emacswiki.org/emacs/download/init-python.el
 ;; Keywords:
 ;; Compatibility: GNU Emacs 24.3.50.1
 ;;
@@ -39,19 +39,19 @@
 
 ;;; Commentary:
 ;;
-;; Init irfc
+;; Init python
 ;;
 
 ;;; Installation:
 ;;
-;; Put init-irfc.el to your load-path.
+;; Put init-python.el to your load-path.
 ;; The load-path is usually ~/elisp/.
 ;; It's set in your ~/.emacs like this:
 ;; (add-to-list 'load-path (expand-file-name "~/elisp"))
 ;;
 ;; And the following to your ~/.emacs startup file.
 ;;
-;; (require 'init-irfc)
+;; (require 'init-python)
 ;;
 ;; No need more.
 
@@ -60,12 +60,12 @@
 ;;
 ;;
 ;; All of the above can customize by:
-;;      M-x customize-group RET init-irfc RET
+;;      M-x customize-group RET init-python RET
 ;;
 
 ;;; Change log:
 ;;
-;; 2013/12/30
+;; 2014/01/04
 ;;      * First released.
 ;;
 
@@ -81,26 +81,19 @@
 
 ;;; Require
 
-(require 'irfc)
 
 ;;; Code:
 
-(setq irfc-directory "/space/data/Book/Network_Programming/RFC-all") ;设置存储目录
-(custom-set-variables                                                ;自动关联 `irfc-mode'
- '(irfc-assoc-mode t))
-(lazy-set-key
- '(
-   ("c" . kill-this-buffer)                         ;关闭当前buffer
-   ("C" . kill-current-mode-buffers-except-current) ;关闭所有后台标签
-   ("m" . tabbar-forward-tab)                       ;向右一个标签
-   ("n" . tabbar-backward-tab)                      ;向左一个标签
-   ("<" . end-of-buffer)                            ;最下面
-   (">" . beginning-of-buffer)                      ;最上面
-   )
- irfc-mode-map
- )
-(lazy-set-key sdcv-key-alist irfc-mode-map)
+(eval-after-load 'python-mode
+  '(lambda ()
+     (progn
+       (lazy-set-mode-autoload-key
+        '(
+          ("C-S-j" . jump-to-import)
+          )
+        python-mode-map nil "python-mode-utils")
+       )))
 
-(provide 'init-irfc)
+(provide 'init-python)
 
-;;; init-irfc.el ends here
+;;; init-python.el ends here

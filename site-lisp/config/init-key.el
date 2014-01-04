@@ -41,7 +41,6 @@
    ("s-r" . find-file-smb)                  ;访问samba
    ("<print>" . save-screenshots)           ;截屏
    ("<M-s-return>" . toggle-debug-on-error) ;切换调试模式
-   ("s-R" . re-builder)                     ;可视化构建正则表达式
    ("s-1" . sort-lines)                     ;排序
    ("s-2" . elisp-depend-insert-comment)    ;插入 `...' 注释代码
    ("s-3" . hanconvert-region)              ;转换简体或繁体中文
@@ -57,6 +56,11 @@
    ("s-*" . one-key-menu-backup-file)   ;备份资料
    )
  "init-shell-command")
+(lazy-set-autoload-key
+ '(
+   ("s-R" . re-builder)                 ;可视化构建正则表达式
+   )
+ "init-rebuilder")
 ;;; ### Color-moccur ###
 ;;; --- 增强的moccur
 (lazy-set-autoload-key
@@ -621,5 +625,89 @@
    ("M-U" . one-key-menu-irc-channel)            ;跳转到IRC频道
    )
  "init-erc")
+;;; Elisp
+(lazy-set-key
+ '(
+   ("RET" . comment-indent-new-line)    ;自动换行并注释
+   )
+ emacs-lisp-mode-map
+ )
+;;; ### Wget ###
+;;; --- 下载程序
+(lazy-set-autoload-key
+ '(
+   ("s-c dd" . wget-show)               ;显示下载信息
+   ("s-c dh" . wget-hide)               ;隐藏下载信息
+   ("s-c dq" . wget-quit-and-exit)      ;停止下载
+   )
+ "wget-extension")
+;;; ### EMMS ###
+;;; --- Emacs 多媒体系统
+(lazy-set-autoload-key
+ '(
+   ("C-c p" . one-key-menu-emms)        ;播放器菜单
+   ("<up>" . emms-volume-mode-plus)     ;增加音量
+   ("<down>" . emms-volume-mode-minus)  ;减少音量
+   ("<left>" . emms-seek-backward)      ;后退
+   ("<right>" . emms-seek-forward)      ;前进
+   ("M-A" . emms-pause)                 ;暂停/播放
+   ("M-X" . emms-random)                ;随机播放
+   ("M-Z" . emms-stop)                  ;停止
+   )
+ "init-emms")
+;;; ### Org ###
+;;; --- 笔记管理和组织
+(lazy-set-autoload-key
+ '(
+   ("s-s" . one-key-menu-org-file)      ;Org 文件
+   ("C-c r" . org-remember)             ;Org-remeber
+   )
+ "init-org-mode")
+;;; ### Top ###
+;;; --- 进程管理器
+(lazy-set-autoload-key
+ '(
+   ("<s-f8>" . top)                     ;TOP
+   )
+ "init-top")
+;;; ### Doc-view ###
+;;; --- 文档阅读器
+(lazy-set-autoload-key
+ '(
+   ("C-M-j" . doc-view-scroll-up-or-next-page+)       ;翻另一个窗口中图书的下一页
+   ("C-M-k" . doc-view-scroll-down-or-previous-page+) ;翻另一个窗口中图书的上一页
+   )
+ "init-doc-view")
+;;; ### Apropos ###
+;;; --- 程序员命令查询
+;; (lazy-set-key
+;;  '(
+;;    ("C-m" . apropos-follow)                ;进入
+;;    ("N" . forward-button-with-line-begin)  ;下一个条目
+;;    ("P" . backward-button-with-line-begin) ;上一个条目
+;;    ("J" . scroll-up-one-line)              ;向上滚动一行
+;;    ("K" . scroll-down-one-line)            ;向下滚动一行
+;;    ("q" . quit-window)                     ;退出
+;;    ("f" . push-button)                     ;确定
+;;    )
+;;  apropos-mode-map
+;;  )
+;; (lazy-set-key sdcv-key-alist apropos-mode-map)    ;sdcv的局部按键绑定
+;; (lazy-set-key vi-move-key-alist apropos-mode-map) ;vi-move 的局部按键
+;;; ### Keyboard Macro ###
+;;; --- 键盘宏
+(lazy-set-autoload-key
+ '(
+   ("M-s-s" . kmacro-start-macro-or-insert-counter) ;开始键盘宏或插入
+   ("M-s-d" . kmacro-end-or-call-macro)             ;结束键盘宏或调用
+   ("M-s-c" . kmacro-delete-ring-head)              ;删除当前的键盘宏
+   ("M-s-w" . kmacro-cycle-ring-next)               ;下一个键盘宏
+   ("M-s-e" . kmacro-cycle-ring-previous)           ;上一个键盘宏
+   ("M-s-a" . kmacro-edit-macro)                    ;编辑键盘宏
+   ("M-s-v" . name-last-kbd-macro)                  ;命令当前键盘宏
+   ("M-s-f" . insert-kbd-macro)                     ;插入键盘宏
+   ("M-s-q" . apply-macro-to-region-lines)          ;应用键盘宏到选择的区域
+   )
+ "macros+")
 
 (provide 'init-key)

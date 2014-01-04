@@ -15,8 +15,9 @@
 (require 'rect-mark)
 (require 'window-number)
 (require 'anzu)
+(require 'browse-kill-ring)
+(require 'winpoint)
 
-(require 'init-doc-view)
 (require 'init-eldoc)
 (require 'init-jedi)
 (require 'init-tempbuf)
@@ -33,6 +34,8 @@
 (require 'init-auto-complete)
 (require 'init-one-key)
 (require 'init-key)
+(require 'init-doxymacs)
+(require 'init-doc-view)
 (require 'init-startup)
 (require 'init-package)
 

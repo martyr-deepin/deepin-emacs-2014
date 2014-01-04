@@ -1,17 +1,17 @@
-;;; init-golang.el --- Extensions for go lang mode
+;;; init-top.el --- Init for top
 
-;; Filename: init-golang.el
-;; Description: Extensions for go lang mode
+;; Filename: init-top.el
+;; Description: Init for top
 ;; Author: Andy Stewart <lazycat.manatee@gmail.com>
 ;; Maintainer: Andy Stewart <lazycat.manatee@gmail.com>
-;; Copyright (C) 2013, Andy Stewart, all rights reserved.
-;; Created: 2013-10-16 22:38:54
+;; Copyright (C) 2014, Andy Stewart, all rights reserved.
+;; Created: 2014-01-04 13:22:14
 ;; Version: 0.1
-;; Last-Updated: 2013-10-16 22:38:54
+;; Last-Updated: 2014-01-04 13:22:14
 ;;           By: Andy Stewart
-;; URL: http://www.emacswiki.org/emacs/download/init-golang.el
+;; URL: http://www.emacswiki.org/emacs/download/init-top.el
 ;; Keywords:
-;; Compatibility: GNU Emacs 24.2.1
+;; Compatibility: GNU Emacs 24.3.50.1
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -39,19 +39,19 @@
 
 ;;; Commentary:
 ;;
-;; Extensions for go lang mode
+;; Init for top
 ;;
 
 ;;; Installation:
 ;;
-;; Put init-golang.el to your load-path.
+;; Put init-top.el to your load-path.
 ;; The load-path is usually ~/elisp/.
 ;; It's set in your ~/.emacs like this:
 ;; (add-to-list 'load-path (expand-file-name "~/elisp"))
 ;;
 ;; And the following to your ~/.emacs startup file.
 ;;
-;; (require 'init-golang)
+;; (require 'init-top)
 ;;
 ;; No need more.
 
@@ -60,12 +60,12 @@
 ;;
 ;;
 ;; All of the above can customize by:
-;;      M-x customize-group RET init-golang RET
+;;      M-x customize-group RET init-top RET
 ;;
 
 ;;; Change log:
 ;;
-;; 2013/10/16
+;; 2014/01/04
 ;;      * First released.
 ;;
 
@@ -81,52 +81,29 @@
 
 ;;; Require
 
-(require 'go-mode)
+(require 'top-mode)
 
 ;;; Code:
 
-(defun go-run-buffer()
-  (interactive)
-  (shell-command (concat "go run " (buffer-name))))
-
-(defun go-kill()
-  (interactive)
-  (if (go-mode-in-string)
-      (paredit-kill-line-in-string)
-    (paredit-kill)))
-
-(defun go-backward-delete()
-  (interactive)
-  (if (go-mode-in-string)
-      (paredit-backward-delete-in-string)
-    (paredit-backward-delete)))
-
-(add-hook 'go-mode-hook
-          (lambda ()
-            (linum-mode 1)
-            (flymake-mode 1)
-            (auto-complete-mode 1)
-            (add-to-list 'ac-sources 'ac-source-go)
-            (call-process "gocode" nil nil nil "-s")))
-
-;;; ### Golang ###
-(lazy-unset-key
- '("C-k" "M-o")
- go-mode-map)
 (lazy-set-key
  '(
-   ("C-c C-c" . go-run-buffer)
-   ("C-c C-f" . gofmt)
-   ("C-c C-d" . godoc)
-   ("C-c C-a" . go-import-add)
-   ("C-8" . godef-jump)
-   ("C-u C-8" . godef-jump-other-window)
-   ("C-k" . go-kill)
-   ("M-o" . go-backward-delete)
-   )
- go-mode-map
+   ("s" . isearch-forward)				;搜索
+   ("g" . top)							;刷新
+   ("q" . quit-window)					;退出
+   ("d" . top-mode-kill)				;删除
+   ("D" . top-mode-kill-noconfirm)		;不需要确认删除
+   ("t" . top-mode-strace)
+   ("T" . top-mode-strace-noconfirm)
+   ("r" . top-mode-renice)
+   ("R" . top-mode-renice-noconfirm)
+   ("m" . top-mode-mark)				;标记
+   ("u" . top-mode-unmark)				;删除标记
+   ("U" . top-mode-show-specific-user))
+ top-mode-map
  )
+(lazy-set-key sdcv-key-alist top-mode-map)    ;sdcv 的局部按键
+(lazy-set-key vi-move-key-alist top-mode-map) ;vi-mode的局部按键
 
-(provide 'init-golang)
+(provide 'init-top)
 
-;;; init-golang.el ends here
+;;; init-top.el ends here

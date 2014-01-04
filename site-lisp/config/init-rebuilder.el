@@ -1,21 +1,21 @@
-;;; init-irfc.el --- Init irfc
+;;; init-rebuilder.el --- Init for re-builder
 
-;; Filename: init-irfc.el
-;; Description: Init irfc
-;; Author: Andy Stewart <andy@freedom>
-;; Maintainer: Andy Stewart <andy@freedom>
-;; Copyright (C) 2013, Andy Stewart, all rights reserved.
-;; Created: 2013-12-30 16:01:24
+;; Filename: init-rebuilder.el
+;; Description: Init for re-builder
+;; Author: Andy Stewart <lazycat.manatee@gmail.com>
+;; Maintainer: Andy Stewart <lazycat.manatee@gmail.com>
+;; Copyright (C) 2014, Andy Stewart, all rights reserved.
+;; Created: 2014-01-04 13:16:57
 ;; Version: 0.1
-;; Last-Updated: 2013-12-30 16:01:24
+;; Last-Updated: 2014-01-04 13:16:57
 ;;           By: Andy Stewart
-;; URL: http://www.emacswiki.org/emacs/download/init-irfc.el
-;; Keywords:
+;; URL: http://www.emacswiki.org/emacs/download/init-rebuilder.el
+;; Keywords: 
 ;; Compatibility: GNU Emacs 24.3.50.1
 ;;
 ;; Features that might be required by this library:
 ;;
-;;
+;; 
 ;;
 
 ;;; This file is NOT part of GNU Emacs
@@ -37,70 +37,70 @@
 ;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth
 ;; Floor, Boston, MA 02110-1301, USA.
 
-;;; Commentary:
-;;
-;; Init irfc
-;;
+;;; Commentary: 
+;; 
+;; Init for re-builder
+;; 
 
 ;;; Installation:
 ;;
-;; Put init-irfc.el to your load-path.
+;; Put init-rebuilder.el to your load-path.
 ;; The load-path is usually ~/elisp/.
 ;; It's set in your ~/.emacs like this:
 ;; (add-to-list 'load-path (expand-file-name "~/elisp"))
 ;;
 ;; And the following to your ~/.emacs startup file.
 ;;
-;; (require 'init-irfc)
+;; (require 'init-rebuilder)
 ;;
 ;; No need more.
 
 ;;; Customize:
 ;;
-;;
+;; 
 ;;
 ;; All of the above can customize by:
-;;      M-x customize-group RET init-irfc RET
+;;      M-x customize-group RET init-rebuilder RET
 ;;
 
 ;;; Change log:
-;;
-;; 2013/12/30
+;;	
+;; 2014/01/04
 ;;      * First released.
-;;
+;; 
 
 ;;; Acknowledgements:
 ;;
-;;
+;; 
 ;;
 
 ;;; TODO
 ;;
-;;
+;; 
 ;;
 
 ;;; Require
 
-(require 'irfc)
+(require 're-builder)
+(require 're-builder+)
 
 ;;; Code:
 
-(setq irfc-directory "/space/data/Book/Network_Programming/RFC-all") ;设置存储目录
-(custom-set-variables                                                ;自动关联 `irfc-mode'
- '(irfc-assoc-mode t))
 (lazy-set-key
  '(
-   ("c" . kill-this-buffer)                         ;关闭当前buffer
-   ("C" . kill-current-mode-buffers-except-current) ;关闭所有后台标签
-   ("m" . tabbar-forward-tab)                       ;向右一个标签
-   ("n" . tabbar-backward-tab)                      ;向左一个标签
-   ("<" . end-of-buffer)                            ;最下面
-   (">" . beginning-of-buffer)                      ;最上面
+   ("C-c b" . reb-change-target-buffer) ;改变目标buffer
+   ("C-c c" . reb-toggle-case)          ;切换大小写
+   ("C-c e" . reb-enter-subexp-mode)    ;进入表达式模式
+   ("C-c r" . reb-prev-match)           ;前一个匹配
+   ("C-c s" . reb-next-match)           ;后一个匹配
+   ("C-c u" . reb-force-update)         ;更新
+   ("C-c w" . reb-copy)                 ;拷贝
+   ("C-c q" . reb-quit)                 ;退出
+   ("C-c TAB" . reb-change-syntax)      ;改变语法
    )
- irfc-mode-map
+ reb-mode-map
  )
-(lazy-set-key sdcv-key-alist irfc-mode-map)
 
-(provide 'init-irfc)
+(provide 'init-rebuilder)
 
-;;; init-irfc.el ends here
+;;; init-rebuilder.el ends here

@@ -1,15 +1,15 @@
-;;; init-irfc.el --- Init irfc
+;;; init-doxymacs.el --- Init for doxymacs
 
-;; Filename: init-irfc.el
-;; Description: Init irfc
-;; Author: Andy Stewart <andy@freedom>
-;; Maintainer: Andy Stewart <andy@freedom>
-;; Copyright (C) 2013, Andy Stewart, all rights reserved.
-;; Created: 2013-12-30 16:01:24
+;; Filename: init-doxymacs.el
+;; Description: Init for doxymacs
+;; Author: Andy Stewart <lazycat.manatee@gmail.com>
+;; Maintainer: Andy Stewart <lazycat.manatee@gmail.com>
+;; Copyright (C) 2014, Andy Stewart, all rights reserved.
+;; Created: 2014-01-04 11:03:11
 ;; Version: 0.1
-;; Last-Updated: 2013-12-30 16:01:24
+;; Last-Updated: 2014-01-04 11:03:11
 ;;           By: Andy Stewart
-;; URL: http://www.emacswiki.org/emacs/download/init-irfc.el
+;; URL: http://www.emacswiki.org/emacs/download/init-doxymacs.el
 ;; Keywords:
 ;; Compatibility: GNU Emacs 24.3.50.1
 ;;
@@ -39,19 +39,19 @@
 
 ;;; Commentary:
 ;;
-;; Init irfc
+;; Init for doxymacs
 ;;
 
 ;;; Installation:
 ;;
-;; Put init-irfc.el to your load-path.
+;; Put init-doxymacs.el to your load-path.
 ;; The load-path is usually ~/elisp/.
 ;; It's set in your ~/.emacs like this:
 ;; (add-to-list 'load-path (expand-file-name "~/elisp"))
 ;;
 ;; And the following to your ~/.emacs startup file.
 ;;
-;; (require 'init-irfc)
+;; (require 'init-doxymacs)
 ;;
 ;; No need more.
 
@@ -60,12 +60,12 @@
 ;;
 ;;
 ;; All of the above can customize by:
-;;      M-x customize-group RET init-irfc RET
+;;      M-x customize-group RET init-doxymacs RET
 ;;
 
 ;;; Change log:
 ;;
-;; 2013/12/30
+;; 2014/01/04
 ;;      * First released.
 ;;
 
@@ -81,26 +81,21 @@
 
 ;;; Require
 
-(require 'irfc)
 
 ;;; Code:
 
-(setq irfc-directory "/space/data/Book/Network_Programming/RFC-all") ;设置存储目录
-(custom-set-variables                                                ;自动关联 `irfc-mode'
- '(irfc-assoc-mode t))
-(lazy-set-key
- '(
-   ("c" . kill-this-buffer)                         ;关闭当前buffer
-   ("C" . kill-current-mode-buffers-except-current) ;关闭所有后台标签
-   ("m" . tabbar-forward-tab)                       ;向右一个标签
-   ("n" . tabbar-backward-tab)                      ;向左一个标签
-   ("<" . end-of-buffer)                            ;最下面
-   (">" . beginning-of-buffer)                      ;最上面
-   )
- irfc-mode-map
- )
-(lazy-set-key sdcv-key-alist irfc-mode-map)
+(dolist (hook (list
+               'c-mode-hook
+               'c++-mode-hook
+               'java-mode-hook
+               ))
+  (require 'doxymacs)
+  (require 'lazycat-toolkit)
+  (doxymacs-font-lock)                                                    ;注释高亮模式
+  (add-hook hook 'doxymacs-mode)                                          ;加载文档模式
+  (add-hook hook (lambda () (local-set-key (kbd "C-m") 'my-doxymacs-return))) ;注释智能换行
+  )
 
-(provide 'init-irfc)
+(provide 'init-doxymacs)
 
-;;; init-irfc.el ends here
+;;; init-doxymacs.el ends here

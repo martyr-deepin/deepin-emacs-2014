@@ -108,6 +108,11 @@
 (lazy-set-mode-autoload-key sdcv-key-alist Man-mode-map nil "woman")    ;sdcv的局部按键绑定
 (lazy-set-mode-autoload-key vi-move-key-alist Man-mode-map nil "woman") ;vi-move 的局部按键
 
+(setq woman-default-indent 7            ;缩进格式
+      woman-fill-frame t                ;填充满屏幕
+      woman-use-own-frame nil           ;同一个frame
+      woman-cache-level 3)              ;缓存级别, 最快
+
 (provide 'init-woman)
 
 ;;; init-woman.el ends here
