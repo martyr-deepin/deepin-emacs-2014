@@ -105,7 +105,7 @@
 (setq emms-cache-file "~/.emacs.d/deepin-emacs/Configure-File/Emms/cache")     ;缓存文件
 (setq emms-stream-bookmarks-file "~/.emacs.d/deepin-emacs/Configure-File/Emms/streams") ;网络电台保存文件
 (setq emms-score-file "~/.emacs.d/deepin-emacs/Configure-File/Emms/scores")             ;分数文件
-(setq emms-source-file-default-directory "/data/Music/")    ;设定默认的播放目录
+(setq emms-source-file-default-directory "/space/data/Music/") ;设定默认的播放目录
 ;; 播放设置
 (add-hook 'emms-player-finished-hook 'emms-random)          ;当播放完当前的歌曲时随机选择下一首歌曲
 (setq emms-playlist-default-major-mode 'emms-playlist-mode) ;设定EMMS用播放列表的主模式
