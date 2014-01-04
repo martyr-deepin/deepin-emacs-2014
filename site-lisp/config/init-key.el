@@ -680,20 +680,25 @@
  "init-doc-view")
 ;;; ### Apropos ###
 ;;; --- 程序员命令查询
-;; (lazy-set-key
-;;  '(
-;;    ("C-m" . apropos-follow)                ;进入
-;;    ("N" . forward-button-with-line-begin)  ;下一个条目
-;;    ("P" . backward-button-with-line-begin) ;上一个条目
-;;    ("J" . scroll-up-one-line)              ;向上滚动一行
-;;    ("K" . scroll-down-one-line)            ;向下滚动一行
-;;    ("q" . quit-window)                     ;退出
-;;    ("f" . push-button)                     ;确定
-;;    )
-;;  apropos-mode-map
-;;  )
-;; (lazy-set-key sdcv-key-alist apropos-mode-map)    ;sdcv的局部按键绑定
-;; (lazy-set-key vi-move-key-alist apropos-mode-map) ;vi-move 的局部按键
+(autoload 'apropos-mode "aprops")
+(eval-after-load 'apropos-mode
+  '(lambda ()
+     (progn
+       (lazy-set-key
+        '(
+          ("C-m" . apropos-follow)                ;进入
+          ("N" . forward-button-with-line-begin)  ;下一个条目
+          ("P" . backward-button-with-line-begin) ;上一个条目
+          ("J" . scroll-up-one-line)              ;向上滚动一行
+          ("K" . scroll-down-one-line)            ;向下滚动一行
+          ("q" . quit-window)                     ;退出
+          ("f" . push-button)                     ;确定
+          )
+        apropos-mode-map
+        )
+       (lazy-set-key sdcv-key-alist apropos-mode-map)    ;sdcv的局部按键绑定
+       (lazy-set-key vi-move-key-alist apropos-mode-map) ;vi-move 的局部按键
+       )))
 ;;; ### Keyboard Macro ###
 ;;; --- 键盘宏
 (lazy-set-autoload-key
