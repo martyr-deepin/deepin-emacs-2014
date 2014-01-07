@@ -22,7 +22,7 @@
         ("y" . sdcv-search-pointer+)    ;光标处的单词, tooltip显示
         ("i" . sdcv-search-input)       ;输入的单词, buffer显示
         (";" . sdcv-search-input+)))    ;输入的单词, tooltip显示
-(lazy-set-prefix-autoload-key sdcv-key-alist nil "C-z" "sdcv")
+(lazy-set-prefix-autoload-key sdcv-key-alist nil "C-z" "init-sdcv")
 ;;; ### Toolkit ###
 ;;; --- 工具函数
 (lazy-set-key

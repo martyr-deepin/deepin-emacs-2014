@@ -100,7 +100,7 @@
    )
  less-minor-mode-map
  )
-(lazy-set-mode-autoload-key sdcv-key-alist less-minor-mode-map nil "sdcv") ;sdcv的局部按键绑定
+(lazy-set-mode-autoload-key sdcv-key-alist less-minor-mode-map nil "init-sdcv") ;sdcv的局部按键绑定
 (lazy-set-mode-autoload-key vi-move-key-alist less-minor-mode-map nil "less")
 
 (provide 'init-less)
