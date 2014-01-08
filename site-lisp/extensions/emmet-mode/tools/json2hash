@@ -1,0 +1,92 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import json
+import sys
+import os
+import re
+import argparse
+from cStringIO import StringIO
+
+class ApplicationException(Exception):
+    pass
+
+def pystr2elstrexp(s):
+    s = re.sub(r'^(u\'|\'|u\"|\")(.*)(\'|\")$', r'\2', repr(s))
+    output = re.sub(r'("|\\")', '\\"', s)
+    return u'"' + output + u'"'
+
+class Processor(object):
+
+    def __init__(self):
+        self.out = StringIO()
+
+    def _print(self, data):
+        _type = type(data)
+        if _type is dict:
+            self.out.write('(let ((tbl (make-hash-table :test \'equal)))\n')
+            for k, v in data.items():
+                self.out.write('(puthash ')
+                self.out.write(pystr2elstrexp(k))
+                self.out.write(' ')
+                self._print(v)
+                self.out.write(' tbl)\n')
+            self.out.write('tbl)')
+        elif _type is list:
+            self.out.write('(vector \n')
+            for v in data:
+                self._print(v)
+                self.out.write('\n')
+            self.out.write(')\n')
+        elif _type is bool:
+            self.out.write('t' if data else 'nil')
+        elif (_type is str or _type is unicode):
+            self.out.write(pystr2elstrexp(data))
+        else: # number ?
+            self.out.write(str(data))
+
+    def read(self, file):
+        data = json.load(file)
+        self._print(data)
+
+    def write(self, out):
+        out.write(self.out.getvalue())
+
+def main():
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument('-o', type=str)
+    argparser.add_argument('--defvar', type=str)
+    argparser.add_argument('file', nargs='+', type=str)
+    options = argparser.parse_args()
+    if options.o:
+        out = open(options.o, 'w')
+    else:
+        out = sys.stdout
+    try:
+        p = Processor()
+        for file in options.file:
+            try:
+                f = open(os.path.abspath(file))
+                p.read(f)
+            finally:
+                f.close()
+        out.write(';; ' + str(options.o) + '\n')
+        out.write(';; This file is generated from ' + ','.join(options.file) + '\n')
+        out.write(';; Don\'t edit.\n')
+        if options.defvar:
+            out.write(u'(emmet-defparameter ' + options.defvar + u'\n')
+        p.write(out)
+        if options.defvar:
+            out.write(')\n')
+    except:
+        if options.o:
+            out.close()
+            os.unlink(options.o)
+        raise
+    if options.o:
+        out.close()
+
+if __name__ == '__main__':
+    try:
+        main()
+    except ApplicationException as e:
+        print >>sys.stderr, e.message
