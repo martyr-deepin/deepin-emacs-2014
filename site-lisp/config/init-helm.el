@@ -86,8 +86,11 @@
 (require 'helm-helm-commands)
 (require 'helm-c-yasnippet)
 (require 'helm-apt)
+(require 'apt-utils)
 
 ;;; Code:
+
+(setq helm-apt-cache-show-function 'apt-utils-show-package-1)
 
 (defun helm-dwim ()
   (interactive)

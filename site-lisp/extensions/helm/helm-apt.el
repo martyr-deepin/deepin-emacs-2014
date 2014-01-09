@@ -32,13 +32,22 @@
   "Apt related Applications and libraries for Helm."
   :group 'helm)
 
+(defcustom helm-apt-cache-show-function nil
+  "You can set the function with your own to show apt package.
+Example, we can use `apt-utils-show-package-1' instead `helm-apt-cache-show' like below:
+
+  (setq helm-apt-cache-show-function 'apt-utils-show-package-1)
+"
+  :type 'function
+  :group 'helm-apt)
+
 (defface helm-apt-installed
-  '((t (:foreground "green")))
+    '((t (:foreground "green")))
   "Face used for apt installed candidates."
   :group 'helm-apt)
 
 (defface helm-apt-deinstalled
-  '((t (:foreground "DimGray")))
+    '((t (:foreground "DimGray")))
   "Face used for apt deinstalled candidates."
   :group 'helm-apt)
 
@@ -149,13 +158,13 @@
                        for p = (split-string i)
                        collect (cons (car p) (cadr p)))))
       (helm-init-candidates-in-buffer
-          'global
-        (setq helm-apt-all-packages
-              (with-temp-buffer
-                (call-process-shell-command
-                 (format helm-apt-search-command query)
-                 nil (current-buffer))
-                (buffer-string))))
+       'global
+       (setq helm-apt-all-packages
+             (with-temp-buffer
+               (call-process-shell-command
+                (format helm-apt-search-command query)
+                nil (current-buffer))
+               (buffer-string))))
       (message "Loading package list done")
       (sit-for 0.5))))
 
@@ -165,11 +174,27 @@ LINE is displayed like:
 package name - description."
   (car (split-string line " - ")))
 
+(defvar helm-apt-show-current-package nil)
+(define-derived-mode helm-apt-show-mode
+    special-mode "helm-apt-show"
+    "Mode to display infos on apt packages.")
+
 (defun helm-apt-cache-show (package)
   "Show information on apt package PACKAGE."
-  (require 'apt-utils)
-  (apt-utils-show-package-1 package)
-  )
+  (if (functionp helm-apt-cache-show-function)
+      (funcall helm-apt-cache-show-function package)
+    (let* ((command (format helm-apt-show-command package))
+         (buf     (get-buffer-create "*helm apt show*")))
+    (helm-switch-to-buffer buf)
+    (unless (string= package helm-apt-show-current-package)
+      (let ((inhibit-read-only t))
+        (erase-buffer)
+        (save-excursion
+          (call-process-shell-command
+           command nil (current-buffer) t))))
+    (helm-apt-show-mode)
+    (set (make-local-variable 'helm-apt-show-current-package)
+         package))))
 
 (defun helm-apt-install (_package)
   "Run 'apt-get install' shell command on PACKAGE."
@@ -193,8 +218,8 @@ Support install, remove and purge actions."
   (if (and helm-apt-term-buffer
            (buffer-live-p (get-buffer helm-apt-term-buffer)))
       (switch-to-buffer helm-apt-term-buffer)
-    (ansi-term (getenv "SHELL") "term apt")
-    (setq helm-apt-term-buffer (buffer-name)))
+      (ansi-term (getenv "SHELL") "term apt")
+      (setq helm-apt-term-buffer (buffer-name)))
   (term-line-mode)
   (let ((command   (cl-case action
                      (install   "sudo apt-get install ")
@@ -214,7 +239,7 @@ Support install, remove and purge actions."
           (setq helm-external-commands-list nil)
           (setq helm-apt-installed-packages nil)
           (term-char-mode) (term-send-input))
-      (delete-region beg end))))
+        (delete-region beg end))))
 
 ;;;###autoload
 (defun helm-apt (arg)
