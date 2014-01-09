@@ -21,7 +21,7 @@
 
 import os
 from PyQt5 import QtCore
-from PyQt5.QtCore import QCoreApplication
+from PyQt5.QtCore import QCoreApplication, QEvent
 if os.name == 'posix':
     QCoreApplication.setAttribute(QtCore.Qt.AA_X11InitThreads, True)
     
@@ -31,7 +31,8 @@ from PyQt5.QtCore import QUrl, Qt
 import os
 from epc.server import ThreadingEPCServer
 import threading
-from PyQt5.QtWidgets import QWidget, QVBoxLayout
+from PyQt5.QtWidgets import QWidget
+from PyQt5.QtGui import QPainter, QImage
 import functools
 
 def get_parent_dir(filepath, level=1):
@@ -77,28 +78,86 @@ class postGui(QtCore.QObject):
         else:    
             self._func(*args, **kwargs)
             
-class Browser(QWidget):
+class BrowserBuffer(QWebView):
+
+    redrawScreenshot = QtCore.pyqtSignal(object)
+    
     def __init__(self):
-        super(Browser, self).__init__()
+        super(BrowserBuffer, self).__init__()
+        self.page().setLinkDelegationPolicy(QWebPage.DelegateAllLinks)
+        self.page().linkClicked.connect(self.link_clicked)
+        self.page().mainFrame().setScrollBarPolicy(Qt.Horizontal, Qt.ScrollBarAlwaysOff)
+        self.settings().setUserStyleSheetUrl(QUrl.fromLocalFile(os.path.join(get_parent_dir(__file__), "scrollbar.css")))
+        
+        self.view_list = []
+        
+        self.resize(600, 400)
+        
+    # def paintEvent(self, event):
+    #     QWebView.paintEvent(self, event)
+    #     p = QPainter(self)
+    #     p.setCompositionMode(QPainter.CompositionMode_Difference)
+    #     p.fillRect(event.rect(), Qt.white)
+    #     p.end()
+        
+    def eventFilter(self, obj, event):
+        
+        if event.type() in [QEvent.KeyPress, QEvent.MouseButtonPress, QEvent.MouseButtonRelease, QEvent.MouseMove, QEvent.MouseButtonDblClick]:
+            print obj, event
+            QApplication.sendEvent(self, event)
+        else:
+            print event
+        
+        return False
+        
+    @postGui()
+    def redraw(self):
+        qimage = QImage(600, 400, QImage.Format_RGB888)
+        self.render(qimage)
+        
+        self.redrawScreenshot.emit(qimage)
+        
+    def add_view(self, view):
+        if view not in self.view_list:
+            self.view_list.append(view)
+            
+    def remove_view(self, view):
+        if view in self.view_list:
+            self.view_list.remove(view)
+            
+    @postGui()    
+    def open_url(self, url):    
+        self.load(QUrl(url))
+        
+    def link_clicked(self, url):
+        self.load(url)
+        
+class BrowserView(QWidget):
+    def __init__(self, browser_buffer):
+        super(BrowserView, self).__init__()
         
         self.setWindowFlags(Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground, True)
         
         self.setContentsMargins(0, 0, 0, 0)
-        self.layout = QVBoxLayout(self)
-        self.layout.setContentsMargins(0, 0, 0, 0)
-        self.setLayout(self.layout)
         
-    @postGui()    
-    def open_url(self, url):    
-        self.view = QWebView(self)
-        self.view.load(QUrl(url))
-        self.view.page().setLinkDelegationPolicy(QWebPage.DelegateAllLinks)
-        self.view.page().linkClicked.connect(self.link_clicked)
-        self.view.page().mainFrame().setScrollBarPolicy(Qt.Horizontal, Qt.ScrollBarAlwaysOff)
-            
-        self.view.settings().setUserStyleSheetUrl(QUrl.fromLocalFile(os.path.join(get_parent_dir(__file__), "scrollbar.css")))
-        self.layout.addWidget(self.view)
+        browser_buffer.add_view(self)
+        browser_buffer.redrawScreenshot.connect(self.updateView)
+        
+        self.qimage = None
+        
+        self.installEventFilter(browser_buffer)
+        
+    def paintEvent(self, event):    
+        if self.qimage:
+            painter = QPainter(self)
+            painter.drawImage(0, 0, self.qimage)
+            painter.end()
+        
+    @postGui()
+    def updateView(self, qimage):
+        self.qimage = qimage
+        self.update()
         
     @postGui()    
     def moveresize(self, emacs_xid, x, y, w, h):
@@ -116,26 +175,48 @@ class Browser(QWidget):
         browser_xwindow.reparent(emacs_xwindow, x, y)
         xlib_display.sync()
         
-    def link_clicked(self, url):
-        self.view.load(url)
-        
 if __name__ == '__main__':
     import sys
     import signal
     
     app = QApplication(sys.argv)
     
-    browser = Browser()
+    browser_buffer = BrowserBuffer()
+    
+    browser_view = BrowserView(browser_buffer)
+    browser_view.resize(600, 400)
+    browser_view.show()
+
+    browser_view1 = BrowserView(browser_buffer)
+    browser_view1.resize(600, 400)
+    browser_view1.move(0, 500)
+    browser_view1.show()
+
+    browser_view2 = BrowserView(browser_buffer)
+    browser_view2.resize(600, 400)
+    browser_view2.move(700, 500)
+    browser_view2.show()
+
+    browser_buffer.open_url("http://www.videojs.com/")
     
     server = ThreadingEPCServer(('localhost', 0), log_traceback=True)
     
-    server.register_function(browser.open_url)
-    server.register_function(browser.moveresize)
-    server.register_function(browser.hide)
-    server.register_function(browser.show)
+    server.register_function(browser_buffer.open_url)
+    server.register_function(browser_view.moveresize)
+    server.register_function(browser_view.hide)
+    server.register_function(browser_view.show)
     
     server_thread = threading.Thread(target=server.serve_forever)
     server_thread.allow_reuse_address = True
+    
+    def update_buffer():
+        while True:
+            browser_buffer.redraw()
+            
+            import time
+            time.sleep(0.05)
+            
+    threading.Thread(target=update_buffer).start()
     
     server_thread.start()
     server.print_port()
