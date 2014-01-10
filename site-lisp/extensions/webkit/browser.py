@@ -28,6 +28,7 @@ if os.name == 'posix':
 from PyQt5.QtWebKitWidgets import QWebView, QWebPage
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import QUrl, Qt
+from PyQt5 import QtGui
 import os
 from epc.server import ThreadingEPCServer
 import threading
@@ -102,11 +103,16 @@ class BrowserBuffer(QWebView):
         
     def eventFilter(self, obj, event):
         
-        if event.type() in [QEvent.KeyPress, QEvent.MouseButtonPress, QEvent.MouseButtonRelease, QEvent.MouseMove, QEvent.MouseButtonDblClick]:
-            print obj, event
+        if event.type() in [QEvent.KeyPress, QEvent.KeyRelease,
+                            QEvent.MouseButtonPress, QEvent.MouseButtonRelease,
+                            QEvent.MouseMove, QEvent.MouseButtonDblClick, QEvent.Wheel,
+                            QEvent.InputMethod, QEvent.InputMethodQuery, QEvent.ShortcutOverride,
+                            QEvent.ActivationChange, QEvent.Enter, QEvent.WindowActivate,
+                            ]:
             QApplication.sendEvent(self, event)
         else:
-            print event
+            if event.type() not in [12, 77]:
+                print event.type(), event
         
         return False
         
@@ -148,11 +154,25 @@ class BrowserView(QWidget):
         
         self.installEventFilter(browser_buffer)
         
+        browser_buffer.installEventFilter(self)
+        
+    def eventFilter(self, obj, event):
+        print "*********", obj, event, event.type()
+        
+        return False
+        
     def paintEvent(self, event):    
         if self.qimage:
             painter = QPainter(self)
             painter.drawImage(0, 0, self.qimage)
             painter.end()
+        else:
+            painter = QPainter(self)
+            painter.setBrush(QtGui.QColor(255, 255, 255, 255))
+            painter.drawRect(0, 0, self.width(), self.height())
+            painter.end()
+            
+            print "################"
         
     @postGui()
     def updateView(self, qimage):
@@ -198,6 +218,8 @@ if __name__ == '__main__':
     browser_view2.show()
 
     browser_buffer.open_url("http://www.videojs.com/")
+    # browser_buffer.open_url("http://www.baidu.com")
+    # browser_buffer.open_url("http://www.google.com")
     
     server = ThreadingEPCServer(('localhost', 0), log_traceback=True)
     
@@ -216,7 +238,7 @@ if __name__ == '__main__':
             import time
             time.sleep(0.05)
             
-    threading.Thread(target=update_buffer).start()
+    # threading.Thread(target=update_buffer).start()
     
     server_thread.start()
     server.print_port()
