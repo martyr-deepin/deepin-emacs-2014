@@ -26,6 +26,7 @@ if os.name == 'posix':
     QCoreApplication.setAttribute(QtCore.Qt.AA_X11InitThreads, True)
     
 from PyQt5.QtWebKitWidgets import QWebView, QWebPage
+from PyQt5.QtWebKit import  QWebSettings
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import QUrl, Qt
 from PyQt5 import QtGui
@@ -94,12 +95,7 @@ class BrowserBuffer(QWebView):
         
         self.resize(600, 400)
         
-    # def paintEvent(self, event):
-    #     QWebView.paintEvent(self, event)
-    #     p = QPainter(self)
-    #     p.setCompositionMode(QPainter.CompositionMode_Difference)
-    #     p.fillRect(event.rect(), Qt.white)
-    #     p.end()
+        self.settings().setAttribute(QWebSettings.PluginsEnabled, True)
         
     def eventFilter(self, obj, event):
         
@@ -154,13 +150,6 @@ class BrowserView(QWidget):
         
         self.installEventFilter(browser_buffer)
         
-        browser_buffer.installEventFilter(self)
-        
-    def eventFilter(self, obj, event):
-        print "*********", obj, event, event.type()
-        
-        return False
-        
     def paintEvent(self, event):    
         if self.qimage:
             painter = QPainter(self)
@@ -171,8 +160,6 @@ class BrowserView(QWidget):
             painter.setBrush(QtGui.QColor(255, 255, 255, 255))
             painter.drawRect(0, 0, self.width(), self.height())
             painter.end()
-            
-            print "################"
         
     @postGui()
     def updateView(self, qimage):
@@ -205,6 +192,7 @@ if __name__ == '__main__':
     
     browser_view = BrowserView(browser_buffer)
     browser_view.resize(600, 400)
+    browser_view.move(0, 0)
     browser_view.show()
 
     browser_view1 = BrowserView(browser_buffer)
@@ -217,9 +205,12 @@ if __name__ == '__main__':
     browser_view2.move(700, 500)
     browser_view2.show()
 
-    browser_buffer.open_url("http://www.videojs.com/")
-    # browser_buffer.open_url("http://www.baidu.com")
-    # browser_buffer.open_url("http://www.google.com")
+    browser_view3 = BrowserView(browser_buffer)
+    browser_view3.resize(600, 400)
+    browser_view3.move(700, 0)
+    browser_view3.show()
+
+    browser_buffer.open_url("http://www.youku.com")
     
     server = ThreadingEPCServer(('localhost', 0), log_traceback=True)
     
@@ -238,7 +229,7 @@ if __name__ == '__main__':
             import time
             time.sleep(0.05)
             
-    # threading.Thread(target=update_buffer).start()
+    threading.Thread(target=update_buffer).start()
     
     server_thread.start()
     server.print_port()
