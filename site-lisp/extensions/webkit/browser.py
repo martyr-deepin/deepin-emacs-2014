@@ -90,15 +90,13 @@ class BrowserBuffer(QWebView):
         self.page().linkClicked.connect(self.link_clicked)
         self.page().mainFrame().setScrollBarPolicy(Qt.Horizontal, Qt.ScrollBarAlwaysOff)
         self.settings().setUserStyleSheetUrl(QUrl.fromLocalFile(os.path.join(get_parent_dir(__file__), "scrollbar.css")))
-        
-        self.view_list = []
-        
-        self.resize(600, 400)
-        
         self.settings().setAttribute(QWebSettings.PluginsEnabled, True)
         
-    def eventFilter(self, obj, event):
+        self.view_list = []
+        self.resize(600, 400)
+        self.qimage = QImage(600, 400, QImage.Format_ARGB32)
         
+    def eventFilter(self, obj, event):
         if event.type() in [QEvent.KeyPress, QEvent.KeyRelease,
                             QEvent.MouseButtonPress, QEvent.MouseButtonRelease,
                             QEvent.MouseMove, QEvent.MouseButtonDblClick, QEvent.Wheel,
@@ -114,10 +112,9 @@ class BrowserBuffer(QWebView):
         
     @postGui()
     def redraw(self):
-        qimage = QImage(600, 400, QImage.Format_RGB888)
-        self.render(qimage)
+        self.render(self.qimage)
         
-        self.redrawScreenshot.emit(qimage)
+        self.redrawScreenshot.emit(self.qimage)
         
     def add_view(self, view):
         if view not in self.view_list:
@@ -153,7 +150,7 @@ class BrowserView(QWidget):
     def paintEvent(self, event):    
         if self.qimage:
             painter = QPainter(self)
-            painter.drawImage(0, 0, self.qimage)
+            painter.drawImage(QtCore.QRect(0, 0, self.width(), self.height()), self.qimage)
             painter.end()
         else:
             painter = QPainter(self)
