@@ -141,18 +141,36 @@
 
 (defun webkit-open-url (url)
   (interactive "sURL: ")
-  (let* ((buffer (webkit-create-buffer url))
-         (emacs-xid (webkit-get-emacs-xid)))
+  (let* ((buffer (webkit-create-buffer url)))
     (switch-to-buffer buffer)
     (let* ((window-allocation (webkit-get-window-allocation))
            (x (nth 0 window-allocation))
            (y (nth 1 window-allocation))
            (w (nth 2 window-allocation))
-           (h (nth 3 window-allocation)))
+           (h (nth 3 window-allocation))
+           ;; view-id = buffer-id + left + top + right + bottom
+           (view-id (webkit-generate-id)))
       (epc:call-deferred pyepc-browser 'create_buffer (list buffer-id url w h))
-      (epc:call-deferred pyepc-browser 'create_view (list buffer-id emacs-xid x y w h))
+      (epc:call-deferred pyepc-browser 'create_view (list buffer-id view-id (webkit-get-emacs-xid) x y w h))
       )
     ))
+
+(defun webkit-monitor-window-change (&rest _)
+  (dolist (window (window-list))
+    (setq buffer (window-buffer window))
+    (with-current-buffer buffer
+      (if (string= "webkit-mode" (format "%s" major-mode))
+          (let* ((window-allocation (webkit-get-window-allocation))
+                 (x (nth 0 window-allocation))
+                 (y (nth 1 window-allocation))
+                 (w (nth 2 window-allocation))
+                 (h (nth 3 window-allocation))
+                 )
+            (epc:call-deferred pyepc-browser 'adjust_view_size (list (webkit-get-emacs-xid) x y w h))
+            )))
+    ))
+
+(add-hook 'window-configuration-change-hook #'webkit-monitor-window-change)
 
 (provide 'webkit)
 
