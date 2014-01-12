@@ -227,12 +227,6 @@ if __name__ == '__main__':
     server.register_function(create_buffer)
     server.register_function(create_view)
     
-    # test_create_buffer()
-    # test_create_view("83886167")
-    
-    # create_buffer("1", "http://www.google.com", 600, 400)
-    # create_view("1", "83886167", 0, 0, 600, 400)
-    
     threading.Thread(target=update_buffer).start()            
         
     signal.signal(signal.SIGINT, signal.SIG_DFL)
