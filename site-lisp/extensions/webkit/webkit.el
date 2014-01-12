@@ -108,20 +108,17 @@
   (use-local-map webkit-mode-map)
   (run-hooks 'webkit-mode-hook))
 
-(defun webkit-get-window-info ()
+(defun webkit-get-window-allocation ()
   (let* ((window-edges (window-inside-pixel-edges))
          (x (nth 0 window-edges))
          (y (nth 1 window-edges))
          (w (- (nth 2 window-edges) x))
          (h (- (nth 3 window-edges) y))
          )
-    (list (frame-parameter nil 'window-id) x y w h)))
+    (list x y w h)))
 
-(defun webkit-create-buffer (url)
-  (let ((webkit-buffer (get-buffer-create (concat "*" url "*"))))
-    (with-current-buffer webkit-buffer
-      (webkit-mode))
-    webkit-buffer))
+(defun webkit-get-emacs-xid ()
+  (frame-parameter nil 'window-id))
 
 (defun webkit-generate-id ()
   (replace-regexp-in-string "\n" "" (shell-command-to-string "uuidgen")))
@@ -136,13 +133,25 @@
                    'message
                    (lambda (&rest args) (message "%S" args)))
 
+(defun webkit-create-buffer (url)
+  (let ((webkit-buffer (get-buffer-create (concat "*" url "*"))))
+    (with-current-buffer webkit-buffer
+      (webkit-mode))
+    webkit-buffer))
+
 (defun webkit-open-url (url)
   (interactive "sURL: ")
-  (let ((buffer (webkit-create-buffer url))
-        (window-info (webkit-get-window-info)))
+  (let* ((buffer (webkit-create-buffer url))
+         (emacs-xid (webkit-get-emacs-xid)))
     (switch-to-buffer buffer)
-    (epc:call-deferred pyepc-browser 'create_buffer (list buffer-id url (nth 3 window-info) (nth 4 window-info)))
-    (epc:call-deferred pyepc-browser 'create_view (append (list buffer-id) window-info))
+    (let* ((window-allocation (webkit-get-window-allocation))
+           (x (nth 0 window-allocation))
+           (y (nth 1 window-allocation))
+           (w (nth 2 window-allocation))
+           (h (nth 3 window-allocation)))
+      (epc:call-deferred pyepc-browser 'create_buffer (list buffer-id url w h))
+      (epc:call-deferred pyepc-browser 'create_view (list buffer-id emacs-xid x y w h))
+      )
     ))
 
 (provide 'webkit)
