@@ -129,7 +129,7 @@
 
 (defadvice save-buffers-kill-emacs (around no-query-kill-emacs activate)
   "Prevent annoying \"Active processes exist\" query when you quit Emacs."
-  (flet ((process-list ())) ad-do-it))
+  (cl-flet ((process-list ())) ad-do-it))
 
 (defadvice list-load-path-shadows (around hidden-window-if-found-nothing activate)
   "This advice hidden output window if found nothing."
@@ -166,7 +166,7 @@
   (interactive)
   ;; Save file before compile.
   (when buffer-file-name
-    (flet ((message (&rest args)))
+    (cl-flet ((message (&rest args)))
       (basic-save-buffer)))
   ;; Compile.
   (call-interactively 'compile-dwim-compile))

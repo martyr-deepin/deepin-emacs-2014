@@ -30,6 +30,7 @@ from PyQt5.QtWebKit import  QWebSettings
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import QUrl, Qt
 from PyQt5 import QtGui
+import time
 import os
 from epc.server import ThreadingEPCServer
 import threading
@@ -84,8 +85,13 @@ class BrowserBuffer(QWebView):
 
     redrawScreenshot = QtCore.pyqtSignal(object)
     
-    def __init__(self):
+    def __init__(self, buffer_id, buffer_width, buffer_height):
         super(BrowserBuffer, self).__init__()
+        
+        self.buffer_id = buffer_id
+        self.buffer_width = buffer_width
+        self.buffer_height = buffer_height
+        
         self.page().setLinkDelegationPolicy(QWebPage.DelegateAllLinks)
         self.page().linkClicked.connect(self.link_clicked)
         self.page().mainFrame().setScrollBarPolicy(Qt.Horizontal, Qt.ScrollBarAlwaysOff)
@@ -93,8 +99,7 @@ class BrowserBuffer(QWebView):
         self.settings().setAttribute(QWebSettings.PluginsEnabled, True)
         
         self.view_list = []
-        self.resize(600, 400)
-        self.qimage = QImage(600, 400, QImage.Format_ARGB32)
+        self.resize(self.buffer_width, self.buffer_height)
         
     def eventFilter(self, obj, event):
         if event.type() in [QEvent.KeyPress, QEvent.KeyRelease,
@@ -112,9 +117,10 @@ class BrowserBuffer(QWebView):
         
     @postGui()
     def redraw(self):
-        self.render(self.qimage)
+        qimage = QImage(self.buffer_width, self.buffer_height, QImage.Format_ARGB32)
+        self.render(qimage)
         
-        self.redrawScreenshot.emit(self.qimage)
+        self.redrawScreenshot.emit(qimage)
         
     def add_view(self, view):
         if view not in self.view_list:
@@ -185,51 +191,49 @@ if __name__ == '__main__':
     
     app = QApplication(sys.argv)
     
-    browser_buffer = BrowserBuffer()
-    
-    browser_view = BrowserView(browser_buffer)
-    browser_view.resize(600, 400)
-    browser_view.move(0, 0)
-    browser_view.show()
-
-    browser_view1 = BrowserView(browser_buffer)
-    browser_view1.resize(600, 400)
-    browser_view1.move(0, 500)
-    browser_view1.show()
-
-    browser_view2 = BrowserView(browser_buffer)
-    browser_view2.resize(600, 400)
-    browser_view2.move(700, 500)
-    browser_view2.show()
-
-    browser_view3 = BrowserView(browser_buffer)
-    browser_view3.resize(600, 400)
-    browser_view3.move(700, 0)
-    browser_view3.show()
-
-    browser_buffer.open_url("http://www.youku.com")
-    
     server = ThreadingEPCServer(('localhost', 0), log_traceback=True)
-    
-    server.register_function(browser_buffer.open_url)
-    server.register_function(browser_view.moveresize)
-    server.register_function(browser_view.hide)
-    server.register_function(browser_view.show)
     
     server_thread = threading.Thread(target=server.serve_forever)
     server_thread.allow_reuse_address = True
     
+    buffer_dict = {}
+    
+    # NOTE: every epc method must should wrap with postGui.
+    # Because epc server is running in sub-thread.
+    @postGui(False)        
+    def create_buffer(buffer_id, buffer_url, buffer_width, buffer_height):
+        if not buffer_dict.has_key(buffer_id):
+            buffer = BrowserBuffer(buffer_id, buffer_width, buffer_height)
+            buffer.open_url(buffer_url)
+            buffer_dict[buffer_id] = buffer
+            
+    @postGui(False)        
+    def create_view(buffer_id, emacs_xid, x, y, w, h):
+        if buffer_dict.has_key(buffer_id):
+            view = BrowserView(buffer_dict[buffer_id])
+            view.moveresize(emacs_xid, x, y, w, h)
+            view.show()
+    
     def update_buffer():
         while True:
-            browser_buffer.redraw()
+            for buffer in list(buffer_dict.values()):
+                buffer.redraw()
             
-            import time
             time.sleep(0.05)
             
-    threading.Thread(target=update_buffer).start()
-    
     server_thread.start()
     server.print_port()
     
+    server.register_function(create_buffer)
+    server.register_function(create_view)
+    
+    # test_create_buffer()
+    # test_create_view("83886167")
+    
+    # create_buffer("1", "http://www.google.com", 600, 400)
+    # create_view("1", "83886167", 0, 0, 600, 400)
+    
+    threading.Thread(target=update_buffer).start()            
+        
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     sys.exit(app.exec_())

@@ -104,12 +104,9 @@
   (kill-all-local-variables)
   (setq major-mode 'webkit-mode)
   (setq mode-name "WebKit")
+  (set (make-local-variable 'buffer-id) (webkit-generate-id))
   (use-local-map webkit-mode-map)
   (run-hooks 'webkit-mode-hook))
-
-(defvar pyepc-browser
-  (epc:start-epc (or (getenv "PYTHON") "python")
-                 (list (expand-file-name "browser.py" "/usr/share/deepin-emacs/site-lisp/extensions/webkit"))))
 
 (defun webkit-get-window-info ()
   (let* ((window-edges (window-inside-pixel-edges))
@@ -120,21 +117,33 @@
          )
     (list (frame-parameter nil 'window-id) x y w h)))
 
+(defun webkit-create-buffer (url)
+  (let ((webkit-buffer (get-buffer-create (concat "*" url "*"))))
+    (with-current-buffer webkit-buffer
+      (webkit-mode))
+    webkit-buffer))
+
+(defun webkit-generate-id ()
+  (replace-regexp-in-string "\n" "" (shell-command-to-string "uuidgen")))
+
+(defvar pyepc-file (expand-file-name "browser.py" (file-name-directory load-file-name)))
+
+(defvar pyepc-browser
+  (epc:start-epc (or (getenv "PYTHON") "python")
+                 (list pyepc-file)))
+
+(epc:define-method pyepc-browser
+                   'message
+                   (lambda (&rest args) (message "%S" args)))
+
 (defun webkit-open-url (url)
   (interactive "sURL: ")
-  (epc:call-deferred pyepc-browser 'show ())
-  (epc:call-deferred pyepc-browser 'open_url (list url))
-  (epc:call-deferred pyepc-browser 'moveresize (webkit-get-window-info))
-  )
-
-(defun webkit-show()
-  (interactive)
-  (epc:call-deferred pyepc-browser 'show ())
-  (epc:call-deferred pyepc-browser 'moveresize (webkit-get-window-info)))
-
-(defun webkit-hide ()
-  (interactive)
-  (epc:call-deferred pyepc-browser 'hide ()))
+  (let ((buffer (webkit-create-buffer url))
+        (window-info (webkit-get-window-info)))
+    (switch-to-buffer buffer)
+    (epc:call-deferred pyepc-browser 'create_buffer (list buffer-id url (nth 3 window-info) (nth 4 window-info)))
+    (epc:call-deferred pyepc-browser 'create_view (append (list buffer-id) window-info))
+    ))
 
 (provide 'webkit)
 
