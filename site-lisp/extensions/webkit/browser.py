@@ -153,10 +153,11 @@ class BrowserBuffer(QWebView):
         
     @postGui()
     def redraw(self):
-        qimage = QImage(self.buffer_width, self.buffer_height, QImage.Format_ARGB32)
-        self.render(qimage)
+        if len(self.view_dict) > 0:
+            qimage = QImage(self.buffer_width, self.buffer_height, QImage.Format_ARGB32)
+            self.render(qimage)
         
-        self.redrawScreenshot.emit(qimage)
+            self.redrawScreenshot.emit(qimage)
         
     @postGui()    
     def open_url(self, url):    
@@ -164,8 +165,7 @@ class BrowserBuffer(QWebView):
         
     def link_clicked(self, url):
         if self.press_ctrl_flag:
-            call_message("##### %s" % url.url())
-            call_open_url_in_new_tab(url.url())
+            call_open_url(url.url())
         else:
             self.load(url)
         
@@ -241,9 +241,9 @@ if __name__ == '__main__':
     
     buffer_dict = {}
     
-    def call_open_url_in_new_tab(url):
+    def call_open_url(url):
         handler = server.clients[0]
-        handler.call('open-url-in-new-tab', [url])
+        handler.call('open-url', [url])
     
     def call_message(message):
         handler = server.clients[0]
