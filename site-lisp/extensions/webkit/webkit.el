@@ -151,7 +151,6 @@
         (epc:call-deferred pyepc-browser 'create_buffer (list buffer-id url w h))
         ))
     (switch-to-buffer buffer)
-    (message "Open %s" url)
     ))
 
 (defun webkit-monitor-window-change (&rest _)
@@ -180,10 +179,7 @@
                  (h (nth 3 window-allocation))
                  )
             (epc:call-deferred pyepc-browser 'adjust_view (list (webkit-get-emacs-xid) buffer-id (format "%s_%s" x y) x y w h))
-            (message "-----------------------")
             )))
-
-    (message "***********************************")
     ))
 
 (defun webkit-monitor-buffer-kill ()

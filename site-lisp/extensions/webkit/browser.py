@@ -299,12 +299,10 @@ if __name__ == '__main__':
                     # Update view.
                     if emacs_view_id in buffer_view_ids:
                         buffer.update_view(emacs_view_id, emacs_xid, x, y, w, h)
-                        
-                        print "Update view: %s" % emacs_view_id
+
                     # Create view.
                     else:
                         buffer.add_view(emacs_view_id, emacs_xid, x, y, w, h)
-                    
                 for buffer_view_id in buffer_view_ids:
                     # Remove view.
                     if buffer_view_id not in emacs_view_ids:
