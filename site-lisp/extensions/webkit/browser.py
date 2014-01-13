@@ -296,6 +296,7 @@ if __name__ == '__main__':
     
     threading.Thread(target=update_buffer).start()            
     
+    # This function just for test python module.
     def test():
         emacs_xid = "65011799"
         
