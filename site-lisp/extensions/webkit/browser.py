@@ -123,6 +123,8 @@ class BrowserBuffer(QWebView):
         
         view.show()
         
+        call_message("Add view %s" % view_id)
+        
     def remove_view(self, view_id):
         if self.view_dict.has_key(view_id):
             self.view_dict[view_id].remove()
@@ -200,6 +202,8 @@ class BrowserView(QWidget):
         self.moveresize(emacs_xid, x, y, w, h)
         self.browser_buffer.adjust_size(w, h)
         
+        call_message("Adjust size %s" % self.view_)
+        
     def reparent(self, emacs_xid, x, y):
         from Xlib import display
         xlib_display = display.Display()
@@ -239,6 +243,7 @@ if __name__ == '__main__':
             
     @postGui(False)        
     def adjust_view(emacs_xid, buffer_id, view_id, x, y, w, h):
+        call_message("****************** %s %s" % (buffer_dict.has_key(buffer_id), buffer_dict[buffer_id].view_dict.has_key(view_id)))
         if buffer_dict.has_key(buffer_id) and buffer_dict[buffer_id].view_dict.has_key(view_id):
             buffer_dict[buffer_id].view_dict[view_id].adjust_size(emacs_xid, x, y, w, h)
             

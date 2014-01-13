@@ -180,6 +180,7 @@
                  (h (nth 3 window-allocation))
                  )
             (epc:call-deferred pyepc-browser 'adjust_view (list (webkit-get-emacs-xid) buffer-id (format "%s_%s" x y) x y w h))
+            (message "-----------------------")
             )))
     ))
 
