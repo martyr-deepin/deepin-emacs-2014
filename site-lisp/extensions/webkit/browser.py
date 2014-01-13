@@ -100,6 +100,8 @@ class BrowserBuffer(QWebView):
         
         self.adjust_size(self.buffer_width, self.buffer_height)
         
+        self.view_dict = {}
+        
     def eventFilter(self, obj, event):
         if event.type() in [QEvent.KeyPress, QEvent.KeyRelease,
                             QEvent.MouseButtonPress, QEvent.MouseButtonRelease,
@@ -113,12 +115,31 @@ class BrowserBuffer(QWebView):
                 print event.type(), event
         
         return False
+    
+    def add_view(self, view_id, emacs_xid, x, y, w, h):
+        view = BrowserView(self, view_id)
+        self.view_dict[view_id] = view
+        self.update_view(view_id, emacs_xid, x, y, w, h)
+        
+        view.show()
+        
+    def remove_view(self, view_id):
+        if self.view_dict.has_key(view_id):
+            self.view_dict[view_id].remove()
+            self.view_dict.pop(view_id)
+        
+    def update_view(self, view_id, emacs_xid, x, y, w, h):
+        self.view_dict[view_id].moveresize(emacs_xid, x, y, w, h)
+        
+    def remove_all_views(self):
+        for view_id in self.view_dict.keys():
+            self.remove_view(view_id)
         
     def adjust_size(self, width, height):
         self.buffer_width = width
         self.buffer_height = height
         self.resize(self.buffer_width, self.buffer_height)
-    
+        
     @postGui()
     def redraw(self):
         qimage = QImage(self.buffer_width, self.buffer_height, QImage.Format_ARGB32)
@@ -150,6 +171,10 @@ class BrowserView(QWidget):
         self.qimage = None
         
         self.installEventFilter(browser_buffer)
+        
+    def remove(self):
+        self.browser_buffer.redrawScreenshot.disconnect(self.updateView)
+        self.destroy()
         
     def paintEvent(self, event):    
         if self.qimage:
@@ -198,7 +223,10 @@ if __name__ == '__main__':
     server_thread.allow_reuse_address = True
     
     buffer_dict = {}
-    view_dict = {}
+    
+    def call_message(message):
+        handler = server.clients[0]
+        handler.call('message', [message])
     
     # NOTE: every epc method must should wrap with postGui.
     # Because epc server is running in sub-thread.
@@ -210,23 +238,51 @@ if __name__ == '__main__':
             buffer_dict[buffer_id] = buffer
             
     @postGui(False)        
-    def create_view(buffer_id, view_id, emacs_xid, x, y, w, h):
-        if buffer_dict.has_key(buffer_id):
-            view = BrowserView(buffer_dict[buffer_id], view_id)
-            view.moveresize(emacs_xid, x, y, w, h)
-            view.show()
+    def adjust_view(emacs_xid, buffer_id, view_id, x, y, w, h):
+        if buffer_dict.has_key(buffer_id) and buffer_dict[buffer_id].view_dict.has_key(view_id):
+            buffer_dict[buffer_id].view_dict[view_id].adjust_size(emacs_xid, x, y, w, h)
             
-            if not view_dict.has_key(view_id):
-                view_dict[view_id] = view
+    @postGui(False)        
+    def update_views(emacs_xid, view_infos):
+        buffer_view_dict = {}
+        
+        for view_info in view_infos:
+            [buffer_id, x, y, w, h] = view_info
+            view_id = "%s_%s" % (x, y)
+            if buffer_dict.has_key(buffer_id):
+                if not buffer_view_dict.has_key(buffer_id):
+                    buffer_view_dict[buffer_id] = {}
+                    
+                buffer_view_dict[buffer_id][view_id] = (x, y, w, h)
+            else:
+                call_message("Buffer id %s is not exist!" % buffer_id)
                 
-    @postGui(False)            
-    def adjust_view_size(emacs_xid, x, y, w, h):
-        for view in list(view_dict.values()):
-            view.adjust_size(emacs_xid, x, y, w, h)
+        for buffer in buffer_dict.values():
+            if buffer_view_dict.has_key(buffer.buffer_id):
+                emacs_view_ids = buffer_view_dict[buffer.buffer_id].keys()
+                buffer_view_ids = buffer.view_dict.keys()
+                
+                for emacs_view_id in emacs_view_ids:
+                    (x, y, w, h) = buffer_view_dict[buffer.buffer_id][emacs_view_id]
+                    # Update view.
+                    if emacs_view_id in buffer_view_ids:
+                        buffer.update_view(emacs_view_id, emacs_xid, x, y, w, h)
+                        
+                        print "Update view: %s" % emacs_view_id
+                    # Create view.
+                    else:
+                        buffer.add_view(emacs_view_id, emacs_xid, x, y, w, h)
+                    
+                for buffer_view_id in buffer_view_ids:
+                    # Remove view.
+                    if buffer_view_id not in emacs_view_ids:
+                        buffer.remove_view(buffer_view_id)
+            else:
+                buffer.remove_all_views()
     
     def update_buffer():
         while True:
-            for buffer in list(buffer_dict.values()):
+            for buffer in buffer_dict.values():
                 buffer.redraw()
             
             time.sleep(0.05)
@@ -235,14 +291,33 @@ if __name__ == '__main__':
     server.print_port()
     
     server.register_function(create_buffer)
-    server.register_function(create_view)
-    server.register_function(adjust_view_size)
+    server.register_function(adjust_view)
+    server.register_function(update_views)
     
     threading.Thread(target=update_buffer).start()            
     
     def test():
+        emacs_xid = "65011799"
+        
         create_buffer("1", "http://www.google.com", 1600, 400)
-        create_view("1", "2", "3", 0, 0, 1600, 400)
+
+        # View will adjust.
+        buffer_dict["1"].add_view("400_500", emacs_xid, 400, 500, 300, 400)
+
+        # View will destory.
+        buffer_dict["1"].add_view("900_500", emacs_xid, 900, 500, 300, 400)
+
+        # View will add.
+        view_infos = [
+            ["1", 0, 0, 300, 400],
+            ["1", 0, 500, 300, 400],
+            ["1", 400, 0, 300, 400],
+            ["1", 400, 500, 500, 400],
+        ]
+        
+        update_views(emacs_xid, view_infos)
+        
+        adjust_view(emacs_xid, "1", "400_500", 400, 500, 500, 400)
         
     # test()    
         
