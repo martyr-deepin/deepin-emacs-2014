@@ -184,7 +184,13 @@
             )))
     ))
 
+(defun webkit-monitor-buffer-kill ()
+  (with-current-buffer (buffer-name)
+    (if (string= "webkit-mode" (format "%s" major-mode))
+        (epc:call-deferred pyepc-browser 'remove_buffer (list buffer-id)))))
+
 (add-hook 'window-configuration-change-hook #'webkit-monitor-window-change)
+(add-hook 'kill-buffer-hook #'webkit-monitor-buffer-kill)
 
 (provide 'webkit)
 

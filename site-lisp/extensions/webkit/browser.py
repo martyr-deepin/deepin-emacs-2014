@@ -242,6 +242,16 @@ if __name__ == '__main__':
             buffer_dict[buffer_id] = buffer
             
     @postGui(False)        
+    def remove_buffer(buffer_id):
+        if buffer_dict.has_key(buffer_id):
+            buffer = buffer_dict[buffer_id]
+            buffer.remove_all_views()
+            buffer_dict.pop(buffer_id)
+            buffer.destroy()
+            
+            call_message("Remove buffer %s" % buffer_id)
+            
+    @postGui(False)        
     def adjust_view(emacs_xid, buffer_id, view_id, x, y, w, h):
         call_message("****************** %s %s" % (buffer_dict.has_key(buffer_id), buffer_dict[buffer_id].view_dict.has_key(view_id)))
         if buffer_dict.has_key(buffer_id) and buffer_dict[buffer_id].view_dict.has_key(view_id):
@@ -296,6 +306,7 @@ if __name__ == '__main__':
     server.print_port()
     
     server.register_function(create_buffer)
+    server.register_function(remove_buffer)
     server.register_function(adjust_view)
     server.register_function(update_views)
     
