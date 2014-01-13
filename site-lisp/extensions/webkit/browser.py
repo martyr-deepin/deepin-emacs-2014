@@ -102,6 +102,8 @@ class BrowserBuffer(QWebView):
         
         self.view_dict = {}
         
+        self.press_ctrl_flag = False
+        
     def eventFilter(self, obj, event):
         if event.type() in [QEvent.KeyPress, QEvent.KeyRelease,
                             QEvent.MouseButtonPress, QEvent.MouseButtonRelease,
@@ -110,6 +112,13 @@ class BrowserBuffer(QWebView):
                             QEvent.ActivationChange, QEvent.Enter, QEvent.WindowActivate,
                             ]:
             QApplication.sendEvent(self, event)
+            
+            if event.type() == QEvent.KeyPress and event.key() == QtCore.Qt.Key_Control:
+                self.press_ctrl_flag = True
+                call_message("Ctrl press")
+            elif event.type() == QEvent.KeyRelease and event.key() == QtCore.Qt.Key_Control:
+                self.press_ctrl_flag = False
+                call_message("Ctrl release")
         else:
             if event.type() not in [12, 77]:
                 print event.type(), event
@@ -154,7 +163,11 @@ class BrowserBuffer(QWebView):
         self.load(QUrl(url))
         
     def link_clicked(self, url):
-        self.load(url)
+        if self.press_ctrl_flag:
+            call_message("##### %s" % url.url())
+            call_open_url_in_new_tab(url.url())
+        else:
+            self.load(url)
         
 class BrowserView(QWidget):
     def __init__(self, browser_buffer, view_id):
@@ -227,6 +240,10 @@ if __name__ == '__main__':
     server_thread.allow_reuse_address = True
     
     buffer_dict = {}
+    
+    def call_open_url_in_new_tab(url):
+        handler = server.clients[0]
+        handler.call('open-url-in-new-tab', [url])
     
     def call_message(message):
         handler = server.clients[0]

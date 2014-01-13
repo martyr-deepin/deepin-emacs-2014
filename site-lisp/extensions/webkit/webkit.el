@@ -129,10 +129,6 @@
   (epc:start-epc (or (getenv "PYTHON") "python")
                  (list pyepc-file)))
 
-(epc:define-method pyepc-browser
-                   'message
-                   (lambda (&rest args) (message "%S" args)))
-
 (defun webkit-create-buffer (url)
   (let ((webkit-buffer (get-buffer-create (concat "*" url "*"))))
     (with-current-buffer webkit-buffer
@@ -152,36 +148,42 @@
         (epc:call-deferred pyepc-browser 'create_buffer (list buffer-id url w h))
         ))
     (switch-to-buffer buffer)
+    (message "Open %s" url)
     ))
 
 (defun webkit-monitor-window-change (&rest _)
   (let ((view-infos)
         (selected-buffer (window-buffer (selected-window))))
     (dolist (window (window-list))
-      (setq buffer (window-buffer window))
-      (with-current-buffer buffer
-        (if (string= "webkit-mode" (format "%s" major-mode))
-            (let* ((window-allocation (webkit-get-window-allocation window))
-                   (x (nth 0 window-allocation))
-                   (y (nth 1 window-allocation))
-                   (w (nth 2 window-allocation))
-                   (h (nth 3 window-allocation))
-                   )
-              (add-to-list 'view-infos (list buffer-id x y w h))
-              ))))
+      (if (window-live-p window)
+          (progn
+            (setq buffer (window-buffer window))
+            (with-current-buffer buffer
+              (if (string= "webkit-mode" (format "%s" major-mode))
+                  (let* ((window-allocation (webkit-get-window-allocation window))
+                         (x (nth 0 window-allocation))
+                         (y (nth 1 window-allocation))
+                         (w (nth 2 window-allocation))
+                         (h (nth 3 window-allocation))
+                         )
+                    (add-to-list 'view-infos (list buffer-id x y w h))
+                    ))))))
     (epc:call-deferred pyepc-browser 'update_views (list (webkit-get-emacs-xid) view-infos))
 
-    (with-current-buffer selected-buffer
-      (if (string= "webkit-mode" (format "%s" major-mode))
-          (let* ((window-allocation (webkit-get-window-allocation (selected-window)))
-                 (x (nth 0 window-allocation))
-                 (y (nth 1 window-allocation))
-                 (w (nth 2 window-allocation))
-                 (h (nth 3 window-allocation))
-                 )
-            (epc:call-deferred pyepc-browser 'adjust_view (list (webkit-get-emacs-xid) buffer-id (format "%s_%s" x y) x y w h))
-            (message "-----------------------")
-            )))
+    (if (window-live-p (selected-window))
+        (with-current-buffer selected-buffer
+          (if (string= "webkit-mode" (format "%s" major-mode))
+              (let* ((window-allocation (webkit-get-window-allocation (selected-window)))
+                     (x (nth 0 window-allocation))
+                     (y (nth 1 window-allocation))
+                     (w (nth 2 window-allocation))
+                     (h (nth 3 window-allocation))
+                     )
+                (epc:call-deferred pyepc-browser 'adjust_view (list (webkit-get-emacs-xid) buffer-id (format "%s_%s" x y) x y w h))
+                (message "-----------------------")
+                )))
+      )
+    (message "***********************************")
     ))
 
 (defun webkit-monitor-buffer-kill ()
@@ -191,6 +193,15 @@
 
 (add-hook 'window-configuration-change-hook #'webkit-monitor-window-change)
 (add-hook 'kill-buffer-hook #'webkit-monitor-buffer-kill)
+
+(epc:define-method pyepc-browser
+                   'message
+                   (lambda (&rest args) (message "%S" args)))
+
+(epc:define-method pyepc-browser
+                   'open-url-in-new-tab
+                   ;; (lambda (&rest args) (webkit-open-url args)))
+                   (lambda (&rest args) (message "%S" args)))
 
 (provide 'webkit)
 
