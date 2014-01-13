@@ -160,7 +160,6 @@
     (dolist (window (window-list))
       (setq buffer (window-buffer window))
       (with-current-buffer buffer
-        (message "%s" major-mode)
         (if (string= "webkit-mode" (format "%s" major-mode))
             (let* ((window-allocation (webkit-get-window-allocation window))
                    (x (nth 0 window-allocation))
@@ -169,11 +168,8 @@
                    (h (nth 3 window-allocation))
                    )
               (add-to-list 'view-infos (list buffer-id x y w h))
-              (message "%s" (list buffer-id x y w h))
               ))))
     (epc:call-deferred pyepc-browser 'update_views (list (webkit-get-emacs-xid) view-infos))
-    (message "%s" (length view-infos))
-    (message "**************************")
 
     (with-current-buffer selected-buffer
       (if (string= "webkit-mode" (format "%s" major-mode))
@@ -184,8 +180,6 @@
                  (h (nth 3 window-allocation))
                  )
             (epc:call-deferred pyepc-browser 'adjust_view (list (webkit-get-emacs-xid) buffer-id (format "%s_%s" x y) x y w h))
-            (message "%s" (list (webkit-get-emacs-xid) buffer-id (format "%s_%s" x y) x y w h))
-            (message "----------------------")
             )))
     ))
 
