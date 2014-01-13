@@ -173,12 +173,10 @@
     (with-current-buffer selected-buffer
       (if (string= "webkit-mode" (format "%s" major-mode))
           (let* ((window-allocation (webkit-get-window-allocation (selected-window)))
-                 (x (nth 0 window-allocation))
-                 (y (nth 1 window-allocation))
                  (w (nth 2 window-allocation))
                  (h (nth 3 window-allocation))
                  )
-            (epc:call-deferred pyepc-browser 'adjust_view (list (webkit-get-emacs-xid) buffer-id (format "%s_%s" x y) x y w h))
+            (epc:call-deferred pyepc-browser 'adjust_size (list buffer-id w h))
             )))
     ))
 

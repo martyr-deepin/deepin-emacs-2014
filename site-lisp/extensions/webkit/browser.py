@@ -269,10 +269,9 @@ if __name__ == '__main__':
             call_message("Remove buffer %s" % buffer_id)
             
     @postGui(False)        
-    def adjust_view(emacs_xid, buffer_id, view_id, x, y, w, h):
-        call_message("****************** %s %s" % (buffer_dict.has_key(buffer_id), buffer_dict[buffer_id].view_dict.has_key(view_id)))
-        if buffer_dict.has_key(buffer_id) and buffer_dict[buffer_id].view_dict.has_key(view_id):
-            buffer_dict[buffer_id].view_dict[view_id].adjust_size(emacs_xid, x, y, w, h)
+    def adjust_size(buffer_id, w, h):
+        if buffer_dict.has_key(buffer_id):
+            buffer_dict[buffer_id].adjust_size(w, h)
             
     @postGui(False)        
     def update_views(emacs_xid, view_infos):
@@ -322,7 +321,7 @@ if __name__ == '__main__':
     
     server.register_function(create_buffer)
     server.register_function(remove_buffer)
-    server.register_function(adjust_view)
+    server.register_function(adjust_size)
     server.register_function(update_views)
     
     threading.Thread(target=update_buffer).start()            
@@ -349,7 +348,7 @@ if __name__ == '__main__':
         
         update_views(emacs_xid, view_infos)
         
-        adjust_view(emacs_xid, "1", "400_500", 400, 500, 500, 400)
+        adjust_size(emacs_xid, "1", "400_500", 400, 500, 500, 400)
         
     # test()    
         
