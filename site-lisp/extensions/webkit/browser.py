@@ -37,22 +37,8 @@ import threading
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtGui import QPainter, QImage
 import functools
-
-def get_parent_dir(filepath, level=1):
-    '''
-    Get parent directory with given return level.
-    
-    @param filepath: Filepath.
-    @param level: Return level, default is 1
-    @return: Return parent directory with given return level. 
-    '''
-    parent_dir = os.path.realpath(filepath)
-    
-    while(level > 0):
-        parent_dir = os.path.dirname(parent_dir)
-        level -= 1
-    
-    return parent_dir
+from utils import get_parent_dir
+from constant import xlib_display
 
 class postGui(QtCore.QObject):
     
@@ -235,8 +221,11 @@ class BrowserView(QWidget):
         self.browser_buffer.adjust_size(w, h)
         
     def reparent(self, emacs_xid, x, y):
-        from Xlib import display
-        xlib_display = display.Display()
+        global xlib_display
+        
+        if xlib_display == None:
+            from Xlib import display
+            xlib_display =  display.Display()
         
         browser_xid = self.winId().__int__()
         browser_xwindow = xlib_display.create_resource_object("window", int(browser_xid))

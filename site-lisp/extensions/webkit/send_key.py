@@ -27,10 +27,6 @@ import time
 
 display = Xlib.display.Display()
 
-def get_window(windowid):
-    window = display.create_resource_object('window', windowid)
-    return window
-
 special_X_keysyms = {
     ' ' : "space",
     '\t' : "Tab",
@@ -122,8 +118,3 @@ def send_string(window, str):
                               detail=keycode,
                               time=int(time.time()))
             window.send_event(event, propagate=True)
-
-if __name__ == '__main__':
-    window = get_window(106954839)
-    send_string(window, "a")
-    display.sync()
