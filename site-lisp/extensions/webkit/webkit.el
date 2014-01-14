@@ -131,11 +131,13 @@
 
 (defvar webkit-buffer-dict (make-hash-table :test 'equal))
 
+(defvar webkit-title-length 30)
+
 (defvar webkit-tab-index 0)
 
 (defun webkit-create-buffer (url)
   (setq webkit-tab-index (+ webkit-tab-index 1))
-  (let ((webkit-buffer (generate-new-buffer (concat (truncate-string-to-width url 30)))))
+  (let ((webkit-buffer (generate-new-buffer (concat (truncate-string-to-width url webkit-title-length)))))
     (with-current-buffer webkit-buffer
       (webkit-mode)
       (set (make-local-variable 'buffer-url) url)
@@ -146,7 +148,7 @@
 (defun webkit-change-buffer-title (id title)
   (let* ((buffer (gethash id webkit-buffer-dict)))
     (with-current-buffer buffer
-      (rename-buffer (truncate-string-to-width title 30)))
+      (rename-buffer (truncate-string-to-width title webkit-title-length)))
     )
   )
 
