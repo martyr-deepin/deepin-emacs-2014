@@ -38,7 +38,7 @@ from PyQt5.QtWidgets import QWidget
 from PyQt5.QtGui import QPainter, QImage
 import functools
 from utils import get_parent_dir
-from constant import xlib_display
+from constant import get_xlib_display
 
 class postGui(QtCore.QObject):
     
@@ -221,11 +221,7 @@ class BrowserView(QWidget):
         self.browser_buffer.adjust_size(w, h)
         
     def reparent(self, emacs_xid, x, y):
-        global xlib_display
-        
-        if xlib_display == None:
-            from Xlib import display
-            xlib_display =  display.Display()
+        xlib_display = get_xlib_display()
         
         browser_xid = self.winId().__int__()
         browser_xwindow = xlib_display.create_resource_object("window", int(browser_xid))

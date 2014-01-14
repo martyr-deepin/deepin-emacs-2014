@@ -21,3 +21,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 xlib_display = None
+
+def get_xlib_display():
+    global xlib_display
+    
+    if xlib_display == None:
+        from Xlib import display
+        xlib_display =  display.Display()
+        
+    return xlib_display    
