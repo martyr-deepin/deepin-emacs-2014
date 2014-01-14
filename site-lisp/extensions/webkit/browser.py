@@ -81,6 +81,20 @@ class postGui(QtCore.QObject):
         else:    
             self._func(*args, **kwargs)
             
+class WebPage(QWebPage):
+	def __init__(self):
+            super(WebPage, self).__init__()
+ 
+	def acceptNavigationRequest(self, frame, request, type):
+            if(type == QWebPage.NavigationTypeLinkClicked):
+                if(frame == self.mainFrame()):
+                    self.view().link_clicked(request.url())
+                else:
+                    call_method("open-url", [request.url().toString()])
+                    return False
+                
+	    return QWebPage.acceptNavigationRequest(self, frame, request, type)            
+            
 class BrowserBuffer(QWebView):
 
     redrawScreenshot = QtCore.pyqtSignal(object)
@@ -91,6 +105,8 @@ class BrowserBuffer(QWebView):
         self.buffer_id = buffer_id
         self.buffer_width = buffer_width
         self.buffer_height = buffer_height
+        
+        # self.setPage(WebPage())
         
         self.page().setLinkDelegationPolicy(QWebPage.DelegateAllLinks)
         self.page().linkClicked.connect(self.link_clicked)
@@ -104,9 +120,9 @@ class BrowserBuffer(QWebView):
         
         self.view_dict = {}
         
-        self.press_ctrl_flag = False
-        
         self.titleChanged.connect(self.change_title)
+        
+        self.press_ctrl_flag = False
         
     def change_title(self, title):
         call_method("change-buffer-title", [self.buffer_id, title])
@@ -122,10 +138,8 @@ class BrowserBuffer(QWebView):
             
             if event.type() == QEvent.KeyPress and event.key() == QtCore.Qt.Key_Control:
                 self.press_ctrl_flag = True
-                call_message("Ctrl press")
             elif event.type() == QEvent.KeyRelease and event.key() == QtCore.Qt.Key_Control:
                 self.press_ctrl_flag = False
-                call_message("Ctrl release")
         else:
             if event.type() not in [12, 77]:
                 print event.type(), event
