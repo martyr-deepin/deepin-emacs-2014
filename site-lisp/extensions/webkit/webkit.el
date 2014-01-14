@@ -129,14 +129,26 @@
   (epc:start-epc (or (getenv "PYTHON") "python")
                  (list pyepc-file)))
 
+(defvar webkit-buffer-dict (make-hash-table :test 'equal))
+
 (defvar webkit-tab-index 0)
 
 (defun webkit-create-buffer (url)
   (setq webkit-tab-index (+ webkit-tab-index 1))
-  (let ((webkit-buffer (get-buffer-create (concat "<Tab-" (int-to-string webkit-tab-index) ">"))))
+  (let ((webkit-buffer (generate-new-buffer (concat (truncate-string-to-width url 30)))))
     (with-current-buffer webkit-buffer
-      (webkit-mode))
+      (webkit-mode)
+      (set (make-local-variable 'buffer-url) url)
+      (puthash buffer-id webkit-buffer webkit-buffer-dict)
+      )
     webkit-buffer))
+
+(defun webkit-change-buffer-title (id title)
+  (let* ((buffer (gethash id webkit-buffer-dict)))
+    (with-current-buffer buffer
+      (rename-buffer (truncate-string-to-width title 30)))
+    )
+  )
 
 (defun webkit-open-url (url)
   (interactive "sURL: ")
@@ -183,7 +195,9 @@
 (defun webkit-monitor-buffer-kill ()
   (with-current-buffer (buffer-name)
     (if (string= "webkit-mode" (format "%s" major-mode))
-        (epc:call-deferred pyepc-browser 'remove_buffer (list buffer-id)))))
+        (progn
+          (epc:call-deferred pyepc-browser 'remove_buffer (list buffer-id))
+          (remhash buffer-id webkit-buffer-dict)))))
 
 (add-hook 'window-configuration-change-hook #'webkit-monitor-window-change)
 (add-hook 'kill-buffer-hook #'webkit-monitor-buffer-kill)
@@ -196,6 +210,12 @@
                    'open-url
                    (lambda (&rest args)
                      (webkit-open-url (nth 0 args))
+                     ))
+
+(epc:define-method pyepc-browser
+                   'change-buffer-title
+                   (lambda (&rest args)
+                     (webkit-change-buffer-title (nth 0 args) (nth 1 args))
                      ))
 
 (provide 'webkit)

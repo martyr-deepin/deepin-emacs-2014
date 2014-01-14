@@ -104,6 +104,11 @@ class BrowserBuffer(QWebView):
         
         self.press_ctrl_flag = False
         
+        self.titleChanged.connect(self.change_title)
+        
+    def change_title(self, title):
+        call_method("change-buffer-title", [self.buffer_id, title])
+        
     def eventFilter(self, obj, event):
         if event.type() in [QEvent.KeyPress, QEvent.KeyRelease,
                             QEvent.MouseButtonPress, QEvent.MouseButtonRelease,
@@ -165,7 +170,7 @@ class BrowserBuffer(QWebView):
         
     def link_clicked(self, url):
         if self.press_ctrl_flag:
-            call_open_url(url.url())
+            call_method("open-url", [url.url()])
         else:
             self.load(url)
         
@@ -241,13 +246,12 @@ if __name__ == '__main__':
     
     buffer_dict = {}
     
-    def call_open_url(url):
-        handler = server.clients[0]
-        handler.call('open-url', [url])
-    
     def call_message(message):
+        call_method("message", [message])
+        
+    def call_method(method_name, args):
         handler = server.clients[0]
-        handler.call('message', [message])
+        handler.call(method_name, args)
     
     # NOTE: every epc method must should wrap with postGui.
     # Because epc server is running in sub-thread.
