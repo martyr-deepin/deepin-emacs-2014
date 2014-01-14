@@ -142,7 +142,7 @@ class BrowserBuffer(QWebView):
                 self.press_ctrl_flag = False
         else:
             if event.type() not in [12, 77]:
-                print event.type(), event
+                call_method("%s %s" % (event.type(), event))
         
         return False
     
@@ -152,8 +152,6 @@ class BrowserBuffer(QWebView):
         self.update_view(view_id, emacs_xid, x, y, w, h)
         
         view.show()
-        
-        call_message("Add view %s" % view_id)
         
     def remove_view(self, view_id):
         if self.view_dict.has_key(view_id):
@@ -235,8 +233,6 @@ class BrowserView(QWidget):
     def adjust_size(self, emacs_xid, x, y, w, h):
         self.moveresize(emacs_xid, x, y, w, h)
         self.browser_buffer.adjust_size(w, h)
-        
-        call_message("Adjust size %s" % self.view_)
         
     def reparent(self, emacs_xid, x, y):
         from Xlib import display
@@ -348,7 +344,7 @@ if __name__ == '__main__':
     
     # This function just for test python module.
     def test():
-        emacs_xid = "65011799"
+        emacs_xid = "106954839"
         
         create_buffer("1", "http://www.google.com", 1600, 400)
 
