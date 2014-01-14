@@ -154,7 +154,13 @@
 
 (defun webkit-open-url (url)
   (interactive "sURL: ")
-  (let* ((buffer (webkit-create-buffer url)))
+  (let* ((buffer (webkit-create-buffer url))
+         (url-parts (split-string url "://"))
+         )
+    (unless (member (nth 0 url-parts) (list "http" "https" "ftp" "file"))
+      (if (= (length url-parts) 1)
+          (setq url (concat "http://" (nth 0 url-parts))))
+      )
     (with-current-buffer buffer
       (let* ((window-allocation (webkit-get-window-allocation))
              (x (nth 0 window-allocation))
