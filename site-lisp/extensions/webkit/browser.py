@@ -97,6 +97,8 @@ class BrowserBuffer(QWebView):
         self.page().mainFrame().setScrollBarPolicy(Qt.Horizontal, Qt.ScrollBarAlwaysOff)
         self.settings().setUserStyleSheetUrl(QUrl.fromLocalFile(os.path.join(get_parent_dir(__file__), "theme.css")))
         self.settings().setAttribute(QWebSettings.PluginsEnabled, True)
+        self.settings().setAttribute(QWebSettings.JavascriptEnabled, True)
+        self.settings().setAttribute(QWebSettings.JavascriptCanOpenWindows, True)
         
         self.adjust_size(self.buffer_width, self.buffer_height)
         
