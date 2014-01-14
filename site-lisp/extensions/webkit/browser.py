@@ -38,7 +38,7 @@ from PyQt5.QtWidgets import QWidget
 from PyQt5.QtGui import QPainter, QImage
 import functools
 from utils import get_parent_dir
-from constant import get_xlib_display
+from xutils import get_xlib_display
 
 class postGui(QtCore.QObject):
     

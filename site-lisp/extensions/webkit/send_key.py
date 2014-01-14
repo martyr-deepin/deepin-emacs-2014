@@ -24,8 +24,7 @@ import Xlib.X
 import Xlib.XK
 import Xlib.protocol.event
 import time
-
-display = Xlib.display.Display()
+from xutils import get_xlib_display
 
 special_X_keysyms = {
     ' ' : "space",
@@ -86,8 +85,10 @@ def is_shifted(ch):
     return False
 
 def char_to_keycode(ch):
+    xlib_display = get_xlib_display()
+    
     keysym = get_keysym(ch)
-    keycode = display.keysym_to_keycode(keysym)
+    keycode = xlib_display.keysym_to_keycode(keysym)
     if keycode == 0:
         print "Sorry, can't map", ch
 
@@ -99,6 +100,8 @@ def char_to_keycode(ch):
     return keycode, shift_mask
 
 def send_string(window, str):
+    xlib_display = get_xlib_display()
+    
     for ch in str:
         keycode, shift_mask = char_to_keycode(ch)
         if keycode == 0:
@@ -108,7 +111,7 @@ def send_string(window, str):
             ch, keycode, shift_mask)
         for eventtype in (Xlib.protocol.event.KeyPress,
                           Xlib.protocol.event.KeyRelease):
-            event = eventtype(root=display.screen().root,
+            event = eventtype(root=xlib_display.screen().root,
                               window=window,
                               same_screen=0,
                               child=Xlib.X.NONE,
