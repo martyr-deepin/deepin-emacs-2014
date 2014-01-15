@@ -23,7 +23,6 @@ import Xlib.display
 import Xlib.X
 import Xlib.XK
 import Xlib.protocol.event
-import time
 from xutils import get_xlib_display
 
 special_X_keysyms = {
@@ -99,25 +98,49 @@ def char_to_keycode(ch):
 
     return keycode, shift_mask
 
-def send_string(window, str):
+def send_string(window, str, press=True):
     xlib_display = get_xlib_display()
     
-    for ch in str:
-        keycode, shift_mask = char_to_keycode(ch)
+    if str == "Ctrl":
+        keycode = xlib_display.keysym_to_keycode(Xlib.XK.XK_Control_L)
+        mask = Xlib.X.ControlMask
+    elif str == "Alt":
+        keycode = xlib_display.keysym_to_keycode(Xlib.XK.XK_Alt_L)
+        mask = Xlib.X.Mod1Mask
+    elif str == "Shift":
+        keycode = xlib_display.keysym_to_keycode(Xlib.XK.XK_Shift_L)
+        mask = Xlib.X.ShiftMask
+    elif str == "Super":
+        keycode = xlib_display.keysym_to_keycode(Xlib.XK.XK_Super_L)
+        mask = Xlib.X.Mod4Mask
+    else:
+        keycode, mask = char_to_keycode(str)
         if keycode == 0:
-            keycode, shift_mask = char_to_keycode('_')
+            keycode, mask = char_to_keycode('_')
+            
+    if press:        
+        eventtype = Xlib.protocol.event.KeyPress
+    else:
+        eventtype = Xlib.protocol.event.KeyRelease
+        
+    print str, keycode, mask
+        
+    event = eventtype(root=xlib_display.screen().root,
+                      window=window,
+                      same_screen=0,
+                      child=Xlib.X.NONE,
+                      root_x=0, root_y=0,
+                      event_x=0, event_y=0,
+                      state=mask,
+                      detail=keycode,
+                      time=Xlib.X.CurrentTime)
+    window.send_event(event, propagate=True)
 
-        print 'sending [{0!r}] keycode={1} with shift_mask={2}'.format(
-            ch, keycode, shift_mask)
-        for eventtype in (Xlib.protocol.event.KeyPress,
-                          Xlib.protocol.event.KeyRelease):
-            event = eventtype(root=xlib_display.screen().root,
-                              window=window,
-                              same_screen=0,
-                              child=Xlib.X.NONE,
-                              root_x=0, root_y=0,
-                              event_x=0, event_y=0,
-                              state=shift_mask,
-                              detail=keycode,
-                              time=int(time.time()))
-            window.send_event(event, propagate=True)
+if __name__ == "__main__":
+    xlib_display = get_xlib_display()
+    xwindow = xlib_display.create_resource_object("window", 71303255)
+    send_string(xwindow, "Alt")
+    send_string(xwindow, "x")
+    send_string(xwindow, "x", False)
+    send_string(xwindow, "Alt", False)
+    xlib_display.sync()
