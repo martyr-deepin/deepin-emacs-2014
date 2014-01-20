@@ -1,4 +1,5 @@
 (require 'theme)
+(require 'init-startup)
 (require 'lazy-set-key)
 (require 'one-key)
 (require 'miniedit)
@@ -36,7 +37,7 @@
 (require 'init-key)
 (require 'init-doxymacs)
 (require 'init-doc-view)
-(require 'init-startup)
+(require 'init-generic)
 (require 'init-package)
 
 (provide 'init)
