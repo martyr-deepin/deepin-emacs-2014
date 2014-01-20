@@ -712,7 +712,6 @@ install-etc:
 	    [ -r $${icon} ] || continue ; \
 	    ext=`echo "$${icon}" | sed -e 's|.*\.||'`; \
 	    dest=`echo "$${icon}" | sed -e 's|.*/||' -e "s|\.$${ext}$$||" -e 's/$(EMACS_ICON)/emacs/' -e '$(TRANSFORM)'`.$${ext} ; \
-	    || exit 1; \
 	  done ; \
 	done
 
