@@ -439,7 +439,7 @@ One argument of frame number should be taken.")
             (make-frame
              (cons
               (cons 'name "mule[1]")
-              (mapcar '(lambda (s)
+              (mapcar #'(lambda (s)
                          (cons s (frame-property old s)))
                       '(top left height width))))
           (delete-frame old)))))

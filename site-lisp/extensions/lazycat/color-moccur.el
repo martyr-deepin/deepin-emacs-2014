@@ -1653,7 +1653,7 @@ Example:
     (if regexp
         (setq new-lst
               (append new-lst
-                      (mapcar '(lambda (string)
+                      (mapcar #'(lambda (string)
                                  (if (and moccur-use-keyword
                                           (assoc string moccur-search-keyword-alist))
                                      (cdr (assoc string moccur-search-keyword-alist))
@@ -2400,7 +2400,7 @@ It serves as a menu to find any of the occurrences in this buffer.
          (if (listp dir)
              (eval (nth 0 (car dir)))
            (eval dir))))
-    (setq lst (mapcar '(lambda (file)
+    (setq lst (mapcar #'(lambda (file)
                          (if (and (not (string-match "\\.+$" file))
                                   (file-directory-p file))
                              (file-name-nondirectory file)))
