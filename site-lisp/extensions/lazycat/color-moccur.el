@@ -1,7 +1,7 @@
 ;;; color-moccur.el ---  multi-buffer occur (grep) mode
 ;; -*- Mode: Emacs-Lisp -*-
 
-;; $Id: color-moccur.el,v 2.63 2009/03/07 15:03:32 akihisa Exp $
+;; $Id: color-moccur.el,v 2.73 2010-07-23 23:52:29 Akihisa Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -102,6 +102,10 @@
 ;;
 ;; dmoccur-maximum-size: Maximum size (kB) of a buffer for dmoccur and
 ;; moccur-grep(-find).
+;;
+;; moccur-following-mode-toggle :
+;; If this value is t, cursor motion in the moccur buffer causes
+;; automatic display of the corresponding buffer location.
 ;;
 ;; moccur-grep-following-mode-toggle :
 ;; If this value is t, cursor motion in the moccur-grep buffer causes
@@ -224,7 +228,7 @@
 ;;;; moccur-split-word
 ;; non-nil means to input word splited by space. You can search
 ;; "defun color-moccur (regexp)" by "defun regexp" or "regexp defun".
-;; You don't need to input complicated  regexp.
+;; You don't need to input complicated regexp.
 ;; And you can search "defun" in buffers whose name match "moccur".
 
 ;;;; dmoccur-use-list
@@ -348,7 +352,19 @@
 ;;       with many buffers, buffer-menu overflow.
 
 ;;; History:
-;;
+
+;; 2010/05/06
+;; Add user variable (moccur-following-mode-toggle)
+
+;; 2010/04/14
+;; Bug fix
+;; I changed next-line to forward-line in moccur-prev and moccur-next
+
+;; 2010/02/23
+;; Bug fix.
+;; line 2199
+;; (cdr (reverse inputs))) -> (reverse (cdr (reverse inputs))))
+;; Thanks for patch!
 
 ;; 2008/7/27
 ;; Bug fix.
@@ -550,13 +566,19 @@ Per default, this var contains only a \".*\" catchall-regexp."
   '( ;; binary
     "\\.elc$" "\\.exe$" "\\.dll$" "\\.lib$" "\\.lzh$"
     "\\.zip$" "\\.deb$" "\\.gz$" "\\.pdf$" "\\.tar$"
-    "\\.gz$" "\\.7z$" "\\.mp3$" "\\.wma$" "\\.mpg$"
-    "\\.mpeg$" "\\.aac$" "\\.o$" "\\.a$" "\\.mod$"
+    "\\.gz$" "\\.7z$" "\\.o$" "\\.a$" "\\.mod$"
     "\\.nc$" "\\.obj$" "\\.ai$" "\\.fla$" "\\.swf$"
     "\\.dvi$" "\\.pdf$" "\\.bz2$" "\\.tgz$" "\\.cab$"
-    "\\.sea$"
+    "\\.sea$" "\\.bin$" "\\.fon$" "\\.fnt$" "\\.scr$"
+    "\\.tmp$" "\\.wrl$" "\\.Z$"
+    ;; sound & movie
+    "\\.aif$" "\\.aiff$"  "\\.mp3$"  "\\.wma$" "\\.mpg$"
+    "\\.mpeg$" "\\.aac$" "\\.mid$"  "\\.au$"  "\\.avi$"  "\\.dcr$"
+    "\\.dir$"  "\\.dxr$" "\\.midi$"  "\\.mov$"  "\\.ra$"  "\\.ram$"
+    "\\.vdo$" "\\.wav$"
     ;; Microsoft
     "\\.doc$" "\\.xls$" "\\.ppt$" "\\.mdb$" "\\.adp$"
+    "\\.wri$"
     ;; image
     "\\.jpg$" "\\.gif$" "\\.tiff$" "\\.tif$" "\\.bmp$"
     "\\.png$" "\\.pbm$" "\\.jpeg$" "\\.xpm$" "\\.pbm$"
@@ -566,7 +588,7 @@ Per default, this var contains only a \".*\" catchall-regexp."
     ;; backup file
     "\\~$"
     ;; version control
-    "\\.svn/.+" "CVS/.+"
+    "\\.svn/.+" "CVS/.+" "\\.git/.+"
     )
   "*List of file extensions which are excepted to search by dmoccur and moccur-grep(-find)."
   :group 'color-moccur
@@ -733,6 +755,12 @@ http://www31.ocn.ne.jp/~h_ishida/xdoc2txt.html (Japanese site)"
   "*List of file extensions which are handled by xdoc2txt."
   :type '(repeat string)
   :group 'Meadow-Memo)
+
+(defcustom moccur-following-mode-toggle t
+  "When t, cursor motion in the moccur buffer causes
+automatic display of the corresponding buffer location."
+  :group 'color-moccur
+  :type 'boolean)
 
 (defcustom moccur-grep-following-mode-toggle t
   "When t, cursor motion in the moccur-grep buffer causes
@@ -2154,11 +2182,10 @@ It serves as a menu to find any of the occurrences in this buffer.
     ))
 
 (defun moccur-grep-find-subdir (dir mask)
-  (let ((files (cdr (cdr (directory-files dir t)))) (list))
+  (let ((files (cdr (cdr (directory-files dir t)))) (list) (plist))
     (if (not (moccur-search-file-p dir))
         (setq list nil)
       (dolist (elt files)
-        (message "Listing %s ..." (file-name-directory elt))
         (cond
          ((and
            (not (string-match "^[.]+$" (file-name-nondirectory elt)))
@@ -2168,7 +2195,10 @@ It serves as a menu to find any of the occurrences in this buffer.
           ())
          ((string-match mask (file-name-nondirectory elt))
           (push elt list))
-         (t ()))))
+         (t ()))
+        (if (not (eq list plist))
+            (message "Listing %s ..." (file-name-directory elt)))
+        (setq plist list)))
     list))
 
 (defun moccur-grep-find (dir inputs)
@@ -2179,16 +2209,14 @@ It serves as a menu to find any of the occurrences in this buffer.
   (setq moccur-last-command 'moccur-grep-find)
 
   (let (regexps
-        mask
-        (files nil)
-        results
+        mask (files nil)
         ;;(default-directory dir)
         )
     (setq regexps
           (mapconcat 'concat
                      (if (= 1 (length inputs))
                          inputs
-                       (cdr (reverse inputs)))
+                       (reverse (cdr (reverse inputs))))
                      " "))
     (setq mask
           (if (= 1 (length inputs))
@@ -2211,13 +2239,7 @@ It serves as a menu to find any of the occurrences in this buffer.
      (t
       (setq files (reverse (moccur-grep-find-subdir dir mask)))))
     (message "Listing files done!")
-
-    (message "Filter files...")
-    (dolist (file files)
-      (unless (string-match "^.*\\.pyc$" file)
-        (add-to-list 'results file)))
-    (message "Filter files done!")
-    (moccur-search-files regexps results)
+    (moccur-search-files regexps files)
     ))
 
 ;;; dmoccur
@@ -2671,7 +2693,7 @@ It serves as a menu to find any of the occurrences in this buffer.
   (defun ibuffer-map-marked-lines (func))
   (defun ibuffer-do-occur (regexp &optional nlines)))
 (defadvice ibuffer-do-occur
-  (around ibuffer-menu-moccur activate)
+    (around ibuffer-menu-moccur activate)
   (interactive (list (moccur-regexp-read-from-minibuf)
                      current-prefix-arg))
   (setq moccur-last-command 'buffer-menu-moccur)
@@ -2944,8 +2966,8 @@ It serves as a menu to find any of the occurrences in this buffer.
   (interactive "p")
   (setq moccur-mocur-buffer (current-buffer))
   (if arg
-      (next-line arg)
-    (next-line 1))
+      (forward-line arg)
+    (forward-line 1))
   (beginning-of-line)
 
   (if (and moccur-use-ee (not (featurep 'allout))
@@ -2967,15 +2989,16 @@ It serves as a menu to find any of the occurrences in this buffer.
         (re-search-forward (car moccur-regexp-list) nil t))))
   (moccur-get-info)
   (if (and moccur-view-other-window
-           moccur-view-other-window-nobuf)
+           moccur-view-other-window-nobuf
+           moccur-following-mode-toggle)
       (moccur-view-file)))
 
 (defun moccur-prev (arg)
   (interactive "p")
   (setq moccur-mocur-buffer (current-buffer))
   (if arg
-      (next-line (* -1 arg))
-    (next-line -1))
+      (forward-line (* -1 arg))
+    (forward-line -1))
   (end-of-line)
 
   (if (and moccur-use-ee
@@ -2999,7 +3022,8 @@ It serves as a menu to find any of the occurrences in this buffer.
       (beginning-of-line)))
   (moccur-get-info)
   (if (and moccur-view-other-window
-           moccur-view-other-window-nobuf)
+           moccur-view-other-window-nobuf
+           moccur-following-mode-toggle)
       (moccur-view-file)))
 
 (defun moccur-file-scroll-up ()

@@ -235,7 +235,7 @@
                (or (toggle-read-only -1) t)
                (not buffer-read-only))
           (moccur-edit-change-file)
-        (display-warning             ; (Not defined in old Emacses! *)
+        (display-warning                ; (Not defined in old Emacses! *)
          'moccur-edit
          (format "Buffer read only: %s" (current-buffer)))
         nil)
@@ -249,8 +249,8 @@
   "*Highlight the changed line of the file"
   (let ((fileov))
     (setq fileov (make-overlay
-		  (line-beginning-position)
-		  (line-end-position)))
+                  (line-beginning-position)
+                  (line-end-position)))
     (overlay-put fileov 'face 'moccur-edit-file-face)
     (overlay-put fileov 'priority 0)
     (setq moccur-edit-file-overlays (cons fileov moccur-edit-file-overlays))
@@ -316,8 +316,8 @@
                 (moccur-edit-put-color-file)) ;; Highlight changed text
               (set-buffer cbuf)
               (moccur-edit-put-face 'moccur-edit-done-face))
-         (set-buffer cbuf)
-         (moccur-edit-put-face 'moccur-edit-reject-face))
+          (set-buffer cbuf)
+          (moccur-edit-put-face 'moccur-edit-reject-face))
         ;; Return previous buffer
         (set-buffer cbuf)
         (delete-overlay ov)
@@ -403,7 +403,7 @@
       (put-text-property beg end 'front-sticky '(read-only))
       (while (re-search-forward "\\(^[-+ ]*Buffer: [^\n]*File[^\n]+$\\)" nil t)
         (put-text-property (match-beginning 0)
-                               (match-end 0) 'read-only t)
+                           (match-end 0) 'read-only t)
         (put-text-property (match-beginning 0) (match-end 0) 'front-sticky '(read-only)))
       (goto-char (point-min))
       (while (re-search-forward "\\(^[ ]*[0-9]+\\)" nil t)
