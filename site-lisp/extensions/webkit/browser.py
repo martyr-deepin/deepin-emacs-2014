@@ -68,18 +68,18 @@ class postGui(QtCore.QObject):
             self._func(*args, **kwargs)
             
 class WebPage(QWebPage):
-	def __init__(self):
-            super(WebPage, self).__init__()
+    def __init__(self):
+        super(WebPage, self).__init__()
  
-	def acceptNavigationRequest(self, frame, request, type):
-            if(type == QWebPage.NavigationTypeLinkClicked):
-                if(frame == self.mainFrame()):
-                    self.view().link_clicked(request.url())
-                else:
-                    call_method("open-url", [request.url().toString()])
-                    return False
-                
-	    return QWebPage.acceptNavigationRequest(self, frame, request, type)            
+    def acceptNavigationRequest(self, frame, request, type):
+        if(type == QWebPage.NavigationTypeLinkClicked):
+            if(frame == self.mainFrame()):
+                self.view().link_clicked(request.url())
+            else:
+                call_method("open-url", [request.url().toString()])
+                return False
+            
+        return QWebPage.acceptNavigationRequest(self, frame, request, type)            
             
 class BrowserBuffer(QWebView):
 
@@ -228,6 +228,7 @@ class BrowserView(QWidget):
         emacs_xwindow = xlib_display.create_resource_object("window", int(emacs_xid))
         
         browser_xwindow.reparent(emacs_xwindow, x, y)
+        
         xlib_display.sync()
         
 if __name__ == '__main__':

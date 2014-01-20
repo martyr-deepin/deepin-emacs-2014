@@ -88,52 +88,54 @@ def char_to_keycode(ch):
     
     keysym = get_keysym(ch)
     keycode = xlib_display.keysym_to_keycode(keysym)
-    if keycode == 0:
-        print "Sorry, can't map", ch
 
-    if is_shifted(ch):
-        shift_mask = Xlib.X.ShiftMask
-    else:
-        shift_mask = 0
-
-    return keycode, shift_mask
+    return keycode, is_shifted(ch)
 
 def send_string(window, str, press=True):
     xlib_display = get_xlib_display()
-    
+
+    mask = 0
+
     if str == "Ctrl":
         keycode = xlib_display.keysym_to_keycode(Xlib.XK.XK_Control_L)
-        mask = Xlib.X.ControlMask
+        mask |= Xlib.X.ControlMask
     elif str == "Alt":
         keycode = xlib_display.keysym_to_keycode(Xlib.XK.XK_Alt_L)
-        mask = Xlib.X.Mod1Mask
+        mask |= Xlib.X.Mod1Mask
     elif str == "Shift":
         keycode = xlib_display.keysym_to_keycode(Xlib.XK.XK_Shift_L)
-        mask = Xlib.X.ShiftMask
+        mask |= Xlib.X.ShiftMask
     elif str == "Super":
         keycode = xlib_display.keysym_to_keycode(Xlib.XK.XK_Super_L)
-        mask = Xlib.X.Mod4Mask
+        mask |= Xlib.X.Mod4Mask
     else:
-        keycode, mask = char_to_keycode(str)
+        keycode, is_shifted = char_to_keycode(str)
         if keycode == 0:
-            keycode, mask = char_to_keycode('_')
+            keycode, is_shifted = char_to_keycode('_')
+            
+        if is_shifted:
+            mask |= Xlib.X.ShiftMask
             
     if press:        
-        eventtype = Xlib.protocol.event.KeyPress
+        event_type = Xlib.protocol.event.KeyPress
     else:
-        eventtype = Xlib.protocol.event.KeyRelease
+        event_type = Xlib.protocol.event.KeyRelease
         
     print str, keycode, mask
         
-    event = eventtype(root=xlib_display.screen().root,
-                      window=window,
-                      same_screen=0,
-                      child=Xlib.X.NONE,
-                      root_x=0, root_y=0,
-                      event_x=0, event_y=0,
-                      state=mask,
-                      detail=keycode,
-                      time=Xlib.X.CurrentTime)
+    event = event_type(
+        root=xlib_display.screen().root,
+        window=window,
+        child=Xlib.X.NONE,
+        same_screen=1,
+        root_x=1,
+        root_y=1,
+        event_x=1,
+        event_y=1,
+        state=mask,
+        detail=keycode,
+        time=Xlib.X.CurrentTime,
+    )
     window.send_event(event, propagate=True)
 
 if __name__ == "__main__":
