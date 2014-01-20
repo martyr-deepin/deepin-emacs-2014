@@ -10,12 +10,12 @@
 ;; Last-Updated: 2014-01-20 23:57:56
 ;;           By: Andy Stewart
 ;; URL: http://www.emacswiki.org/emacs/download/init-generic.el
-;; Keywords: 
+;; Keywords:
 ;; Compatibility: GNU Emacs 24.3.50.1
 ;;
 ;; Features that might be required by this library:
 ;;
-;; 
+;;
 ;;
 
 ;;; This file is NOT part of GNU Emacs
@@ -37,10 +37,10 @@
 ;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth
 ;; Floor, Boston, MA 02110-1301, USA.
 
-;;; Commentary: 
-;; 
+;;; Commentary:
+;;
 ;; Generic config
-;; 
+;;
 
 ;;; Installation:
 ;;
@@ -57,26 +57,26 @@
 
 ;;; Customize:
 ;;
-;; 
+;;
 ;;
 ;; All of the above can customize by:
 ;;      M-x customize-group RET init-generic RET
 ;;
 
 ;;; Change log:
-;;	
+;;
 ;; 2014/01/20
 ;;      * First released.
-;; 
+;;
 
 ;;; Acknowledgements:
 ;;
-;; 
+;;
 ;;
 
 ;;; TODO
 ;;
-;; 
+;;
 ;;
 
 ;;; Require
@@ -91,7 +91,6 @@
 (unmark-all-buffers)                         ;取出所有buffer的标记
 (fset 'yes-or-no-p 'y-or-n-p)                ;以 y/n代表 yes/no
 (blink-cursor-mode -1)                       ;指针不闪动
-(global-font-lock-mode t)                    ;语法高亮
 (transient-mark-mode 1)                      ;标记高亮
 (column-number-mode t)                       ;显示列号
 (show-paren-mode t)                          ;显示括号匹配
@@ -129,15 +128,16 @@
 (setq uniquify-buffer-name-style 'post-forward-angle-brackets) ;反方向的显示重复的Buffer名字
 (setq uniquify-after-kill-buffer-p t)                          ;删除重复名字的Buffer后重命名
 (miniedit-install)                                             ;在 minibuffer, 按C-M-e编辑minibuffer
-(global-hl-line-mode 1)                                        ;高亮当前行
 (setq ediff-window-setup-function (quote ediff-setup-windows-plain)) ;比较窗口设置在同一个frame里
 (setq split-width-threshold nil)                                     ;分屏的时候使用上下分屏
 (setq one-key-popup-window nil)                                      ;禁止自动弹出窗口
 (add-hook 'find-file-hook 'highlight-parentheses-mode t)             ;增强的括号高亮
 (pretty-lambda-for-modes)
+(global-hl-line-mode 1)                 ;高亮当前行
 (setq scroll-step 1                     ;流畅滚屏
       scroll-conservatively 10000
-      auto-window-vscroll nil)
+      auto-window-vscroll nil
+      )
 (autoload 'hanconvert-region "hanconvert" ;简繁中文互相转换
   "Convert a region from simple chinese to tradition chinese or
 from tradition chinese to simple chinese" t)
