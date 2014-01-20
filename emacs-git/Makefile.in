@@ -184,9 +184,6 @@ desktopdir=$(datarootdir)/applications
 # Where the etc/images/icons/hicolor directory is to be installed.
 icondir=$(datarootdir)/icons
 
-# The source directory for the icon files.
-iconsrcdir=$(srcdir)/etc/images/icons
-
 # ==================== Emacs-specific directories ====================
 
 # These variables hold the values Emacs will actually use.  They are
@@ -708,7 +705,6 @@ install-etc:
 	${INSTALL_DATA} $${tmp} "$(DESTDIR)${desktopdir}/${EMACS_NAME}.desktop"; \
 	rm -f $${tmp}
 	thisdir=`/bin/pwd`; \
-	cd ${iconsrcdir} || exit 1; umask 022 ; \
 	for dir in */*/apps */*/mimetypes; do \
 	  [ -d $${dir} ] || continue ; \
 	  ( cd "$${thisdir}"; ${MKDIR_P} "$(DESTDIR)${icondir}/$${dir}" ) ; \
@@ -716,8 +712,6 @@ install-etc:
 	    [ -r $${icon} ] || continue ; \
 	    ext=`echo "$${icon}" | sed -e 's|.*\.||'`; \
 	    dest=`echo "$${icon}" | sed -e 's|.*/||' -e "s|\.$${ext}$$||" -e 's/$(EMACS_ICON)/emacs/' -e '$(TRANSFORM)'`.$${ext} ; \
-	    ( cd "$${thisdir}"; \
-	      ${INSTALL_DATA} ${iconsrcdir}/$${icon} "$(DESTDIR)${icondir}/$${dir}/$${dest}" ) \
 	    || exit 1; \
 	  done ; \
 	done
