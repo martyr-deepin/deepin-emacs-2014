@@ -82,7 +82,7 @@
 ;;; Require
 
 (require 'one-key)
-(require 'apropos-fn+var)
+(require 'apropos)
 
 ;;; Code:
 
@@ -170,6 +170,23 @@
   "The `one-key' menu for help."
   (interactive)
   (one-key-menu "help" one-key-menu-help-alist t nil nil nil t))
+
+;;; ### Apropos ###
+;;; --- 程序员命令查询
+(lazy-set-key
+ '(
+   ("C-m" . apropos-follow)                ;进入
+   ("N" . forward-button-with-line-begin)  ;下一个条目
+   ("P" . backward-button-with-line-begin) ;上一个条目
+   ("J" . scroll-up-one-line)              ;向上滚动一行
+   ("K" . scroll-down-one-line)            ;向下滚动一行
+   ("q" . quit-window)                     ;退出
+   ("f" . push-button)                     ;确定
+   )
+ apropos-mode-map
+ )
+(lazy-set-key sdcv-key-alist apropos-mode-map)    ;sdcv的局部按键绑定
+(lazy-set-key vi-move-key-alist apropos-mode-map) ;vi-move 的局部按键
 
 (provide 'init-help-mode)
 
