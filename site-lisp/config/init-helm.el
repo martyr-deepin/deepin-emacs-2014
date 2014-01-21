@@ -90,7 +90,10 @@
 
 ;;; Code:
 
-(setq helm-apt-cache-show-function 'apt-utils-show-package-1)
+(setq helm-apt-cache-show-function
+      '(lambda (package)
+         (require 'init-apt-utils)
+         (apt-utils-show-package-1 package)))
 
 (defun helm-dwim ()
   (interactive)
