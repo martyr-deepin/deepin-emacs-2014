@@ -120,11 +120,10 @@
                     ))
   (add-to-alist 'auto-mode-alist elt-cons))
 
-;;; CMake mode.
+;;; Mode load.
 (autoload 'cmake-mode "cmake-mode")
-
-;;; Qml mode
 (autoload 'qml-mode "qml-mode")
+(autoload 'markdown-mode "markdown-mode")
 
 ;;; ### Auto-fill ###
 ;;; --- 自动换行
