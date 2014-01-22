@@ -358,7 +358,9 @@ unless return was pressed outside the comment"
           (indent-for-tab-command)
           (insert " "))
       ;; else insert only new-line
-      (insert "\n"))))
+      (insert "\n")
+      (indent-for-tab-command))
+    ))
 
 (defun clean-recentf-history ()
   "Clean recentf history of file assoc."
@@ -394,7 +396,7 @@ it is displayed along with the global value."
                   "Describe hash-map: ")
                 obarray
                 (lambda (atom) (and (boundp atom)
-                                    (hash-table-p (symbol-value atom))))
+                                (hash-table-p (symbol-value atom))))
                 t nil nil
                 (if (hash-table-p v) (symbol-name v))))
      (list (if (equal val "")

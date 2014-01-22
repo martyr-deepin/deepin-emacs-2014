@@ -116,7 +116,7 @@
                     ("\\.jl\\'" . lisp-mode)
                     ("\\.asdf\\'" . lisp-mode)
                     ("CMakeLists\\.txt\\'" . cmake-mode)
-                    ("\\.cmake\\'" . cmake-mode)                    
+                    ("\\.cmake\\'" . cmake-mode)
                     ))
   (add-to-alist 'auto-mode-alist elt-cons))
 
@@ -124,6 +124,12 @@
 (autoload 'cmake-mode "cmake-mode")
 (autoload 'qml-mode "qml-mode")
 (autoload 'markdown-mode "markdown-mode")
+(add-hook
+ 'c-mode-common-hook
+ '(lambda ()
+    (require 'google-c-style)
+    (google-set-c-style)
+    ))
 
 ;;; ### Auto-fill ###
 ;;; --- 自动换行
