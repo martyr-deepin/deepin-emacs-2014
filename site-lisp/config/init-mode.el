@@ -129,6 +129,9 @@
  '(lambda ()
     (require 'google-c-style)
     (google-set-c-style)
+
+    (require 'c-eldoc)
+    (c-turn-on-eldoc-mode)
     ))
 
 ;;; ### Auto-fill ###
