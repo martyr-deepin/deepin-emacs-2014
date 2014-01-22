@@ -1,9 +1,11 @@
-/* 
- * Copyright (C) `(format-time-string "%Y")` ${1:Deepin, Inc}.
- * Copyright (C) `(format-time-string "%Y")` ${2:`(get-git-user-name)`}
+/*
+ * `(file-name-nondirectory (buffer-file-name))` - ${1:Description}
+ *
+ * Copyright (C) `(format-time-string "%Y")` ${2:Deepin, Inc}.
+ * Copyright (C) `(format-time-string "%Y")` ${3:`(get-git-user-name)`}
  * 
- * Author:     $2 ${3:<`(get-git-user-email)`>}
- * Maintainer: $2 $3
+ * Author:     $3 ${4:<`(get-git-user-email)`>}
+ * Maintainer: $3 $4
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
