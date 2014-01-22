@@ -103,6 +103,7 @@
                'markdown-mode-hook
                'slime-repl-mode-hook
                'package-menu-mode-hook
+               'cmake-mode-hook
                ))
   (add-hook hook (lambda () (linum-mode 1))))
 

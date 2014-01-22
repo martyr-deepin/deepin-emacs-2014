@@ -115,8 +115,13 @@
                     ("\\.qml\\'" . qml-mode)
                     ("\\.jl\\'" . lisp-mode)
                     ("\\.asdf\\'" . lisp-mode)
+                    ("CMakeLists\\.txt\\'" . cmake-mode)
+                    ("\\.cmake\\'" . cmake-mode)                    
                     ))
   (add-to-alist 'auto-mode-alist elt-cons))
+
+;;; CMake mode.
+(autoload 'cmake-mode "cmake-mode")
 
 ;;; Qml mode
 (autoload 'qml-mode "qml-mode")
