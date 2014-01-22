@@ -1173,11 +1173,13 @@
     (((class color) (min-colors 88)) (:background "orange1"))))
  ;; Auto-complete
  '(ac-candidate-face ((t (:background "#191919" :foreground "#878787"))))
+ '(ac-clang-candidate-face ((t (:background "#191919" :foreground "#878787"))))
  '(ac-completion-face ((t (:foreground "#878787"))))
  '(ac-gtags-candidate-face ((t (:background "#191919" :foreground "#878787"))))
  '(ac-gtags-selection-face ((t (:background "orangered4" :foreground "grey"))))
  '(ac-menu-face ((t (:background "Grey10" :foreground "Grey40"))))
  '(ac-selection-face ((t (:background "darkred" :foreground "grey"))))
+ '(ac-clang-selection-face ((t (:background "darkred" :foreground "grey"))))
  '(ac-yasnippet-candidate-face ((t (:background "#191919" :foreground "#878787"))))
  '(ac-yasnippet-menu-face ((t (:background "Grey10" :foreground "Grey40"))))
  '(ac-yasnippet-selection-face ((t (:background "darkgreen" :foreground "Grey"))))
