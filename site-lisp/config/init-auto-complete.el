@@ -81,11 +81,16 @@
 
 ;;; Require
 
-
+(require 'auto-complete-config)
 
 ;;; Code:
 
-(require 'auto-complete-config)
+(add-hook
+ 'c-mode-common-hook
+ '(lambda ()
+    (require 'auto-complete-c-headers)
+    (setq ac-sources (append '(ac-source-c-headers) ac-sources))))
+
 (add-to-list 'ac-dictionary-directories "/usr/share/deepin-emacs/site-lisp/extensions/auto-complete/dict")
 (ac-config-default)
 (setq ac-use-quick-help nil)
