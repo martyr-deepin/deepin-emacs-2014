@@ -1,6 +1,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Emacs 主题设置 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (set-face-attribute 'default nil :height 130)
 
+(setq window-number-inactive-foreground "white")
+(setq window-number-inactive-background "darkred")
+(setq window-number-active-foreground "black")
+(setq window-number-active-background "gold")
+
 ;; 用户自定义变量
 (custom-set-variables
  ;; Term
