@@ -117,6 +117,7 @@
                     ("\\.asdf\\'" . lisp-mode)
                     ("CMakeLists\\.txt\\'" . cmake-mode)
                     ("\\.cmake\\'" . cmake-mode)
+                    ("\\.po\\'" . po-mode)
                     ))
   (add-to-alist 'auto-mode-alist elt-cons))
 
@@ -124,6 +125,7 @@
 (autoload 'cmake-mode "cmake-mode")
 (autoload 'qml-mode "qml-mode")
 (autoload 'markdown-mode "markdown-mode")
+(autoload 'po-mode "po-mode")
 (add-hook
  'c-mode-common-hook
  '(lambda ()

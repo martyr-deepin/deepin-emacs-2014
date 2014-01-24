@@ -104,6 +104,7 @@
                'slime-repl-mode-hook
                'package-menu-mode-hook
                'cmake-mode-hook
+               'po-mode-hook
                ))
   (add-hook hook (lambda () (linum-mode 1))))
 
