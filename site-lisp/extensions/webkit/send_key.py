@@ -76,62 +76,36 @@ def get_keysym(ch):
             keysym = Xlib.XK.string_to_keysym(special)
     return keysym
 
-def is_shifted(ch):
-    if ch.isupper():
-        return True
-    if ch in '~!@#$%^&*()_+{}|:\"<>?':
-        return True
-    return False
-
-def char_to_keycode(ch):
+def send_string(window, str, modifiers, press=True):
     xlib_display = get_xlib_display()
     
-    keysym = get_keysym(ch)
-    keycode = xlib_display.keysym_to_keycode(keysym)
-
-    return keycode, is_shifted(ch)
-
-def send_string(window, str, press=True):
-    xlib_display = get_xlib_display()
-
     mask = 0
-
-    if str == "Ctrl":
-        keycode = xlib_display.keysym_to_keycode(Xlib.XK.XK_Control_L)
-        mask |= Xlib.X.ControlMask
-    elif str == "Alt":
-        keycode = xlib_display.keysym_to_keycode(Xlib.XK.XK_Alt_L)
-        mask |= Xlib.X.Mod1Mask
-    elif str == "Shift":
-        keycode = xlib_display.keysym_to_keycode(Xlib.XK.XK_Shift_L)
-        mask |= Xlib.X.ShiftMask
-    elif str == "Super":
-        keycode = xlib_display.keysym_to_keycode(Xlib.XK.XK_Super_L)
-        mask |= Xlib.X.Mod4Mask
-    else:
-        keycode, is_shifted = char_to_keycode(str)
-        if keycode == 0:
-            keycode, is_shifted = char_to_keycode('_')
-            
-        if is_shifted:
+    for modifier in modifiers:
+        if modifier == "Ctrl":
+            mask |= Xlib.X.ControlMask
+        elif modifier == "Alt":
+            mask |= Xlib.X.Mod1Mask
+        elif modifier == "Shift":
             mask |= Xlib.X.ShiftMask
+        elif modifier == "Super":
+            mask |= Xlib.X.Mod4Mask
+            
+    keycode = xlib_display.keysym_to_keycode(get_keysym(str))        
             
     if press:        
         event_type = Xlib.protocol.event.KeyPress
     else:
         event_type = Xlib.protocol.event.KeyRelease
         
-    print str, keycode, mask
-        
     event = event_type(
         root=xlib_display.screen().root,
         window=window,
         child=Xlib.X.NONE,
         same_screen=1,
-        root_x=1,
-        root_y=1,
-        event_x=1,
-        event_y=1,
+        root_x=0,
+        root_y=0,
+        event_x=0,
+        event_y=0,
         state=mask,
         detail=keycode,
         time=Xlib.X.CurrentTime,
@@ -140,9 +114,15 @@ def send_string(window, str, press=True):
 
 if __name__ == "__main__":
     xlib_display = get_xlib_display()
-    xwindow = xlib_display.create_resource_object("window", 71303255)
-    send_string(xwindow, "Alt")
-    send_string(xwindow, "x")
-    send_string(xwindow, "x", False)
-    send_string(xwindow, "Alt", False)
+    xwindow = xlib_display.create_resource_object("window", 73400407)
+
+    # send_string(xwindow, "x", ["Ctrl"], False)
+    # send_string(xwindow, "x", ["Ctrl"], True)
+
+    # send_string(xwindow, "h", [], False)
+    # send_string(xwindow, "h", [], True)
+
+    send_string(xwindow, "y", ["Super"], False)
+    send_string(xwindow, "y", ["Super"], True)
+
     xlib_display.sync()
