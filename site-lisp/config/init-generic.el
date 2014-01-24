@@ -134,17 +134,14 @@
 (add-hook 'find-file-hook 'highlight-parentheses-mode t)             ;增强的括号高亮
 (pretty-lambda-for-modes)
 (global-hl-line-mode 1)                 ;高亮当前行
-(setq scroll-step 1                     ;流畅滚屏
-      scroll-conservatively 10000
-      auto-window-vscroll nil
-      )
+(setq smooth-scroll-margin 2)           ;触发滚动的行数
+(setq isearch-allow-scroll t)           ;isearch搜索时是可以滚动屏幕的
 (autoload 'hanconvert-region "hanconvert" ;简繁中文互相转换
   "Convert a region from simple chinese to tradition chinese or
 from tradition chinese to simple chinese" t)
 (autoload 'kill-ring-search "kill-ring-search"
   "Search the kill ring in the minibuffer."
   (interactive))
-(setq isearch-allow-scroll t)           ;isearch搜索时是可以滚动屏幕的
 (autoload 'auto-install "init-auto-install")
 (autoload 'auto-install-from-emacswiki "init-auto-install")
 (autoload 'irfc "init-irfc")

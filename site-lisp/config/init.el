@@ -17,6 +17,7 @@
 (require 'anzu)
 (require 'browse-kill-ring)
 (require 'winpoint)
+(require 'smooth-scrolling)
 
 (require 'init-auto-save)
 (require 'init-eldoc)
