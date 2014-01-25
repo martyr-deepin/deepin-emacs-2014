@@ -17,6 +17,7 @@
 (require 'browse-kill-ring)
 (require 'winpoint)
 (require 'smooth-scrolling)
+(require 'minibuffer-tray)
 
 (require 'init-auto-save)
 (require 'init-eldoc)

@@ -132,9 +132,9 @@
 (setq one-key-popup-window nil)                                      ;禁止自动弹出窗口
 (add-hook 'find-file-hook 'highlight-parentheses-mode t)             ;增强的括号高亮
 (pretty-lambda-for-modes)
-(global-hl-line-mode 1)                 ;高亮当前行
-(setq smooth-scroll-margin 2)           ;触发滚动的行数
-(setq isearch-allow-scroll t)           ;isearch搜索时是可以滚动屏幕的
+(global-hl-line-mode 1)                   ;高亮当前行
+(setq smooth-scroll-margin 2)             ;触发滚动的行数
+(setq isearch-allow-scroll t)             ;isearch搜索时是可以滚动屏幕的
 (autoload 'hanconvert-region "hanconvert" ;简繁中文互相转换
   "Convert a region from simple chinese to tradition chinese or
 from tradition chinese to simple chinese" t)
@@ -171,6 +171,7 @@ from tradition chinese to simple chinese" t)
 (setq winpoint-non-restore-buffer-list '("*Group*"))
 (setq tramp-default-method "ssh")         ;设置传送文件默认的方法
 (custom-set-variables '(tramp-verbose 0)) ;设置tramp的响应方式, 关闭后不弹出消息
+(minibuffer-tray-show)
 
 (provide 'init-generic)
 

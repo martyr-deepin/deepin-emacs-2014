@@ -1,8 +1,7 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2011 ~ 2014 Deepin, Inc.
-#               2011 ~ 2014 Andy Stewart
+# Copyright (C) 2011 ~ 2014 Andy Stewart
 # 
 # Author:     Andy Stewart <lazycat.manatee@gmail.com>
 # Maintainer: Andy Stewart <lazycat.manatee@gmail.com>
