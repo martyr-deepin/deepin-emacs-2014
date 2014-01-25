@@ -92,10 +92,9 @@ class TrayView(QWidget):
         return False
     
     def update_pos(self, row, column, line_number):
-        percent = int(row * 100 / line_number)
-        if percent == 0:
+        if row == 1:
             self.percent_string = "Top"
-        elif percent == 100:
+        elif row - 1 == line_number:
             self.percent_string = "Bottom"
         else:
             self.percent_string = "%s%%" % int(row * 100 / line_number)
