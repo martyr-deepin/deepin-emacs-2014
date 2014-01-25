@@ -121,7 +121,6 @@
 (setq minibuffer-message-timeout 1)          ;显示消息超时的时间
 (setq require-final-newline nil)             ;不自动添加换行符到末尾, 有些情况会出现错误
 (tabbar-mode t)                              ;多标签模式
-(which-function-mode t)                      ;在状态条上显示当前光标在哪个函数体内部
 (auto-compression-mode 1)                    ;打开压缩文件时自动解压缩
 (delete 'win:mode-string global-mode-string) ;在 `global-mode-string' 中去掉窗口数字
 (setq uniquify-separator "/")                ;分隔符
