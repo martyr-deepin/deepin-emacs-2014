@@ -1807,8 +1807,8 @@ or groups.  Call the function `tabbar-button-label' otherwise."
   "Return a label for TAB.
 That is, a string used to represent it on the tab bar."
   (let ((label  (if tabbar--buffer-show-groups
-                    (format "[%s]" (tabbar-tab-tabset tab))
-                  (format "%s" (tabbar-tab-value tab)))))
+                    (format " [%s] " (tabbar-tab-tabset tab))
+                  (format " %s " (tabbar-tab-value tab)))))
     ;; Unless the tab bar auto scrolls to keep the selected tab
     ;; visible, shorten the tab label to keep as many tabs as possible
     ;; in the visible area of the tab bar.
