@@ -6,6 +6,8 @@
 (setq window-number-active-foreground "black")
 (setq window-number-active-background "gold")
 
+(set-fringe-mode '(1 . 1))              ;Make fringe mini size
+
 ;; 用户自定义变量
 (custom-set-variables
  ;; Term
