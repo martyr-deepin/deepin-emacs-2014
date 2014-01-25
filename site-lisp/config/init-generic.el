@@ -146,7 +146,6 @@ from tradition chinese to simple chinese" t)
 (autoload 'auto-install-from-emacswiki "init-auto-install")
 (autoload 'irfc "init-irfc")
 (autoload 'doc-view-mode "init-doc-view")
-(window-number-mode 1)
 (global-anzu-mode 1)                    ;显示搜索的数字
 (size-indication-mode 1)                ;显示当前文件的大小
 (browse-kill-ring-default-keybindings)  ;加载默认的按键邦定

@@ -13,7 +13,6 @@
 (require 'pretty-lambdada)
 (require 'rect)
 (require 'rect-mark)
-(require 'window-number)
 (require 'anzu)
 (require 'browse-kill-ring)
 (require 'winpoint)

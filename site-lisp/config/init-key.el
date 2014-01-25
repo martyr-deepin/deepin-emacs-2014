@@ -1,7 +1,7 @@
 ;;; ### Unset key ###
 ;;; --- 卸载按键
 (lazy-unset-key                         ;全局按键的卸载
- '("C-x C-f" "C-z" "C-q" "s-W" "s-z" "M-h" "C-x C-c" "C-\\" "C-x o"))
+ '("C-x C-f" "C-z" "C-q" "s-W" "s-z" "M-h" "C-x C-c" "C-\\"))
 ;;; ### Vi-move ###
 ;;; --- Vi式移动
 (defvar vi-move-key-alist nil
@@ -196,10 +196,6 @@
    ("C-;" . kill-this-buffer)            ;关闭当前buffer
    ("C-x ;" . delete-other-windows)      ;关闭其它窗口
    ))
-(lazy-set-autoload-key
- '(
-   ("C-x o" . window-number-switch))
- "window-number")
 ;;; ### Multi-Scratch
 (lazy-set-autoload-key
  '(

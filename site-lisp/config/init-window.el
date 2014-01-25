@@ -120,7 +120,6 @@
         (("t" . "Jump Register") . jump-to-register)
         (("g" . "Split Horizontally") . split-window-horizontally)
         (("v" . "Split Vertically") . split-window-vertically)
-        (("z" . "Window Number Jump") . window-number-jump)
         ))
 
 (defun one-key-menu-window-navigation ()
