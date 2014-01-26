@@ -102,6 +102,8 @@
   (epc:start-epc (or (getenv "PYTHON") "python")
                  (list minibuffer-tray-python-file)))
 
+(defvar minibuffer-tray-height 20)
+
 (defun minibuffer-tray-get-emacs-xid ()
   (frame-parameter nil 'window-id))
 
@@ -123,8 +125,9 @@
          (y (nth 1 window-allocation))
          (w (nth 2 window-allocation))
          (h (nth 3 window-allocation)))
+    (epc:call-deferred minibuffer-tray-epc 'init (list (minibuffer-tray-get-emacs-xid) minibuffer-tray-height))
     (epc:call-deferred minibuffer-tray-epc 'show ())
-    (epc:call-deferred minibuffer-tray-epc 'moveresize (list (minibuffer-tray-get-emacs-xid) x y w h))
+    (epc:call-deferred minibuffer-tray-epc 'set_minibuffer_allocation (list x y w))
     )
   )
 
@@ -137,7 +140,17 @@
   (epc:call-deferred minibuffer-tray-epc 'update_pos (list (line-number-at-pos) (current-column) (minibuffer-tray-get-line-number)))
   )
 
+(defun minibuffer-tray-monitor-frame-change (&rest _)
+  (let* ((window-allocation (minibuffer-tray-get-window-allocation))
+         (x (nth 0 window-allocation))
+         (y (nth 1 window-allocation))
+         (w (nth 2 window-allocation))
+         )
+    (epc:call-deferred minibuffer-tray-epc 'set_minibuffer_allocation (list x y w))
+    ))
+
 (add-hook 'post-command-hook #'minibuffer-tray-monitor-cursor-pos-change)
+(add-hook 'window-configuration-change-hook #'minibuffer-tray-monitor-frame-change)
 
 (epc:define-method minibuffer-tray-epc
                    'message

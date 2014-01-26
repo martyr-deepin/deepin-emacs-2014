@@ -28,12 +28,12 @@ if os.name == 'posix':
 from PyQt5 import QtGui
 from PyQt5.QtGui import QPainter
 from PyQt5.QtWidgets import QWidget
-from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtCore import Qt, QTimer, QEvent
 from PyQt5.QtWidgets import QApplication
 from epc.server import ThreadingEPCServer
 import threading
 import functools
-from xutils import get_xlib_display
+from xutils import get_xlib_display, grab_focus
 import time
 
 class postGui(QtCore.QObject):
@@ -65,12 +65,17 @@ class postGui(QtCore.QObject):
             
 class TrayView(QWidget):
 
-    def __init__(self):
+    def __init__(self, emacs_xid, minibuffer_height):
         super(TrayView, self).__init__()
+        self.emacs_xid = int(emacs_xid)
+        self.minibuffer_height = int(minibuffer_height)
         
         self.setWindowFlags(Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground, True)
+        self.setAttribute(Qt.WA_TransparentForMouseEvents, True)
+        self.setAttribute(Qt.WA_ShowWithoutActivating, True)
         self.setContentsMargins(0, 0, 0, 0)
+        self.setFocusPolicy(Qt.NoFocus)
         
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_time)
@@ -79,15 +84,48 @@ class TrayView(QWidget):
         self.time_string = self.get_current_time()
         self.pos_string = ""
         self.percent_string = ""
+        self.info_string = ""
+        self.info_width = 0
+        self.padding = 3
+        self.font = QtGui.QFont()
+        
+        self.minibuffer_x = 0
+        self.minibuffer_y = 0
+        self.minibuffer_w = 0
+        
+        # self.installEventFilter(self)
+        
+    def eventFilter(self, obj, event):
+        if event.type() in [QEvent.MouseButtonPress, QEvent.MouseButtonRelease, QEvent.InputMethodQuery, QEvent.KeyPress, QEvent.KeyRelease, QEvent.Enter, QEvent.WindowActivate, QEvent.ActivationChange, QEvent.ToolTip, QEvent.Leave]:
+            grab_focus(self.emacs_xid)
+            
+            return True
+        
+    def set_minibuffer_allocation(self, x, y, w):
+        (self.minibuffer_x, self.minibuffer_y, self.minibuffer_w) = (x, y, w)
         
     def get_current_time(self):
         return time.strftime("%H:%M %A", time.localtime())
 
+    def update_info(self):
+        self.info_string = "%s   %s   %s" % (self.pos_string, self.percent_string, self.time_string)
+        info_width = self.get_string_width()
+        if self.info_width != info_width:        
+            self.info_width = info_width
+            
+            self.resize(info_width, self.height())
+            self.reparent(
+                self.minibuffer_x + self.minibuffer_w - info_width,
+                self.minibuffer_y,
+            )
+        
+        self.update()
+    
     @postGui()
     def update_time(self):
         self.time_string = self.get_current_time()
         
-        self.update()
+        self.update_info()
         
         return False
     
@@ -103,26 +141,29 @@ class TrayView(QWidget):
             self.percent_string = "%s%%" % percent
         self.pos_string = "( %s, %s )" % (row, column)
         
-        self.update()
+        self.update_info()
+        
+    def get_string_width(self):
+        self.font.setPixelSize(self.height() - self.padding * 2)
+        fm = QtGui.QFontMetrics(self.font)
+        return fm.width(self.info_string)
         
     def paintEvent(self, event):    
         painter = QPainter(self)
-        font = QtGui.QFont()
-        padding = 3
-        font.setPixelSize(self.height() - padding * 2)
+        self.font.setPixelSize(self.height() - self.padding * 2)
         painter.setBrush(QtGui.QColor(0, 0, 0, 255))
         painter.drawRect(0, 0, self.width(), self.height())
         painter.setPen(QtGui.QColor(19, 125, 17, 255))
-        painter.setFont(font)
-        painter.drawText(0, 0, self.width(), self.height(), QtCore.Qt.AlignRight, "%s   %s   %s" % (self.pos_string, self.percent_string, self.time_string))
+        painter.setFont(self.font)
+        painter.drawText(0, 0, self.width(), self.height(), QtCore.Qt.AlignRight, self.info_string)
         painter.end()
             
-    def reparent(self, emacs_xid, x, y):
+    def reparent(self, x, y):
         xlib_display = get_xlib_display()
         
         browser_xid = self.winId().__int__()
-        browser_xwindow = xlib_display.create_resource_object("window", int(browser_xid))
-        emacs_xwindow = xlib_display.create_resource_object("window", int(emacs_xid))
+        browser_xwindow = xlib_display.create_resource_object("window", browser_xid)
+        emacs_xwindow = xlib_display.create_resource_object("window", self.emacs_xid)
         
         browser_xwindow.reparent(emacs_xwindow, x, y)
         
@@ -139,16 +180,18 @@ if __name__ == '__main__':
     server_thread = threading.Thread(target=server.serve_forever)
     server_thread.allow_reuse_address = True
     
-    tray_view = TrayView()
+    tray_view = None
     
     def call_method(method_name, args):
         handler = server.clients[0]
         handler.call(method_name, args)
-    
-    @postGui(False)        
-    def hello(message):
-        call_method("message", [message])
         
+    @postGui(False)    
+    def init(emacs_xid, minibuffer_height):
+        global tray_view
+        
+        tray_view = TrayView(emacs_xid, minibuffer_height)
+    
     @postGui(False)    
     def show():
         tray_view.show()
@@ -158,9 +201,11 @@ if __name__ == '__main__':
         tray_view.hide()
         
     @postGui(False)    
-    def moveresize(emacs_xid, x, y, w, h):
-        tray_view.resize(300, h)
-        tray_view.reparent(emacs_xid, x + w - 300, y)
+    def set_minibuffer_allocation(x, y, w):
+        init_width = tray_view.get_string_width()
+        tray_view.set_minibuffer_allocation(x, y, w)
+        tray_view.resize(init_width, tray_view.minibuffer_height)
+        tray_view.reparent(x + w - init_width, y)
         
     @postGui(False)    
     def update_pos(row, column, line_number):
@@ -169,15 +214,16 @@ if __name__ == '__main__':
     server_thread.start()
     server.print_port()
     
-    server.register_function(hello)
+    server.register_function(init)
     server.register_function(hide)
     server.register_function(show)
-    server.register_function(moveresize)
+    server.register_function(set_minibuffer_allocation)
     server.register_function(update_pos)
     
+    # tray_view = TrayView(0, 24)
     # show()
     # tray_view.move(300, 300)
-    # tray_view.resize(200, 100)
+    # tray_view.resize(200, 30)
     
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     sys.exit(app.exec_())

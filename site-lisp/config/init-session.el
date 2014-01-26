@@ -101,10 +101,21 @@
 (defun emacs-session-save ()
   "Exit emacs."
   (interactive)
+  (kill-epc-buffers)
   (kill-unused-buffers)
   (auto-save-buffers)
   (make-directory "~/.emacs.d/deepin-emacs/Configure-File/Windows/" t)
   (see-you-again))
+
+(defun kill-epc-buffers ()
+  (interactive)
+  (dolist (buf (buffer-list))
+    (save-excursion
+      (with-current-buffer buf
+        (if (string-prefix-p "*epc" (buffer-name buf))
+            (ignore-errors (kill-buffer buf)))
+        )))
+  )
 
 ;;; ### Windows ###
 ;;; --- 用于保存和管理窗口的配置方案
