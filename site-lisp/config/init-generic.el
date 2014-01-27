@@ -171,7 +171,7 @@ from tradition chinese to simple chinese" t)
 (setq winpoint-non-restore-buffer-list '("*Group*"))
 (setq tramp-default-method "ssh")         ;设置传送文件默认的方法
 (custom-set-variables '(tramp-verbose 0)) ;设置tramp的响应方式, 关闭后不弹出消息
-(minibuffer-tray-show)
+(minibuffer-tray-mode 1)
 
 (provide 'init-generic)
 

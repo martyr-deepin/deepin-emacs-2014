@@ -150,8 +150,19 @@
     (epc:call-deferred minibuffer-tray-epc 'set_minibuffer_allocation (list x y w h))
     ))
 
-(add-hook 'post-command-hook #'minibuffer-tray-monitor-cursor-pos-change)
-(add-hook 'window-configuration-change-hook #'minibuffer-tray-monitor-frame-change)
+(define-minor-mode minibuffer-tray-mode
+  :global t
+  :group 'minibuffer-tray-mode
+  (if minibuffer-tray-mode
+      (progn
+        (minibuffer-tray-show)
+        (add-hook 'post-command-hook #'minibuffer-tray-monitor-cursor-pos-change)
+        (add-hook 'window-configuration-change-hook #'minibuffer-tray-monitor-frame-change)
+        )
+    (minibuffer-tray-hide)
+    (remove-hook 'post-command-hook 'minibuffer-tray-monitor-cursor-pos-change)
+    (remove-hook 'window-configuration-change-hook 'minibuffer-tray-monitor-frame-change))
+  )
 
 (epc:define-method minibuffer-tray-epc
                    'message
