@@ -92,6 +92,7 @@ class TrayView(QWidget):
         self.minibuffer_x = 0
         self.minibuffer_y = 0
         self.minibuffer_w = 0
+        self.minibuffer_h = 0
         
         # self.installEventFilter(self)
         
@@ -101,8 +102,8 @@ class TrayView(QWidget):
             
             return True
         
-    def set_minibuffer_allocation(self, x, y, w):
-        (self.minibuffer_x, self.minibuffer_y, self.minibuffer_w) = (x, y, w)
+    def set_minibuffer_allocation(self, x, y, w, h):
+        (self.minibuffer_x, self.minibuffer_y, self.minibuffer_w, self.minibuffer_h) = (x, y, w, h)
         
     def get_current_time(self):
         return time.strftime("%H:%M %A", time.localtime())
@@ -112,14 +113,16 @@ class TrayView(QWidget):
         info_width = self.get_string_width()
         if self.info_width != info_width:        
             self.info_width = info_width
-            
-            self.resize(info_width, self.height())
-            self.reparent(
-                self.minibuffer_x + self.minibuffer_w - info_width,
-                self.minibuffer_y,
-            )
+            self.update_allocation(self.info_width)
         
         self.update()
+        
+    def update_allocation(self, width):
+        self.resize(width, self.minibuffer_height)
+        self.reparent(
+            self.minibuffer_x + self.minibuffer_w - width,
+            self.minibuffer_y + self.minibuffer_h - self.minibuffer_height,
+        )
     
     @postGui()
     def update_time(self):
@@ -201,11 +204,9 @@ if __name__ == '__main__':
         tray_view.hide()
         
     @postGui(False)    
-    def set_minibuffer_allocation(x, y, w):
-        init_width = tray_view.get_string_width()
-        tray_view.set_minibuffer_allocation(x, y, w)
-        tray_view.resize(init_width, tray_view.minibuffer_height)
-        tray_view.reparent(x + w - init_width, y)
+    def set_minibuffer_allocation(x, y, w, h):
+        tray_view.set_minibuffer_allocation(x, y, w, h)
+        tray_view.update_allocation(tray_view.get_string_width())
         
     @postGui(False)    
     def update_pos(row, column, line_number):

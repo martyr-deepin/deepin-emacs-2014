@@ -127,7 +127,7 @@
          (h (nth 3 window-allocation)))
     (epc:call-deferred minibuffer-tray-epc 'init (list (minibuffer-tray-get-emacs-xid) minibuffer-tray-height))
     (epc:call-deferred minibuffer-tray-epc 'show ())
-    (epc:call-deferred minibuffer-tray-epc 'set_minibuffer_allocation (list x y w))
+    (epc:call-deferred minibuffer-tray-epc 'set_minibuffer_allocation (list x y w h))
     )
   )
 
@@ -145,8 +145,9 @@
          (x (nth 0 window-allocation))
          (y (nth 1 window-allocation))
          (w (nth 2 window-allocation))
+         (h (nth 3 window-allocation))
          )
-    (epc:call-deferred minibuffer-tray-epc 'set_minibuffer_allocation (list x y w))
+    (epc:call-deferred minibuffer-tray-epc 'set_minibuffer_allocation (list x y w h))
     ))
 
 (add-hook 'post-command-hook #'minibuffer-tray-monitor-cursor-pos-change)
