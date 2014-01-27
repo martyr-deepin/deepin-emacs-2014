@@ -136,11 +136,11 @@
   (epc:call-deferred minibuffer-tray-epc 'hide ())
   )
 
-(defun minibuffer-tray-monitor-cursor-pos-change (&rest _)
+(defun minibuffer-tray-monitor-cursor-pos-change ()
   (epc:call-deferred minibuffer-tray-epc 'update_pos (list (line-number-at-pos) (current-column) (minibuffer-tray-get-line-number)))
   )
 
-(defun minibuffer-tray-monitor-frame-change (&rest _)
+(defun minibuffer-tray-monitor-frame-change ()
   (let* ((window-allocation (minibuffer-tray-get-window-allocation))
          (x (nth 0 window-allocation))
          (y (nth 1 window-allocation))

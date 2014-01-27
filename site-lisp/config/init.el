@@ -33,6 +33,7 @@
 (require 'init-backup)
 (require 'init-indent)
 (require 'init-time)
+(require 'init-cursor-chg)
 (require 'init-auto-complete)
 (require 'init-one-key)
 (require 'init-key)
