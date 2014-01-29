@@ -136,7 +136,7 @@
   (epc:call-deferred minibuffer-tray-epc 'hide ())
   )
 
-(defun minibuffer-tray-monitor-cursor-pos-change ()
+(defun minibuffer-tray-update-cursor-pos ()
   (epc:call-deferred minibuffer-tray-epc 'update_pos (list (line-number-at-pos) (current-column) (minibuffer-tray-get-line-number)))
   )
 
@@ -156,17 +156,20 @@
   (if minibuffer-tray-mode
       (progn
         (minibuffer-tray-show)
-        (add-hook 'post-command-hook #'minibuffer-tray-monitor-cursor-pos-change)
         (add-hook 'window-configuration-change-hook #'minibuffer-tray-monitor-frame-change)
         )
     (minibuffer-tray-hide)
-    (remove-hook 'post-command-hook 'minibuffer-tray-monitor-cursor-pos-change)
     (remove-hook 'window-configuration-change-hook 'minibuffer-tray-monitor-frame-change))
   )
 
 (epc:define-method minibuffer-tray-epc
                    'message
                    (lambda (&rest args) (message "%S" args)))
+
+(epc:define-method minibuffer-tray-epc
+                   'update-cursor-pos
+                   (lambda (&rest args)
+                     (minibuffer-tray-update-cursor-pos)))
 
 (provide 'minibuffer-tray)
 

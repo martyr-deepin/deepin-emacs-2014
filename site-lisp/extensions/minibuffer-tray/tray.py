@@ -77,9 +77,13 @@ class TrayView(QWidget):
         self.setContentsMargins(0, 0, 0, 0)
         self.setFocusPolicy(Qt.NoFocus)
         
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.update_time)
-        self.timer.start(1000)
+        self.update_time_timer = QTimer()
+        self.update_time_timer.timeout.connect(self.update_time)
+        self.update_time_timer.start(1000)
+        
+        self.update_cursor_pos_timer = QTimer()
+        self.update_cursor_pos_timer.timeout.connect(self.update_cursor_pos)
+        self.update_cursor_pos_timer.start(10)
         
         self.time_string = self.get_current_time()
         self.pos_string = ""
@@ -96,6 +100,9 @@ class TrayView(QWidget):
         
         # self.installEventFilter(self)
         
+    def update_cursor_pos(self):
+        call_method("update-cursor-pos", [])
+        
     def eventFilter(self, obj, event):
         if event.type() in [QEvent.MouseButtonPress, QEvent.MouseButtonRelease, QEvent.InputMethodQuery, QEvent.KeyPress, QEvent.KeyRelease, QEvent.Enter, QEvent.WindowActivate, QEvent.ActivationChange, QEvent.ToolTip, QEvent.Leave]:
             grab_focus(self.emacs_xid)
@@ -109,13 +116,17 @@ class TrayView(QWidget):
         return time.strftime("%H:%M %A", time.localtime())
 
     def update_info(self):
-        self.info_string = "%s   %s   %s" % (self.pos_string, self.percent_string, self.time_string)
-        info_width = self.get_string_width()
-        if self.info_width != info_width:        
-            self.info_width = info_width
-            self.update_allocation(self.info_width)
+        info_string = "%s   %s   %s" % (self.pos_string, self.percent_string, self.time_string)
         
-        self.update()
+        if self.info_string != info_string:
+            self.info_string = info_string
+            
+            info_width = self.get_string_width()
+            if self.info_width != info_width:        
+                self.info_width = info_width
+                self.update_allocation(self.info_width)
+            
+            self.update()
         
     def update_allocation(self, width):
         self.resize(width, self.minibuffer_height)
