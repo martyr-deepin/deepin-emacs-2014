@@ -101,11 +101,13 @@
 (defun emacs-session-save ()
   "Exit emacs."
   (interactive)
-  (kill-epc-buffers)
-  (kill-unused-buffers)
-  (auto-save-buffers)
-  (make-directory "~/.emacs.d/deepin-emacs/Configure-File/Windows/" t)
-  (see-you-again))
+  (ignore-errors
+    (epc:stop-epc minibuffer-tray-epc)
+    (kill-epc-buffers)
+    (kill-unused-buffers)
+    (auto-save-buffers)
+    (make-directory "~/.emacs.d/deepin-emacs/Configure-File/Windows/" t)
+    (see-you-again)))
 
 (defun kill-epc-buffers ()
   (interactive)
