@@ -112,6 +112,7 @@
         (("m" . "OCaml") . (lambda () (interactive) (cycle-buffer-in-special-mode 'tuareg-mode)))
         (("g" . "Golang") . (lambda () (interactive) (cycle-buffer-in-special-mode 'go-mode)))
         (("q" . "QML") . (lambda () (interactive) (cycle-buffer-in-special-mode 'qml-mode)))
+        (("w" . "WebKit") . (lambda () (interactive) (cycle-buffer-in-special-mode 'webkit-mode)))
         (("u" . "Lisp") . (lambda () (interactive) (cycle-buffer-in-special-mode-except-buffer 'lisp-mode " *slime-fontify*")))
         ))
 

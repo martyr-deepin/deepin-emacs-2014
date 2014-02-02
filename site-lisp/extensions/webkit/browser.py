@@ -39,6 +39,7 @@ from PyQt5.QtGui import QPainter, QImage
 import functools
 from utils import get_parent_dir
 from xutils import get_xlib_display
+from send_key import send_string
 
 class postGui(QtCore.QObject):
     
@@ -126,6 +127,26 @@ class BrowserBuffer(QWebView):
                 self.press_ctrl_flag = True
             elif event.type() == QEvent.KeyRelease and event.key() == QtCore.Qt.Key_Control:
                 self.press_ctrl_flag = False
+                
+            global emacs_xwindow_id
+            
+            xlib_display = get_xlib_display()
+            xwindow = xlib_display.create_resource_object("window", emacs_xwindow_id)
+            
+            mask = []
+            event_key = event.text()            
+            if event.modifiers() & QtCore.Qt.AltModifier == QtCore.Qt.AltModifier:
+                mask.append("Alt")
+            elif event.modifiers() & QtCore.Qt.ControlModifier == QtCore.Qt.ControlModifier:
+                mask.append("Ctrl")
+            elif event.modifiers() & QtCore.Qt.ShiftModifier == QtCore.Qt.ShiftModifier:
+                mask.append("Shift")
+            elif event.modifiers() & QtCore.Qt.MetaModifier == QtCore.Qt.MetaModifier:
+                mask.append("Super")
+                
+            send_string(xwindow, event_key, mask, event.type() == QEvent.KeyPress)
+            
+            xlib_display.sync()
         else:
             if event.type() not in [12, 77]:
                 call_method("%s %s" % (event.type(), event))
@@ -242,6 +263,8 @@ if __name__ == '__main__':
     server_thread = threading.Thread(target=server.serve_forever)
     server_thread.allow_reuse_address = True
     
+    emacs_xwindow_id = 0
+    
     buffer_dict = {}
     
     def call_message(message):
@@ -277,6 +300,10 @@ if __name__ == '__main__':
             
     @postGui(False)        
     def update_views(emacs_xid, view_infos):
+        global emacs_xwindow_id 
+        
+        emacs_xwindow_id = int(emacs_xid)
+        
         buffer_view_dict = {}
         
         for view_info in view_infos:
