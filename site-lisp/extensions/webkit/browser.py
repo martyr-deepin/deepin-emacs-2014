@@ -153,10 +153,10 @@ class BrowserBuffer(QWebView):
         
         return False
     
-    def add_view(self, view_id, emacs_xid, x, y, w, h):
+    def add_view(self, view_id, x, y, w, h):
         view = BrowserView(self, view_id)
         self.view_dict[view_id] = view
-        self.update_view(view_id, emacs_xid, x, y, w, h)
+        self.update_view(view_id, x, y, w, h)
         
         view.show()
         
@@ -165,8 +165,8 @@ class BrowserBuffer(QWebView):
             self.view_dict[view_id].remove()
             self.view_dict.pop(view_id)
         
-    def update_view(self, view_id, emacs_xid, x, y, w, h):
-        self.view_dict[view_id].moveresize(emacs_xid, x, y, w, h)
+    def update_view(self, view_id, x, y, w, h):
+        self.view_dict[view_id].moveresize(x, y, w, h)
         
     def remove_all_views(self):
         for view_id in self.view_dict.keys():
@@ -233,20 +233,20 @@ class BrowserView(QWidget):
         self.qimage = qimage
         self.update()
         
-    def moveresize(self, emacs_xid, x, y, w, h):
+    def moveresize(self, x, y, w, h):
         self.resize(w, h)
-        self.reparent(emacs_xid, x, y)
+        self.reparent(x, y)
         
-    def adjust_size(self, emacs_xid, x, y, w, h):
-        self.moveresize(emacs_xid, x, y, w, h)
+    def adjust_size(self, x, y, w, h):
+        self.moveresize(x, y, w, h)
         self.browser_buffer.adjust_size(w, h)
         
-    def reparent(self, emacs_xid, x, y):
+    def reparent(self, x, y):
         xlib_display = get_xlib_display()
         
-        browser_xid = self.winId().__int__()
-        browser_xwindow = xlib_display.create_resource_object("window", int(browser_xid))
-        emacs_xwindow = xlib_display.create_resource_object("window", int(emacs_xid))
+        browser_xwindow_id = self.winId().__int__()
+        browser_xwindow = xlib_display.create_resource_object("window", browser_xwindow_id)
+        emacs_xwindow = xlib_display.create_resource_object("window", emacs_xwindow_id)
         
         browser_xwindow.reparent(emacs_xwindow, x, y)
         
@@ -274,6 +274,12 @@ if __name__ == '__main__':
         handler = server.clients[0]
         handler.call(method_name, args)
     
+    @postGui(False)    
+    def init(emacs_xid):
+        global emacs_xwindow_id
+        
+        emacs_xwindow_id = int(emacs_xid)
+        
     # NOTE: every epc method must should wrap with postGui.
     # Because epc server is running in sub-thread.
     @postGui(False)        
@@ -299,11 +305,7 @@ if __name__ == '__main__':
             buffer_dict[buffer_id].adjust_size(w, h)
             
     @postGui(False)        
-    def update_views(emacs_xid, view_infos):
-        global emacs_xwindow_id 
-        
-        emacs_xwindow_id = int(emacs_xid)
-        
+    def update_views(view_infos):
         buffer_view_dict = {}
         
         for view_info in view_infos:
@@ -326,11 +328,11 @@ if __name__ == '__main__':
                     (x, y, w, h) = buffer_view_dict[buffer.buffer_id][emacs_view_id]
                     # Update view.
                     if emacs_view_id in buffer_view_ids:
-                        buffer.update_view(emacs_view_id, emacs_xid, x, y, w, h)
+                        buffer.update_view(emacs_view_id, x, y, w, h)
 
                     # Create view.
                     else:
-                        buffer.add_view(emacs_view_id, emacs_xid, x, y, w, h)
+                        buffer.add_view(emacs_view_id, x, y, w, h)
                 for buffer_view_id in buffer_view_ids:
                     # Remove view.
                     if buffer_view_id not in emacs_view_ids:
@@ -348,6 +350,7 @@ if __name__ == '__main__':
     server_thread.start()
     server.print_port()
     
+    server.register_function(init)
     server.register_function(create_buffer)
     server.register_function(remove_buffer)
     server.register_function(adjust_size)
@@ -359,13 +362,15 @@ if __name__ == '__main__':
     def test():
         emacs_xid = "106954839"
         
+        init(emacs_xid)
+        
         create_buffer("1", "http://www.google.com", 1600, 400)
 
         # View will adjust.
-        buffer_dict["1"].add_view("400_500", emacs_xid, 400, 500, 300, 400)
+        buffer_dict["1"].add_view("400_500", 400, 500, 300, 400)
 
         # View will destory.
-        buffer_dict["1"].add_view("900_500", emacs_xid, 900, 500, 300, 400)
+        buffer_dict["1"].add_view("900_500", 900, 500, 300, 400)
 
         # View will add.
         view_infos = [
@@ -375,9 +380,9 @@ if __name__ == '__main__':
             ["1", 400, 500, 500, 400],
         ]
         
-        update_views(emacs_xid, view_infos)
+        update_views(view_infos)
         
-        adjust_size(emacs_xid, "1", "400_500", 400, 500, 500, 400)
+        adjust_size("1", "400_500", 400, 500, 500, 400)
         
     # test()    
         

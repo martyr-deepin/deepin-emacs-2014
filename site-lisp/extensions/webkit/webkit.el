@@ -126,8 +126,11 @@
 (defvar pyepc-file (expand-file-name "browser.py" (file-name-directory load-file-name)))
 
 (defvar pyepc-browser
-  (epc:start-epc (or (getenv "PYTHON") "python")
-                 (list pyepc-file)))
+  (let* ((browser
+          (epc:start-epc (or (getenv "PYTHON") "python")
+                         (list pyepc-file))))
+    (epc:call-deferred browser 'init (list (webkit-get-emacs-xid)))
+    browser))
 
 (defvar webkit-buffer-dict (make-hash-table :test 'equal))
 
@@ -188,7 +191,7 @@
                    )
               (add-to-list 'view-infos (list buffer-id x y w h))
               ))))
-    (epc:call-deferred pyepc-browser 'update_views (list (webkit-get-emacs-xid) view-infos))
+    (epc:call-deferred pyepc-browser 'update_views (list view-infos))
 
     (with-current-buffer selected-buffer
       (if (string= "webkit-mode" (format "%s" major-mode))
