@@ -38,7 +38,7 @@ from PyQt5.QtWidgets import QWidget
 from PyQt5.QtGui import QPainter, QImage
 import functools
 from utils import get_parent_dir
-from xutils import get_xlib_display
+from xutils import get_xlib_display, grab_focus
 from send_key import send_string
 
 class postGui(QtCore.QObject):
@@ -339,6 +339,17 @@ if __name__ == '__main__':
                         buffer.remove_view(buffer_view_id)
             else:
                 buffer.remove_all_views()
+                
+    @postGui(False)            
+    def focus_view(buffer_id, x, y, w, h):
+        if buffer_dict.has_key(buffer_id):
+            buffer = buffer_dict[buffer_id]
+            view_id = "%s_%s" % (x, y)
+            
+            if buffer.view_dict.has_key(view_id):
+                view = buffer.view_dict[view_id]
+                view_xwindow_id = view.winId().__int__()
+                grab_focus(view_xwindow_id)
     
     def update_buffer():
         while True:
@@ -355,6 +366,7 @@ if __name__ == '__main__':
     server.register_function(remove_buffer)
     server.register_function(adjust_size)
     server.register_function(update_views)
+    server.register_function(focus_view)
     
     threading.Thread(target=update_buffer).start()            
     

@@ -210,6 +210,26 @@
           (epc:call-deferred pyepc-browser 'remove_buffer (list buffer-id))
           (remhash buffer-id webkit-buffer-dict)))))
 
+(defun webkit-focus-browser-view ()
+  (interactive)
+  (with-current-buffer (current-buffer)
+    (if (string= "webkit-mode" (format "%s" major-mode))
+        (let* ((window-allocation (webkit-get-window-allocation (get-buffer-window (current-buffer))))
+               (x (nth 0 window-allocation))
+               (y (nth 1 window-allocation))
+               (w (nth 2 window-allocation))
+               (h (nth 3 window-allocation))
+               )
+          (epc:call-deferred pyepc-browser 'focus_view (list buffer-id x y w h))
+          )
+      )))
+
+(defadvice switch-to-buffer (after webkit-switch-to-buffer-advice activate)
+  (webkit-focus-browser-view))
+
+(defadvice other-window (after webkit-other-window-advice activate)
+  (webkit-focus-browser-view))
+
 (add-hook 'window-configuration-change-hook #'webkit-monitor-window-change)
 (add-hook 'kill-buffer-hook #'webkit-monitor-buffer-kill)
 

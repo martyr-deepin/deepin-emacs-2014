@@ -29,3 +29,14 @@ def get_xlib_display():
         xlib_display =  display.Display()
         
     return xlib_display    
+
+def grab_focus(window_id):
+    global xlib_display
+
+    from Xlib import X
+    xwindow = xlib_display.create_resource_object("window", window_id)
+
+    xwindow.set_input_focus(X.RevertToNone, X.CurrentTime)
+    xwindow.configure(stack_mode=X.Above)
+    
+    xlib_display.sync()
