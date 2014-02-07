@@ -38,7 +38,7 @@ from PyQt5.QtWidgets import QWidget
 from PyQt5.QtGui import QPainter, QImage
 import functools
 from utils import get_parent_dir
-from xutils import get_xlib_display, grab_focus
+from xutils import get_xlib_display, grab_focus, ActiveWindowWatcher, get_parent_window_id
 from send_key import send_string
 
 class postGui(QtCore.QObject):
@@ -273,7 +273,17 @@ if __name__ == '__main__':
     def call_method(method_name, args):
         handler = server.clients[0]
         handler.call(method_name, args)
-    
+        
+    def handle_active_window(active_window_id):
+        global emacs_xwindow_id
+        
+        emacs_real_id = get_parent_window_id(emacs_xwindow_id)
+        
+        call_method("message", ["handle_active_window: %s %s %s" % (active_window_id, emacs_xwindow_id, emacs_real_id)])
+        
+        if active_window_id == emacs_real_id:
+            call_method("focus-browser-view", [])
+        
     @postGui(False)    
     def init(emacs_xid):
         global emacs_xwindow_id
@@ -350,7 +360,7 @@ if __name__ == '__main__':
                 view = buffer.view_dict[view_id]
                 view_xwindow_id = view.winId().__int__()
                 grab_focus(view_xwindow_id)
-    
+                
     def update_buffer():
         while True:
             for buffer in buffer_dict.values():
@@ -369,6 +379,10 @@ if __name__ == '__main__':
     server.register_function(focus_view)
     
     threading.Thread(target=update_buffer).start()            
+    
+    active_window_watcher = ActiveWindowWatcher()
+    active_window_watcher.activeWindowChanged.connect(handle_active_window)
+    active_window_watcher.start()        
     
     # This function just for test python module.
     def test():

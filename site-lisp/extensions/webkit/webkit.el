@@ -221,6 +221,7 @@
                (h (nth 3 window-allocation))
                )
           (epc:call-deferred pyepc-browser 'focus_view (list buffer-id x y w h))
+          (message "Focus view: %S" buffer-id)
           )
       )))
 
@@ -247,6 +248,12 @@
                    'change-buffer-title
                    (lambda (&rest args)
                      (webkit-change-buffer-title (nth 0 args) (nth 1 args))
+                     ))
+
+(epc:define-method pyepc-browser
+                   'focus-browser-view
+                   (lambda (&rest args)
+                     (webkit-focus-browser-view)
                      ))
 
 (provide 'webkit)
