@@ -111,6 +111,14 @@ class BrowserBuffer(QWebView):
         
         self.press_ctrl_flag = False
         
+        self.page().mainFrame().initialLayoutCompleted.connect(self.inject_js)
+        
+    def inject_js(self):
+        with open("reverse_color.js", "r") as jsfile:
+            self.page().mainFrame().evaluateJavaScript(jsfile.read())
+            
+        call_method("message", ["injectjs"])        
+        
     def change_title(self, title):
         call_method("change-buffer-title", [self.buffer_id, title])
         
