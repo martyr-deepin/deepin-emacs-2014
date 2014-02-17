@@ -105,6 +105,7 @@
                'package-menu-mode-hook
                'cmake-mode-hook
                'po-mode-hook
+               'php-mode-hook
                ))
   (add-hook hook (lambda () (linum-mode 1))))
 

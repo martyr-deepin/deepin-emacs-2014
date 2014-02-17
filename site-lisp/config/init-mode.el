@@ -118,6 +118,7 @@
                     ("CMakeLists\\.txt\\'" . cmake-mode)
                     ("\\.cmake\\'" . cmake-mode)
                     ("\\.po\\'" . po-mode)
+                    ("\\.php\\'" . php-mode)
                     ))
   (add-to-alist 'auto-mode-alist elt-cons))
 
@@ -126,6 +127,7 @@
 (autoload 'qml-mode "qml-mode")
 (autoload 'markdown-mode "markdown-mode")
 (autoload 'po-mode "po-mode")
+(autoload 'php-mode "php-mode")
 (add-hook
  'c-mode-common-hook
  '(lambda ()
