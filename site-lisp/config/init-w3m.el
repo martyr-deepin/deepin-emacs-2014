@@ -75,6 +75,7 @@
 
 (require 'w3m)                          ;W3M
 (require 'w3m-bookmark)                 ;w3m书签
+(require 'html-helper-mode)
 
 ;;; Code:
 

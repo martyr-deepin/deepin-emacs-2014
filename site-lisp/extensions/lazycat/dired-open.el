@@ -101,12 +101,10 @@ Open file use another tool"
   "Open diversified format FILE."
   (interactive "fFile: ")
   (let ((file-extension (file-name-extension file)))
-    (cond ((or file-extension))
-          ((string-match "\\(s?html?\\)$" file-extension)
-           (w3m-copy-buffer)
-           (message "%s" file)
+    (cond ((string-equal "html" file-extension)
+           (require 'init-w3m)
            (w3m-find-file file))
-          ((string-match "\\(chm\\)$" file-extension)
+          ((string-equal "chm" file-extension)
            (require 'chm-view)
            (chm-view-file file))
           ((string-match "\\(pdf\\|ps\\|dvi\\)$" file-extension)
@@ -119,7 +117,7 @@ Open file use another tool"
              (forward-line -1)
              (emms-playlist-mode-play-smart)))
           (t (find-file file)))
-    (find-file file)))
+    ))
 
 (provide 'dired-open)
 
