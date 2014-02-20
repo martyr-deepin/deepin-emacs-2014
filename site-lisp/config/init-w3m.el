@@ -162,7 +162,6 @@
    ("F" . w3m-view-next-page)              ;前进
    ("L" . w3m-submit-form)                 ;提交form中的内容
    ("C" . w3m-delete-other-buffers)        ;关闭后台标签
-   ("Y" . wget-web-page)                   ;网页下载
    ("-" . org-w3m-copy-for-org-mode)       ;转换网页成 `org-mode' 的链接格式
    ("C-u s" . w3m-db-history)              ;历史数据库
    ("<up>" . emms-volume-mode-plus)        ;增加音量
@@ -181,6 +180,11 @@
    )
  w3m-mode-map
  )
+(lazy-set-mode-autoload-key
+ '(
+   ("Y" . wget-web-page)                ;网页下载
+   )
+ w3m-mode-map nil "wget")
 (lazy-set-mode-autoload-key
  '(
    ("5" . w3m-open-rcirc-window)                        ;打开RCIRC窗口
