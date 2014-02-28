@@ -25,13 +25,19 @@
     (flymake-log 3 "create-temp-inplace: file=%s temp=%s" file-name temp-name)
     temp-name))
 
+(defvar goflymake-directory default-directory)
+(defvar goflymake-bin "/tmp/goflymake")
+
 (defun goflymake-init ()
   (let* ((temp-file (flymake-init-create-temp-buffer-copy
                      'goflymake-create-temp-inplace))
          (local-file (file-relative-name
                       temp-file
                       (file-name-directory buffer-file-name))))
-    (list "goflymake"
+    ;; Build /tmp/goflymake if it not exists.
+    (unless (file-exists-p goflymake-bin)
+      (shell-command (format "go build -o %s %s/goflymake.go" goflymake-bin goflymake-directory)))
+    (list goflymake-bin
           (list (if goflymake-debug "-debug=true" "-debug=false")
                 temp-file))))
 

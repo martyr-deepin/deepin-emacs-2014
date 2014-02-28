@@ -129,17 +129,17 @@
 (defun go-eldoc--invoke-autocomplete ()
   (let ((temp-buffer (generate-new-buffer "*go-eldoc*")))
     (prog2
-	(call-process-region (point-min)
-			     (point-max)
-			     "gocode"
-			     nil
-			     temp-buffer
-			     nil
-			     "-f=emacs"
-			     "autocomplete"
-			     (or (buffer-file-name) "")
-			     (concat "c" (int-to-string (- (point) 1))))
-	(with-current-buffer temp-buffer (buffer-string))
+        (call-process-region (point-min)
+                             (point-max)
+                             "gocode"
+                             nil
+                             temp-buffer
+                             nil
+                             "-f=emacs"
+                             "autocomplete"
+                             (or (buffer-file-name) "")
+                             (concat "c" (int-to-string (- (point) 1))))
+        (with-current-buffer temp-buffer (buffer-string))
       (kill-buffer temp-buffer))))
 
 (defun go-eldoc--get-funcinfo ()
@@ -167,7 +167,7 @@
    "\\([]{}[:word:][:multibyte:]*.[]+\\)" ;; $1 argname
    (format "\\(?: %s%s\\)?"
            "\\(\\(?:\\[\\]\\)?\\(?:<-\\)?chan\\(?:<-\\)? \\)?" ;; $2 channel
-           "\\(?:\\([]{}[:word:][:multibyte:]*.[]+\\)\\)?") ;; $3 argtype
+           "\\(?:\\([]{}[:word:][:multibyte:]*.[]+\\)\\)?")    ;; $3 argtype
    ))
 
 (defun go-eldoc--extract-type-name (chan sym)
@@ -222,10 +222,10 @@
               (setq highlight-done t)
               (propertize type 'face 'eldoc-highlight-function-argument)) into args
 
-            else
-            collect type into args
-            finally
-            return (concat "(" (mapconcat 'identity args ", ") ") " ret-type)))))
+              else
+              collect type into args
+              finally
+              return (concat "(" (mapconcat 'identity args ", ") ") " ret-type)))))
 
 (defun go-eldoc--analyze-func-signature (signature)
   (let (arg-start arg-end)
