@@ -185,6 +185,7 @@
    ("Y" . wget-web-page)                ;网页下载
    )
  w3m-mode-map nil "wget")
+(lazy-set-key sdcv-key-alist w3m-mode-map)
 (lazy-set-mode-autoload-key
  '(
    ("5" . w3m-open-rcirc-window)                        ;打开RCIRC窗口
