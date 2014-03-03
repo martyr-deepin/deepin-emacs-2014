@@ -25,7 +25,7 @@
     (flymake-log 3 "create-temp-inplace: file=%s temp=%s" file-name temp-name)
     temp-name))
 
-(defvar goflymake-directory default-directory)
+(defvar goflymake-directory "/usr/share/deepin-emacs/site-lisp/extensions/flymake/")
 (defvar goflymake-bin "/tmp/goflymake")
 
 (defun goflymake-init ()
