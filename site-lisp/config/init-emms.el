@@ -107,27 +107,18 @@
 (setq emms-score-file "~/.emacs.d/deepin-emacs/Configure-File/Emms/scores")             ;分数文件
 (setq emms-source-file-default-directory "/space/data/Music/") ;设定默认的播放目录
 ;; 播放设置
-(setq emms-playlist-default-major-mode 'emms-playlist-mode) ;设定EMMS用播放列表的主模式
-(add-to-list 'emms-track-initialize-functions 'emms-info-initialize-track) ;设定音轨初始化信息
-(add-hook 'emms-player-finished-hook 'emms-random)          ;当播放完当前的歌曲时随机选择下一首歌曲
-(setq emms-player-next-function 'emms-next-noerror)         ;修复该死的播放完后的BUG
-(setq emms-repeat-playlist t)                               ;设定EMMS启动列表循环播放
-(setq emms-history-start-playing t)
+(setq emms-repeat-playlist t)           ;设定EMMS启动列表循环播放
 (setq emms-playlist-sort-function       ;设置播放列表用自然的方法排序: 艺术家 -> 专辑 -> 序号
       'emms-playlist-sort-by-natural-order)
-(emms-mode-line-disable)                    ;不在Mode-line上显示歌曲信息
-(setq emms-playing-time-display-format "")  ;不显示歌曲播放时间
-(when (fboundp 'emms-cache) (emms-cache 1)) ;设置EMMS缓存
-(setq emms-player-list                      ;设定EMMS播放器的优先顺序
+(emms-mode-line-disable)                ;不在Mode-line上显示歌曲信息
+(setq emms-player-list                  ;设定EMMS播放器的优先顺序
       '(emms-player-mplayer
         emms-player-timidity
         emms-player-mpg321
         emms-player-ogg123))
-(setq emms-info-asynchronously nil)            ;关闭EMMS信息异步模式, 不然会处错
-(setq emms-playlist-buffer-name "*Music*")     ;设定播放列表的缓存标题
+(setq emms-info-asynchronously nil)            ;关闭EMMS信息异步模式
 (setq emms-source-file-directory-tree-function ;设定更快和灵活的文件目录查找模式
       'emms-source-file-directory-tree-find)
-(setq emms-show-format "%s")                 ;设置 `emms-show' 的显示格式
 ;; 歌词设置
 (ad-activate 'emms-lyrics-find-lyric)        ;自动下载歌词
 (setq emms-lyrics-dir "~/.lyrcis")           ;EMMS的歌词目录
