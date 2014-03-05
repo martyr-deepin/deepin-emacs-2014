@@ -60,7 +60,10 @@
 ;;
 ;; (require 'webkit)
 ;;
-;; No need more.
+;; Quick start:
+;; 
+;; M-x webkit-open-url
+;; 
 
 ;;; Customize:
 ;;
