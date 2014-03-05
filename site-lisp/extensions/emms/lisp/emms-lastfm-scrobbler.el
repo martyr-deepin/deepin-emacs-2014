@@ -30,6 +30,7 @@
 
 (require 'emms)
 (require 'emms-playing-time)
+(require 'emms-lastfm-client)
 
 ;; Variables referenced from emms-lastfm-client:
 ;;  emms-lastfm-client-username, emms-lastfm-client-api-key,
@@ -70,9 +71,6 @@ To submit every track to Last.fm, set this to t."
 
 (defvar emms-lastfm-scrobbler-client-identifier "emm"
   "Client identifier for Emms (Last.fm define this, not us).")
-
-(defvar emms-lastfm-scrobbler-track-play-start-timestamp nil
-  "UTC timestamp.")
 
 ;; 1.3 Authentication Token for Web Services Authentication: token =
 ;; md5(shared_secret + timestamp)
@@ -312,7 +310,6 @@ to last.fm"
 (defun emms-lastfm-scrobbler-make-async-submission-call (track rating)
   "Make asynchronous submission call."
   (let ((flarb (emms-lastfm-scrobbler-submission-data track rating)))
-    (setq flooz flarb)
     (let* ((url-request-method "POST")
 	   (url-request-data flarb)
 	   (url-request-extra-headers

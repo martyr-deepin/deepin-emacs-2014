@@ -37,7 +37,7 @@
   "Sorting list used by `emms-playlist-sort-by-list'.
 Currently it understands the following fields: name info-artist
 imfo-composer info-performer info-title info-album info-genre
-info-playing-time info-tracknumber."
+info-playing-time info-tracknumber info-discnumber."
   :type 'symbol
   :group 'emms-playlist-sort)
 
@@ -173,15 +173,17 @@ With a prefix argument, decreasingly."
 This is the order in which albums where intended to be played.
 ie. by album name and then by track number."
   (let ((album-a (emms-track-get a 'info-album))
-        (album-b (emms-track-get b 'info-album)))
+        (album-b (emms-track-get b 'info-album))
+	(discnum-a (string-to-number (or (emms-track-get a 'info-discnumber) "0")))
+	(discnum-b (string-to-number (or (emms-track-get b 'info-discnumber) "0")))
+	(tracknum-a (string-to-number (or (emms-track-get a 'info-tracknumber) "0")))
+	(tracknum-b (string-to-number (or (emms-track-get b 'info-tracknumber) "0"))))
     (or (emms-string< album-a album-b)
-        (and album-a
-             album-b
+        (and album-a album-b
              (string= album-a album-b)
-             (< (string-to-number (or (emms-track-get a 'info-tracknumber)
-                                      "0"))
-                (string-to-number (or (emms-track-get b 'info-tracknumber)
-                                      "0")))))))
+	     (or (< discnum-a discnum-b)
+		 (and (= discnum-a discnum-b)
+		      (< tracknum-a tracknum-b)))))))
 
 (defun emms-playlist-sort-by-list-p (a b)
   (catch 'return
@@ -195,7 +197,7 @@ ie. by album name and then by track number."
          (when (< (emms-track-get a info)
                   (emms-track-get b info))
            (throw 'return t)))
-        ((info-tracknumber)
+        ((info-tracknumber info-discnumber)
          (when (< (string-to-number (or (emms-track-get a info) "0"))
                   (string-to-number (or (emms-track-get b info) "0")))
            (throw 'return t)))))))

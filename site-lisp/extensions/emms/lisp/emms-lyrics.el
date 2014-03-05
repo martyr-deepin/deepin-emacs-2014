@@ -1,6 +1,6 @@
 ;;; emms-lyrics.el --- Display lyrics synchronically
 
-;; Copyright (C) 2005, 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+;; Copyright (C) 2005, 2006, 2007, 2008, 2009, 2010, 2013 Free Software Foundation, Inc.
 
 ;; Author: William Xu <william.xwl@gmail.com>
 ;; Keywords: emms music lyrics
@@ -42,12 +42,12 @@
 
 ;;; Code:
 
-(require 'hl-line)
 (require 'emms)
 (require 'emms-player-simple)
 (require 'emms-source-file)
 (require 'time-date)
 (require 'emms-url)
+(require 'emms-compat)
 
 ;;; User Customization
 
@@ -314,7 +314,7 @@ FILE should be under the same directory as the music file, or under
   (mapc (lambda (time-lyric) (insert (cdr time-lyric) "\n"))
         emms-lyrics-alist)
   (goto-char (point-min))
-  (hl-line-mode 1)
+  (emms-activate-highlighting-mode)
   (setq buffer-read-only t))
 
 (defun emms-lyrics-start ()
@@ -411,17 +411,18 @@ job."
             (next-lyric (and (cdr lyrics-alist)
                              (cdr (cadr lyrics-alist)))))
         (setq line (1+ line))
-        (setq emms-lyrics-timers
-              (append emms-lyrics-timers
-                      (list
-                       (run-at-time (format "%d sec" time)
-                                    nil
-                                    'emms-lyrics-display-handler
-                                    lyric
-                                    next-lyric
-                                    line
-                                    (and next-time (- next-time time)))))))
-      (setq lyrics-alist (cdr lyrics-alist)))))
+        (when (> time 0)
+          (setq emms-lyrics-timers
+                (append emms-lyrics-timers
+                        (list
+                         (run-at-time (format "%d sec" time)
+                                      nil
+                                      'emms-lyrics-display-handler
+                                      lyric
+                                      next-lyric
+                                      line
+                                      (and next-time (- next-time time)))))))
+        (setq lyrics-alist (cdr lyrics-alist))))))
 
 (defun emms-lyrics-mode-line ()
   "Add lyric to the mode line."
@@ -470,7 +471,7 @@ display."
         (when line
           (goto-char (point-min))
           (forward-line (1- line))
-          (hl-line-highlight))))))
+          (emms-line-highlight))))))
 
 (defun emms-lyrics-find-lyric (file)
   "Return full path of found lrc FILE, or nil if not found.

@@ -103,7 +103,8 @@ Emacs."
           (insert "\n)")
           (write-file emms-history-file))))))
 
-(add-hook 'kill-emacs-hook 'emms-history-save)
+(unless noninteractive
+  (add-hook 'kill-emacs-hook 'emms-history-save))
 
 (defun emms-history-load ()
   "Restore all playlists in `emms-history-file'."

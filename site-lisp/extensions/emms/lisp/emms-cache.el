@@ -73,7 +73,8 @@ This is used to cache over emacs sessions.")
       (progn
 	(unless emms-cache-dirty
 	  (emms-cache-restore))
-        (add-hook 'kill-emacs-hook 'emms-cache-save)
+        (unless noninteractive
+          (add-hook 'kill-emacs-hook 'emms-cache-save))
         (setq emms-cache-get-function 'emms-cache-get)
         (setq emms-cache-set-function 'emms-cache-set)
         (setq emms-cache-modified-function 'emms-cache-dirty))

@@ -2,7 +2,7 @@
 
 (defvar generated-autoload-file)
 (defvar command-line-args-left)
-(defun generate-autoloads ()
+(defun emms-generate-autoloads ()
   (interactive)
   (require 'autoload)
   (setq generated-autoload-file (car command-line-args-left))

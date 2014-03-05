@@ -64,6 +64,7 @@ external metaflac program"
     "--show-tag=NOTE"
     "--show-tag=YEAR"
     "--show-tag=TRACKNUMBER"
+    "--show-tag=DISCNUMBER"
     "--show-tag=GENRE")
   "The argument to pass to `emms-info-metaflac-program-name'."
   :type '(repeat string)

@@ -34,8 +34,6 @@
 (require 'emms)
 (require 'emms-source-file)
 (require 'xml)
-(require 'w3m)
-(require 'emms-lastfm-scrobbler)
 
 (defcustom emms-lastfm-client-username nil
   "Valid Last.fm account username."
@@ -138,6 +136,15 @@
   list whose CAR is the method call string, CADR is the function
   to call on a success and CADDR is the function to call on
   failure.")
+
+(defvar emms-lastfm-scrobbler-track-play-start-timestamp nil
+  "UTC timestamp.")
+
+(declare-function emms-lastfm-scrobbler-timestamp "emms-lastfm-scrobbler")
+(declare-function emms-lastfm-scrobbler-make-async-submission-call
+		  "emms-lastfm-scrobbler")
+(declare-function emms-lastfm-scrobbler-handshake "emms-lastfm-scrobbler")
+
 
 ;;; ------------------------------------------------------------------
 ;;; API method call
@@ -287,7 +294,7 @@ This function includes the cryptographic signature."
 (defun emms-lastfm-client-construct-lexi (arguments)
   "Return ARGUMENTS sorted in lexicographic order."
   (let ((lexi (sort arguments
-		    '(lambda (a b) (string< (car a) (car b)))))
+		    #'(lambda (a b) (string< (car a) (car b)))))
 	(out ""))
     (while lexi
       (setq out (concat out (caar lexi) (cdar lexi)))
@@ -980,8 +987,7 @@ This function includes the cryptographic signature."
 	(insert (format "Listeners: %s\n" stats-listeners))
 	(insert (format "Plays: %s\n\n" stats-playcount))
 	(let ((p (point)))
-	  (insert (format "<p>%s</p>" bio-complete))
-	  (w3m-region p (point))))
+	  (insert (format "<p>%s</p>" bio-complete))))
       (setq buffer-read-only t)
       (text-mode)
       (goto-char (point-min)))
@@ -992,7 +998,7 @@ This function includes the cryptographic signature."
   (when (or (not data)
 	    (not (listp data)))
     (error "no artist info to parse"))
-  (let ((c (copy-seq (nth 1 data)))
+  (let ((c (copy-sequence (nth 1 data)))
 	artist-name lastfm-url artist-image
 	stats-listeners stats-playcount
 	bio-summary bio-complete)

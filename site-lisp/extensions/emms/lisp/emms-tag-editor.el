@@ -92,6 +92,7 @@ is the format template.  The format specification is like:
  t     --     Track info-title
  l     --     Track info-album
  n     --     Track info-tracknumber
+ D     --     Track info-discnumber
  y     --     Track info-year
  g     --     Track info-genre
  ;     --     Track info-note
@@ -139,7 +140,7 @@ should be given.
 See also `emms-tag-editor-tag-file' and `emms-tag-editor-tag-ogg'.")
 
 (defun emms-tag-editor-tag-flac (track)
-  "Commit changes to an OGG file according to TRACK."
+  "Commit changes to an FLAC file according to TRACK."
   (require 'emms-info-metaflac)
   (with-temp-buffer
     (let (need val)
@@ -147,7 +148,7 @@ See also `emms-tag-editor-tag-file' and `emms-tag-editor-tag-ogg'.")
               (let ((info-tag (intern (concat "info-" tag))))
                 (when (> (length (setq val (emms-track-get track info-tag))) 0)
                   (insert (upcase tag) "=" val "\n"))))
-            '("artist" "composer" "performer" "title" "album" "tracknumber" "date" "genre" "note"))
+            '("artist" "composer" "performer" "title" "album" "tracknumber" "discnumber" "date" "genre" "note"))
       (when (buffer-string)
         (funcall #'call-process-region (point-min) (point-max)
                  emms-info-metaflac-program-name nil
@@ -171,7 +172,7 @@ See also `emms-tag-editor-tag-file' and `emms-tag-editor-tag-ogg'.")
              "-w"
              (append args (list (emms-track-name track)))))))
 
-(defun emms-tag-editor-tag-file (track program tags)
+(defun emms-tag-editor-tag-file (track program tags filename)
   "Change TAGS in FILE, using PROGRAM.
 Valid tags are given by `emms-tag-editor-tagfile-functions'."
   (let (args val)
@@ -617,7 +618,7 @@ With prefix argument, bury the tag edit buffer."
             (setq exit
                   (if (functionp (cdr func))
                       (funcall (cdr func) track)
-                    (emms-tag-editor-tag-file track (cadr func) (nth 2 func))))
+                    (emms-tag-editor-tag-file track (cadr func) (nth 2 func) filename)))
             (if (zerop exit)
                 (emms-track-get track 'info-mtime (butlast (current-time)))
               (emms-tag-editor-log

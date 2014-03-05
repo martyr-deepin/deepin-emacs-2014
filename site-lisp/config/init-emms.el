@@ -107,11 +107,11 @@
 (setq emms-score-file "~/.emacs.d/deepin-emacs/Configure-File/Emms/scores")             ;分数文件
 (setq emms-source-file-default-directory "/space/data/Music/") ;设定默认的播放目录
 ;; 播放设置
-(add-hook 'emms-player-finished-hook 'emms-random)          ;当播放完当前的歌曲时随机选择下一首歌曲
 (setq emms-playlist-default-major-mode 'emms-playlist-mode) ;设定EMMS用播放列表的主模式
 (add-to-list 'emms-track-initialize-functions 'emms-info-initialize-track) ;设定音轨初始化信息
-(setq emms-player-next-function 'emms-next)                                ;修复该死的播放完后的BUG
-(setq emms-repeat-playlist t)                                              ;设定EMMS启动列表循环播放
+(add-hook 'emms-player-finished-hook 'emms-random)          ;当播放完当前的歌曲时随机选择下一首歌曲
+(setq emms-player-next-function 'emms-next-noerror)         ;修复该死的播放完后的BUG
+(setq emms-repeat-playlist t)                               ;设定EMMS启动列表循环播放
 (setq emms-history-start-playing t)
 (setq emms-playlist-sort-function       ;设置播放列表用自然的方法排序: 艺术家 -> 专辑 -> 序号
       'emms-playlist-sort-by-natural-order)
@@ -291,7 +291,6 @@
   (interactive)
   (one-key-menu "EMMS-BROWSER-LOOKUP" one-key-menu-emms-browser-lookup-alist t))
 
-(provide 'init-emms)
 
 ;;; ### Emms Playlist ###
 ;;; --- EMMS 播放列表
@@ -384,5 +383,7 @@
  emms-stream-mode-map
  )
 (lazy-set-key vi-move-key-alist emms-stream-mode-map) ;vi-move 的局部按键
+
+(provide 'init-emms)
 
 ;;; init-emms.el ends here

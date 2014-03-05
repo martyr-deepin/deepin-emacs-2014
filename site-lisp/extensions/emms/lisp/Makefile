@@ -16,7 +16,7 @@ emms-auto.el: emms-auto.in $(SOURCE)
 	@$(EMACS) -q $(SITEFLAG) -batch \
 		-l emms-maint.el \
 		-l emms-auto.el \
-		-f generate-autoloads \
+		-f emms-generate-autoloads \
 		$(shell pwd)/emms-auto.el .
 
 %.elc: %.el

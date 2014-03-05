@@ -67,6 +67,26 @@ EMMS release version number."
            (< (nth 1 t1) (nth 1 t2)))))
 
 
+;;; Highline
+
+(defun emms-activate-highlighting-mode ()
+  "Activate highline mode."
+  (if (featurep 'xemacs)
+      (progn
+        (require 'highline)
+        (highline-local-mode 1))
+    (progn
+      (require 'hl-line)
+      (hl-line-mode 1))))
+
+(defun emms-line-highlight ()
+  "Highlight the current line. You must call
+emms-activate-highlighting-mode beforehand."
+  (if (featurep 'xemacs)
+      (highline-highlight-current-line)
+    (hl-line-highlight)))
+
+
 ;;; Movement and position
 
 (defun emms-move-beginning-of-line (arg)

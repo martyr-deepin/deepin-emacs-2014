@@ -81,6 +81,12 @@ If non-nil, EMMS will wrap back to the first track when that happens."
   :group 'emms
   :type 'boolean)
 
+(defcustom emms-random-playlist nil
+  "*Non-nil means that tracks are played randomly. If nil, tracks
+are played sequentially."
+  :group 'emms
+  :type 'boolean)
+
 (defcustom emms-repeat-track nil
   "Non-nil, playback will repeat current track.  If nil, EMMS will play
 track by track normally."
@@ -486,6 +492,17 @@ This uses `emms-playlist-uniq-function'."
   (with-current-emms-playlist
     (save-excursion
       (funcall emms-playlist-uniq-function))))
+
+(defun emms-toggle-random-playlist ()
+  "Toggle whether emms plays the tracks randomly or sequentially.
+See `emms-random-playlist'."
+  (interactive)
+  (setq emms-random-playlist (not emms-random-playlist))
+  (if emms-random-playlist
+      (progn (setq emms-player-next-function 'emms-random)
+             (message "Will play the tracks randomly."))
+    (setq emms-player-next-function 'emms-next-noerror)
+    (message "Will play the tracks sequentially.")))
 
 (defun emms-toggle-repeat-playlist ()
   "Toggle whether emms repeats the playlist after it is done.

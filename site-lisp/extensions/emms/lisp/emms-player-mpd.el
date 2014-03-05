@@ -140,30 +140,45 @@ leave it set to nil."
 (defun emms-player-mpd-get-supported-regexp ()
   "Returns a regexp of file extensions that MusicPD supports,
 or nil if we cannot figure it out."
-  (let ((out (shell-command-to-string "mpd --version"))
-        (found-start nil)
-        (supported nil))
-    ;; Get supported formats
-    ;; New version (0.15.x)
-    (if (string-match "Supported decoders:\\([^0]+?\\)Supported outputs:" out)
-	(setq supported (replace-regexp-in-string "\\[.+?\\]" ""
-						  (match-string 1 out)))
-      ;; Older versions
-      (setq out (split-string out "\n"))
-      (while (car out)
-	(cond ((string= (car out) "Supported formats:")
-	       (setq found-start t))
-	      ((string= (car out) "")
-	       (setq found-start nil))
-	      (found-start
-	       (setq supported (concat supported (car out)))))
-	(setq out (cdr out))))
-    ;; Create regexp
-    (when (and (stringp supported)
-               (not (string= supported "")))
-      (concat "\\`http://\\|\\.\\(m3u\\|pls\\|"
-              (regexp-opt (delq nil (split-string supported)))
-              "\\)\\'"))))
+  (let ((out (shell-command-to-string "mpd --version")))
+    ;; 0.17.x
+    (if (string-match "Decoders plugins:$" out)
+        (let* ((b (match-end 0))
+               (e (string-match "Output plugins:$" out))
+               (plugs (split-string (substring out b e) "\n" t))
+               (plugs (mapcan (lambda (x)
+                                (and (string-match " +\\[.*\\] +\\(.+\\)$" x)
+                                     (split-string (match-string 1 x) nil t)))
+                              plugs))
+               (b (and (string-match "Protocols:$" out) (match-end 0)))
+               (prots (and b (substring out (+ 2 b) -1)))
+               (prots (split-string (or prots "") nil t)))
+          (concat "\\(\\.\\(m3u\\|pls\\|"
+                  (regexp-opt (delq nil plugs))
+                  "\\)\\'\\)\\|\\(\\`"
+                  (regexp-opt (delete "file://" prots)) "\\)"))
+      (let ((found-start nil)
+            (supported nil))
+        (if (string-match "Supported decoders:\\([^0]+?\\)Supported outputs:" out)
+            ;; 0.15.x
+            (setq supported (replace-regexp-in-string "\\[.+?\\]" ""
+                                                      (match-string 1 out)))
+          ;; < 0.15
+          (setq out (split-string out "\n"))
+          (while (car out)
+            (cond ((string= (car out) "Supported formats:")
+                   (setq found-start t))
+                  ((string= (car out) "")
+                   (setq found-start nil))
+                  (found-start
+                   (setq supported (concat supported (car out)))))
+            (setq out (cdr out))))
+        ;; Create regexp
+        (when (and (stringp supported)
+                   (not (string= supported "")))
+          (concat "\\`http://\\|\\.\\(m3u\\|pls\\|"
+                  (regexp-opt (delq nil (split-string supported)))
+                  "\\)\\'"))))))
 
 (defcustom emms-player-mpd-supported-regexp
   ;; Use a sane default, just in case

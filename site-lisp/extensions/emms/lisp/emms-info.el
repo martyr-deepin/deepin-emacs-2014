@@ -35,6 +35,7 @@
 ;; info-title - string naming the title of the song
 ;; info-album - string naming the album
 ;; info-tracknumber - string(?) naming the track number
+;; info-discnumber - string naming the disc number
 ;; info-year - string naming the year
 ;; info-note - string of free-form entry
 ;; info-genre - string naming the genre
