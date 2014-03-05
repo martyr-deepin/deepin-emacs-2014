@@ -51,7 +51,14 @@
 
 ;;; Installation:
 ;;
-;; Put minibuffer-tray.el to your load-path.
+;; NOTE: just minibuffer-tray.el can't work, you need install below depends first:
+;;       * PyQt5:       http://www.riverbankcomputing.co.uk/software/pyqt/intro
+;;       * Python-Xlib: https://pypi.python.org/pypi/python-xlib
+;;       * Python-EPC:  https://github.com/tkf/python-epc
+;;       
+;; Detail description please look: http://www.emacswiki.org/emacs/MiniBufferTray
+;;
+;; Then put minibuffer-tray.el to your load-path.
 ;; The load-path is usually ~/elisp/.
 ;; It's set in your ~/.emacs like this:
 ;; (add-to-list 'load-path (expand-file-name "~/elisp"))

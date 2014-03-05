@@ -44,7 +44,14 @@
 
 ;;; Installation:
 ;;
-;; Put webkit.el to your load-path.
+;; NOTE: just webkit.el can't work, you need install below depends first:
+;;       * PyQt5:       http://www.riverbankcomputing.co.uk/software/pyqt/intro
+;;       * Python-Xlib: https://pypi.python.org/pypi/python-xlib
+;;       * Python-EPC:  https://github.com/tkf/python-epc
+;;       
+;; Detail description please look: http://www.emacswiki.org/emacs/WebKit 
+;;
+;; Then put webkit.el to your load-path.
 ;; The load-path is usually ~/elisp/.
 ;; It's set in your ~/.emacs like this:
 ;; (add-to-list 'load-path (expand-file-name "~/elisp"))
