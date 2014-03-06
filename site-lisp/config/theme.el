@@ -308,6 +308,8 @@
  '(w3m-tab-unselected ((t (:inherit tabbar-default :background "black" :foreground "#10650F" :box (:line-width 1 :color "#10650F")))))
  '(w3m-tab-unselected-retrieving ((t (:inherit tabbar-default :background "black" :foreground "grey30" :box (:line-width 1 :color "grey30")))))
  '(w3m-tab-unselected-unseen ((t (:inherit tabbar-default :background "black" :foreground "DodgerBlue" :box (:line-width 1 :color "#10650F")))))
+ '(emmet-preview-input ((t (:foreground "gold" :underline t))))
+ '(emmet-preview-output ((t (:background "gray10" :foreground "grey80"))))
  '(web-mode-block-attr-name-face ((t (:foreground "#51D117"))))
  '(web-mode-block-face ((t (:background "black"))))
  '(web-mode-comment-face ((t (:foreground "chocolate3"))))

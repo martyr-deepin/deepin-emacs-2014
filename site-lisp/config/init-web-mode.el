@@ -10,12 +10,12 @@
 ;; Last-Updated: 2014-03-06 15:50:39
 ;;           By: Andy Stewart
 ;; URL: http://www.emacswiki.org/emacs/download/init-web-mode.el
-;; Keywords: 
+;; Keywords:
 ;; Compatibility: GNU Emacs 24.3.50.1
 ;;
 ;; Features that might be required by this library:
 ;;
-;; 
+;;
 ;;
 
 ;;; This file is NOT part of GNU Emacs
@@ -37,10 +37,10 @@
 ;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth
 ;; Floor, Boston, MA 02110-1301, USA.
 
-;;; Commentary: 
-;; 
+;;; Commentary:
+;;
 ;; Init web mode
-;; 
+;;
 
 ;;; Installation:
 ;;
@@ -57,35 +57,42 @@
 
 ;;; Customize:
 ;;
-;; 
+;;
 ;;
 ;; All of the above can customize by:
 ;;      M-x customize-group RET init-web-mode RET
 ;;
 
 ;;; Change log:
-;;	
+;;
 ;; 2014/03/06
 ;;      * First released.
-;; 
+;;
 
 ;;; Acknowledgements:
 ;;
-;; 
+;;
 ;;
 
 ;;; TODO
 ;;
-;; 
+;;
 ;;
 
 ;;; Require
 
 (require 'web-mode)
+(require 'emmet-mode)
 
 ;;; Code:
 
-
+(setq emmet-preview-default nil)        ;don't show preview when expand code
+(dolist (hook (list
+               'sgml-mode-hook
+               'css-mode-hook
+               'web-mode-hook
+               ))
+  (add-hook hook (lambda () (emmet-mode 1))))
 
 (provide 'init-web-mode)
 

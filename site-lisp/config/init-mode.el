@@ -161,11 +161,6 @@
                ))
   (add-hook hook '(lambda () (auto-fill-mode 1))))
 
-;; Emmet mode.
-(autoload 'emmet-mode "emmet-mode")
-(add-hook 'sgml-mode-hook 'emmet-mode) ;; Auto-start on any markup modes
-(add-hook 'css-mode-hook  'emmet-mode) ;; enable Emmet's css abbreviation.
-
 (provide 'init-mode)
 
 ;;; init-mode.el ends here
