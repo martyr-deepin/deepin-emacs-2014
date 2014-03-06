@@ -105,7 +105,6 @@
                     ("cron\\(tab\\)?\\." . crontab-mode)
                     ("\\.a90\\'" . intel-hex-mode)
                     ("\\.hex\\'" . intel-hex-mode)
-                    ("\\.html\\'" . html-helper-mode)
                     ("SConstruct". python-mode)
                     ("\\.ml\\'" . tuareg-mode)
                     ("\\.mli\\'" . tuareg-mode)
@@ -119,8 +118,18 @@
                     ("\\.cmake\\'" . cmake-mode)
                     ("\\.po\\'" . po-mode)
                     ("\\.php\\'" . php-mode)
+                    ("\\.blade\\.php\\'" . web-mode)
+                    ("\\.phtml\\'" . web-mode)
+                    ("\\.tpl\\.php\\'" . web-mode)
+                    ("\\.jsp\\'" . web-mode)
+                    ("\\.as[cp]x\\'" . web-mode)
+                    ("\\.erb\\'" . web-mode)
+                    ("\\.mustache\\'" . web-mode)
+                    ("\\.djhtml\\'" . web-mode)
+                    ("\\.html?\\'" . web-mode)
                     ))
   (add-to-alist 'auto-mode-alist elt-cons))
+
 
 ;;; Mode load.
 (autoload 'cmake-mode "cmake-mode")
@@ -128,7 +137,7 @@
 (autoload 'markdown-mode "markdown-mode")
 (autoload 'po-mode "po-mode")
 (autoload 'php-mode "php-mode")
-(autoload 'html-helper-mode "html-helper-mode")
+(autoload 'web-mode "init-web-mode")
 (add-hook
  'c-mode-common-hook
  '(lambda ()

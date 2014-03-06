@@ -106,6 +106,7 @@
                'cmake-mode-hook
                'po-mode-hook
                'php-mode-hook
+               'web-mode-hook
                ))
   (add-hook hook (lambda () (linum-mode 1))))
 

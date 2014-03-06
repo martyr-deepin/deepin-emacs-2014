@@ -92,6 +92,7 @@
                'js-mode-hook
                'go-mode-hook
                'qml-mode-hook
+               'web-mode-hook
                ))
   (add-hook hook '(lambda () (paredit-mode 1))))
 
