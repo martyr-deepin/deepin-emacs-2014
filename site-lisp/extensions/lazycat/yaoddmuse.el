@@ -8,8 +8,8 @@
 ;; Copyright (C) 2009, 2010 rubikitch, all rights reserved.
 ;; Created: 2009-01-06 12:41:17
 ;; Version: 0.1.1
-;; Last-Updated: 2010/03/20 20:53
-;;           By: rubikitch
+;; Last-Updated: 2014/03/06 22:28
+;;           By: Andy Stewart
 ;; URL: http://www.emacswiki.org/emacs/download/yaoddmuse.el
 ;; Keywords: yaoddmuse, oddmuse
 ;; Compatibility: GNU Emacs 22 ~ 23
@@ -374,6 +374,9 @@
 ;;
 
 ;;; Change log:
+;; 2014/03/06
+;;      * `yaoddmuse-post-dired': add sit-for 5 for emacswiki to void upload files failed.
+;;
 ;; 2010/03/20
 ;;      * Add Emacswiki-specific commands for convenience:
 ;;        `emacswiki'
@@ -1138,7 +1141,12 @@ If PREFIX is non-nil, will view page after post successful."
             (dolist (file (dired-get-marked-files))
               (setq filename file)
               (setq pagename (file-name-nondirectory filename))
-              (yaoddmuse-post-file filename wikiname pagename summary prefix))))
+              (yaoddmuse-post-file filename wikiname pagename summary prefix)
+              (when (string-equal "EmacsWiki" wikiname)
+                ;; We need add 5 seconds delay for post files to emacswiki, otherwise emacswiki will banned connection that 10 hits in 20 seconds.
+                (sit-for 5)
+                )
+              )))
     (message "This command in only for `dired-mode'.")))
 
 (defun yaoddmuse-post-dired-default (prefix)
