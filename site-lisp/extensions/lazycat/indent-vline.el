@@ -335,3 +335,5 @@ s1 ",\n" s2 "};"
           (setq overlay-no-buffer
                 (cons y overlay-no-buffer)))))
   )
+
+(provide 'indent-vline)

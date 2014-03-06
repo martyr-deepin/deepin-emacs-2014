@@ -83,16 +83,20 @@
 
 (require 'web-mode)
 (require 'emmet-mode)
+(require 'indent-vline)
 
 ;;; Code:
 
-(setq emmet-preview-default nil)        ;don't show preview when expand code
 (dolist (hook (list
                'sgml-mode-hook
                'css-mode-hook
                'web-mode-hook
                ))
-  (add-hook hook (lambda () (emmet-mode 1))))
+  (add-hook hook (lambda ()
+                   (setq emmet-preview-default nil) ;don't show preview when expand code
+                   (emmet-mode)
+                   (indent-hint-fixed)
+                   )))
 
 (provide 'init-web-mode)
 
