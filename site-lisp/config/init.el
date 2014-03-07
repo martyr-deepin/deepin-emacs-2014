@@ -20,6 +20,7 @@
 (require 'minibuffer-tray)
 
 (require 'init-auto-save)
+(require 'init-auto-indent-mode)
 (require 'init-eldoc)
 (require 'init-jedi)
 (require 'init-tempbuf)
