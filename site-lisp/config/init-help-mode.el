@@ -83,6 +83,7 @@
 
 (require 'one-key)
 (require 'apropos)
+(require 'apropos-fn+var)
 
 ;;; Code:
 
