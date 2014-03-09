@@ -83,7 +83,7 @@
 
 (require 'web-mode)
 (require 'emmet-mode)
-(require 'indent-vline)
+;; (require 'indent-vline)
 
 ;;; Code:
 
@@ -95,7 +95,7 @@
   (add-hook hook (lambda ()
                    (setq emmet-preview-default nil) ;don't show preview when expand code
                    (emmet-mode)
-                   (indent-hint-fixed)
+                   ;; (indent-hint-fixed)
                    )))
 
 (provide 'init-web-mode)
