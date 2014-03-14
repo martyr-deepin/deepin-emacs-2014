@@ -695,5 +695,10 @@
    ("s-/" . webkit-open-url)
    )
  "webkit")
+;;; ### yaoddmuse ###
+(lazy-set-autoload-key
+ '(
+   ("C-s-z" . yaoddmuse-post-library-default))
+ "yaoddmuse-extension")
 
 (provide 'init-key)
