@@ -105,6 +105,10 @@
    ("%" . web-mode-match-paren)
    )
  web-mode-map nil "web-mode-extension")
+(lazy-set-mode-autoload-key
+ '(
+   ("C-c C-r" . mc/mark-sgml-tag-pair))
+ web-mode-map nil "multiple-cursors")
 
 (provide 'init-web-mode)
 
