@@ -103,6 +103,7 @@
    ("M-k" . web-mode-element-kill)
    ("C-M-SPC" . web-mode-mark-and-expand)
    ("%" . web-mode-match-paren)
+   ("C-:" . web-mode-comment-or-uncomment)
    )
  web-mode-map nil "web-mode-extension")
 (lazy-set-mode-autoload-key
