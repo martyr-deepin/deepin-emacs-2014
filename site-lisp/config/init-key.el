@@ -27,7 +27,6 @@
 ;;; --- 工具函数
 (lazy-set-key
  '(
-   ("C-x C-c" . checkdoc)                   ;检查文档
    ("C-c ns" . notes-search)                ;便签搜索
    ("C-c nn" . notes-new)                   ;新建便签
    ("s-c o" . one-key-menu-directory)       ;目录打开菜单
@@ -245,6 +244,7 @@
    ("<f3>" . visit-tags-table)                   ;查找TAGS文件 (更新TAGS表)
    ("<f4>" . generate-gtags-files)               ;生成gtags引用文件
    ("<f5>" . emacs-session-save)                 ;退出emacs
+   ("C-x C-c" . emacs-session-save)              ;退出emacs
    ("<f6>" . lock-screen)                        ;锁屏
    ("<f8>" . dired-jump)                         ;文件管理起
    ("<f9>" . list-load-path-shadows)             ;显示重复加载的库

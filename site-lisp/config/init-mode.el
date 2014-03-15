@@ -127,8 +127,13 @@
                     ("\\.mustache\\'" . web-mode)
                     ("\\.djhtml\\'" . web-mode)
                     ("\\.html?\\'" . web-mode)
+                    ("\\.coffee\\'" . coffee-mode)
+                    ("\\.iced\\'" . coffee-mode)
+                    ("Cakefile\\'" . coffee-mode)
                     ))
   (add-to-alist 'auto-mode-alist elt-cons))
+
+(add-to-list 'interpreter-mode-alist '("coffee" . coffee-mode))
 
 
 ;;; Mode load.
@@ -138,6 +143,7 @@
 (autoload 'po-mode "po-mode")
 (autoload 'php-mode "php-mode")
 (autoload 'web-mode "init-web-mode")
+(autoload 'coffee-mode "init-coffee-mode")
 (add-hook
  'c-mode-common-hook
  '(lambda ()

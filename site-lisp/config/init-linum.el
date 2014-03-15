@@ -107,6 +107,7 @@
                'po-mode-hook
                'php-mode-hook
                'web-mode-hook
+               'coffee-mode-hook
                ))
   (add-hook hook (lambda () (linum-mode 1))))
 
