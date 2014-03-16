@@ -112,7 +112,6 @@ Default is t."
        (and
         (not (string-prefix-p "*epc" name))
         (not (string-prefix-p "*helm" name))
-        (not (string-prefix-p "*Messages*" name))
         )))
    (delq nil
          (mapcar #'(lambda (b)
