@@ -129,6 +129,7 @@
                     ("\\.html?\\'" . web-mode)
                     ("\\.coffee\\'" . coffee-mode)
                     ("\\.iced\\'" . coffee-mode)
+                    ("\\.css\\'" . css-mode)
                     ("Cakefile\\'" . coffee-mode)
                     ("\\.styl$" . sws-mode)
                     ("\\.jade" . jade-mode)
@@ -148,6 +149,7 @@
 (autoload 'coffee-mode "init-coffee-mode")
 (autoload 'sws-mode "sws-mode")
 (autoload 'jade-mode "jade-mode")
+(autoload 'css-mode "init-css-mode")
 (add-hook
  'c-mode-common-hook
  '(lambda ()

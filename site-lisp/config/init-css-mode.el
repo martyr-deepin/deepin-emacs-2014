@@ -1,21 +1,21 @@
-;;; init-web-mode.el --- Init web mode
+;;; init-css-mode.el --- Init for css-mode
 
-;; Filename: init-web-mode.el
-;; Description: Init web mode
+;; Filename: init-css-mode.el
+;; Description: Init for css-mode
 ;; Author: Andy Stewart <lazycat.manatee@gmail.com>
 ;; Maintainer: Andy Stewart <lazycat.manatee@gmail.com>
 ;; Copyright (C) 2014, Andy Stewart, all rights reserved.
-;; Created: 2014-03-06 15:50:39
+;; Created: 2014-03-16 12:34:52
 ;; Version: 0.1
-;; Last-Updated: 2014-03-06 15:50:39
+;; Last-Updated: 2014-03-16 12:34:52
 ;;           By: Andy Stewart
-;; URL: http://www.emacswiki.org/emacs/download/init-web-mode.el
-;; Keywords:
+;; URL: http://www.emacswiki.org/emacs/download/init-css-mode.el
+;; Keywords: 
 ;; Compatibility: GNU Emacs 24.3.50.1
 ;;
 ;; Features that might be required by this library:
 ;;
-;;
+;; 
 ;;
 
 ;;; This file is NOT part of GNU Emacs
@@ -37,81 +37,60 @@
 ;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth
 ;; Floor, Boston, MA 02110-1301, USA.
 
-;;; Commentary:
-;;
-;; Init web mode
-;;
+;;; Commentary: 
+;; 
+;; Init for css-mode
+;; 
 
 ;;; Installation:
 ;;
-;; Put init-web-mode.el to your load-path.
+;; Put init-css-mode.el to your load-path.
 ;; The load-path is usually ~/elisp/.
 ;; It's set in your ~/.emacs like this:
 ;; (add-to-list 'load-path (expand-file-name "~/elisp"))
 ;;
 ;; And the following to your ~/.emacs startup file.
 ;;
-;; (require 'init-web-mode)
+;; (require 'init-css-mode)
 ;;
 ;; No need more.
 
 ;;; Customize:
 ;;
-;;
+;; 
 ;;
 ;; All of the above can customize by:
-;;      M-x customize-group RET init-web-mode RET
+;;      M-x customize-group RET init-css-mode RET
 ;;
 
 ;;; Change log:
-;;
-;; 2014/03/06
+;;	
+;; 2014/03/16
 ;;      * First released.
-;;
+;; 
 
 ;;; Acknowledgements:
 ;;
-;;
+;; 
 ;;
 
 ;;; TODO
 ;;
-;;
+;; 
 ;;
 
 ;;; Require
 
-(require 'web-mode)
-(require 'emmet-mode)
+(require 'css-mode)
 
 ;;; Code:
 
 (dolist (hook (list
-               'sgml-mode-hook
-               'css-mode-hook
-               'web-mode-hook
-               ))
+               'css-mode-hook))
   (add-hook hook (lambda ()
-                   (setq emmet-preview-default nil) ;don't show preview when expand code
-                   (emmet-mode)
-                   )))
+                   (require 'rainbow-mode)
+                   (rainbow-mode))))
 
-(lazy-set-mode-autoload-key
- '(
-   ("M-(" . web-mode-element-wrap)
-   ("M-)" . sgml-delete-tag)
-   ("M-k" . web-mode-element-kill)
-   ("C-M-SPC" . web-mode-mark-and-expand)
-   ("%" . web-mode-match-paren)
-   ("C-:" . web-mode-comment-or-uncomment)
-   )
- web-mode-map nil "web-mode-extension")
-(lazy-set-mode-autoload-key
- '(
-   ("C-c C-r" . mc/mark-sgml-tag-pair))
- web-mode-map nil "multiple-cursors")
+(provide 'init-css-mode)
 
-
-(provide 'init-web-mode)
-
-;;; init-web-mode.el ends here
+;;; init-css-mode.el ends here
