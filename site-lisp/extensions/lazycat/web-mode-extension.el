@@ -99,7 +99,7 @@
         (t (self-insert-command (or arg 1)))))
 
 (defun web-mode-element-wrap+ ()
-  "Wrap current REGION with start and end tags."
+  "Like `web-mode-element-wrap', but jump after tag for continue edit."
   (interactive)
   (let (beg end pos tag sep)
     (save-excursion
