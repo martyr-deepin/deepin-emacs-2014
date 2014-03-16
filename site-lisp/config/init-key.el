@@ -307,7 +307,6 @@
    ("C-M-S-n" . paredit-backward)             ;向后移动
    ;; 包围
    ("M-\"" . paredit-meta-doublequote)        ;用 " " 包围对象, 或跳出字符串
-   ("M-(" . paredit-wrap-sexp)                ;用 ( ) 包围当前对象
    ("M-[" . paredit-wrap-square)              ;用 [ ] 包围对象
    ("M-{" . paredit-wrap-curly)               ;用 { } 包围对象
    ("C-(" . paredit-wrap-angled)              ;用 < > 包围对象
@@ -332,6 +331,7 @@
    ("C-M-:" . paredit-comment-list-and-newline) ;注释当前LIST并换行
    ("M-:" . paredit-close-round-and-newline+)   ;跳出 ( ) 或 " " 并换行
    ("M-?" . paredit-forward-sexp-and-newline)   ;移动到下一个表达式, 并换行
+   ("M-(" . paredit-wrap-sexp)                  ;用 ( ) 包围当前对象
    ("M-)" . paredit-splice-sexp+)               ;去除包围对象的括号, 并删除空行
    ("C-S-k" . paredit-duplicate-closest-sexp)   ;复制光标处的语法块
    )
