@@ -103,39 +103,21 @@
 (setq x-select-enable-clipboard t)      ;支持emacs和外部程序的粘贴
 (setq x-stretch-cursor t)               ;光标在 TAB 字符上会显示为一个大方块
 (setq auto-revert-mode 1)               ;自动更新buffer
-(setq max-lisp-eval-depth 40000)        ;lisp最大执行深度
-(setq max-specpdl-size 10000)           ;最大容量
-(setq kill-ring-max 1024)               ;用一个很大的 kill ring. 这样防止我不小心删掉重要的东西
-(setq mark-ring-max 1024)               ;设置的mark ring容量
 (setq message-log-max t)                ;设置message记录全部消息, 而不用截去
-(setq read-quoted-char-radix 16)        ;设置 引用字符 的基数
 (setq void-text-area-pointer nil)       ;禁止显示鼠标指针
 (setq enable-recursive-minibuffers t)   ;minibuffer 递归调用命令
-(setq eval-expression-print-length nil) ;设置执行表达式的长度没有限制
-(setq eval-expression-print-level nil)  ;设置执行表达式的深度没有限制
-(setq global-mark-ring-max 1024)        ;设置最大的全局标记容量
 (setq history-delete-duplicates t)      ;删除minibuffer的重复历史
 (put 'narrow-to-region 'disabled nil)   ;开启变窄区域
 (setq print-escape-newlines t)          ;显示字符窗中的换行符为 \n
 (setq minibuffer-message-timeout 1)     ;显示消息超时的时间
 (setq require-final-newline nil)        ;不自动添加换行符到末尾, 有些情况会出现错误
-(auto-compression-mode 1)               ;打开压缩文件时自动解压缩
 (setq ediff-window-setup-function (quote ediff-setup-windows-plain)) ;比较窗口设置在同一个frame里
 (setq split-width-threshold nil)                                     ;分屏的时候使用上下分屏
 (setq one-key-popup-window nil)                                      ;禁止自动弹出窗口
 (add-hook 'find-file-hook 'highlight-parentheses-mode t)             ;增强的括号高亮
-(pretty-lambda-for-modes)
-(global-hl-line-mode 1)                   ;高亮当前行
-(setq smooth-scroll-margin 2)             ;触发滚动的行数
-(setq isearch-allow-scroll t)             ;isearch搜索时是可以滚动屏幕的
-(autoload 'hanconvert-region "hanconvert" ;简繁中文互相转换
-  "Convert a region from simple chinese to tradition chinese or
-from tradition chinese to simple chinese" t)
-(autoload 'irfc "init-irfc")
-(autoload 'doc-view-mode "init-doc-view")
-(browse-kill-ring-default-keybindings)  ;加载默认的按键邦定
-(setq browse-kill-ring-quit-action      ;设置退出动作
-      (quote save-and-restore))         ;保存还原窗口设置
+(global-hl-line-mode 1)                                              ;高亮当前行
+(setq smooth-scroll-margin 2)                                        ;触发滚动的行数
+(setq isearch-allow-scroll t)                                        ;isearch搜索时是可以滚动屏幕的
 (setq byte-compile-warnings
       (quote (
               ;; 显示的警告
@@ -154,8 +136,7 @@ from tradition chinese to simple chinese" t)
 (icomplete-mode 1)                      ;minibuffer补全反馈
 (window-point-remember-mode 1)
 (setq winpoint-non-restore-buffer-list '("*Group*"))
-(setq tramp-default-method "ssh")         ;设置传送文件默认的方法
-(custom-set-variables '(tramp-verbose 0)) ;设置tramp的响应方式, 关闭后不弹出消息
+(setq tramp-default-method "ssh")       ;设置传送文件默认的方法
 (minibuffer-tray-mode 1)
 
 (provide 'init-generic)

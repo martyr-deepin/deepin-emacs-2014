@@ -1,3 +1,4 @@
+;; 必须加载的
 (require 'theme)
 (require 'init-startup)
 (require 'lazy-set-key)
@@ -8,34 +9,43 @@
 (require 'redo)
 (require 'linum)
 (require 'highlight-parentheses)
-(require 'pretty-lambdada)
-(require 'browse-kill-ring)
 (require 'winpoint)
 (require 'smooth-scrolling)
 (require 'minibuffer-tray)
 
 (require 'init-flymake)
 (require 'init-auto-save)
-(require 'init-auto-indent-mode)
-(require 'init-eldoc)
 (require 'init-jedi)
-(require 'init-tempbuf)
 (require 'init-tabbar)
 (require 'init-mode)
 (require 'init-dired)
 (require 'init-session)
-(require 'init-yasnippet)
 (require 'init-linum)
 (require 'init-paredit)
-(require 'init-backup)
 (require 'init-indent)
 (require 'init-cursor-chg)
 (require 'init-auto-complete)
 (require 'init-one-key)
 (require 'init-key)
-(require 'init-doxymacs)
-(require 'init-doc-view)
 (require 'init-generic)
 (require 'init-package)
+(require 'init-auto-indent-mode)
+
+;; 可以延后加载的
+(run-with-idle-timer
+ 1 t
+ #'(lambda ()
+     (require 'pretty-lambdada)
+     (require 'browse-kill-ring)
+
+     (require 'init-tempbuf)
+     (require 'init-doc-view)
+     (require 'init-backup)
+     (require 'init-eldoc)
+     (require 'init-doxymacs)
+     (require 'init-yasnippet)
+
+     (require 'init-idle)
+     ))
 
 (provide 'init)
