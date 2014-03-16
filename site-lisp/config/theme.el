@@ -1,6 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Emacs ÷˜Ã‚…Ë÷√ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (set-face-attribute 'default nil :height 130)
-(set-fringe-mode '(1 . 1))              ;Make fringe mini size
+(set-fringe-mode '(0 . 0))              ;Make fringe mini size
+(setq linum-format (concat " %" (number-to-string (length (number-to-string (count-lines (point-min) (point-max))))) "d "))
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -197,7 +198,7 @@
  '(italic ((t (:underline nil :slant normal))))
  '(jedi:highlight-function-argument ((t (:foreground "gold"))))
  '(lazy-highlight ((((class color) (min-colors 88) (background dark)) (:background "grey20"))))
- '(linum ((t (:background "black" :foreground "green4"))))
+ '(linum ((t (:background "black" :foreground "gray15"))))
  '(match ((((class color) (min-colors 88) (background dark)) (:background "Black" :foreground "Grey70" :weight extra-bold))))
  '(message-header-subject ((t (:foreground "gold" :weight bold))))
  '(message-header-to ((t (:foreground "DarkRed" :weight bold))))
