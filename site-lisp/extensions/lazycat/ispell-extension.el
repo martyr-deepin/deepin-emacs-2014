@@ -1,4 +1,4 @@
-d;;; ispell-extension.el --- Some extension for ispell
+;;; ispell-extension.el --- Some extension for ispell
 
 ;; Filename: ispell-extension.el
 ;; Description: Some extension for ispell
