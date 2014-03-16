@@ -223,6 +223,16 @@ Will delete blank line after execute `paredit-splice-sexp'."
     (kill-line)
     (back-to-indentation)))
 
+(defun paredit-kill+()
+  "It's annoying that we need re-indent line after we delete blank line with `paredit-kill'.
+`paredt-kill+' fixed this problem."
+  (interactive)
+  (if (and (equal (current-column) 0)
+           (blank-line-p))
+      (kill-region (beginning-of-thing 'line) (end-of-thing 'line))
+    (paredit-kill))
+  (back-to-indentation))
+
 (provide 'paredit-extension)
 
 ;;; paredit-extension.el ends here

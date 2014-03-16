@@ -298,7 +298,6 @@
    ;; 删除
    ("M-o" . paredit-backward-delete)          ;向后删除
    ("C-d" . paredit-forward-delete)           ;向前删除
-   ("C-k" . paredit-kill)                     ;删除
    ("C-M-m" . paredit-forward-kill-word)      ;向前按词删除
    ("C-M-n" . paredit-backward-kill-word)     ;向后按词删除
    ;; 移动
@@ -322,6 +321,10 @@
    ("M-s-'" . one-key-menu-paredit)     ;Paredit 菜单
    )
  paredit-mode-map)
+(lazy-set-mode-autoload-key
+ '(
+   ("C-k" . paredit-kill+))             ;增强的 paredit-kill
+ paredit-mode-map nil "paredit-extension")
 (lazy-set-autoload-key
  '(
    ("C-M-:" . paredit-comment-list-and-newline) ;注释当前LIST并换行
