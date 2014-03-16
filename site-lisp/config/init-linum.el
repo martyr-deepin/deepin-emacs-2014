@@ -108,6 +108,8 @@
                'php-mode-hook
                'web-mode-hook
                'coffee-mode-hook
+               'sws-mode-hook
+               'jade-mode-hook
                ))
   (add-hook hook (lambda () (linum-mode 1))))
 

@@ -93,6 +93,7 @@
 (setq one-key-menu-cycle-buffer-alist
       '(
         (("l" . "Elisp") . (lambda () (interactive) (cycle-buffer-in-special-mode 'emacs-lisp-mode)))
+        (("e" . "Jade") . (lambda () (interactive) (cycle-buffer-in-special-mode 'jade-mode)))
         (("i" . "IRC") . (lambda () (interactive) (cycle-buffer-in-special-mode 'erc-mode)))
         (("d" . "Dired") . (lambda () (interactive) (cycle-buffer-in-special-mode 'dired-mode)))
         (("o" . "Org") . (lambda () (interactive) (cycle-buffer-in-special-mode 'org-mode)))
@@ -108,7 +109,7 @@
         (("x" . "XML") . (lambda () (interactive) (cycle-buffer-in-special-mode 'nxml-mode)))
         (("p" . "Python") . (lambda () (interactive) (cycle-buffer-in-special-mode 'python-mode)))
         (("s" . "CSS") . (lambda () (interactive) (cycle-buffer-in-special-mode 'css-mode)))
-        (("h" . "html") . (lambda () (interactive) (cycle-buffer-in-special-mode 'html-helper-mode)))
+        (("h" . "html") . (lambda () (interactive) (cycle-buffer-in-special-mode 'web-mode)))
         (("m" . "OCaml") . (lambda () (interactive) (cycle-buffer-in-special-mode 'tuareg-mode)))
         (("g" . "Golang") . (lambda () (interactive) (cycle-buffer-in-special-mode 'go-mode)))
         (("q" . "QML") . (lambda () (interactive) (cycle-buffer-in-special-mode 'qml-mode)))

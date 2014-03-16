@@ -130,6 +130,8 @@
                     ("\\.coffee\\'" . coffee-mode)
                     ("\\.iced\\'" . coffee-mode)
                     ("Cakefile\\'" . coffee-mode)
+                    ("\\.styl$" . sws-mode)
+                    ("\\.jade" . jade-mode)
                     ))
   (add-to-alist 'auto-mode-alist elt-cons))
 
@@ -144,6 +146,8 @@
 (autoload 'php-mode "php-mode")
 (autoload 'web-mode "init-web-mode")
 (autoload 'coffee-mode "init-coffee-mode")
+(autoload 'sws-mode "sws-mode")
+(autoload 'jade-mode "jade-mode")
 (add-hook
  'c-mode-common-hook
  '(lambda ()
