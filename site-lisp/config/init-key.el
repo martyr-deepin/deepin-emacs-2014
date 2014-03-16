@@ -157,7 +157,7 @@
    ))
 ;;; ### Rect ###
 ;;; --- 矩形操作
-(lazy-set-key
+(lazy-set-autoload-key
  '(
    ("s-M" . rm-set-mark)                 ;矩形标记
    ("s-X" . rm-exchange-point-and-mark)  ;矩形对角交换
@@ -170,10 +170,7 @@
    ("s-I" . string-insert-rectangle)     ;插入字符串在矩形的每一行
    ("s-F" . delete-whitespace-rectangle) ;删除矩形中空格
    ("s-\"" . copy-rectangle-to-register) ;拷贝矩形到寄存器
-   ))
-(lazy-set-autoload-key
- '(
-   ("s-:" . mark-rectangle-to-end)      ;标记矩形到行末
+   ("s-:" . mark-rectangle-to-end)       ;标记矩形到行末
    )
  "rect-extension")
 ;;; ### Font ###
@@ -709,9 +706,16 @@
  '(
    ("C-s-z" . yaoddmuse-post-library-default))
  "yaoddmuse-extension")
+;;; ### auto-install ###
+(lazy-set-autoload-key
+ '(
+   ("C-s-x" . auto-install-from-emacswiki))
+ "init-auto-install")
+;;; ### expand-region ###
 (lazy-set-autoload-key
  '(
    ("C-=" . er/expand-region))
  "expand-region")
+
 
 (provide 'init-key)

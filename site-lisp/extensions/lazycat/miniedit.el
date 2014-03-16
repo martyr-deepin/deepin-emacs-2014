@@ -13,12 +13,12 @@
 (defconst miniedit-home-page
   "http://www.glue.umd.edu/~deego/emacspub/lisp-mine/miniedit/")
 ;; This file is NOT (yet) part of GNU Emacs.
- 
+
 ;; This is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
 ;; the Free Software Foundation; either version 2, or (at your option)
 ;; any later version.
- 
+
 ;; This is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -28,7 +28,7 @@
 ;; along with GNU Emacs; see the file COPYING.  If not, write to the
 ;; Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 ;; Boston, MA 02111-1307, USA.
- 
+
 
 ;; See also:
 
@@ -41,7 +41,7 @@
 Xemacsers use \(miniedit-install-for-xemacs\) instead of
 \(miniedit-install\).
 Then, type M-C-e in any minibuffer to do nicer edits, and type M-C-c
-or C-c C-c when done. 
+or C-c C-c when done.
 
 Please type M-x miniedit-introduction, M-x miniedit-quick-start and
 M-x miniedit-commentary for more details. "
@@ -68,7 +68,7 @@ fields, which tend to be multiline, \(right?\)
 
 PS: Lots of code borrowed from checkdoc..
 Comments, patches, and more features welcome :\)
- 
+
 
 Tested mainly on emacs21.  Now, it may work even on Xemacs for atleast
 for some of the minibuffer-maps.
@@ -105,7 +105,7 @@ I think of C-M-e as edit and C-M-c or C-c C-c as commit.. any others?
   "
 
 Thanks to Alex Schroeder for suggestign C-c C-c to end recursive
-edits. 
+edits.
 ")
 
 ;;;###autoload
@@ -123,7 +123,7 @@ edits.
 ;;   fails.. the author is working on this.... :)
 ;;   that is why we kill-new and have variables like
 ;;   miniedit-before-edit-kill-p and miniedit-after-edit-kill-p. -- to
-;;   save any lost data. 
+;;   save any lost data.
 ;;==========================================
 ;;; code:
 (eval-when-compile (require 'custom))
@@ -194,10 +194,10 @@ Caution: var-capture by its very nature.."
 
 ;;;  Tom Fawcett <tfawcett@hpl.hp.com>
 ;; For us xemacs users who don't have princ-list
-					;(eval-when-compile
-					;  (unless (fboundp 'princ-list)
-					;    (defmacro princ-list (&rest things)
-					;      (cons 'progn (mapcar #'(lambda (x) `(princ ,x)) things)))))
+                                        ;(eval-when-compile
+                                        ;  (unless (fboundp 'princ-list)
+                                        ;    (defmacro princ-list (&rest things)
+                                        ;      (cons 'progn (mapcar #'(lambda (x) `(princ ,x)) things)))))
 
 ;; special handling because princ-list is not defined for xemacs..
 
@@ -225,14 +225,14 @@ when eval'ed."
 
   )
 
- 
+
 ;;;###autoload
 (defun miniedit ()
   "The main function."
   (interactive)
   (let ((miniedit-string miniedit-string)
-	(minibufname (buffer-name))
-	)
+        (minibufname (buffer-name))
+        )
     (save-excursion
       ;; so that it can be redefined below..
       (makunbound 'miniedit-mode-map)
@@ -246,30 +246,30 @@ when eval'ed."
        (list 'keymap (cons 16 (current-local-map))))
       (define-key miniedit-mode-map (kbd "C-c C-c") 'exit-recursive-edit)
       (let ((contents
-	     (miniedit-recursive-edit
-	      ""
-	      (progn
-		(setq miniedit-string
-		      (minibuffer-contents-no-properties))
-		(when (and
-		       (stringp miniedit-string)
-		       miniedit-before-edit-kill-p)
-		  (kill-new miniedit-string))
-		(when
-		    miniedit-before-edit-function
-		  (miniedit-withit
-		   (funcall miniedit-before-edit-function
-			    miniedit-string)
-		   (when it (setq miniedit-string it))))
-		(run-hooks 'miniedit-before-editing-hook)
-		miniedit-string)
-	      
-	      )))
-	(delete-other-windows)
-	(other-window 1)
-	(miniedit-set-minibuffer-contents contents minibufname)
-	))))
- 
+             (miniedit-recursive-edit
+              ""
+              (progn
+                (setq miniedit-string
+                      (minibuffer-contents-no-properties))
+                (when (and
+                       (stringp miniedit-string)
+                       miniedit-before-edit-kill-p)
+                  (kill-new miniedit-string))
+                (when
+                    miniedit-before-edit-function
+                  (miniedit-withit
+                   (funcall miniedit-before-edit-function
+                            miniedit-string)
+                   (when it (setq miniedit-string it))))
+                (run-hooks 'miniedit-before-editing-hook)
+                miniedit-string)
+
+              )))
+        (delete-other-windows)
+        (other-window 1)
+        (miniedit-set-minibuffer-contents contents minibufname)
+        ))))
+
 (defun miniedit-set-minibuffer-contents (contents minibuffer-name)
   "Set `minibuffer-contents' to CONTENTS.
 The name of the minibuffer is MINIBUFFER-NAME.
@@ -278,7 +278,7 @@ version 21 or higher only.."
   (set-buffer minibuffer-name)
   (delete-minibuffer-contents)
   (insert contents))
- 
+
 
 ;;;###autoload
 (defun miniedit-install ()
@@ -319,10 +319,10 @@ Then, returns a string...
 
 Optimized for being called when the current buffer is a minibuffer.."
   (let ((this-buffer (buffer-name))
-	(new-content content)
-	save-content
-	(errorp nil)
-	)
+        (new-content content)
+        save-content
+        (errorp nil)
+        )
     (save-excursion
       (other-window 1)
       (switch-to-buffer "*Miniedit*")
@@ -332,54 +332,54 @@ Optimized for being called when the current buffer is a minibuffer.."
       (text-mode)
       (miniedit-mode t)
       (let ((fill-column (- fill-column
-			    (eval miniedit-fill-column-deduction))))
-	(if (stringp content) (insert content)
-	  (setq errorp t))
-	(unless errorp
-	  (miniedit-show-help
-	   "Read THIS MESSAGE --->\n  " msg
-	   "\n\nEdit field, and press C-c C-c or C-M-c to continue.")
+                            (eval miniedit-fill-column-deduction))))
+        (if (stringp content) (insert content)
+          (setq errorp t))
+        (unless errorp
+          (miniedit-show-help
+           "Read THIS MESSAGE --->\n  " msg
+           "\n\nEdit field, and press C-c C-c or C-M-c to continue.")
 
 
-	  (message "When you're done editing press C-M-c to continue.")
+          (message "When you're done editing press C-M-c to continue.")
 
-	  (unwind-protect
-	      (recursive-edit)
-	    (if (get-buffer-window "*Miniedit*")
-		(progn
-		  (progn
-		    (setq new-content (buffer-substring
-				       (point-min) (point-max)))
-		    ;;(delete-window (get-buffer-window "*Miniedit*"))
-		    (kill-buffer "*Miniedit*")
-		    )))
-	    (when 
-		(get-buffer "*Miniedit Help*")
-	      (kill-buffer "*Miniedit Help*")))))
+          (unwind-protect
+              (recursive-edit)
+            (if (get-buffer-window "*Miniedit*")
+                (progn
+                  (progn
+                    (setq new-content (buffer-substring
+                                       (point-min) (point-max)))
+                    ;;(delete-window (get-buffer-window "*Miniedit*"))
+                    (kill-buffer "*Miniedit*")
+                    )))
+            (when
+                (get-buffer "*Miniedit Help*")
+              (kill-buffer "*Miniedit Help*")))))
       (unless (stringp new-content)
-	(setq errorp t))
+        (setq errorp t))
 
-      
+
       ;;user-customization of new content begins..
       (setq miniedit-string
-	    new-content)
+            new-content)
       (when (and
-	     (stringp miniedit-string)
-	     miniedit-before-commit-kill-p)
-	(kill-new miniedit-string))
+             (stringp miniedit-string)
+             miniedit-before-commit-kill-p)
+        (kill-new miniedit-string))
       (when
-	  miniedit-before-commit-function
-	(miniedit-withit
-	 (funcall miniedit-before-commit-function
-		  miniedit-string)
-	 (when it (setq miniedit-string it))))
+          miniedit-before-commit-function
+        (miniedit-withit
+         (funcall miniedit-before-commit-function
+                  miniedit-string)
+         (when it (setq miniedit-string it))))
       (run-hooks 'miniedit-before-committing-hook)
       ;;user-customization of new content ends..
-	
+
 
       (if (not errorp)
-	  new-content
-	save-content))))
+          new-content
+        save-content))))
 
 
 
@@ -394,43 +394,43 @@ Then, returns a string...
 
 Optimized for being called when the current buffer is not a minibuffer.."
   (let ((this-buffer (buffer-name))
-	(new-content content)
-	)
+        (new-content content)
+        )
     (save-excursion
-					;(other-window 1)
+                                        ;(other-window 1)
       (switch-to-buffer "*Miniedit*")
       (set-buffer "*Miniedit*")
       (kill-region (point-min) (point-max))
       (text-mode)
       (let ((fill-column (- fill-column 16)))
-	(if (stringp content) (insert content))
-	(with-output-to-temp-buffer "*Miniedit Help*"
-	  (miniedit-princ-list
-	   "IMPORTANT: Read THIS MESSAGE --->\n  " msg
-	   "\n\nEdit field, and press C-M-c to continue."))
-	(shrink-window-if-larger-than-buffer
-	 (get-buffer-window "*Miniedit Help*"))
-	(message "When you're done editing press C-M-c to continue.")
-	(unwind-protect
-	    (recursive-edit)
-	  (if (get-buffer-window "*Miniedit*")
-	      (progn
-		(progn
-		  (setq new-content (buffer-substring
-				     (point-min) (point-max)))
-		  (delete-window (get-buffer-window "*Miniedit*"))
-		  (kill-buffer "*Miniedit*")
-		  )))
-	  (kill-buffer "*Miniedit Help*")))
+        (if (stringp content) (insert content))
+        (with-output-to-temp-buffer "*Miniedit Help*"
+          (miniedit-princ-list
+           "IMPORTANT: Read THIS MESSAGE --->\n  " msg
+           "\n\nEdit field, and press C-M-c to continue."))
+        (shrink-window-if-larger-than-buffer
+         (get-buffer-window "*Miniedit Help*"))
+        (message "When you're done editing press C-M-c to continue.")
+        (unwind-protect
+            (recursive-edit)
+          (if (get-buffer-window "*Miniedit*")
+              (progn
+                (progn
+                  (setq new-content (buffer-substring
+                                     (point-min) (point-max)))
+                  (delete-window (get-buffer-window "*Miniedit*"))
+                  (kill-buffer "*Miniedit*")
+                  )))
+          (kill-buffer "*Miniedit Help*")))
       (switch-to-buffer this-buffer)
       new-content)))
-  
+
 
 (defun miniedit-show-help (&rest args)
   (when miniedit-show-help-p
     (with-output-to-temp-buffer "*Miniedit Help*"
       (apply 'miniedit-princ-list
-	     args))
+             args))
     (shrink-window-if-larger-than-buffer
      (get-buffer-window "*Miniedit Help*"))))
 

@@ -84,6 +84,11 @@
 
 ;;; Code:
 
+(tabbar-mode t)                                                ;多标签模式
+(setq uniquify-separator "/")                                  ;分隔符
+(setq uniquify-buffer-name-style 'post-forward-angle-brackets) ;反方向的显示重复的Buffer名字
+(setq uniquify-after-kill-buffer-p t)                          ;删除重复名字的Buffer后重命名
+
 (defcustom tabbar-hide-header-button t
   "Hide header button at left-up corner.
 Default is t."
@@ -112,6 +117,7 @@ Default is t."
        (and
         (not (string-prefix-p "*epc" name))
         (not (string-prefix-p "*helm" name))
+        (not (string-prefix-p "*scratch" name))
         )))
    (delq nil
          (mapcar #'(lambda (b)

@@ -94,8 +94,6 @@
 
 ;;; Code:
 
-
-
 (provide 'flymake-config)
 
 ;;; flymake-config.el ends here
