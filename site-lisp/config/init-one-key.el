@@ -96,6 +96,7 @@
         (("c" . "Config") . (lambda () (interactive) (dired-x-find-file "/usr/share/deeepin-emacs/site-lisp/config")))
         ((";" . "Android SDK") . (lambda () (interactive) (dired-x-find-file "/usr/local/android-sdk-linux_86")))
         (("e" . "Emacs") . (lambda () (interactive) (dired-x-find-file "/usr/share/deepin-emacs/")))
+        (("s" . "Space") . (lambda () (interactive) (dired-x-find-file "/space")))
         (("x" . "Reading") . (lambda () (interactive) (dired-x-find-file "/space/data/Book/Reading")))
         ))
 
