@@ -105,7 +105,7 @@
  web-mode-map nil "paredit-extension")
 (lazy-set-mode-autoload-key
  '(
-   ("M-(" . web-mode-element-wrap)
+   ("M-(" . web-mode-element-wrap+)
    ("M-)" . web-mode-element-unwrap)
    ("M-k" . web-mode-element-kill)
    ("C-M-SPC" . web-mode-mark-and-expand)
