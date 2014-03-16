@@ -96,6 +96,13 @@
                    (emmet-mode)
                    )))
 
+(lazy-set-key paredit-key-alist web-mode-map)
+(lazy-set-mode-autoload-key
+ '(
+   ("C-k" . paredit-kill+)
+   ("C-S-k" . paredit-duplicate-closest-sexp)
+   )
+ web-mode-map nil "paredit-extension")
 (lazy-set-mode-autoload-key
  '(
    ("M-(" . web-mode-element-wrap)

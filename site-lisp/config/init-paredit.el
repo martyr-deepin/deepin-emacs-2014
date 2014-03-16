@@ -92,7 +92,6 @@
                'js-mode-hook
                'go-mode-hook
                'qml-mode-hook
-               'web-mode-hook
                'jade-mode-hook
                'css-mode-hook
                ))
