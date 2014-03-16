@@ -709,5 +709,9 @@
  '(
    ("C-s-z" . yaoddmuse-post-library-default))
  "yaoddmuse-extension")
+(lazy-set-autoload-key
+ '(
+   ("C-=" . er/expand-region))
+ "expand-region")
 
 (provide 'init-key)
