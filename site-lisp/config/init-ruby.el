@@ -85,12 +85,15 @@
 
 ;;; Code:
 
+(setq enh-ruby-check-syntax nil)
 (dolist (hook (list
                'enh-ruby-mode-hook
                ))
   (add-hook hook (lambda ()
                    (require 'ruby-electric)
+                   (require 'flymake-ruby)
                    (ruby-electric-mode)
+                   (flymake-ruby-load)
                    )))
 (autoload 'inf-ruby "inf-ruby")
 
