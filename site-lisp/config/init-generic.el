@@ -137,7 +137,7 @@
 (window-point-remember-mode 1)
 (setq winpoint-non-restore-buffer-list '("*Group*"))
 (setq tramp-default-method "ssh")       ;设置传送文件默认的方法
-(minibuffer-tray-mode 1)
+(ignore-errors (minibuffer-tray-mode 1))
 
 (provide 'init-generic)
 
