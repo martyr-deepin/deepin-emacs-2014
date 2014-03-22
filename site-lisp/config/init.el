@@ -11,7 +11,7 @@
 (require 'highlight-parentheses)
 (require 'winpoint)
 (require 'smooth-scrolling)
-(require 'minibuffer-tray)
+(ignore-errors (require 'minibuffer-tray))
 
 (require 'init-flymake)
 (require 'init-auto-save)
