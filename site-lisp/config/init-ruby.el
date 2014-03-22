@@ -92,6 +92,7 @@
                    (require 'ruby-electric)
                    (ruby-electric-mode)
                    )))
+(autoload 'inf-ruby "inf-ruby")
 
 (provide 'init-ruby)
 

@@ -716,7 +716,5 @@
  '(
    ("C-=" . er/expand-region))
  "expand-region")
-;;; ruby-mode
-
 
 (provide 'init-key)
