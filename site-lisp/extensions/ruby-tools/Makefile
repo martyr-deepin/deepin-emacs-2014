@@ -1,0 +1,2 @@
+all:
+	cask exec ecukes
