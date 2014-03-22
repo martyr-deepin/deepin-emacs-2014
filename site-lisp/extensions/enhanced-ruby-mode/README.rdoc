@@ -1,0 +1,71 @@
+= Enhanced Ruby Mode
+
+* Git: http://github.com/zenspider/Enhanced-Ruby-Mode
+* Author: Geoff Jacobsen / forked by Ryan Davis
+* Copyright: 2010 - 2012
+* License: RUBY License
+
+== Description
+
+Enhanced Ruby Mode replaces the emacs ruby mode that comes with ruby.
+
+It uses the Ripper class found in ruby 1.9.2 (and later) to parse and indent the source code.  As a consquence only ruby 1.9.2 (or later) syntax is parsed correctly.
+
+Syntax checking is also peformed.
+
+== TODO
+
+* Optimisation; currently parses and fontifies whole buffer for most modifications - it still appears to run fast enough on large files.
+
+* Suggestions?
+
+
+== Synopsis
+
+* Enhanced Ruby Mode is intallable via el-get and Melpa, where its package name is enh-ruby-mode.
+
+* For manual installation, add the following file to your init file.
+
+   (add-to-list 'load-path "(path-to)/Enhanced-Ruby-Mode") ; must be added after any path containing old ruby-mode
+   (autoload 'enh-ruby-mode "enh-ruby-mode" "Major mode for ruby files" t)
+   (add-to-list 'auto-mode-alist '("\\.rb$" . enh-ruby-mode))
+   (add-to-list 'interpreter-mode-alist '("ruby" . enh-ruby-mode))
+
+   ;; optional
+
+   (setq enh-ruby-program "(path-to-ruby1.9)/bin/ruby") ; so that still works if ruby points to ruby1.8
+
+* Enhanced Ruby Mode defines its own specific faces with the hook <tt>erm-define-faces</tt>. If your theme is already defining those faces, to not overwrite them, just remove the hook with:
+
+   (remove-hook 'enh-ruby-mode-hook 'erm-define-faces)
+
+== Existing ruby-mode hooks
+
+You may have existing lines in your emacs config that add minor modes based on ruby mode, like this:
+    (add-hook 'ruby-mode-hook 'robe-mode)
+    (add-hook 'ruby-mode-hook 'yard-mode)
+
+For these to work with enh-ruby-mode, you need to add hooks to the enh-ruby-mode minor mode:
+    (add-hook 'enh-ruby-mode-hook 'robe-mode)
+    (add-hook 'enh-ruby-mode-hook 'yard-mode)
+
+== Requirements
+
+* ruby 1.9.2 (or later)
+
+== Install
+
+* git clone git@github.com:zenspider/Enhanced-Ruby-Mode.git
+
+== Development
+
+You can run tests via rake. Try:
+
+   rake -T
+
+Tests for Emacs Lisp require ERT. It is built-in since Emacs 24.1.
+
+== Credits
+
+Jell (Jean-Louis Giordano) https://github.com/Jell
+  Improved UTF-8 support

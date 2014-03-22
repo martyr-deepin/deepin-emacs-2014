@@ -133,6 +133,7 @@
                     ("Cakefile\\'" . coffee-mode)
                     ("\\.styl$" . sws-mode)
                     ("\\.jade" . jade-mode)
+                    ("\\.rb$" . enh-ruby-mode)
                     ))
   (add-to-alist 'auto-mode-alist elt-cons))
 
@@ -150,6 +151,8 @@
 (autoload 'sws-mode "sws-mode")
 (autoload 'jade-mode "jade-mode")
 (autoload 'css-mode "init-css-mode")
+(autoload 'enh-ruby-mode "init-ruby")
+(add-to-list 'interpreter-mode-alist '("ruby" . enh-ruby-mode))
 (add-hook
  'c-mode-common-hook
  '(lambda ()

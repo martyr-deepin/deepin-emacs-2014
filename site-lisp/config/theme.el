@@ -116,6 +116,8 @@
  '(erc-my-nick-face ((t (:foreground "DarkRed" :weight bold))))
  '(erc-notice-face ((t (:foreground "Gray20" :weight bold))))
  '(erc-prompt-face ((t (:background "Black" :foreground "Gold" :weight bold))))
+ '(erm-syn-errline ((t (:background "black" :foreground "red" :underline t))))
+ '(erm-syn-warnline ((t (:background "black" :foreground "yellow" :underline nil))))
  '(fixme-face ((t (:foreground "orange" :box (:line-width 1 :color "orange") :weight bold))))
  '(flymake-errline ((t (:background "black" :underline "red"))))
  '(flymake-infoline ((t (:background "black" :underline "yellow" :slant italic))))

@@ -27,7 +27,7 @@
 
 ;; Features that might be required by this library:
 ;;
-;;  `paredit' `lazycat-toolkit'
+;;  `paredit' `lazycat-toolkit' `thingatpt'
 ;;
 
 ;;; Installation:
@@ -64,6 +64,8 @@
 ;;
 
 ;;; Require
+
+(require 'thingatpt)
 (require 'lazycat-toolkit)
 (require 'paredit)
 

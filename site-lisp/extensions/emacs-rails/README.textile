@@ -1,0 +1,87 @@
+It is minor mode for editing "Ruby On Rails":http://rubyonrails.org/ code with "Emacs":http://www.gnu.org/software/emacs/.
+
+
+h2. Features
+
+* Navigation
+  Go from unit test to model to controller to functional test to view to spec etc.
+* Running tests and specs
+  Run test or spec for the current model, controller, lib etc.
+* Console and webserver
+  Run this console and webserver in a buffer.
+* Snippets
+  Use snippets to speedup code writing and editing.
+
+Try @C-h b@ to find out what key bindings are available and see @M-x customize-group <RET> rails@ for all the knobs and switches.
+
+
+h2. Installation
+
+
+h3. Dependencies
+
+Before you install this package make sure the following dependencies met:
+
+* Ruby Mode
+* Inferior Ruby Mode
+
+These are installable via the "ELPA":http://tromey.com/elpa/ or using @apt-get install ruby-elisp@.  Some Emacs distributions include them by default.
+
+
+h3. Rails-minor-mode
+
+Pull the latest version from github:
+
+<pre><code>  git clone git://github.com/remvee/emacs-rails.git ~/.emacs.d/rails-minor-mode
+</code></pre>
+
+Hook it up in your @.emacs@ or @.emacs.d/init.el@ with something like:
+
+<pre><code>  (add-to-list 'load-path (expand-file-name "~/.emacs.d/rails-minor-mode"))
+  (require 'rails)
+</code></pre>
+
+You're ready to go.
+
+
+h3. Extra's
+
+You can find HAML and SASS support via ELPA.
+
+
+h4. RHTML-mode
+
+The latest from github:
+
+<pre><code>  git clone git://github.com/eschulte/rhtml.git ~/.emacs.d/rhtml-minor-mode
+</code></pre>
+
+Hook it up:
+
+<pre><code>  (add-to-list 'load-path (expand-file-name "~/.emacs.d/rhtml-minor-mode"))
+  (require 'rhtml-mode)
+</code></pre>
+
+
+h4. YAML-mode
+
+Latest from subversion repo:
+
+<pre><code>  svn co http://svn.clouder.jp/repos/public/yaml-mode/trunk/ ~/.emacs.d/yaml-mode
+</code></pre>
+
+Hook it up:
+
+<pre><code>  (add-to-list 'load-path (expand-file-name "~/.emacs.d/yaml-mode"))
+  (require 'yaml-mode)
+</code></pre>
+
+
+h2. Bugs
+
+Yes!  Plenty!  And most of them known, ignored and yearning for your attention!  Please fork this repository and fix the stuff that bothers you.
+
+
+h2. Credits
+
+A big thanks to Dmitry Galinsky for starting this project.  Since then a lot of people touched it too, checkout the commit logs.

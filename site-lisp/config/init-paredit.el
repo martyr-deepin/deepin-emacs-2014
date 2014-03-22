@@ -94,6 +94,7 @@
                'qml-mode-hook
                'jade-mode-hook
                'css-mode-hook
+               'enh-ruby-mode-hook
                ))
   (add-hook hook '(lambda () (paredit-mode 1))))
 
