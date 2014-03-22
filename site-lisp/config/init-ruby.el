@@ -97,6 +97,12 @@
                    )))
 (autoload 'inf-ruby "inf-ruby")
 
+(add-hook 'inf-ruby-mode-hook
+          (lambda ()
+            (auto-complete-mode)
+            (require 'ac-inf-ruby)
+            (ac-inf-ruby-enable)))
+
 (provide 'init-ruby)
 
 ;;; init-ruby.el ends here
