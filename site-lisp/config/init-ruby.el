@@ -93,11 +93,20 @@
                    (require 'ruby-electric)
                    (require 'flymake-ruby)
                    (require 'inf-ruby-extension)
+                   (require 'robe)
                    (require 'yasnippet)
                    (yas-minor-mode-on)
                    (auto-complete-mode 1)
                    (ruby-electric-mode)
                    (flymake-ruby-load)
+                   (robe-mode)
+                   (robe-ac-setup)
+                   (save-excursion
+                     (window-configuration-to-register 'a)
+                     (inf-ruby)
+                     (robe-start)
+                     (jump-to-register 'a)
+                     )
                    )))
 
 (add-hook 'inf-ruby-mode-hook
