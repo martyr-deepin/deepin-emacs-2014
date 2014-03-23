@@ -82,19 +82,20 @@
 ;;; Require
 
 (require 'enh-ruby-mode)
+(require 'ruby-electric)
+(require 'flymake-ruby)
+(require 'inf-ruby-extension)
+(require 'robe)
+(require 'yasnippet)
 
 ;;; Code:
 
+(setq robe-highlight-capf-candidates nil) ;avoid robe set color of auto-complete candidate
 (setq enh-ruby-check-syntax nil)
 (dolist (hook (list
                'enh-ruby-mode-hook
                ))
   (add-hook hook (lambda ()
-                   (require 'ruby-electric)
-                   (require 'flymake-ruby)
-                   (require 'inf-ruby-extension)
-                   (require 'robe)
-                   (require 'yasnippet)
                    (yas-minor-mode-on)
                    (auto-complete-mode 1)
                    (ruby-electric-mode)
