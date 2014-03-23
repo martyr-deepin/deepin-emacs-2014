@@ -1,21 +1,21 @@
-;;; init-ruby.el --- Init for ruby
+;;; inf-ruby-extension.el --- inf-ruby extension
 
-;; Filename: init-ruby.el
-;; Description: Init for ruby
+;; Filename: inf-ruby-extension.el
+;; Description: inf-ruby extension
 ;; Author: Andy Stewart <lazycat.manatee@gmail.com>
 ;; Maintainer: Andy Stewart <lazycat.manatee@gmail.com>
 ;; Copyright (C) 2014, Andy Stewart, all rights reserved.
-;; Created: 2014-03-22 20:52:31
+;; Created: 2014-03-23 14:37:30
 ;; Version: 0.1
-;; Last-Updated: 2014-03-22 20:52:31
+;; Last-Updated: 2014-03-23 14:37:30
 ;;           By: Andy Stewart
-;; URL: http://www.emacswiki.org/emacs/download/init-ruby.el
+;; URL: http://www.emacswiki.org/emacs/download/inf-ruby-extension.el
 ;; Keywords:
 ;; Compatibility: GNU Emacs 24.3.50.1
 ;;
 ;; Features that might be required by this library:
 ;;
-;;
+;; `inf-ruby'
 ;;
 
 ;;; This file is NOT part of GNU Emacs
@@ -39,19 +39,23 @@
 
 ;;; Commentary:
 ;;
-;; Init for ruby
+;; `inf-ruby' provide a way run ruby subprocess, but it like term.el that
+;; not close inf-ruby buffer after user type 'quit' command in it.
+;;
+;; `inf-ruby-extension' add `inf-ruby-handle-close' function in `inf-ruby-mode-hook' to
+;; make inf-ruby close automatically after we don't need it.
 ;;
 
 ;;; Installation:
 ;;
-;; Put init-ruby.el to your load-path.
+;; Put inf-ruby-extension.el to your load-path.
 ;; The load-path is usually ~/elisp/.
 ;; It's set in your ~/.emacs like this:
 ;; (add-to-list 'load-path (expand-file-name "~/elisp"))
 ;;
 ;; And the following to your ~/.emacs startup file.
 ;;
-;; (require 'init-ruby)
+;; (require 'inf-ruby-extension)
 ;;
 ;; No need more.
 
@@ -60,12 +64,12 @@
 ;;
 ;;
 ;; All of the above can customize by:
-;;      M-x customize-group RET init-ruby RET
+;;      M-x customize-group RET inf-ruby-extension RET
 ;;
 
 ;;; Change log:
 ;;
-;; 2014/03/22
+;; 2014/03/23
 ;;      * First released.
 ;;
 
@@ -81,28 +85,20 @@
 
 ;;; Require
 
-(require 'enh-ruby-mode)
+(require 'inf-ruby)
 
 ;;; Code:
 
-(setq enh-ruby-check-syntax nil)
-(dolist (hook (list
-               'enh-ruby-mode-hook
-               ))
-  (add-hook hook (lambda ()
-                   (require 'ruby-electric)
-                   (require 'flymake-ruby)
-                   (require 'inf-ruby-extension.el)
-                   (ruby-electric-mode)
-                   (flymake-ruby-load)
-                   )))
+(add-hook 'inf-ruby-mode-hook (lambda () (inf-ruby-handle-close)))
 
-(add-hook 'inf-ruby-mode-hook
-          (lambda ()
-            (auto-complete-mode)
-            (require 'ac-inf-ruby)
-            (ac-inf-ruby-enable)))
+(defun inf-ruby-handle-close ()
+  (when (ignore-errors (get-buffer-process (current-buffer)))
+    (set-process-sentinel (get-buffer-process (current-buffer))
+                          (lambda (proc change)
+                            (when (string-match "\\(finished\\|exited\\)" change)
+                              (message "hello")
+                              (kill-buffer (process-buffer proc)))))))
 
-(provide 'init-ruby)
+(provide 'inf-ruby-extension)
 
-;;; init-ruby.el ends here
+;;; inf-ruby-extension.el ends here
