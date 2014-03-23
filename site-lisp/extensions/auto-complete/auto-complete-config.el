@@ -142,10 +142,10 @@
 
 (defun ac-yasnippet-candidates ()
   (with-no-warnings
-    (cond (;; 0.8 onwards
+    (cond ( ;; 0.8 onwards
            (fboundp 'yas-active-keys)
            (all-completions ac-prefix (yas-active-keys)))
-          (;; >0.6.0
+          ( ;; >0.6.0
            (fboundp 'yas/get-snippet-tables)
            (apply 'append (mapcar 'ac-yasnippet-candidate-1
                                   (condition-case nil
@@ -175,7 +175,7 @@
 
 (defun ac-semantic-candidates (prefix)
   (with-no-warnings
-    (delete ""            ; semantic sometimes returns an empty string
+    (delete ""                          ; semantic sometimes returns an empty string
             (mapcar (lambda (elem)
                       (cons (semantic-tag-name elem)
                             (semantic-tag-clone elem)))
@@ -447,7 +447,7 @@
 
 (defun ac-ropemacs-setup ()
   (ac-ropemacs-require)
-  ;(setq ac-sources (append (list 'ac-source-ropemacs) ac-sources))
+                                        ;(setq ac-sources (append (list 'ac-source-ropemacs) ac-sources))
   (setq ac-omni-completion-sources '(("\\." ac-source-ropemacs))))
 
 (defun ac-ropemacs-initialize ()
@@ -493,7 +493,7 @@
 ;;;; Default settings
 
 (defun ac-common-setup ()
-  ;(add-to-list 'ac-sources 'ac-source-filename)
+                                        ;(add-to-list 'ac-sources 'ac-source-filename)
   )
 
 (defun ac-emacs-lisp-mode-setup ()
@@ -502,7 +502,9 @@
 (defun ac-cc-mode-setup ()
   (setq ac-sources (append '(ac-source-yasnippet ac-source-gtags) ac-sources)))
 
-(defun ac-ruby-mode-setup ())
+(defun ac-ruby-mode-setup ()
+  (setq ac-sources (append '(ac-source-yasnippet) ac-sources))
+  )
 
 (defun ac-css-mode-setup ()
   (setq ac-sources (append '(ac-source-css-property) ac-sources)))
