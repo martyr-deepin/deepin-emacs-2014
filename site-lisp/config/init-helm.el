@@ -86,6 +86,7 @@
 (require 'helm-helm-commands)
 (require 'helm-c-yasnippet)
 (require 'helm-apt)
+(require 'helm-ls-git)
 (require 'apt-utils)
 
 ;;; Code:
@@ -100,13 +101,11 @@
   (let ((helm-ff-transformer-show-only-basename nil))
     (helm-other-buffer
      '(
+       helm-source-findutils
        helm-source-buffers-list
        helm-source-recentf
        helm-source-locate
-       helm-source-files-in-current-dir
-       helm-source-moccur
-       helm-source-occur
-       helm-source-helm-commands
+       helm-source-ls-git
        helm-c-source-yasnippet
        helm-source-apt
        )
