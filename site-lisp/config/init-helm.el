@@ -87,6 +87,7 @@
 (require 'helm-c-yasnippet)
 (require 'helm-apt)
 (require 'helm-ls-git)
+(require 'helm-descbinds)
 (require 'apt-utils)
 
 ;;; Code:

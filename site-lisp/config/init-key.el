@@ -379,6 +379,7 @@
 (lazy-set-autoload-key
  '(
    ("s-y" . helm-dwim)
+   ("s-t" . helm-descbinds)
    )
  "init-helm")
 ;; Cycle buffer
