@@ -92,10 +92,10 @@
   (add-hook hook (lambda ()
                    (require 'ruby-electric)
                    (require 'flymake-ruby)
+                   (require 'inf-ruby)
                    (ruby-electric-mode)
                    (flymake-ruby-load)
                    )))
-(autoload 'inf-ruby "inf-ruby")
 
 (add-hook 'inf-ruby-mode-hook
           (lambda ()
