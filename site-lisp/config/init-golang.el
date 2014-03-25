@@ -82,6 +82,7 @@
 ;;; Require
 
 (require 'go-mode)
+(require 'go-autocomplete)
 
 ;;; Code:
 
@@ -103,11 +104,8 @@
 
 (add-hook 'go-mode-hook
           (lambda ()
-            (linum-mode 1)
             (flymake-mode 1)
-            (auto-complete-mode 1)
-            (add-to-list 'ac-sources 'ac-source-go)
-            (call-process "gocode" nil nil nil "-s")))
+            ))
 
 ;;; ### Golang ###
 (lazy-unset-key
