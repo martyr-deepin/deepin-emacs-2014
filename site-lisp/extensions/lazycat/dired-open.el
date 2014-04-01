@@ -110,12 +110,6 @@ Open file use another tool"
           ((string-match "\\(pdf\\|ps\\|dvi\\)$" file-extension)
            (dired-view-file)
            (doc-view-mode))
-          ((string-match (emms-player-get (emms-player-for (emms-playlist-current-selected-track)) 'regex) file)
-           (emms-add-file file)
-           (with-current-emms-playlist
-             (goto-char (point-max))
-             (forward-line -1)
-             (emms-playlist-mode-play-smart)))
           (t (find-file file)))
     ))
 
