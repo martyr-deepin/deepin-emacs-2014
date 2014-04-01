@@ -10,12 +10,12 @@
 ;; Last-Updated: 2014-01-20 23:58:38
 ;;           By: Andy Stewart
 ;; URL: http://www.emacswiki.org/emacs/download/init-startup.el
-;; Keywords: 
+;; Keywords:
 ;; Compatibility: GNU Emacs 24.3.50.1
 ;;
 ;; Features that might be required by this library:
 ;;
-;; 
+;;
 ;;
 
 ;;; This file is NOT part of GNU Emacs
@@ -37,10 +37,10 @@
 ;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth
 ;; Floor, Boston, MA 02110-1301, USA.
 
-;;; Commentary: 
-;; 
+;;; Commentary:
+;;
 ;; Config load when startup
-;; 
+;;
 
 ;;; Installation:
 ;;
@@ -57,26 +57,26 @@
 
 ;;; Customize:
 ;;
-;; 
+;;
 ;;
 ;; All of the above can customize by:
 ;;      M-x customize-group RET init-startup RET
 ;;
 
 ;;; Change log:
-;;	
+;;
 ;; 2014/01/20
 ;;      * First released.
-;; 
+;;
 
 ;;; Acknowledgements:
 ;;
-;; 
+;;
 ;;
 
 ;;; TODO
 ;;
-;; 
+;;
 ;;
 
 ;;; Require
@@ -89,6 +89,14 @@
 (tool-bar-mode -1)                      ;禁用工具栏
 (menu-bar-mode -1)                      ;禁用菜单栏
 (scroll-bar-mode -1)                    ;禁用滚动条
+(defvar emacs-font-name "文泉驿等宽微米黑"
+  "The font name of English.")
+(defvar emacs-font-size 12
+  "The default font size.")
+(if (display-grayscale-p)
+    (progn
+      (set-frame-font (format "%s-%s" (eval emacs-font-name) (eval emacs-font-size)))
+      (set-fontset-font (frame-parameter nil 'font) 'unicode (eval emacs-font-name))))
 
 (provide 'init-startup)
 
