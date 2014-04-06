@@ -174,7 +174,7 @@ This is run before the process is cranked up."
     ("\\<\\(true\\|false\\|[A-Z][a-zA-Z0-9]*\\.[A-Z][a-zA-Z0-9]*\\)\\>"
      (0 font-lock-constant-face))
     ;; Keyword.
-    ("\\<\\(parent\\|import\\|if\\|else[ \t]+if\\)\\>"
+    ("\\<\\(parent\\|import\\|if\\|else\\|[ \t]+if\\)\\>"
      (1 font-lock-keyword-face nil t))
     ;; Import
     ("\\(^import\\)[ \t]+\\([a-zA-Z0-9\.]+\\)[ \t]+\\([^ /\*]+\\)"
