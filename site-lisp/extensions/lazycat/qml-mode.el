@@ -193,6 +193,8 @@ This is run before the process is cranked up."
     ;; Properties.
     ("\\([ \t]?[a-zA-Z0-9\.]+\\):"
      (1 font-lock-variable-name-face nil t))
+    ("\\<\\(anchors\\|margins\\)\\>"
+     (1 font-lock-variable-name-face nil t))
     ;; Method
     ("\\<\\(function\\) +\\([a-z][a-zA-Z0-9]*\\)\\>"
      (1 font-lock-keyword-face nil t)
@@ -221,6 +223,9 @@ This is run before the process is cranked up."
   (setq major-mode 'qml-mode)
   (setq mode-name "qml")
   (use-local-map qml-mode-map)
+
+  (electric-indent-mode -1)
+
   (run-hooks 'pron-mode-hook)
   (run-hooks 'qml-mode-hook)
   )
