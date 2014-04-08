@@ -209,10 +209,9 @@ This is run before the process is cranked up."
 
 ;;;###autoload
 
-(define-derived-mode qml-mode prog-mode "QML"
+(define-derived-mode qml-mode text-mode "QML"
   "Major mode for Qt declarative UI"
   (interactive)
-  (kill-all-local-variables)
   (set-syntax-table qml-mode-syntax-table)
   (set (make-local-variable 'font-lock-defaults) '(qml-font-lock-keywords))
   (set (make-local-variable 'tab-width) qml-indent-width)
@@ -222,11 +221,10 @@ This is run before the process is cranked up."
   (set (make-local-variable 'comment-end) " */")
   (setq major-mode 'qml-mode)
   (setq mode-name "qml")
-  (use-local-map qml-mode-map)
 
   (electric-indent-mode -1)
 
-  (run-hooks 'pron-mode-hook)
+  (use-local-map qml-mode-map)
   (run-hooks 'qml-mode-hook)
   )
 
