@@ -171,16 +171,20 @@ This is run before the process is cranked up."
     ("/\\*.*\\*/\\|//.*"
      (0 font-lock-comment-face t t))
     ;; Constants.
-    ("\\<\\(true\\|false\\|[A-Z][a-zA-Z0-9]*\\.[A-Z][a-zA-Z0-9]*\\)\\>"
+    ("\\<\\(true\\|false\\|parent\\|[A-Z][a-zA-Z0-9]*\\.[A-Z][a-zA-Z0-9]*\\)\\>"
      (0 font-lock-constant-face))
+    ;; String.
+    ("\"[^\"]*\""
+     (0 font-lock-string-face))
     ;; Keyword.
-    ("\\<\\(parent\\|import\\|if\\|else\\|[ \t]+if\\)\\>"
+    ("\\<\\(import\\|if\\|else\\|[ \t]+if\\)\\>"
      (1 font-lock-keyword-face nil t))
     ;; Import
-    ("\\(^import\\)[ \t]+\\([a-zA-Z0-9\.]+\\)[ \t]+\\([^ /\*]+\\)"
+    ("\\(^import\\)[ \t]+\\([a-zA-Z0-9\.]+\\)[ \t]+\\([^ \n/\*]+\\)"
      (1 font-lock-keyword-face nil t)
      (2 font-lock-function-name-face nil t)
-     (3 font-lock-constant-face nil t))
+     (3 font-lock-constant-face nil t)
+     )
     ;; Element
     ("\\([A-Z][a-zA-Z0-9]*\\)[ \t]+{"
      (1 font-lock-function-name-face nil t))
