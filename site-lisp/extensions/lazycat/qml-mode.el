@@ -6,8 +6,8 @@
 ;; Maintainer: Andy Stewart <lazycat.manatee@gmail.com>
 ;; Copyright (C) 2013 ~ 2014, Andy Stewart, all rights reserved.
 ;; Created: 2013-12-31 21:23:56
-;; Version: 0.1
-;; Last-Updated: 2014-01-01 13:23:56
+;; Version: 0.2
+;; Last-Updated: 2014-04-09 09:36:11
 ;;           By: Andy Stewart
 ;; URL: http://www.emacswiki.org/emacs/download/qml-mode.el
 ;; Keywords:
@@ -64,6 +64,10 @@
 ;;
 
 ;;; Change log:
+;;
+;; 2014/04/09
+;;      * Derived-mode from text-mode, and not prog-mode.
+;;      * Fixed syntax highlight and indent problem.
 ;;
 ;; 2014/01/01
 ;;      * Fixed keywords regexp
