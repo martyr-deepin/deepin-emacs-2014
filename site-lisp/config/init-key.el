@@ -49,6 +49,7 @@
    ("s-\\" . artist-mode)                   ;绘制模式
    ("M-s-u" . ediff-buffers)                ;ediff
    ("C-s-q" . quoted-insert)                ;读取系一个输入字符并插入
+   ("M-h" . set-mark-command)               ;Instead C-Space for Chinese input method
    ))
 (lazy-set-autoload-key
  '(
