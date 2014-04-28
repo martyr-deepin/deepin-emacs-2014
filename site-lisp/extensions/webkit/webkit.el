@@ -190,17 +190,17 @@
   (let ((view-infos)
         (selected-buffer (window-buffer (selected-window))))
     (dolist (window (window-list))
-      (setq buffer (window-buffer window))
-      (with-current-buffer buffer
-        (if (string= "webkit-mode" (format "%s" major-mode))
-            (let* ((window-allocation (webkit-get-window-allocation window))
-                   (x (nth 0 window-allocation))
-                   (y (nth 1 window-allocation))
-                   (w (nth 2 window-allocation))
-                   (h (nth 3 window-allocation))
-                   )
-              (add-to-list 'view-infos (list buffer-id x y w h))
-              ))))
+      (let ((buffer (window-buffer window)))
+        (with-current-buffer buffer
+          (if (string= "webkit-mode" (format "%s" major-mode))
+              (let* ((window-allocation (webkit-get-window-allocation window))
+                     (x (nth 0 window-allocation))
+                     (y (nth 1 window-allocation))
+                     (w (nth 2 window-allocation))
+                     (h (nth 3 window-allocation))
+                     )
+                (add-to-list 'view-infos (list buffer-id x y w h))
+                )))))
     (epc:call-deferred pyepc-browser 'update_views (list view-infos))
 
     (with-current-buffer selected-buffer
