@@ -2,20 +2,20 @@
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2011 ~ 2014 Andy Stewart
-# 
+#
 # Author:     Andy Stewart <lazycat.manatee@gmail.com>
 # Maintainer: Andy Stewart <lazycat.manatee@gmail.com>
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -78,7 +78,7 @@ def get_keysym(ch):
 
 def send_string(window, str, modifiers, press=True):
     xlib_display = get_xlib_display()
-    
+
     mask = 0
     for modifier in modifiers:
         if modifier == "Ctrl":
@@ -89,14 +89,14 @@ def send_string(window, str, modifiers, press=True):
             mask |= Xlib.X.ShiftMask
         elif modifier == "Super":
             mask |= Xlib.X.Mod4Mask
-            
-    keycode = xlib_display.keysym_to_keycode(get_keysym(str))        
-            
-    if press:        
+
+    keycode = xlib_display.keysym_to_keycode(get_keysym(str))
+
+    if press:
         event_type = Xlib.protocol.event.KeyPress
     else:
         event_type = Xlib.protocol.event.KeyRelease
-        
+
     event = event_type(
         root=xlib_display.screen().root,
         window=window,

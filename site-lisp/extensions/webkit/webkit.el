@@ -48,8 +48,8 @@
 ;;       * PyQt5:       http://www.riverbankcomputing.co.uk/software/pyqt/intro
 ;;       * Python-Xlib: https://pypi.python.org/pypi/python-xlib
 ;;       * Python-EPC:  https://github.com/tkf/python-epc
-;;       
-;; Detail description please look: http://www.emacswiki.org/emacs/WebKit 
+;;
+;; Detail description please look: http://www.emacswiki.org/emacs/WebKit
 ;;
 ;; Then put webkit.el to your load-path.
 ;; The load-path is usually ~/elisp/.
@@ -61,9 +61,9 @@
 ;; (require 'webkit)
 ;;
 ;; Quick start:
-;; 
+;;
 ;; M-x webkit-open-url
-;; 
+;;
 
 ;;; Customize:
 ;;
