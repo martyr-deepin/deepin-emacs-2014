@@ -165,8 +165,6 @@ class TrayView(QWidget):
     def paintEvent(self, event):    
         painter = QPainter(self)
         self.font.setPixelSize(self.height() - self.padding * 2)
-        painter.setBrush(QtGui.QColor(0, 0, 0, 255))
-        painter.drawRect(0, 0, self.width(), self.height())
         painter.setPen(QtGui.QColor(19, 125, 17, 255))
         painter.setFont(self.font)
         painter.drawText(0, 0, self.width(), self.height(), QtCore.Qt.AlignRight, self.info_string)
@@ -179,7 +177,7 @@ class TrayView(QWidget):
         browser_xwindow = xlib_display.create_resource_object("window", browser_xid)
         emacs_xwindow = xlib_display.create_resource_object("window", self.emacs_xid)
         
-        browser_xwindow.reparent(emacs_xwindow, x, y)
+        browser_xwindow.reparent(emacs_xwindow, x, y + 1)
         
         xlib_display.sync()
             
