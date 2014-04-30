@@ -48,8 +48,8 @@
 ;;       * PyQt5:       http://www.riverbankcomputing.co.uk/software/pyqt/intro
 ;;       * Python-Xlib: https://pypi.python.org/pypi/python-xlib
 ;;       * Python-EPC:  https://github.com/tkf/python-epc
-;;       
-;; Detail description please look: http://www.emacswiki.org/emacs/WebKit 
+;;
+;; Detail description please look: http://www.emacswiki.org/emacs/WebKit
 ;;
 ;; Then put webkit.el to your load-path.
 ;; The load-path is usually ~/elisp/.
@@ -61,9 +61,9 @@
 ;; (require 'webkit)
 ;;
 ;; Quick start:
-;; 
+;;
 ;; M-x webkit-open-url
-;; 
+;;
 
 ;;; Customize:
 ;;
@@ -190,17 +190,17 @@
   (let ((view-infos)
         (selected-buffer (window-buffer (selected-window))))
     (dolist (window (window-list))
-      (setq buffer (window-buffer window))
-      (with-current-buffer buffer
-        (if (string= "webkit-mode" (format "%s" major-mode))
-            (let* ((window-allocation (webkit-get-window-allocation window))
-                   (x (nth 0 window-allocation))
-                   (y (nth 1 window-allocation))
-                   (w (nth 2 window-allocation))
-                   (h (nth 3 window-allocation))
-                   )
-              (add-to-list 'view-infos (list buffer-id x y w h))
-              ))))
+      (let ((buffer (window-buffer window)))
+        (with-current-buffer buffer
+          (if (string= "webkit-mode" (format "%s" major-mode))
+              (let* ((window-allocation (webkit-get-window-allocation window))
+                     (x (nth 0 window-allocation))
+                     (y (nth 1 window-allocation))
+                     (w (nth 2 window-allocation))
+                     (h (nth 3 window-allocation))
+                     )
+                (add-to-list 'view-infos (list buffer-id x y w h))
+                )))))
     (epc:call-deferred pyepc-browser 'update_views (list view-infos))
 
     (with-current-buffer selected-buffer
