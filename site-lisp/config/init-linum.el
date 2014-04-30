@@ -104,7 +104,6 @@
                'slime-repl-mode-hook
                'package-menu-mode-hook
                'cmake-mode-hook
-               'po-mode-hook
                'php-mode-hook
                'web-mode-hook
                'coffee-mode-hook
