@@ -124,6 +124,7 @@
 (setq helm-autoload-commands-list
       '(
         ("inf-ruby" "Run an inferior Ruby process in a buffer." "inf-ruby")
+        ("yaoddmuse-post-library-default" "Post elisp library to EmacsWiki" "yaoddmuse-extension")
         )
       )
 
