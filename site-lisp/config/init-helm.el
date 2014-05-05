@@ -86,6 +86,7 @@
 (require 'helm-helm-commands)
 (require 'helm-c-yasnippet)
 (require 'helm-apt)
+(require 'helm-autoload-commands)
 (require 'helm-ls-git)
 (require 'helm-descbinds)
 (require 'apt-utils)
@@ -106,6 +107,7 @@
        helm-source-buffers-list
        helm-source-recentf
        helm-source-locate
+       helm-source-autoload-commands
        helm-source-ls-git
        helm-c-source-yasnippet
        helm-source-apt
@@ -118,6 +120,12 @@
    ("M-s-k" . helm-previous-source)
    )
  helm-map)
+
+(setq helm-autoload-commands-list
+      '(
+        ("inf-ruby" "Run an inferior Ruby process in a buffer." "inf-ruby")
+        )
+      )
 
 (provide 'init-helm)
 
