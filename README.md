@@ -1,5 +1,11 @@
 # Deepin Emacs
 
+* Download emacs git code:
+
+<pre><code>
+git clone git://git.savannah.gnu.org/emacs.git
+</pre></code>
+
 * Compile emacs git:
 
 <pre><code>
