@@ -29,7 +29,6 @@
 (require 'init-one-key)
 (require 'init-key)
 (require 'init-generic)
-(require 'init-package)
 (require 'init-auto-indent-mode)
 
 ;; 可以延后加载的
@@ -45,6 +44,7 @@
      (require 'init-eldoc)
      (require 'init-doxymacs)
      (require 'init-yasnippet)
+     (require 'init-package)
 
      (require 'init-idle)
      ))
