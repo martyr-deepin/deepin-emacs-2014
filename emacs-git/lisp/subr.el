@@ -1,9 +1,9 @@
 ;;; subr.el --- basic lisp subroutines for Emacs  -*- coding: utf-8; lexical-binding:t -*-
 
-;; Copyright (C) 1985-1986, 1992, 1994-1995, 1999-2013 Free Software
+;; Copyright (C) 1985-1986, 1992, 1994-1995, 1999-2014 Free Software
 ;; Foundation, Inc.
 
-;; Maintainer: FSF
+;; Maintainer: emacs-devel@gnu.org
 ;; Keywords: internal
 ;; Package: emacs
 
@@ -265,7 +265,9 @@ information about the function or macro; these go into effect
 during the evaluation of the `defun' or `defmacro' form.
 
 The possible values of SPECS are specified by
-`defun-declarations-alist' and `macro-declarations-alist'."
+`defun-declarations-alist' and `macro-declarations-alist'.
+
+For more information, see info node `(elisp)Declare Form'."
   ;; FIXME: edebug spec should pay attention to defun-declarations-alist.
   nil)
 
@@ -364,12 +366,15 @@ If N is bigger than the length of LIST, return LIST."
          (nthcdr (1- (safe-length list)) list))))
 
 (defun butlast (list &optional n)
-  "Return a copy of LIST with the last N elements removed."
+  "Return a copy of LIST with the last N elements removed.
+If N is omitted or nil, the last element is removed from the
+copy."
   (if (and n (<= n 0)) list
     (nbutlast (copy-sequence list) n)))
 
 (defun nbutlast (list &optional n)
-  "Modifies LIST to remove the last N elements."
+  "Modifies LIST to remove the last N elements.
+If N is omitted or nil, remove the last element."
   (let ((m (length list)))
     (or n (setq n 1))
     (and (< n m)
@@ -1016,38 +1021,37 @@ in the current Emacs session, then this function may return nil."
 
 (defun event-start (event)
   "Return the starting position of EVENT.
-EVENT should be a click, drag, or key press event.
-If it is a key press event, the return value has the form
-    (WINDOW POS (0 . 0) 0)
-If it is a click or drag event, it has the form
-   (WINDOW AREA-OR-POS (X . Y) TIMESTAMP OBJECT POS (COL . ROW)
-    IMAGE (DX . DY) (WIDTH . HEIGHT))
-The `posn-' functions access elements of such lists.
-For more information, see Info node `(elisp)Click Events'.
+EVENT should be a mouse click, drag, or key press event.  If
+EVENT is nil, the value of `posn-at-point' is used instead.
 
-If EVENT is a mouse or key press or a mouse click, this is the
-position of the event.  If EVENT is a drag, this is the starting
-position of the drag."
+The following accessor functions are used to access the elements
+of the position:
+
+`posn-window': The window the event is in.
+`posn-area': A symbol identifying the area the event occurred in,
+or nil if the event occurred in the text area.
+`posn-point': The buffer position of the event.
+`posn-x-y': The pixel-based coordinates of the event.
+`posn-col-row': The estimated column and row corresponding to the
+position of the event.
+`posn-actual-col-row': The actual column and row corresponding to the
+position of the event.
+`posn-string': The string object of the event, which is either
+nil or (STRING . POSITION)'.
+`posn-image': The image object of the event, if any.
+`posn-object': The image or string object of the event, if any.
+`posn-timestamp': The time the event occurred, in milliseconds.
+
+For more information, see Info node `(elisp)Click Events'."
   (if (consp event) (nth 1 event)
     (or (posn-at-point)
         (list (selected-window) (point) '(0 . 0) 0))))
 
 (defun event-end (event)
-  "Return the ending location of EVENT.
+  "Return the ending position of EVENT.
 EVENT should be a click, drag, or key press event.
-If EVENT is a key press event, the return value has the form
-    (WINDOW POS (0 . 0) 0)
-If EVENT is a click event, this function is the same as
-`event-start'.  For click and drag events, the return value has
-the form
-   (WINDOW AREA-OR-POS (X . Y) TIMESTAMP OBJECT POS (COL . ROW)
-    IMAGE (DX . DY) (WIDTH . HEIGHT))
-The `posn-' functions access elements of such lists.
-For more information, see Info node `(elisp)Click Events'.
 
-If EVENT is a mouse or key press or a mouse click, this is the
-position of the event.  If EVENT is a drag, this is the starting
-position of the drag."
+See `event-start' for a description of the value returned."
   (if (consp event) (nth (if (consp (nth 2 event)) 2 1) event)
     (or (posn-at-point)
         (list (selected-window) (point) '(0 . 0) 0))))
@@ -1459,7 +1463,7 @@ Each hook function definition is used to construct the FUN passed
 to the next hook function, if any.  The last (or \"outermost\")
 FUN is then called once."
   (declare (indent 2) (debug (form sexp body))
-           (obsolete "use a <foo>-function variable modified by add-function."
+           (obsolete "use a <foo>-function variable modified by `add-function'."
                      "24.4"))
   ;; We need those two gensyms because CL's lexical scoping is not available
   ;; for function arguments :-(
@@ -1497,8 +1501,8 @@ FUN is then called once."
 
 (defun add-to-list (list-var element &optional append compare-fn)
   "Add ELEMENT to the value of LIST-VAR if it isn't there yet.
-The test for presence of ELEMENT is done with `equal',
-or with COMPARE-FN if that's non-nil.
+The test for presence of ELEMENT is done with `equal', or with
+COMPARE-FN if that's non-nil.
 If ELEMENT is added, it is added at the beginning of the list,
 unless the optional argument APPEND is non-nil, in which case
 ELEMENT is added at the end.
@@ -1506,14 +1510,15 @@ ELEMENT is added at the end.
 The return value is the new value of LIST-VAR.
 
 This is handy to add some elements to configuration variables,
-but please do not abuse it in Elisp code, where you are usually better off
-using `push' or `cl-pushnew'.
+but please do not abuse it in Elisp code, where you are usually
+better off using `push' or `cl-pushnew'.
 
-If you want to use `add-to-list' on a variable that is not defined
-until a certain package is loaded, you should put the call to `add-to-list'
-into a hook function that will be run only after loading the package.
-`eval-after-load' provides one way to do this.  In some cases
-other hooks, such as major mode hooks, can do the job."
+If you want to use `add-to-list' on a variable that is not
+defined until a certain package is loaded, you should put the
+call to `add-to-list' into a hook function that will be run only
+after loading the package.  `eval-after-load' provides one way to
+do this.  In some cases other hooks, such as major mode hooks,
+can do the job."
   (declare
    (compiler-macro
     (lambda (exp)
@@ -1810,7 +1815,7 @@ If TYPE is nil, then any kind of definition is acceptable.  If
 TYPE is `defun', `defvar', or `defface', that specifies function
 definition, variable definition, or face definition only."
   (if (and (or (null type) (eq type 'defun))
-	   (symbolp symbol) (fboundp symbol)
+	   (symbolp symbol)
 	   (autoloadp (symbol-function symbol)))
       (nth 1 (symbol-function symbol))
     (let ((files load-history)
@@ -2177,7 +2182,7 @@ floating point support."
 	    nil))))))
 
 ;; Behind display-popup-menus-p test.
-(declare-function x-popup-dialog "xmenu.c" (position contents &optional header))
+(declare-function x-popup-dialog "menu.c" (position contents &optional header))
 
 (defun y-or-n-p (prompt)
   "Ask user a \"y or n\" question.  Return t if answer is \"y\".
@@ -2203,14 +2208,16 @@ is nil and `use-dialog-box' is non-nil."
   ;; ¡Beware! when I tried to edebug this code, Emacs got into a weird state
   ;; where all the keys were unbound (i.e. it somehow got triggered
   ;; within read-key, apparently).  I had to kill it.
-  (let ((answer 'recenter))
+  (let ((answer 'recenter)
+	(padded (lambda (prompt &optional dialog)
+		  (let ((l (length prompt)))
+		    (concat prompt
+			    (if (or (zerop l) (eq ?\s (aref prompt (1- l))))
+				"" " ")
+			    (if dialog "" "(y or n) "))))))
     (cond
      (noninteractive
-      (setq prompt (concat prompt
-                           (if (or (zerop (length prompt))
-                                   (eq ?\s (aref prompt (1- (length prompt)))))
-                               "" " ")
-                           "(y or n) "))
+      (setq prompt (funcall padded prompt))
       (let ((temp-prompt prompt))
 	(while (not (memq answer '(act skip)))
 	  (let ((str (read-string temp-prompt)))
@@ -2221,14 +2228,10 @@ is nil and `use-dialog-box' is non-nil."
      ((and (display-popup-menus-p)
 	   (listp last-nonmenu-event)
 	   use-dialog-box)
-      (setq answer
-	    (x-popup-dialog t `(,prompt ("Yes" . act) ("No" . skip)))))
+      (setq prompt (funcall padded prompt t)
+	    answer (x-popup-dialog t `(,prompt ("Yes" . act) ("No" . skip)))))
      (t
-      (setq prompt (concat prompt
-                           (if (or (zerop (length prompt))
-                                   (eq ?\s (aref prompt (1- (length prompt)))))
-                               "" " ")
-                           "(y or n) "))
+      (setq prompt (funcall padded prompt))
       (while
           (let* ((scroll-actions '(recenter scroll-up scroll-down
 				   scroll-other-window scroll-other-window-down))
@@ -2261,9 +2264,7 @@ is nil and `use-dialog-box' is non-nil."
         (discard-input))))
     (let ((ret (eq answer 'act)))
       (unless noninteractive
-        ;; FIXME this prints one too many spaces, since prompt
-        ;; already ends in a space.  Eg "... (y or n)  y".
-        (message "%s %s" prompt (if ret "y" "n")))
+        (message "%s%c" prompt (if ret ?y ?n)))
       ret)))
 
 
@@ -3173,12 +3174,7 @@ not really affect the buffer's content."
     `(let* ((,modified (buffer-modified-p))
             (buffer-undo-list t)
             (inhibit-read-only t)
-            (inhibit-modification-hooks t)
-            deactivate-mark
-            ;; Avoid setting and removing file locks and checking
-            ;; buffer's uptodate-ness w.r.t the underlying file.
-            buffer-file-name
-            buffer-file-truename)
+            (inhibit-modification-hooks t))
        (unwind-protect
            (progn
              ,@body)
@@ -3246,9 +3242,13 @@ even if this catches the signal."
 
 (defmacro with-demoted-errors (format &rest body)
   "Run BODY and demote any errors to simple messages.
+FORMAT is a string passed to `message' to format any error message.
+It should contain a single %-sequence; e.g., \"Error: %S\".
+
 If `debug-on-error' is non-nil, run BODY without catching its errors.
 This is to be used around code which is not expected to signal an error
 but which should be robust in the unexpected case that an error is signaled.
+
 For backward compatibility, if FORMAT is not a constant string, it
 is assumed to be part of BODY, in which case the message format
 used is \"Error: %S\"."
@@ -4266,6 +4266,9 @@ use `called-interactively-p'."
            (eq 'add-keymap-witness (nth 1 map))
            (set symbol tail)))))
 
+(define-obsolete-function-alias
+  'set-temporary-overlay-map 'set-transient-map "24.4")
+
 (defun set-transient-map (map &optional keep-pred on-exit)
   "Set MAP as a temporary keymap taking precedence over other keymaps.
 Normally, MAP is used only once, to look up the very next key.
@@ -4277,32 +4280,41 @@ active.
 Optional arg ON-EXIT, if non-nil, specifies a function that is
 called, with no arguments, after MAP is deactivated.
 
-Note that MAP will take precedence over the \"overriding\" maps
-`overriding-terminal-local-map' and `overriding-local-map' (and
-over the `keymap' text property).  Unlike those maps, if no match
-for a key is found in MAP, Emacs continues the normal key lookup
-sequence."
+This uses `overriding-terminal-local-map' which takes precedence over all other
+keymaps.  As usual, if no match for a key is found in MAP, the normal key
+lookup sequence then continues."
   (let ((clearfun (make-symbol "clear-transient-map")))
     ;; Don't use letrec, because equal (in add/remove-hook) would get trapped
     ;; in a cycle.
     (fset clearfun
-          (lambda ()
-            ;; FIXME: Handle the case of multiple transient maps.  For
-            ;; example, if isearch and C-u both use transient maps,
-            ;; then the lifetime of the C-u should be nested within
-            ;; the isearch overlay, so the pre-command-hook of isearch
-            ;; should be suspended during the C-u one so we don't exit
-            ;; isearch just because we hit 1 after C-u and that 1
-            ;; exits isearch whereas it doesn't exit C-u.
-            (with-demoted-errors "set-transient-map PCH: %S"
-              (unless (cond ((null keep-pred) nil)
-                            ((eq t keep-pred)
-                             (eq this-command
-                                 (lookup-key map (this-command-keys-vector))))
-                            (t (funcall keep-pred)))
-                (internal-pop-keymap map 'overriding-terminal-local-map)
-                (remove-hook 'pre-command-hook clearfun)
-                (when on-exit (funcall on-exit))))))
+          (suspicious-object
+           (lambda ()
+             (with-demoted-errors "set-transient-map PCH: %S"
+               (unless (cond
+                         ((not (eq map (cadr overriding-terminal-local-map)))
+                          ;; There's presumably some other transient-map in
+                          ;; effect.  Wait for that one to terminate before we
+                          ;; remove ourselves.
+                          ;; For example, if isearch and C-u both use transient
+                          ;; maps, then the lifetime of the C-u should be nested
+                          ;; within isearch's, so the pre-command-hook of
+                          ;; isearch should be suspended during the C-u one so
+                          ;; we don't exit isearch just because we hit 1 after
+                          ;; C-u and that 1 exits isearch whereas it doesn't
+                          ;; exit C-u.
+                          t)
+                         ((null keep-pred) nil)
+                         ((eq t keep-pred)
+                          (eq this-command
+                              (lookup-key map (this-command-keys-vector))))
+                         (t (funcall keep-pred)))
+                 (internal-pop-keymap map 'overriding-terminal-local-map)
+                 (remove-hook 'pre-command-hook clearfun)
+                 (when on-exit (funcall on-exit))
+                 ;; Comment out the fset if you want to debug the GC bug.
+;;;		(fset clearfun nil)
+;;;             (set clearfun nil)
+                 )))))
     (add-hook 'pre-command-hook clearfun)
     (internal-push-keymap map 'overriding-terminal-local-map)))
 

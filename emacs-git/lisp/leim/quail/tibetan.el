@@ -1,6 +1,6 @@
 ;;; tibetan.el --- Quail package for inputting Tibetan characters -*-coding: utf-8-emacs;-*-
 
-;; Copyright (C) 1997, 2001-2013 Free Software Foundation, Inc.
+;; Copyright (C) 1997, 2001-2014 Free Software Foundation, Inc.
 ;; Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
 ;;   2006, 2007, 2008, 2009, 2010, 2011
 ;;   National Institute of Advanced Industrial Science and Technology (AIST)
@@ -23,7 +23,7 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
-;; Author: Toru TOMABECHI, <Toru.Tomabechi@orient.unil.ch>
+;; Author: Toru TOMABECHI <Toru.Tomabechi@orient.unil.ch>
 
 ;; Created: Feb. 17. 1997
 

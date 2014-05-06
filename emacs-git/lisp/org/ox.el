@@ -1,6 +1,6 @@
 ;;; ox.el --- Generic Export Engine for Org Mode
 
-;; Copyright (C) 2012-2013 Free Software Foundation, Inc.
+;; Copyright (C) 2012-2014 Free Software Foundation, Inc.
 
 ;; Author: Nicolas Goaziou <n.goaziou at gmail dot com>
 ;; Keywords: outlines, hypermedia, calendar, wp
@@ -143,7 +143,7 @@
   "Alist between export properties and ways to set them.
 
 The CAR of the alist is the property name, and the CDR is a list
-like (KEYWORD OPTION DEFAULT BEHAVIOUR) where:
+like (KEYWORD OPTION DEFAULT BEHAVIOR) where:
 
 KEYWORD is a string representing a buffer keyword, or nil.  Each
   property defined this way can also be set, during subtree
@@ -152,7 +152,7 @@ KEYWORD is a string representing a buffer keyword, or nil.  Each
   property).
 OPTION is a string that could be found in an #+OPTIONS: line.
 DEFAULT is the default value for the property.
-BEHAVIOUR determines how Org should handle multiple keywords for
+BEHAVIOR determines how Org should handle multiple keywords for
   the same property.  It is a symbol among:
   nil       Keep old value and discard the new one.
   t         Replace old value with the new one.
@@ -362,7 +362,7 @@ If the value is `comment' insert it as a comment."
   :group 'org-export-general
   :type '(choice
 	  (const :tag "No creator sentence" nil)
-	  (const :tag "Sentence as a comment" 'comment)
+	  (const :tag "Sentence as a comment" comment)
 	  (const :tag "Insert the sentence" t)))
 
 (defcustom org-export-with-date t
@@ -795,7 +795,8 @@ HTML code while every other back-end will ignore it."
   :type 'coding-system)
 
 (defcustom org-export-copy-to-kill-ring 'if-interactive
-  "Should we push exported content to the kill ring?"
+  "Non-nil means pushing export output to the kill ring.
+This variable is ignored during asynchronous export."
   :group 'org-export-general
   :version "24.3"
   :type '(choice
@@ -1613,10 +1614,11 @@ for export.  Return options as a plist."
      ;; Make sure point is at a heading.
      (if (org-at-heading-p) (org-up-heading-safe) (org-back-to-heading t))
      ;; Take care of EXPORT_TITLE. If it isn't defined, use headline's
-     ;; title as its fallback value.
+     ;; title (with no todo keyword, priority cookie or tag) as its
+     ;; fallback value.
      (when (setq prop (or (org-entry-get (point) "EXPORT_TITLE")
-			  (progn (looking-at org-todo-line-regexp)
-				 (org-match-string-no-properties 3))))
+			  (progn (looking-at org-complex-heading-regexp)
+				 (org-match-string-no-properties 4))))
        (setq plist
 	     (plist-put
 	      plist :title
@@ -1649,7 +1651,7 @@ for export.  Return options as a plist."
 			  ((member keyword org-element-document-properties)
 			   (org-element-parse-secondary-string
 			    value (org-element-restriction 'keyword)))
-			  ;; If BEHAVIOUR is `split' expected value is
+			  ;; If BEHAVIOR is `split' expected value is
 			  ;; a list of strings, not a string.
 			  ((eq (nth 4 option) 'split) (org-split-string value))
 			  (t value)))))))))
@@ -1731,7 +1733,7 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 				 (plist-put
 				  plist property
 				  ;; Handle value depending on specified
-				  ;; BEHAVIOUR.
+				  ;; BEHAVIOR.
 				  (case behaviour
 				    (space
 				     (if (not (plist-get plist property))
@@ -3124,8 +3126,8 @@ locally for the subtree through node properties."
     ;; Populate OPTIONS and KEYWORDS.
     (dolist (entry (cond ((eq backend 'default) org-export-options-alist)
 			 ((org-export-backend-p backend)
-			  (org-export-get-all-options backend))
-			 (t (org-export-get-all-options
+			  (org-export-backend-options backend))
+			 (t (org-export-backend-options
 			     (org-export-get-backend backend)))))
       (let ((keyword (nth 1 entry))
             (option (nth 2 entry)))
@@ -4955,7 +4957,7 @@ If no translation is found, the quote character is left as-is.")
 (defconst org-export-smart-quotes-regexps
   (list
    ;; Possible opening quote at beginning of string.
-   "\\`\\([\"']\\)\\(\\w\\|\\s.\\|\\s_\\)"
+   "\\`\\([\"']\\)\\(\\w\\|\\s.\\|\\s_\\|\\s(\\)"
    ;; Possible closing quote at beginning of string.
    "\\`\\([\"']\\)\\(\\s-\\|\\s)\\|\\s.\\)"
    ;; Possible apostrophe at beginning of string.
@@ -5093,7 +5095,7 @@ Return the new string."
 ;;;; Topology
 ;;
 ;; Here are various functions to retrieve information about the
-;; neighbourhood of a given element or object.  Neighbours of interest
+;; neighborhood of a given element or object.  Neighbors of interest
 ;; are direct parent (`org-export-get-parent'), parent headline
 ;; (`org-export-get-parent-headline'), first element containing an
 ;; object, (`org-export-get-parent-element'), parent table
@@ -5612,7 +5614,7 @@ a registered back-end.  FILE is the name of the output file, as
 a string.
 
 A non-nil optional argument ASYNC means the process should happen
-asynchronously.  The resulting buffer file then be accessible
+asynchronously.  The resulting buffer will then be accessible
 through the `org-export-stack' interface.
 
 Optional arguments SUBTREEP, VISIBLE-ONLY, BODY-ONLY and

@@ -1,8 +1,9 @@
 ;;; window.el --- GNU Emacs window commands aside from those written in C
 
-;; Copyright (C) 1985, 1989, 1992-1994, 2000-2013 Free Software Foundation, Inc.
+;; Copyright (C) 1985, 1989, 1992-1994, 2000-2014 Free Software
+;; Foundation, Inc.
 
-;; Maintainer: FSF
+;; Maintainer: emacs-devel@gnu.org
 ;; Keywords: internal
 ;; Package: emacs
 
@@ -141,28 +142,28 @@ to `display-buffer'."
 	;; Return the window.
 	window))))
 
-;; Doc is very similar to with-output-to-temp-buffer.
 (defmacro with-temp-buffer-window (buffer-or-name action quit-function &rest body)
   "Bind `standard-output' to BUFFER-OR-NAME, eval BODY, show the buffer.
-BUFFER-OR-NAME must specify either a live buffer, or the name of a
-buffer (if it does not exist, this macro creates it).
+BUFFER-OR-NAME must specify either a live buffer, or the name of
+a buffer (if it does not exist, this macro creates it).
 
-This construct makes buffer BUFFER-OR-NAME empty before running BODY.
-It does not make the buffer current for BODY.
-Instead it binds `standard-output' to that buffer, so that output
+Make the buffer specified by BUFFER-OR-NAME empty before running
+BODY and bind `standard-output' to that buffer, so that output
 generated with `prin1' and similar functions in BODY goes into
-the buffer.
+that buffer.  Do not make that buffer current for running the
+forms in BODY.  Use `with-current-buffer-window' instead if you
+need to run BODY with that buffer current.
 
-At the end of BODY, this marks the specified buffer unmodified and
-read-only, and displays it in a window (but does not select it, or make
-the buffer current).  The display happens by calling `display-buffer'
-with the ACTION argument.  If `temp-buffer-resize-mode' is enabled,
-the relevant window shrinks automatically.
+At the end of BODY, mark the specified buffer unmodified and
+read-only, and display it in a window (but do not select it).
+The display happens by calling `display-buffer' passing it the
+ACTION argument.  If `temp-buffer-resize-mode' is enabled, the
+corresponding window may be resized automatically.
 
-This returns the value returned by BODY, unless QUIT-FUNCTION specifies
-a function.  In that case, it runs the function with two arguments -
+Return the value returned by BODY, unless QUIT-FUNCTION specifies
+a function.  In that case, run that function with two arguments -
 the window showing the specified buffer and the value returned by
-BODY - and returns the value returned by that function.
+BODY - and return the value returned by that function.
 
 If the buffer is displayed on a new frame, the window manager may
 decide to select that frame.  In that case, it's usually a good
@@ -171,16 +172,35 @@ before reading any value from the minibuffer; for example, when
 asking a `yes-or-no-p' question.
 
 This runs the hook `temp-buffer-window-setup-hook' before BODY,
-with the specified buffer temporarily current.  It runs the
-hook `temp-buffer-window-show-hook' after displaying the buffer,
-with that buffer temporarily current, and the window that was used to
+with the specified buffer temporarily current.  It runs the hook
+`temp-buffer-window-show-hook' after displaying the buffer, with
+that buffer temporarily current, and the window that was used to
 display it temporarily selected.
 
-This construct is similar to `with-output-to-temp-buffer', but
-runs different hooks.  In particular, it does not run
-`temp-buffer-setup-hook', which usually puts the buffer in Help mode.
-Also, it does not call `temp-buffer-show-function' (the ACTION
+This construct is similar to `with-output-to-temp-buffer' but,
+neither runs `temp-buffer-setup-hook' which usually puts the
+buffer in Help mode, nor `temp-buffer-show-function' (the ACTION
 argument replaces this)."
+  (declare (debug t))
+  (let ((buffer (make-symbol "buffer"))
+	(window (make-symbol "window"))
+	(value (make-symbol "value")))
+    `(let* ((,buffer (temp-buffer-window-setup ,buffer-or-name))
+	    (standard-output ,buffer)
+	    ,window ,value)
+       (setq ,value (progn ,@body))
+       (with-current-buffer ,buffer
+	 (setq ,window (temp-buffer-window-show ,buffer ,action)))
+
+       (if (functionp ,quit-function)
+	   (funcall ,quit-function ,window ,value)
+	 ,value))))
+
+(defmacro with-current-buffer-window (buffer-or-name action quit-function &rest body)
+  "Evaluate BODY with a buffer BUFFER-OR-NAME current and show that buffer.
+This construct is like `with-temp-buffer-window' but unlike that
+makes the buffer specified by BUFFER-OR-NAME current for running
+BODY."
   (declare (debug t))
   (let ((buffer (make-symbol "buffer"))
 	(window (make-symbol "window"))
@@ -319,10 +339,11 @@ Anything less might crash Emacs.")
      (frame-char-size (window-normalize-window window))))
 
 (defcustom window-min-height 4
-  "The minimum number of lines of any window.
-The value has to accommodate a mode- or header-line if present.
-A value less than `window-safe-min-height' is ignored.  The value
-of this variable is honored when windows are resized or split.
+  "The minimum total height, in lines, of any window.
+The value has to accommodate one text line, a mode and header
+line, and a bottom divider, if present.  A value less than
+`window-safe-min-height' is ignored.  The value of this variable
+is honored when windows are resized or split.
 
 Applications should never rebind this variable.  To resize a
 window to a height less than the one specified here, an
@@ -349,11 +370,11 @@ Anything less might crash Emacs.")
      (frame-char-size (window-normalize-window window) t)))
 
 (defcustom window-min-width 10
-  "The minimum number of columns of any window.
-The value has to accommodate margins, fringes, or scrollbars if
-present.  A value less than `window-safe-min-width' is ignored.
-The value of this variable is honored when windows are resized or
-split.
+  "The minimum total width, in columns, of any window.
+The value has to accommodate two text columns as well as margins,
+fringes, a scroll bar and a right divider, if present.  A value
+less than `window-safe-min-width' is ignored.  The value of this
+variable is honored when windows are resized or split.
 
 Applications should never rebind this variable.  To resize a
 window to a width less than the one specified here, an
@@ -1011,19 +1032,100 @@ FRAME defaults to the selected frame."
   (window--side-check frame)
   (window--atom-check frame))
 
+;; Dumping frame/window contents.
+(defun window--dump-window (&optional window erase)
+  "Dump WINDOW to buffer *window-frame-dump*.
+WINDOW must be a valid window and defaults to the selected one.
+Optional argument ERASE non-nil means erase *window-frame-dump*
+before writing to it."
+  (setq window (window-normalize-window window))
+  (with-current-buffer (get-buffer-create "*window-frame-dump*")
+    (when erase (erase-buffer))
+    (insert
+     (format "%s   parent: %s\n" window (window-parent window))
+     (format "pixel left: %s   top: %s   size: %s x %s   new: %s\n"
+	     (window-pixel-left window) (window-pixel-top window)
+	     (window-size window t t) (window-size window nil t)
+	     (window-new-pixel window))
+     (format "char left: %s   top: %s   size: %s x %s   new: %s\n"
+	     (window-left-column window) (window-top-line window)
+	     (window-total-size window t) (window-total-size window)
+	     (window-new-total window))
+     (format "normal: %s x %s   new: %s\n"
+	     (window-normal-size window t) (window-normal-size window)
+	     (window-new-normal window)))
+    (when (window-live-p window)
+      (let ((fringes (window-fringes window))
+	    (margins (window-margins window)))
+	(insert
+	 (format "body pixel: %s x %s   char: %s x %s\n"
+		 (window-body-width window t) (window-body-height window t)
+		 (window-body-width window) (window-body-height window))
+	 (format "width left fringe: %s  left margin: %s  right margin: %s\n"
+		 (car fringes) (or (car margins) 0) (or (cdr margins) 0))
+	 (format "width right fringe: %s  scroll-bar: %s  divider: %s\n"
+		 (cadr fringes)
+		 (window-scroll-bar-width window)
+		 (window-right-divider-width window))
+	 (format "height header-line: %s  mode-line: %s  divider: %s\n"
+		 (window-header-line-height window)
+		 (window-mode-line-height window)
+		 (window-bottom-divider-width window)))))
+    (insert "\n")))
+
+(defun window--dump-frame (&optional window-or-frame)
+  "Dump WINDOW-OR-FRAME to buffer *window-frame-dump*.
+WINDOW-OR-FRAME can be a frame or a window and defaults to the
+selected frame.  When WINDOW-OR-FRAME is a window, dump that
+window's frame.  The buffer *window-frame-dump* is erased before
+dumping to it."
+  (interactive)
+  (let* ((window
+	  (cond
+	   ((or (not window-or-frame)
+		(frame-live-p window-or-frame))
+	    (frame-root-window window-or-frame))
+	   ((or (window-live-p window-or-frame)
+		(window-child window-or-frame))
+	    window-or-frame)
+	   (t
+	    (frame-root-window))))
+	 (frame (window-frame window)))
+    (with-current-buffer (get-buffer-create "*window-frame-dump*")
+      (erase-buffer)
+      (insert
+       (format "frame pixel: %s x %s   cols/lines: %s x %s   units: %s x %s\n"
+	       (frame-pixel-width frame) (frame-pixel-height frame)
+	       (frame-total-cols frame) (frame-text-lines frame) ; (frame-total-lines frame)
+	       (frame-char-width frame) (frame-char-height frame))
+       (format "frame text pixel: %s x %s   cols/lines: %s x %s\n"
+	       (frame-text-width frame) (frame-text-height frame)
+	       (frame-text-cols frame) (frame-text-lines frame))
+       (format "tool: %s  scroll: %s  fringe: %s  border: %s  right: %s  bottom: %s\n\n"
+	       (tool-bar-height frame t)
+	       (frame-scroll-bar-width frame)
+	       (frame-fringe-width frame)
+	       (frame-border-width frame)
+	       (frame-right-divider-width frame)
+	       (frame-bottom-divider-width frame)))
+      (walk-window-tree 'window--dump-window frame t t))))
+
 ;;; Window sizes.
-(defun window-total-size (&optional window horizontal)
+(defun window-total-size (&optional window horizontal round)
   "Return the total height or width of WINDOW.
 WINDOW must be a valid window and defaults to the selected one.
 
 If HORIZONTAL is omitted or nil, return the total height of
 WINDOW, in lines, like `window-total-height'.  Otherwise return
-the total width, in columns, like `window-total-width'."
-  (if horizontal
-      (window-total-width window)
-    (window-total-height window)))
+the total width, in columns, like `window-total-width'.
 
-(defun window-size (&optional window horizontal pixelwise)
+Optional argument ROUND is handled as for `window-total-height'
+and `window-total-width'."
+  (if horizontal
+      (window-total-width window round)
+    (window-total-height window round)))
+
+(defun window-size (&optional window horizontal pixelwise round)
   "Return the height or width of WINDOW.
 WINDOW must be a valid window and defaults to the selected one.
 
@@ -1032,14 +1134,18 @@ WINDOW, in lines, like `window-total-height'.  Otherwise return
 the total width, in columns, like `window-total-width'.
 
 Optional argument PIXELWISE means return the pixel size of WINDOW
-like `window-pixel-height' and `window-pixel-width'."
+like `window-pixel-height' and `window-pixel-width'.
+
+Optional argument ROUND is ignored if PIXELWISE is non-nil and
+handled as for `window-total-height' and `window-total-width'
+otherwise."
   (if horizontal
       (if pixelwise
 	  (window-pixel-width window)
-	(window-total-width window))
+	(window-total-width window round))
     (if pixelwise
 	(window-pixel-height window)
-      (window-total-height window))))
+      (window-total-height window round))))
 
 (defvar window-size-fixed nil
   "Non-nil in a buffer means windows displaying the buffer are fixed-size.
@@ -1132,55 +1238,46 @@ of WINDOW."
 	  ;; windows such that the new (or resized) windows can get a
 	  ;; size less than the user-specified `window-min-height' and
 	  ;; `window-min-width'.
-	  (let ((frame (window-frame window))
-		(fringes (window-fringes window))
-		(scroll-bars (window-scroll-bars window)))
+	  (let* ((char-size (frame-char-size window t))
+		 (fringes (window-fringes window))
+		 (pixel-width
+		  (+ (window-safe-min-size window t t)
+		     (car fringes) (cadr fringes)
+		     (window-scroll-bar-width window)
+		     (window-right-divider-width window))))
 	    (if pixelwise
 		(max
-		 (+ (window-safe-min-size window t t)
-		    (car fringes) (cadr fringes)
-		    (cond
-		     ((memq (nth 2 scroll-bars) '(left right))
-		      (nth 1 scroll-bars))
-		     ((memq (frame-parameter frame 'vertical-scroll-bars)
-			    '(left right))
-		      (frame-parameter frame 'scroll-bar-width))
-		     (t 0)))
+		 (if window-resize-pixelwise
+		     pixel-width
+		   ;; Round up to next integral of columns.
+		   (* (ceiling pixel-width char-size) char-size))
 		 (if (window--size-ignore-p window ignore)
 		     0
 		   (window-min-pixel-width)))
 	      (max
-	       (+ window-safe-min-width
-		  (ceiling (car fringes) (frame-char-width frame))
-		  (ceiling (cadr fringes) (frame-char-width frame))
-		  (cond
-		   ((memq (nth 2 scroll-bars) '(left right))
-		    (nth 1 scroll-bars))
-		 ((memq (frame-parameter frame 'vertical-scroll-bars)
-			'(left right))
-		  (ceiling (or (frame-parameter frame 'scroll-bar-width) 14)
-			   (frame-char-width)))
-		 (t 0)))
+	       (ceiling pixel-width char-size)
 	       (if (window--size-ignore-p window ignore)
 		   0
 		 window-min-width)))))
-	 (pixelwise
-	  (max
-	   (+ (window-safe-min-size window nil t)
-	      (window-header-line-height window)
-	      (window-mode-line-height window))
-	   (if (window--size-ignore-p window ignore)
-	       0
-	     (window-min-pixel-height))))
-	 (t
-	  ;; For the minimum height of a window take any mode- or
-	  ;; header-line into account.
-	  (max (+ window-safe-min-height
-		  (if header-line-format 1 0)
-		  (if mode-line-format 1 0))
-	       (if (window--size-ignore-p window ignore)
-		   0
-		 window-min-height))))))))
+	 ((let ((char-size (frame-char-size window))
+		(pixel-height
+		 (+ (window-safe-min-size window nil t)
+		    (window-header-line-height window)
+		    (window-mode-line-height window)
+		    (window-bottom-divider-width window))))
+	    (if pixelwise
+		(max
+		 (if window-resize-pixelwise
+		     pixel-height
+		   ;; Round up to next integral of lines.
+		   (* (ceiling pixel-height char-size) char-size))
+		 (if (window--size-ignore-p window ignore)
+		     0
+		   (window-min-pixel-height)))
+	      (max (ceiling pixel-height char-size)
+		   (if (window--size-ignore-p window ignore)
+		       0
+		     window-min-height))))))))))
 
 (defun window-sizable (window delta &optional horizontal ignore pixelwise)
   "Return DELTA if DELTA lines can be added to WINDOW.
@@ -1315,9 +1412,10 @@ WINDOW can be resized in the desired direction.  The function
 	    (unless (eq sub window)
 	      (setq delta
 		    (min delta
-			 (- (window-size sub horizontal pixelwise)
-			    (window-min-size
-			     sub horizontal ignore pixelwise)))))
+			 (max (- (window-size sub horizontal pixelwise 'ceiling)
+				 (window-min-size
+				  sub horizontal ignore pixelwise))
+			      0))))
 	    (setq sub (window-right sub))))
 	(if noup
 	    delta
@@ -1355,7 +1453,7 @@ at least one other window can be enlarged appropriately.
 Optional argument PIXELWISE non-nil means return number of pixels
 by which WINDOW can be shrunk."
   (setq window (window-normalize-window window))
-  (let ((size (window-size window horizontal pixelwise))
+  (let ((size (window-size window horizontal pixelwise 'floor))
 	(minimum (window-min-size window horizontal ignore pixelwise)))
     (cond
      (nodown
@@ -1392,9 +1490,11 @@ by which WINDOW can be shrunk."
 		 (t
 		  (setq delta
 			(+ delta
-			   (- (window-size sub horizontal pixelwise)
-			      (window-min-size
-			       sub horizontal ignore pixelwise))))))
+			   (max
+			    (- (window-size sub horizontal pixelwise 'floor)
+			       (window-min-size
+				sub horizontal ignore pixelwise))
+			    0)))))
 		(setq sub (window-right sub))))
 	  ;; For an ortho-combination throw DELTA when at least one
 	  ;; child window is fixed-size.
@@ -1592,16 +1692,17 @@ WINDOW must be a valid window and defaults to the selected one."
   (= (window-pixel-width window)
      (window-pixel-width (frame-root-window window))))
 
-(defun window-body-size (&optional window horizontal)
+(defun window-body-size (&optional window horizontal pixelwise)
   "Return the height or width of WINDOW's text area.
 WINDOW must be a live window and defaults to the selected one.
 
 If HORIZONTAL is omitted or nil, return the height of the text
 area, like `window-body-height'.  Otherwise, return the width of
-the text area, like `window-body-width'."
+the text area, like `window-body-width'.  In either case, the
+optional argument PIXELWISE is passed to the functions."
   (if horizontal
-      (window-body-width window)
-    (window-body-height window)))
+      (window-body-width window pixelwise)
+    (window-body-height window pixelwise)))
 
 (defun window-current-scroll-bars (&optional window)
   "Return the current scroll bar settings for WINDOW.
@@ -1738,10 +1839,9 @@ or bottom edge of WINDOW as reference position instead of
 top edge of WINDOW as reference position.
 
 Optional argument WRAP non-nil means to wrap DIRECTION around
-frame borders.  This means to return for a WINDOW a the top of
-the frame and DIRECTION `above' to return the minibuffer window
-if the frame has one, and a window at the bottom of the frame
-otherwise.
+frame borders.  This means to return for WINDOW at the top of the
+frame and DIRECTION `above' the minibuffer window if the frame
+has one, and a window at the bottom of the frame otherwise.
 
 Optional argument MINI nil means to return the minibuffer window
 if and only if it is currently active.  MINI non-nil means to
@@ -2309,9 +2409,11 @@ instead."
 	;; Otherwise, resize all other windows in the same combination.
 	(window--resize-siblings window delta horizontal ignore))
       (when (window--resize-apply-p frame horizontal)
-	(window-resize-apply frame horizontal)
-	(window--pixel-to-total frame horizontal)
-	(run-window-configuration-change-hook frame)))
+	(if (window-resize-apply frame horizontal)
+	    (progn
+	      (window--pixel-to-total frame horizontal)
+	      (run-window-configuration-change-hook frame))
+	  (error "Failed to apply resizing %s" window))))
      (t
       (error "Cannot resize window %s" window)))))
 
@@ -2552,7 +2654,7 @@ already set by this routine."
 	  (setq best-value most-negative-fixnum)
 	  (while sub
 	    (when (and (consp (window-new-normal sub))
-		       (not (zerop (car (window-new-normal sub))))
+		       (not (<= (car (window-new-normal sub)) 0))
 		       (> (cdr (window-new-normal sub)) best-value))
 	      (setq best-window sub)
 	      (setq best-value (cdr (window-new-normal sub))))
@@ -2568,7 +2670,7 @@ already set by this routine."
 	     best-window
 	     (if (= (car (window-new-normal best-window)) best-delta)
 		 'skip	    ; We can't shrink best-window any further.
-	       (cons (1- (car (window-new-normal best-window)))
+	       (cons (- (car (window-new-normal best-window)) best-delta)
 		     (- (/ (float (window-new-pixel best-window))
 			   parent-total)
 			(window-normal-size best-window horizontal))))))))
@@ -2933,7 +3035,7 @@ move it as far as possible in the desired direction."
 	  (window--resize-reset frame horizontal)
 	  ;; Try to enlarge LEFT first.
 	  (setq this-delta (window--resizable
-			    left delta horizontal nil nil nil nil pixelwise))
+			    left delta horizontal nil 'after nil nil pixelwise))
 	  (unless (zerop this-delta)
 	    (window--resize-this-window
 	     left this-delta horizontal nil t 'before
@@ -2962,7 +3064,7 @@ move it as far as possible in the desired direction."
 	  ;; Try to enlarge RIGHT.
 	  (setq this-delta
 		(window--resizable
-		 right (- delta) horizontal nil nil nil nil pixelwise))
+		 right (- delta) horizontal nil 'before nil nil pixelwise))
 	  (unless (zerop this-delta)
 	    (window--resize-this-window
 	     right this-delta horizontal nil t 'after
@@ -4540,7 +4642,7 @@ is non-nil)."
     (setq sub first)
     (while (and sub (> rest 0))
       (unless (window--resize-child-windows-skip-p window)
-	(set-window-new-pixel sub char-size t)
+	(set-window-new-pixel sub (min rest char-size) t)
 	(setq rest (- rest char-size)))
       (setq sub (window-right sub)))
 
@@ -4549,7 +4651,7 @@ is non-nil)."
     (setq sub first)
     (while (and sub (> rest 0))
       (unless (eq (window-new-normal sub) 'ignore)
-	(set-window-new-pixel sub char-size t)
+	(set-window-new-pixel sub (min rest char-size) t)
 	(setq rest (- rest char-size)))
       (setq sub (window-right sub)))
 
@@ -4607,7 +4709,7 @@ window."
     (window--resize-reset (window-frame window) t)
     (balance-windows-1 window t)
     (when (window--resize-apply-p frame t)
-      (window-resize-apply frame)
+      (window-resize-apply frame t)
       (window--pixel-to-total frame t)
       (run-window-configuration-change-hook frame))))
 
@@ -5018,14 +5120,32 @@ value can be also stored on disk and read back in a new session."
   "Put window state STATE into WINDOW.
 STATE should be the state of a window returned by an earlier
 invocation of `window-state-get'.  Optional argument WINDOW must
-specify a live window and defaults to the selected one.
+specify a valid window and defaults to the selected one.  If
+WINDOW is not live, replace WINDOW by a live one before putting
+STATE into it.
 
 Optional argument IGNORE non-nil means ignore minimum window
 sizes and fixed size restrictions.  IGNORE equal `safe' means
 windows can get as small as `window-safe-min-height' and
 `window-safe-min-width'."
   (setq window-state-put-stale-windows nil)
-  (setq window (window-normalize-window window t))
+  (setq window (window-normalize-window window))
+
+  ;; When WINDOW is internal, reduce it to a live one to put STATE into,
+  ;; see Bug#16793.
+  (unless (window-live-p window)
+    (let ((root (frame-root-window window)))
+      (if (eq window root)
+	  (setq window (frame-first-window root))
+	(setq root window)
+	(setq window (catch 'live
+		       (walk-window-subtree
+			(lambda (window)
+			  (when (window-live-p window)
+			    (throw 'live window)))
+			root))))
+      (delete-other-windows-internal window root)))
+
   (let* ((frame (window-frame window))
 	 (head (car state))
 	 ;; We check here (1) whether the total sizes of root window of
@@ -6713,34 +6833,26 @@ can resize windows in both dimensions."
 ;; `fit-frame-to-buffer' eventually wants to know the real frame sizes
 ;; counting title bar and outer borders.
 (defcustom fit-frame-to-buffer nil
-  "Non-nil means `fit-frame-to-buffer' can fit a frame to its buffer.
+  "Non-nil means `fit-window-to-buffer' can fit a frame to its buffer.
 A frame is fit if and only if its root window is a live window
 and this option is non-nil.  If this is `horizontally', frames
 are resized horizontally only.  If this is `vertically', frames
 are resized vertically only.  Any other non-nil value means
-frames can be resized in both dimensions.  See also
-`fit-frame-to-buffer-margins' and `fit-frame-to-buffer-sizes'.
-
-If this is non-nil and a window is the only window of its frame,
-`fit-window-to-buffer' will invoke `fit-frame-to-buffer' to fit
-the frame to its buffer."
+frames can be resized in both dimensions."
   :type 'boolean
   :version "24.4"
   :group 'help)
 
 (defcustom fit-frame-to-buffer-margins '(nil nil nil nil)
   "Margins around frame for `fit-frame-to-buffer'.
-This list specifies the numbers of pixels to be left free on the
-left, above, the right, and below a frame that shall be fit to
-its buffer.  The value specified here can be overridden for a
-specific frame by that frame's `fit-frame-to-buffer-margins'
-parameter, if present.
+This specifies the numbers of pixels to be left free on the left,
+above, on the right, and below a frame fitted to its buffer.  Set
+this to avoid obscuring other desktop objects like the taskbar.
+The default is nil for each side, which means to not add margins.
 
-This variable controls how fitting a frame to the size of its
-buffer coordinates with the size of your display.  If you don't
-specify a value here, the size of the display's workarea is used.
-
-See also `fit-frame-to-buffer-sizes'."
+The value specified here can be overridden for a specific frame
+by that frame's `fit-frame-to-buffer-margins' parameter, if
+present.  See also `fit-frame-to-buffer-sizes'."
   :version "24.4"
   :type '(list
 	  (choice
@@ -6810,7 +6922,6 @@ See also `fit-frame-to-buffer-margins'."
   :group 'help)
 
 (declare-function x-display-pixel-height "xfns.c" (&optional terminal))
-(declare-function tool-bar-lines-needed "xdisp.c" (&optional frame))
 
 (defun window--sanitize-margin (margin left right)
   "Return MARGIN if it's a number between LEFT and RIGHT."
@@ -6818,29 +6929,29 @@ See also `fit-frame-to-buffer-margins'."
 	     (<= left (- right margin)) (<= margin right))
     margin))
 
-(defun fit-frame-to-buffer (&optional frame max-height min-height max-width min-width)
+(defun fit-frame-to-buffer (&optional frame max-height min-height max-width min-width only)
   "Adjust size of FRAME to display the contents of its buffer exactly.
 FRAME can be any live frame and defaults to the selected one.
 Fit only if FRAME's root window is live.  MAX-HEIGHT, MIN-HEIGHT,
 MAX-WIDTH and MIN-WIDTH specify bounds on the new total size of
-FRAME's root window.
+FRAME's root window.  MIN-HEIGHT and MIN-WIDTH default to the values of
+`window-min-height' and `window-min-width' respectively.
 
-The option `fit-frame-to-buffer' controls whether this function
-has any effect.  New position and size of FRAME are additionally
-determined by the options `fit-frame-to-buffer-sizes' and
+If the optional argument ONLY is `vertically', resize the frame
+vertically only.  If ONLY is `horizontally', resize the frame
+horizontally only.
+
+The new position and size of FRAME can be additionally determined
+by customizing the options `fit-frame-to-buffer-sizes' and
 `fit-frame-to-buffer-margins' or the corresponding parameters of
 FRAME."
   (interactive)
-  (or (fboundp 'x-display-pixel-height)
-      (user-error "Cannot resize frame in non-graphic Emacs"))
+  (unless (and (fboundp 'x-display-pixel-height)
+	       ;; We need the respective sizes now.
+	       (fboundp 'display-monitor-attributes-list))
+    (user-error "Cannot resize frame in non-graphic Emacs"))
   (setq frame (window-normalize-frame frame))
-  (when (and (window-live-p (frame-root-window frame))
-	     fit-frame-to-buffer
-	     (or (not window-size-fixed)
-		 (and (eq window-size-fixed 'height)
-		      (not (eq fit-frame-to-buffer 'vertically)))
-		 (and (eq window-size-fixed 'width)
-		      (not (eq fit-frame-to-buffer 'horizontally)))))
+  (when (window-live-p (frame-root-window frame))
     (with-selected-window (frame-root-window frame)
       (let* ((window (frame-root-window frame))
 	     (char-width (frame-char-width))
@@ -6854,20 +6965,30 @@ FRAME."
 	     ;; Handle margins.
 	     (margins (or (frame-parameter frame 'fit-frame-to-buffer-margins)
 			  fit-frame-to-buffer-margins))
-	     (left-margin (or (window--sanitize-margin
-			       (nth 0 margins) 0 display-width)
-			      (nth 0 workarea)))
-	     (top-margin (or (window--sanitize-margin
-			      (nth 1 margins) 0 display-height)
-			     (nth 1 workarea)))
+	     (left-margin (if (nth 0 margins)
+			      (or (window--sanitize-margin
+				   (nth 0 margins) 0 display-width)
+				  0)
+			    (nth 0 workarea)))
+	     (top-margin (if (nth 1 margins)
+			     (or (window--sanitize-margin
+				  (nth 1 margins) 0 display-height)
+				 0)
+			   (nth 1 workarea)))
 	     (workarea-width (nth 2 workarea))
-	     (right-margin (or (window--sanitize-margin
-				(nth 2 margins) left-margin display-width)
-			       (+ left-margin workarea-width)))
+	     (right-margin (if (nth 2 margins)
+			       (- display-width
+				  (or (window--sanitize-margin
+				       (nth 2 margins) left-margin display-width)
+				      0))
+			     (nth 2 workarea)))
 	     (workarea-height (nth 3 workarea))
-	     (bottom-margin (or (window--sanitize-margin
-				 (nth 3 margins) top-margin display-height)
-				(+ top-margin workarea-height)))
+	     (bottom-margin (if (nth 3 margins)
+				(- display-height
+				   (or (window--sanitize-margin
+					(nth 3 margins) top-margin display-height)
+				       0))
+			      (nth 3 workarea)))
 	     ;; The pixel width of FRAME (which does not include the
 	     ;; window manager's decorations).
 	     (frame-width (frame-pixel-width))
@@ -6917,11 +7038,7 @@ FRAME."
 			    (not (zerop lines)))
 		       (1- lines)
 		     0))))
-	     ;; The maximum height we can use for fitting.
-	     (fit-height
-	      (- workarea-height extra-height toolbar-extra-height))
-	     ;; The pixel position of FRAME's top border.  We usually
-	     ;; try to leave this alone.
+	     ;; The pixel position of FRAME's top border.
 	     (top
 	      (let ((top (frame-parameter nil 'top)))
 		(if (consp top)
@@ -6933,83 +7050,74 @@ FRAME."
 	     (max-height
 	      (cond
 	       ((numberp (nth 0 sizes)) (* (nth 0 sizes) char-height))
-	       ((numberp max-height) (* max-height char-height))))
+	       ((numberp max-height) (* max-height char-height))
+	       (t display-height)))
 	     (min-height
 	      (cond
 	       ((numberp (nth 1 sizes)) (* (nth 1 sizes) char-height))
-	       ((numberp min-height) (* min-height char-height))))
+	       ((numberp min-height) (* min-height char-height))
+	       (t (* window-min-height char-height))))
 	     (max-width
 	      (cond
 	       ((numberp (nth 2 sizes))
 		(- (* (nth 2 sizes) char-width) window-extra-width))
 	       ((numberp max-width)
-		(- (* max-width char-width) window-extra-width))))
+		(- (* max-width char-width) window-extra-width))
+	       (t display-width)))
 	     (min-width
 	      (cond
 	       ((numberp (nth 3 sizes))
 		(- (* (nth 3 sizes) char-width) window-extra-width))
 	       ((numberp min-width)
-		(- (* min-width char-width) window-extra-width))))
+		(- (* min-width char-width) window-extra-width))
+	       (t (* window-min-width char-width))))
 	     ;; Note: Currently, for a new frame the sizes of the header
 	     ;; and mode line may be estimated incorrectly
 	     (value (window-text-pixel-size
 		     nil t t workarea-width workarea-height t))
 	     (width (+ (car value) (window-right-divider-width)))
-	     (height (+ (cdr value) (window-bottom-divider-width)))
-	     remainder)
-	(unless window-resize-pixelwise
-	  ;; Round sizes to character sizes.
-	  (setq remainder (% width char-width))
-	  (unless (zerop remainder)
-	    (setq width (+ width (- char-width remainder))))
-	  (setq remainder (% height char-height))
-	  (setq height (+ height (- char-height remainder))))
-	;; Now make sure that we don't get larger than our rounded
-	;; maximum lines and columns.
-	(when (> width fit-width)
-	  (setq width (- fit-width (% fit-width char-width))))
-	(when (> height fit-height)
-	  (setq height (- fit-height (% fit-height char-height))))
+	     (height (+ (cdr value) (window-bottom-divider-width))))
 	;; Don't change height or width when the window's size is fixed
-	;; in either direction.
+	;; in either direction or ONLY forbids it.
 	(cond
-	 ((eq window-size-fixed 'height)
-	  (setq height nil))
-	 ((eq window-size-fixed 'width)
+	 ((or (eq window-size-fixed 'width) (eq only 'vertically))
+	  (setq width nil))
+	 ((or (eq window-size-fixed 'height) (eq only 'horizontally))
 	  (setq height nil)))
+	;; Fit width to constraints.
 	(when width
+	  (unless frame-resize-pixelwise
+	    ;; Round to character sizes.
+	    (setq width (* (/ (+ width char-width -1) char-width)
+			   char-width)))
 	  ;; Fit to maximum and minimum widths.
-	  (when max-width
-	    (setq width (min width max-width)))
-	  (when min-width
-	    (setq width (max width min-width)))
+	  (setq width (max (min width max-width) min-width))
 	  ;; Add extra width.
 	  (setq width (+ width extra-width))
-	  ;; Preserve right margin.
-	  (let ((right (+ left width extra-width))
-		(max-right (- workarea-width right-margin)))
+	  ;; Preserve margins.
+	  (let ((right (+ left width)))
 	    (cond
-	     ((> right max-right)
-	      ;; Move FRAME to left.
-	      (setq left (max 0 (- left (- right max-right)))))
+	     ((> right right-margin)
+	      ;; Move frame to left (we don't know its real width).
+	      (setq left (max left-margin (- left (- right right-margin)))))
 	     ((< left left-margin)
 	      ;; Move frame to right.
 	      (setq left left-margin)))))
+	;; Fit height to constraints.
 	(when height
+	  (unless frame-resize-pixelwise
+	    (setq height (* (/ (+ height char-height -1) char-height)
+			    char-height)))
 	  ;; Fit to maximum and minimum heights.
-	  (when max-height
-	    (setq height (min height max-height)))
-	  (when min-height
-	    (setq height (max height min-height)))
+	  (setq height (max (min height max-height) min-height))
 	  ;; Add extra height.
 	  (setq height (+ height extra-height))
-	  ;; Preserve bottom and top margins.
-	  (let ((bottom (+ top height extra-height))
-		(max-bottom (- workarea-height bottom-margin)))
+	  ;; Preserve margins.
+	  (let ((bottom (+ top height)))
 	    (cond
-	     ((> bottom max-bottom)
-	      ;; Move FRAME to left.
-	      (setq top (max 0 (- top (- bottom max-bottom)))))
+	     ((> bottom bottom-margin)
+	      ;; Move frame up (we don't know its real height).
+	      (setq top (max top-margin (- top (- bottom bottom-margin)))))
 	     ((< top top-margin)
 	      ;; Move frame down.
 	      (setq top top-margin)))))
@@ -7026,29 +7134,29 @@ FRAME."
 	(set-frame-size
 	 frame
 	 (if width
-	     (if window-resize-pixelwise
+	     (if frame-resize-pixelwise
 		 width
 	       (/ width char-width))
 	   (frame-text-width))
 	 (if height
-	     (if window-resize-pixelwise
+	     (if frame-resize-pixelwise
 		 height
 	       (/ height char-height))
 	   (frame-text-height))
-	 window-resize-pixelwise)))))
+	 frame-resize-pixelwise)))))
 
 (defun fit-window-to-buffer (&optional window max-height min-height max-width min-width)
   "Adjust size of WINDOW to display its buffer's contents exactly.
 WINDOW must be a live window and defaults to the selected one.
 
 If WINDOW is part of a vertical combination, adjust WINDOW's
-height.  The new height is calculated from the number of lines of
+height.  The new height is calculated from the actual height of
 the accessible portion of its buffer.  The optional argument
 MAX-HEIGHT specifies a maximum height and defaults to the height
 of WINDOW's frame.  The optional argument MIN-HEIGHT specifies a
 minimum height and defaults to `window-min-height'.  Both
-MAX-HEIGHT and MIN-HEIGHT are specified in lines and include the
-mode line and header line, if any.
+MAX-HEIGHT and MIN-HEIGHT are specified in lines and include mode
+and header line and a bottom divider, if any.
 
 If WINDOW is part of a horizontal combination and the value of
 the option `fit-window-to-buffer-horizontally' is non-nil, adjust
@@ -7058,11 +7166,11 @@ start position of WINDOW.  The optional argument MAX-WIDTH
 specifies a maximum width and defaults to the width of WINDOW's
 frame.  The optional argument MIN-WIDTH specifies a minimum width
 and defaults to `window-min-width'.  Both MAX-WIDTH and MIN-WIDTH
-are specified in columns and include fringes, margins and
-scrollbars, if any.
+are specified in columns and include fringes, margins, a
+scrollbar and a vertical divider, if any.
 
 Fit pixelwise if the option `window-resize-pixelwise' is non-nil.
-If WINDOW is its frame's root window, then if the option
+If WINDOW is its frame's root window and the option
 `fit-frame-to-buffer' is non-nil, call `fit-frame-to-buffer' to
 adjust the frame's size.
 
@@ -7078,7 +7186,9 @@ accessible position."
 	;; Fit WINDOW's frame to buffer.
 	(fit-frame-to-buffer
 	 (window-frame window)
-	 max-height min-height max-width min-width))
+	 max-height min-height max-width min-width
+	 (and (memq fit-frame-to-buffer '(vertically horizontally))
+	      fit-frame-to-buffer)))
     (with-selected-window window
       (let* ((pixelwise window-resize-pixelwise)
 	     (char-height (frame-char-height))
@@ -7097,7 +7207,10 @@ accessible position."
 			   (window-safe-min-pixel-height window)
 			 window-safe-min-height))
 		;; Preserve header and mode line if present.
-		(window-min-size nil nil t pixelwise)))
+		(max (if pixelwise
+			 (* char-height window-min-height)
+		       window-min-height)
+		     (window-min-size nil nil t pixelwise))))
 	     (max-height
 	      ;; Sanitize MAX-HEIGHT.
 	      (if (numberp max-height)
@@ -7125,8 +7238,7 @@ accessible position."
 			  (window-bottom-divider-width)))
 	  ;; Round height.
 	  (unless pixelwise
-	    (setq height (+ (/ height char-height)
-			    (if (zerop (% height char-height)) 0 1))))
+	    (setq height (/ (+ height char-height -1) char-height)))
 	  (unless (= height total-height)
 	    (window-resize-no-error
 	     window
@@ -7137,7 +7249,7 @@ accessible position."
 	 ((and fit-window-to-buffer-horizontally
 	       (not (window-size-fixed-p window t))
 	       (window-combined-p nil t))
-	  (let* ((total-width (window-size window nil pixelwise))
+	  (let* ((total-width (window-size window t pixelwise))
 		 (min-width
 		  ;; Sanitize MIN-WIDTH.
 		  (if (numberp min-width)
@@ -7149,7 +7261,10 @@ accessible position."
 			       (window-safe-min-pixel-width)
 			     window-safe-min-width))
 		    ;; Preserve fringes, margins, scrollbars if present.
-		    (window-min-size nil nil t pixelwise)))
+		    (max (if pixelwise
+			     (* char-width window-min-width)
+			   window-min-width)
+			 (window-min-size nil nil t pixelwise))))
 		 (max-width
 		  ;; Sanitize MAX-WIDTH.
 		  (if (numberp max-width)
@@ -7176,8 +7291,7 @@ accessible position."
 				    (if pixelwise char-height 1))))
 			   (window-right-divider-width))))
 	    (unless pixelwise
-	      (setq width (+ (/ width char-width)
-			     (if (zerop (% width char-width)) 0 1))))
+	      (setq width (/ (+ width char-width -1) char-width)))
 	    (unless (= width body-width)
 	      (window-resize-no-error
 	       window

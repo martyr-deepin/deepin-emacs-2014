@@ -1,6 +1,6 @@
 /* Fully extensible Emacs, running on Unix, intended for GNU.
 
-Copyright (C) 1985-1987, 1993-1995, 1997-1999, 2001-2013
+Copyright (C) 1985-1987, 1993-1995, 1997-1999, 2001-2014
   Free Software Foundation, Inc.
 
 This file is part of GNU Emacs.
@@ -105,8 +105,9 @@ extern void moncontrol (int mode);
 #include <sys/personality.h>
 #endif
 
-static const char emacs_version[] = VERSION;
+static const char emacs_version[] = PACKAGE_VERSION;
 static const char emacs_copyright[] = COPYRIGHT;
+static const char emacs_bugreport[] = PACKAGE_BUGREPORT;
 
 /* Empty lisp strings.  To avoid having to build any others.  */
 Lisp_Object empty_unibyte_string, empty_multibyte_string;
@@ -121,6 +122,9 @@ Lisp_Object Vlibrary_cache;
    on subsequent starts.  */
 bool initialized;
 
+/* Set to true if this instance of Emacs might dump.  */
+bool might_dump;
+
 #ifdef DARWIN_OS
 extern void unexec_init_emacs_zone (void);
 #endif
@@ -132,7 +136,7 @@ static void *malloc_state_ptr;
 /* From glibc, a routine that returns a copy of the malloc internal state.  */
 extern void *malloc_get_state (void);
 /* From glibc, a routine that overwrites the malloc internal state.  */
-extern int malloc_set_state (void*);
+extern int malloc_set_state (void *);
 /* True if the MALLOC_CHECK_ environment variable was set while
    dumping.  Used to work around a bug in glibc's malloc.  */
 static bool malloc_using_checking;
@@ -321,7 +325,7 @@ abbreviation for a --option.\n\
 Various environment variables and window system resources also affect\n\
 the operation of Emacs.  See the main documentation.\n\
 \n\
-Report bugs to bug-gnu-emacs@gnu.org.  First, please see the Bugs\n\
+Report bugs to " PACKAGE_BUGREPORT ".  First, please see the Bugs\n\
 section of the Emacs manual or the file BUGS.\n"
   };
 
@@ -731,6 +735,10 @@ main (int argc, char **argv)
   xputenv ("G_SLICE=always-malloc");
 #endif
 
+#ifndef CANNOT_DUMP
+  might_dump = !initialized;
+#endif
+
 #ifdef GNU_LINUX
   if (!initialized)
     {
@@ -749,6 +757,12 @@ main (int argc, char **argv)
      early as possible.  (unexw32.c calls this function as well, but
      the additional call here is harmless.) */
   cache_system_info ();
+#ifdef WINDOWSNT
+  /* On Windows 9X, we have to load UNICOWS.DLL as early as possible,
+     to have non-stub implementations of APIs we need to convert file
+     names between UTF-8 and the system's ANSI codepage.  */
+  maybe_load_unicows_dll ();
+#endif
 #endif
 
 #ifdef RUN_TIME_REMAP
@@ -994,10 +1008,13 @@ main (int argc, char **argv)
     {
       int i;
       printf ("Usage: %s [OPTION-OR-FILENAME]...\n", argv[0]);
-      for (i = 0; i < sizeof usage_message / sizeof *usage_message; i++)
+      for (i = 0; i < ARRAYELTS (usage_message); i++)
 	fputs (usage_message[i], stdout);
       exit (0);
     }
+
+  /* Make sure IS_DAEMON starts up as false.  */
+  daemon_pipe[1] = 0;
 
   if (argmatch (argv, argc, "-daemon", "--daemon", 5, NULL, &skip_args)
       || argmatch (argv, argc, "-daemon", "--daemon", 5, &dname_arg, &skip_args))
@@ -1099,6 +1116,8 @@ Using an Emacs configured with --with-x-toolkit=lucid does not have this problem
 
             argv[skip_args] = fdStr;
 
+	    fcntl (daemon_pipe[0], F_SETFD, 0);
+	    fcntl (daemon_pipe[1], F_SETFD, 0);
             execvp (argv[0], argv);
 	    emacs_perror (argv[0]);
 	    exit (errno == ENOENT ? EXIT_ENOENT : EXIT_CANNOT_INVOKE);
@@ -1115,6 +1134,7 @@ Using an Emacs configured with --with-x-toolkit=lucid does not have this problem
         sscanf (dname_arg, "\n%d,%d\n%s", &(daemon_pipe[0]), &(daemon_pipe[1]),
                 dname_arg2);
         dname_arg = *dname_arg2 ? dname_arg2 : NULL;
+	fcntl (daemon_pipe[1], F_SETFD, FD_CLOEXEC);
       }
 #endif /* DAEMON_MUST_EXEC */
 
@@ -1218,7 +1238,7 @@ Using an Emacs configured with --with-x-toolkit=lucid does not have this problem
 #ifdef HAVE_NS
   ns_pool = ns_alloc_autorelease_pool ();
 #ifdef NS_IMPL_GNUSTEP
-  /* GNUStep stupidly resets our locale settings after we made them.  */
+  /* GNUstep stupidly resets our locale settings after we made them.  */
   fixup_locale ();
 #endif
 
@@ -1797,7 +1817,7 @@ sort_args (int argc, char **argv)
 	    }
 
 	  /* Look for a match with a known old-fashioned option.  */
-	  for (i = 0; i < sizeof (standard_args) / sizeof (standard_args[0]); i++)
+	  for (i = 0; i < ARRAYELTS (standard_args); i++)
 	    if (!strcmp (argv[from], standard_args[i].name))
 	      {
 		options[from] = standard_args[i].nargs;
@@ -1819,8 +1839,7 @@ sort_args (int argc, char **argv)
 
 	      match = -1;
 
-	      for (i = 0;
-		   i < sizeof (standard_args) / sizeof (standard_args[0]); i++)
+	      for (i = 0; i < ARRAYELTS (standard_args); i++)
 		if (standard_args[i].longname
 		    && !strncmp (argv[from], standard_args[i].longname,
 				 thislen))
@@ -2013,9 +2032,7 @@ shut_down_emacs (int sig, Lisp_Object stuff)
   kill_buffer_processes (Qnil);
   Fdo_auto_save (Qt, Qnil);
 
-#ifdef CLASH_DETECTION
   unlock_all_files ();
-#endif
 
   /* There is a tendency for a SIGIO signal to arrive within exit,
      and cause a SIGHUP because the input descriptor is already closed.  */
@@ -2069,6 +2086,9 @@ You must run Emacs in batch mode in order to dump it.  */)
 
   if (! noninteractive)
     error ("Dumping Emacs works only in batch mode");
+
+  if (!might_dump)
+    error ("Emacs can be dumped only once");
 
 #ifdef GNU_LINUX
 
@@ -2440,6 +2460,12 @@ Emacs is running.  */);
 	       doc: /* String containing the configuration options Emacs was built with.  */);
   Vsystem_configuration_options = build_string (EMACS_CONFIG_OPTIONS);
 
+  DEFVAR_LISP ("system-configuration-features", Vsystem_configuration_features,
+	       doc: /* String listing some of the main features this Emacs was compiled with.
+An element of the form \"FOO\" generally means that HAVE_FOO was
+defined during the build.  */);
+  Vsystem_configuration_features = build_string (EMACS_CONFIG_FEATURES);
+
   DEFVAR_BOOL ("noninteractive", noninteractive1,
 	       doc: /* Non-nil means Emacs is running without interactive terminal.  */);
 
@@ -2517,6 +2543,10 @@ This is nil during initialization.  */);
 	       doc: /* Version numbers of this version of Emacs.  */);
   Vemacs_version = build_string (emacs_version);
 
+  DEFVAR_LISP ("report-emacs-bug-address", Vreport_emacs_bug_address,
+	       doc: /* Address of mailing list for GNU Emacs bugs.  */);
+  Vreport_emacs_bug_address = build_string (emacs_bugreport);
+
   DEFVAR_LISP ("dynamic-library-alist", Vdynamic_library_alist,
     doc: /* Alist of dynamic libraries vs external files implementing them.
 Each element is a list (LIBRARY FILE...), where the car is a symbol
@@ -2539,7 +2569,4 @@ libraries; only those already known by Emacs will be loaded.  */);
   Vlibrary_cache = Qnil;
   staticpro (&Vlibrary_cache);
 #endif
-
-  /* Make sure IS_DAEMON starts up as false.  */
-  daemon_pipe[1] = 0;
 }

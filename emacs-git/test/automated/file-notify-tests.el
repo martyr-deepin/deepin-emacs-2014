@@ -1,6 +1,6 @@
 ;;; file-notify-tests.el --- Tests of file notifications
 
-;; Copyright (C) 2013 Free Software Foundation, Inc.
+;; Copyright (C) 2013-2014 Free Software Foundation, Inc.
 
 ;; Author: Michael Albinus <michael.albinus@gmx.de>
 
@@ -19,15 +19,17 @@
 
 ;;; Commentary:
 
-;; Some of the tests require access to a remote host files.  Set
-;; $REMOTE_TEMPORARY_FILE_DIRECTORY to a suitable value in order
-;; to overwrite the default value.  If you want to skip tests
-;; accessing a remote host, set this environment variable to
-;; "/dev/null" or whatever is appropriate on your system.
+;; Some of the tests require access to a remote host files.  Since
+;; this could be problematic, a mock-up connection method "mock" is
+;; used.  Emulating a remote connection, it simply calls "sh -i".
+;; Tramp's file name handlers still run, so this test is sufficient
+;; except for connection establishing.
 
-;; When running the tests in batch mode, it must NOT require an
-;; interactive password prompt unless the environment variable
-;; $REMOTE_ALLOW_PASSWORD is set.
+;; If you want to test a real Tramp connection, set
+;; $REMOTE_TEMPORARY_FILE_DIRECTORY to a suitable value in order to
+;; overwrite the default value.  If you want to skip tests accessing a
+;; remote host, set this environment variable to "/dev/null" or
+;; whatever is appropriate on your system.
 
 ;; A whole test run can be performed calling the command `file-notify-test-all'.
 
@@ -35,13 +37,22 @@
 
 (require 'ert)
 (require 'filenotify)
+(require 'tramp)
 
 ;; There is no default value on w32 systems, which could work out of the box.
 (defconst file-notify-test-remote-temporary-file-directory
   (cond
    ((getenv "REMOTE_TEMPORARY_FILE_DIRECTORY"))
    ((eq system-type 'windows-nt) null-device)
-   (t (format "/ssh::%s" temporary-file-directory)))
+   (t (add-to-list
+       'tramp-methods
+       '("mock"
+	 (tramp-login-program        "sh")
+	 (tramp-login-args           (("-i")))
+	 (tramp-remote-shell         "/bin/sh")
+	 (tramp-remote-shell-args    ("-c"))
+	 (tramp-connection-timeout   10)))
+      (format "/mock::%s" temporary-file-directory)))
   "Temporary directory for Tramp tests.")
 
 (defvar file-notify--test-tmpfile nil)
@@ -49,13 +60,9 @@
 (defvar file-notify--test-results nil)
 (defvar file-notify--test-event nil)
 
-(require 'tramp)
-(setq tramp-verbose 0
+(setq password-cache-expiry nil
+      tramp-verbose 0
       tramp-message-show-message nil)
-
-;; Disable interactive passwords in batch mode.
-(when (and noninteractive (not (getenv "REMOTE_ALLOW_PASSWORD")))
-  (defalias 'tramp-read-passwd 'ignore))
 
 ;; This shall happen on hydra only.
 (when (getenv "NIX_STORE")
@@ -67,7 +74,7 @@
 This is needed for local `temporary-file-directory' only, in the
 remote case we return always `t'."
   (or file-notify--library
-      (not (file-remote-p temporary-file-directory))))
+      (file-remote-p temporary-file-directory)))
 
 (defvar file-notify--test-remote-enabled-checked nil
   "Cached result of `file-notify--test-remote-enabled'.
@@ -102,11 +109,6 @@ being the result.")
 	     file-notify-test-remote-temporary-file-directory)
 	    (ert-test (ert-get-test ',test)))
        (skip-unless (file-notify--test-remote-enabled))
-       ;; The local test could have passed, skipped, or quit.  All of
-       ;; these results should not prevent us to run the remote test.
-       ;; That's why we skip only for failed local tests.
-       (skip-unless
-	(not (ert-test-failed-p (ert-test-most-recent-result ert-test))))
        (tramp-cleanup-connection
 	(tramp-dissect-file-name temporary-file-directory) nil 'keep-password)
        (funcall (ert-test-body ert-test)))))
@@ -187,6 +189,13 @@ Save the result in `file-notify--test-results', for later analysis."
   (expand-file-name
    (make-temp-name "file-notify-test") temporary-file-directory))
 
+(defmacro file-notify--wait-for-events (timeout until)
+  "Wait for file notification events until form UNTIL is true.
+TIMEOUT is the maximum time to wait for, in seconds."
+  `(with-timeout (,timeout (ignore))
+     (while (null ,until)
+       (read-event nil nil 0.1))))
+
 (ert-deftest file-notify-test02-events ()
   "Check file creation/removal notifications."
   (skip-unless (file-notify--test-local-enabled))
@@ -205,6 +214,7 @@ Save the result in `file-notify--test-results', for later analysis."
 	  (write-region
 	   "any text" nil file-notify--test-tmpfile nil 'no-message)
 	  (delete-file file-notify--test-tmpfile)
+	  (sleep-for 0.1)
 
 	  ;; Check copy and rename.
 	  (write-region
@@ -212,18 +222,21 @@ Save the result in `file-notify--test-results', for later analysis."
 	  (copy-file file-notify--test-tmpfile file-notify--test-tmpfile1)
 	  (delete-file file-notify--test-tmpfile)
 	  (delete-file file-notify--test-tmpfile1)
+	  (sleep-for 0.1)
 
 	  (write-region
 	   "any text" nil file-notify--test-tmpfile nil 'no-message)
 	  (rename-file file-notify--test-tmpfile file-notify--test-tmpfile1)
-	  (delete-file file-notify--test-tmpfile1))
+	  (delete-file file-notify--test-tmpfile1)
+	  (sleep-for 0.1))
 
       ;; Wait for events, and exit.
-      (sit-for 5 'nodisplay)
+      (file-notify--wait-for-events 5 file-notify--test-results)
       (file-notify-rm-watch desc)
       (ignore-errors (delete-file file-notify--test-tmpfile))
       (ignore-errors (delete-file file-notify--test-tmpfile1))))
 
+  (should file-notify--test-results)
   (dolist (result file-notify--test-results)
     ;(message "%s" (ert-test-result-messages result))
     (when (ert-test-failed-p result)
@@ -261,7 +274,7 @@ This test is skipped in batch mode."
 	    ;; `auto-revert-buffers' runs every 5".
 	    (with-timeout (timeout (ignore))
 	      (while (null auto-revert-notify-watch-descriptor)
-		(sit-for 1 'nodisplay)))
+		(sleep-for 1)))
 
 	    ;; Check, that file notification has been used.
 	    (should auto-revert-mode)
@@ -270,7 +283,7 @@ This test is skipped in batch mode."
 
 	    ;; Modify file.  We wait for a second, in order to
 	    ;; have another timestamp.
-	    (sit-for 1)
+	    (sleep-for 1)
 	    (shell-command
 	     (format "echo -n 'another text' >%s"
 		     (or (file-remote-p file-notify--test-tmpfile 'localname)
@@ -278,14 +291,10 @@ This test is skipped in batch mode."
 
 	    ;; Check, that the buffer has been reverted.
 	    (with-current-buffer (get-buffer-create "*Messages*")
-	      (with-timeout (timeout (ignore))
-		(while
-		    (null (string-match
-			   (format "Reverting buffer `%s'." (buffer-name buf))
-			   (buffer-string)))
-		  ;; We must trigger the process filter to run.
-		  (when remote (accept-process-output nil 1))
-		  (sit-for 1 'nodisplay))))
+	      (file-notify--wait-for-events
+	       timeout
+	       (string-match (format "Reverting buffer `%s'." (buffer-name buf))
+			     (buffer-string))))
 	    (should (string-match "another text" (buffer-string)))))
 
       ;; Exit.

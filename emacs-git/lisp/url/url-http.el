@@ -1,8 +1,9 @@
 ;;; url-http.el --- HTTP retrieval routines
 
-;; Copyright (C) 1999, 2001, 2004-2013 Free Software Foundation, Inc.
+;; Copyright (C) 1999, 2001, 2004-2014 Free Software Foundation, Inc.
 
 ;; Author: Bill Perry <wmperry@gnu.org>
+;; Maintainer: emacs-devel@gnu.org
 ;; Keywords: comm, data, processes
 
 ;; This file is part of GNU Emacs.
@@ -356,9 +357,7 @@ request.")
              ;; End request
              "\r\n"
              ;; Any data
-             url-http-data
-	     ;; If `url-http-data' is nil, avoid two CRLFs (Bug#8931).
-	     (if url-http-data "\r\n")))
+             url-http-data))
            ""))
     (url-http-debug "Request is: \n%s" request)
     request))
@@ -416,7 +415,7 @@ Return the number of characters removed."
 	  (goto-char (point-max))
 	  (insert "<hr>Sorry, but I do not know how to handle " type
 		  " authentication.  If you'd like to write it,"
-		  " send it to " url-bug-address ".<hr>")
+		  " please use M-x report-emacs-bug RET.<hr>")
           ;; We used to set a `status' var (declared "special") but I can't
           ;; find the corresponding let-binding, so it's probably an error.
           ;; FIXME: Maybe it was supposed to set `success', i.e. to return t?

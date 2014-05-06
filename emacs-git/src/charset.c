@@ -1,6 +1,6 @@
 /* Basic character set support.
 
-Copyright (C) 2001-2013 Free Software Foundation, Inc.
+Copyright (C) 2001-2014 Free Software Foundation, Inc.
 
 Copyright (C) 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
   2005, 2006, 2007, 2008, 2009, 2010, 2011
@@ -2305,9 +2305,11 @@ init_charset (void)
          obscure problem (eg bug#6401), so better abort.  */
       fprintf (stderr, "Error: charsets directory not found:\n\
 %s\n\
-Emacs will not function correctly without the character map files.\n\
+Emacs will not function correctly without the character map files.\n%s\
 Please check your installation!\n",
-                   SDATA (tempdir));
+               SDATA (tempdir),
+               egetenv("EMACSDATA") ? "The EMACSDATA environment \
+variable is set, maybe it has the wrong value?\n" : "");
       exit (1);
     }
 
@@ -2384,7 +2386,7 @@ syms_of_charset (void)
   }
 
   charset_table = charset_table_init;
-  charset_table_size = sizeof charset_table_init / sizeof *charset_table_init;
+  charset_table_size = ARRAYELTS (charset_table_init);
   charset_table_used = 0;
 
   defsubr (&Scharsetp);

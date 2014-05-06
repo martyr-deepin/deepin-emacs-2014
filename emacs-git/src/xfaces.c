@@ -1,6 +1,6 @@
 /* xfaces.c -- "Face" primitives.
 
-Copyright (C) 1993-1994, 1998-2013 Free Software Foundation, Inc.
+Copyright (C) 1993-1994, 1998-2014 Free Software Foundation, Inc.
 
 This file is part of GNU Emacs.
 
@@ -273,10 +273,6 @@ along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #define IGNORE_DEFFACE_P(ATTR) EQ ((ATTR), QCignore_defface)
 
-/* Value is the number of elements of VECTOR.  */
-
-#define DIM(VECTOR) (sizeof (VECTOR) / sizeof *(VECTOR))
-
 /* Size of hash table of realized faces in face caches (should be a
    prime number).  */
 
@@ -324,6 +320,8 @@ static Lisp_Object Qborder, Qmouse, Qmenu;
 Lisp_Object Qmode_line_inactive;
 static Lisp_Object Qvertical_border;
 static Lisp_Object Qwindow_divider;
+static Lisp_Object Qwindow_divider_first_pixel;
+static Lisp_Object Qwindow_divider_last_pixel;
 
 /* The symbol `face-alias'.  A symbols having that property is an
    alias for another face.  Value of the property is the name of
@@ -513,7 +511,7 @@ DEFUN ("dump-colors", Fdump_colors, Sdump_colors, 0, 0, 0,
 
   fputc ('\n', stderr);
 
-  for (i = n = 0; i < sizeof color_count / sizeof color_count[0]; ++i)
+  for (i = n = 0; i < ARRAYELTS (color_count); ++i)
     if (color_count[i])
       {
 	fprintf (stderr, "%3d: %5d", i, color_count[i]);
@@ -694,7 +692,8 @@ init_frame_faces (struct frame *f)
 }
 
 
-/* Free face cache of frame F.  Called from delete_frame.  */
+/* Free face cache of frame F.  Called from frame-dependent
+   resource freeing function, e.g. (x|tty)_free_frame_resources.  */
 
 void
 free_frame_faces (struct frame *f)
@@ -5090,14 +5089,14 @@ Value is ORDER.  */)
 {
   Lisp_Object list;
   int i;
-  int indices[DIM (font_sort_order)];
+  int indices[ARRAYELTS (font_sort_order)];
 
   CHECK_LIST (order);
   memset (indices, 0, sizeof indices);
   i = 0;
 
   for (list = order;
-       CONSP (list) && i < DIM (indices);
+       CONSP (list) && i < ARRAYELTS (indices);
        list = XCDR (list), ++i)
     {
       Lisp_Object attr = XCAR (list);
@@ -5119,9 +5118,9 @@ Value is ORDER.  */)
       indices[i] = xlfd;
     }
 
-  if (!NILP (list) || i != DIM (indices))
+  if (!NILP (list) || i != ARRAYELTS (indices))
     signal_error ("Invalid font sort order", order);
-  for (i = 0; i < DIM (font_sort_order); ++i)
+  for (i = 0; i < ARRAYELTS (font_sort_order); ++i)
     if (indices[i] == 0)
       signal_error ("Invalid font sort order", order);
 
@@ -5248,6 +5247,10 @@ realize_basic_faces (struct frame *f)
       realize_named_face (f, Qmenu, MENU_FACE_ID);
       realize_named_face (f, Qvertical_border, VERTICAL_BORDER_FACE_ID);
       realize_named_face (f, Qwindow_divider, WINDOW_DIVIDER_FACE_ID);
+      realize_named_face (f, Qwindow_divider_first_pixel,
+			  WINDOW_DIVIDER_FIRST_PIXEL_FACE_ID);
+      realize_named_face (f, Qwindow_divider_last_pixel,
+			  WINDOW_DIVIDER_LAST_PIXEL_FACE_ID);
 
       /* Reflect changes in the `menu' face in menu bars.  */
       if (FRAME_FACE_CACHE (f)->menu_face_changed_p)
@@ -6341,7 +6344,7 @@ DEFUN ("dump-face", Fdump_face, Sdump_face, 0, 1, 0, doc: /* */)
       int i;
 
       fprintf (stderr, "font selection order: ");
-      for (i = 0; i < DIM (font_sort_order); ++i)
+      for (i = 0; i < ARRAYELTS (font_sort_order); ++i)
 	fprintf (stderr, "%d ", font_sort_order[i]);
       fprintf (stderr, "\n");
 
@@ -6451,6 +6454,8 @@ syms_of_xfaces (void)
   DEFSYM (Qmode_line_inactive, "mode-line-inactive");
   DEFSYM (Qvertical_border, "vertical-border");
   DEFSYM (Qwindow_divider, "window-divider");
+  DEFSYM (Qwindow_divider_first_pixel, "window-divider-first-pixel");
+  DEFSYM (Qwindow_divider_last_pixel, "window-divider-last-pixel");
   DEFSYM (Qtty_color_desc, "tty-color-desc");
   DEFSYM (Qtty_color_standard_values, "tty-color-standard-values");
   DEFSYM (Qtty_color_by_index, "tty-color-by-index");

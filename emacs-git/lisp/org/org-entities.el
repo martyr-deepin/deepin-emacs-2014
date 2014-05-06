@@ -1,6 +1,6 @@
 ;;; org-entities.el --- Support for special entities in Org-mode
 
-;; Copyright (C) 2010-2013 Free Software Foundation, Inc.
+;; Copyright (C) 2010-2014 Free Software Foundation, Inc.
 
 ;; Author: Carsten Dominik <carsten at orgmode dot org>,
 ;;         Ulf Stegemann <ulf at zeitform dot de>
@@ -330,7 +330,7 @@ packages to be loaded, add these packages to `org-latex-packages-alist'."
     ("infin" "\\propto" t "&infin;" "[infinity]" "[infinity]" "∞")
     ("infty" "\\infty" t "&infin;" "[infinity]" "[infinity]" "∞")
     ("prop" "\\propto" t "&prop;" "[proportional to]" "[proportional to]" "∝")
-    ("proptp" "\\propto" t "&prop;" "[proportional to]" "[proportional to]" "∝")
+    ("propto" "\\propto" t "&prop;" "[proportional to]" "[proportional to]" "∝")
     ("not" "\\textlnot{}" nil "&not;" "[angled dash]" "¬" "¬")
     ("neg" "\\neg{}" t "&not;" "[angled dash]" "¬" "¬")
     ("land" "\\land" t "&and;" "[logical and]" "[logical and]" "∧")
@@ -598,7 +598,9 @@ Kind can be any of `latex', `html', `ascii', `latin1', or `utf8'."
 	  (princ (format "   %-8s \\%-16s %-22s %-13s\n"
 			 utf8 name latex html))))))
   (with-current-buffer "*Org Entity Help*"
-    (org-mode))
+    (org-mode)
+    (when org-pretty-entities
+      (org-toggle-pretty-entities)))
   (select-window (get-buffer-window "*Org Entity Help*")))
 
 

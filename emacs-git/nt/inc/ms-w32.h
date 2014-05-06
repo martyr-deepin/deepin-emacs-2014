@@ -1,6 +1,6 @@
 /* System description file for Windows NT.
 
-Copyright (C) 1993-1995, 2001-2013 Free Software Foundation, Inc.
+Copyright (C) 1993-1995, 2001-2014 Free Software Foundation, Inc.
 
 This file is part of GNU Emacs.
 
@@ -235,6 +235,9 @@ extern struct tm * sys_localtime (const time_t *);
 extern int sys_unlink (const char *);
 #undef write
 #define write   sys_write
+#undef umask
+#define umask   sys_umask
+extern int sys_umask (int);
 
 /* Subprocess calls that are emulated.  */
 #define spawnve sys_spawnve
@@ -273,10 +276,12 @@ typedef int pid_t;
 #endif
 #define isatty    _isatty
 #define _longjmp  longjmp
+/* MinGW64 defines lseek to invoke lseek64.  */
+#ifndef lseek
 #define lseek     _lseek
+#endif
 #define popen     _popen
 #define pclose    _pclose
-#define umask	  _umask
 #define strdup    _strdup
 #define strupr    _strupr
 #define strnicmp  _strnicmp
@@ -386,13 +391,18 @@ extern int sigemptyset (sigset_t *);
 extern int sigaddset (sigset_t *, int);
 extern int sigfillset (sigset_t *);
 extern int sigprocmask (int, const sigset_t *, sigset_t *);
+/* MinGW64 defines pthread_sigmask as zero in its pthread_signal.h
+   header, but we have an implementation for that function in w32proc.c.  */
+#ifdef pthread_sigmask
+#undef pthread_sigmask
+#endif
 extern int pthread_sigmask (int, const sigset_t *, sigset_t *);
 extern int sigismember (const sigset_t *, int);
 extern int setpgrp (int, int);
 extern int sigaction (int, const struct sigaction *, struct sigaction *);
 extern int alarm (int);
 
-extern int sys_kill (int, int);
+extern int sys_kill (pid_t, int);
 
 
 /* For integration with MSDOS support.  */

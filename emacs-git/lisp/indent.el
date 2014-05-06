@@ -1,8 +1,8 @@
 ;;; indent.el --- indentation commands for Emacs  -*- lexical-binding:t -*-
 
-;; Copyright (C) 1985, 1995, 2001-2013 Free Software Foundation, Inc.
+;; Copyright (C) 1985, 1995, 2001-2014 Free Software Foundation, Inc.
 
-;; Maintainer: FSF
+;; Maintainer: emacs-devel@gnu.org
 ;; Package: emacs
 
 ;; This file is part of GNU Emacs.
@@ -76,9 +76,10 @@ that case, indent by aligning to the previous non-blank line."
       ;; indenting.  Replace with something ad-hoc.
       (let ((column (save-excursion
 		      (beginning-of-line)
-		      (skip-chars-backward "\n \t")
-		      (beginning-of-line)
-		      (current-indentation))))
+		      (if (bobp) 0
+                        (beginning-of-line 0)
+                        (if (looking-at "[ \t]*$") 0
+                          (current-indentation))))))
 	(if (<= (current-column) (current-indentation))
 	    (indent-line-to column)
 	  (save-excursion (indent-line-to column))))
@@ -213,7 +214,10 @@ indentation by specifying a large negative ARG."
               (indent-to (max 0 (+ indent (prefix-numeric-value arg))) 0))
           (delete-region (point) (progn (skip-chars-forward " \t") (point))))
         (forward-line 1))
-      (move-marker end nil))))
+      (move-marker end nil)
+      ;; Keep the active region in transient mode.
+      (when (eq (cadr overriding-terminal-local-map) indent-rigidly-map)
+	(setq deactivate-mark nil)))))
 
 (defun indent-rigidly--pop-undo ()
   (and (memq last-command '(indent-rigidly-left indent-rigidly-right
@@ -261,7 +265,7 @@ indentation by specifying a large negative ARG."
   "Indent current line to COLUMN.
 This function removes or adds spaces and tabs at beginning of line
 only if necessary.  It leaves point at end of indentation."
-  (back-to-indentation)
+  (backward-to-indentation 0)
   (let ((cur-col (current-column)))
     (cond ((< cur-col column)
 	   (if (>= (- column (* (/ cur-col tab-width) tab-width)) tab-width)
@@ -270,7 +274,7 @@ only if necessary.  It leaves point at end of indentation."
 	   (indent-to column))
 	  ((> cur-col column) ; too far right (after tab?)
 	   (delete-region (progn (move-to-column column t) (point))
-			  (progn (back-to-indentation) (point)))))))
+			  (progn (backward-to-indentation 0) (point)))))))
 
 (defun current-left-margin ()
   "Return the left margin to use for this line.
@@ -582,16 +586,17 @@ See also `indent-relative-maybe'."
 	  (move-marker opoint nil))
       (tab-to-tab-stop))))
 
-(defcustom tab-stop-list
-  nil
+(defcustom tab-stop-list nil
   "List of tab stop positions used by `tab-to-tab-stop'.
-This should be a list of integers, ordered from smallest to largest.
-It implicitly extends to infinity by repeating the last step (e.g. '(1 2 5)
-is equivalent to '(1 2 5 8 11)).
-If the list has less than 2 elements, `tab-width' is used as the \"last step\"."
+This should be nil, or a list of integers, ordered from smallest to largest.
+It implicitly extends to infinity through repetition of the last step.
+For example, '(1 2 5) is equivalent to '(1 2 5 8 11 ...).  If the list has
+fewer than 2 elements, `tab-width' is used as the \"last step\".
+A value of nil means a tab stop every `tab-width' columns."
   :group 'indent
+  :version "24.4"                       ; from explicit list to nil
+  :safe 'listp
   :type '(repeat integer))
-(put 'tab-stop-list 'safe-local-variable 'listp)
 
 (defvar edit-tab-stops-map
   (let ((map (make-sparse-keymap)))

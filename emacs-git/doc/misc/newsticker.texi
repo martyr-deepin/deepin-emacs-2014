@@ -7,13 +7,14 @@
 @syncodeindex vr cp
 @syncodeindex fn cp
 @syncodeindex pg cp
+@documentencoding UTF-8
 @comment %**end of header
 
 @copying
 This manual is for Newsticker (version @value{VERSION}, @value{UPDATED}).
 
 @noindent
-Copyright @copyright{} 2004--2013 Free Software Foundation, Inc.
+Copyright @copyright{} 2004--2014 Free Software Foundation, Inc.
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -165,8 +166,8 @@ feeds (in tree form), a list of headlines for the current feed, and
 the content of the current headline.  Feeds can be placed into groups,
 which themselves can be placed in groups and so on.
 @item Newsticker's @emph{plainview} displays all headlines in a
-single buffer, called @samp{*newsticker*}.  The modeline in the
-@samp{*newsticker*} buffer informs you whenever new headlines have
+single buffer, called @file{*newsticker*}.  The modeline in the
+@file{*newsticker*} buffer informs you whenever new headlines have
 arrived.
 @end itemize
 In both views clicking mouse-button 2 or pressing @key{RET} on a

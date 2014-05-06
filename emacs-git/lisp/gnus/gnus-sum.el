@@ -1,6 +1,6 @@
 ;;; gnus-sum.el --- summary mode commands for Gnus
 
-;; Copyright (C) 1996-2013 Free Software Foundation, Inc.
+;; Copyright (C) 1996-2014 Free Software Foundation, Inc.
 
 ;; Author: Lars Magne Ingebrigtsen <larsi@gnus.org>
 ;; Keywords: news
@@ -24,9 +24,6 @@
 
 ;;; Code:
 
-;; For Emacs <22.2 and XEmacs.
-(eval-and-compile
-  (unless (fboundp 'declare-function) (defmacro declare-function (&rest r))))
 (eval-when-compile
   (require 'cl))
 (eval-when-compile
@@ -897,6 +894,7 @@ subthreads, customize `gnus-subthread-sort-functions'."
   "*List of functions used for sorting subthreads in the summary buffer.
 By default, subthreads are sorted the same as threads, i.e.,
 according to the value of `gnus-thread-sort-functions'."
+  :version "24.4"
   :group 'gnus-summary-sort
   :type '(choice
 	  (const :tag "Sort subthreads like threads" gnus-thread-sort-functions)
@@ -2187,6 +2185,7 @@ increase the score of each group you read."
 (gnus-define-keys (gnus-summary-wash-mime-map "M" gnus-summary-wash-map)
   "w" gnus-article-decode-mime-words
   "c" gnus-article-decode-charset
+  "h" gnus-mime-buttonize-attachments-in-header
   "v" gnus-mime-view-all-parts
   "b" gnus-article-view-part)
 
@@ -2393,6 +2392,8 @@ increase the score of each group you read."
 	      ["QP" gnus-article-de-quoted-unreadable t]
 	      ["Base64" gnus-article-de-base64-unreadable t]
 	      ["View MIME buttons" gnus-summary-display-buttonized t]
+	      ["View MIME buttons in header"
+	       gnus-mime-buttonize-attachments-in-header t]
 	      ["View all" gnus-mime-view-all-parts t]
 	      ["Verify and Decrypt" gnus-summary-force-verify-and-decrypt t]
 	      ["Encrypt body" gnus-article-encrypt-body
@@ -4023,6 +4024,8 @@ If SELECT-ARTICLES, only select those articles from GROUP."
      ;; The group was successfully selected.
      (t
       (gnus-set-global-variables)
+      (when (boundp 'spam-install-hooks)
+	(spam-initialize))
       ;; Save the active value in effect when the group was entered.
       (setq gnus-newsgroup-active
 	    (gnus-copy-sequence
@@ -7215,6 +7218,7 @@ If FORCE (the prefix), also save the .newsrc file(s)."
     (gnus-dribble-save)))
 
 (declare-function gnus-cache-write-active "gnus-cache" (&optional force))
+(declare-function gnus-article-stop-animations "gnus-art" ())
 
 (defun gnus-summary-exit (&optional temporary leave-hidden)
   "Exit reading current newsgroup, and then return to group selection mode.
@@ -7319,7 +7323,6 @@ If FORCE (the prefix), also save the .newsrc file(s)."
       (unless quit-config
 	(setq gnus-newsgroup-name nil)))))
 
-(declare-function gnus-article-stop-animations "gnus-art" ())
 (declare-function gnus-stop-downloads "gnus-art" ())
 
 (defalias 'gnus-summary-quit 'gnus-summary-exit-no-update)
@@ -9082,6 +9085,41 @@ non-numeric or nil fetch the number specified by the
       (gnus-summary-limit-include-thread id)))
   (gnus-summary-show-thread))
 
+(defun gnus-summary-open-group-with-article (message-id)
+  "Open a group containing the article with the given MESSAGE-ID."
+  (interactive "sMessage-ID: ")
+  (require 'nndoc)
+  (with-temp-buffer
+    ;; Prepare a dummy article
+    (erase-buffer)
+    (insert "From nobody Tue Sep 13 22:05:34 2011\n\n")
+
+    ;; Prepare pretty modelines for summary and article buffers
+    (let ((gnus-summary-mode-line-format "Found %G")
+          (gnus-article-mode-line-format
+           ;; Group names just get in the way here, especially the
+           ;; abbreviated ones
+           (if (string-match "%[gG]" gnus-article-mode-line-format)
+	       (concat (substring gnus-article-mode-line-format
+				  0 (match-beginning 0))
+		       (substring gnus-article-mode-line-format (match-end 0)))
+	     gnus-article-mode-line-format)))
+
+      ;; Build an ephemeral group containing the dummy article (hidden)
+      (gnus-group-read-ephemeral-group
+       message-id
+       `(nndoc ,message-id
+	       (nndoc-address ,(current-buffer))
+	       (nndoc-article-type mbox))
+       :activate
+       (cons (current-buffer) gnus-current-window-configuration)
+       (not :request-only)
+       '(-1)				; :select-articles
+       (not :parameters)
+       0))				; :number
+    ;; Fetch the desired article
+    (gnus-summary-refer-article message-id)))
+
 (defun gnus-summary-refer-article (message-id)
   "Fetch an article specified by MESSAGE-ID."
   (interactive "sMessage-ID: ")
@@ -9745,6 +9783,8 @@ If ARG is a negative number, turn header display off."
 (declare-function article-narrow-to-head "gnus-art" ())
 (declare-function gnus-article-hidden-text-p "gnus-art" (type))
 (declare-function gnus-delete-wash-type "gnus-art" (type))
+(declare-function gnus-mime-buttonize-attachments-in-header
+		  "gnus-art" (&optional interactive))
 
 (defun gnus-summary-toggle-header (&optional arg)
   "Show the headers if they are hidden, or hide them if they are shown.
@@ -9776,7 +9816,10 @@ If ARG is a negative number, hide the unwanted header lines."
 		  (gnus-treat-hide-boring-headers nil))
 	      (gnus-delete-wash-type 'headers)
 	      (gnus-treat-article 'head))
-	  (gnus-treat-article 'head))
+	  (gnus-treat-article 'head)
+	  ;; Add attachment buttons to the header.
+	  (when gnus-mime-display-attachment-buttons-in-header
+	    (gnus-mime-buttonize-attachments-in-header)))
 	(widen)
 	(if window
 	    (set-window-start window (goto-char (point-min))))
@@ -10657,6 +10700,9 @@ groups."
   (gnus-article-edit-done))
 
 ;;; Respooling
+
+(defvar nnimap-split-fancy)
+(defvar nnimap-split-methods)
 
 (defun gnus-summary-respool-query (&optional silent trace)
   "Query where the respool algorithm would put this article."

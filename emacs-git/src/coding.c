@@ -1,5 +1,5 @@
 /* Coding system handler (conversion, detection, etc).
-   Copyright (C) 2001-2013 Free Software Foundation, Inc.
+   Copyright (C) 2001-2014 Free Software Foundation, Inc.
    Copyright (C) 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
      2005, 2006, 2007, 2008, 2009, 2010, 2011
      National Institute of Advanced Industrial Science and Technology (AIST)
@@ -1202,7 +1202,7 @@ detect_coding_utf_8 (struct coding_system *coding,
   bool multibytep = coding->src_multibyte;
   ptrdiff_t consumed_chars = 0;
   bool bom_found = 0;
-  int nchars = coding->head_ascii;
+  ptrdiff_t nchars = coding->head_ascii;
   int eol_seen = coding->eol_seen;
 
   detect_info->checked |= CATEGORY_MASK_UTF_8;
@@ -1300,6 +1300,7 @@ detect_coding_utf_8 (struct coding_system *coding,
 	   means that we found a valid non-ASCII characters.  */
 	detect_info->found |= CATEGORY_MASK_UTF_8_AUTO | CATEGORY_MASK_UTF_8_NOSIG;
     }
+  coding->detected_utf8_bytes = src_base - coding->source;
   coding->detected_utf8_chars = nchars;
   return 1;
 }
@@ -2013,7 +2014,7 @@ emacs_mule_char (struct coding_system *coding, const unsigned char *src,
   int charset_ID;
   unsigned code;
   int c;
-  int consumed_chars = 0;
+  ptrdiff_t consumed_chars = 0;
   bool mseq_found = 0;
 
   ONE_MORE_BYTE (c);
@@ -3190,7 +3191,7 @@ detect_coding_iso_2022 (struct coding_system *coding,
 	      if (! single_shifting
 		  && ! (rejected & CATEGORY_MASK_ISO_8_2))
 		{
-		  int len = 1;
+		  ptrdiff_t len = 1;
 		  while (src < src_end)
 		    {
 		      src_base = src;
@@ -4456,7 +4457,7 @@ encode_coding_iso_2022 (struct coding_system *coding)
 	{
 	  /* We have to produce designation sequences if any now.  */
 	  unsigned char desig_buf[16];
-	  int nbytes;
+	  ptrdiff_t nbytes;
 	  ptrdiff_t offset;
 
 	  charset_map_loaded = 0;
@@ -6211,7 +6212,7 @@ static Lisp_Object adjust_coding_eol_type (struct coding_system *coding,
    EOL_SEEN_LF, EOL_SEEN_CR, and EOL_SEEN_CRLF, but the value is
    reliable only when all the source bytes are ASCII.  */
 
-static int
+static ptrdiff_t
 check_ascii (struct coding_system *coding)
 {
   const unsigned char *src, *end;
@@ -6283,12 +6284,12 @@ check_ascii (struct coding_system *coding)
    the value is reliable only when all the source bytes are valid
    UTF-8.  */
 
-static int
+static ptrdiff_t
 check_utf_8 (struct coding_system *coding)
 {
   const unsigned char *src, *end;
   int eol_seen;
-  int nchars = coding->head_ascii;
+  ptrdiff_t nchars = coding->head_ascii;
 
   if (coding->head_ascii < 0)
     check_ascii (coding);
@@ -7414,7 +7415,7 @@ decode_coding (struct coding_system *coding)
   coding->carryover_bytes = 0;
   if (coding->consumed < coding->src_bytes)
     {
-      int nbytes = coding->src_bytes - coding->consumed;
+      ptrdiff_t nbytes = coding->src_bytes - coding->consumed;
       const unsigned char *src;
 
       coding_set_source (coding);
@@ -7890,7 +7891,7 @@ decode_coding_gap (struct coding_system *coding,
   coding->dst_multibyte = ! NILP (BVAR (current_buffer, enable_multibyte_characters));
 
   coding->head_ascii = -1;
-  coding->detected_utf8_chars = -1;
+  coding->detected_utf8_bytes = coding->detected_utf8_chars = -1;
   coding->eol_seen = EOL_SEEN_NONE;
   if (CODING_REQUIRE_DETECTION (coding))
     detect_coding (coding);
@@ -7907,7 +7908,8 @@ decode_coding_gap (struct coding_system *coding,
       if (chars != bytes)
 	{
 	  /* There exists a non-ASCII byte.  */
-	  if (EQ (CODING_ATTR_TYPE (attrs), Qutf_8))
+	  if (EQ (CODING_ATTR_TYPE (attrs), Qutf_8)
+	      && coding->detected_utf8_bytes == coding->src_bytes)
 	    {
 	      if (coding->detected_utf8_chars >= 0)
 		chars = coding->detected_utf8_chars;
@@ -8441,11 +8443,11 @@ from_unicode (Lisp_Object str)
 }
 
 Lisp_Object
-from_unicode_buffer (const wchar_t* wstr)
+from_unicode_buffer (const wchar_t *wstr)
 {
     return from_unicode (
         make_unibyte_string (
-            (char*) wstr,
+            (char *) wstr,
             /* we get one of the two final 0 bytes for free. */
             1 + sizeof (wchar_t) * wcslen (wstr)));
 }

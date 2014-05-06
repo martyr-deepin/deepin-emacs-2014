@@ -1,6 +1,6 @@
 ;;; org-list.el --- Plain lists for Org-mode
 ;;
-;; Copyright (C) 2004-2013 Free Software Foundation, Inc.
+;; Copyright (C) 2004-2014 Free Software Foundation, Inc.
 ;;
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;;	   Bastien Guerry <bzg@gnu.org>
@@ -1223,7 +1223,7 @@ some heuristics to guess the result."
        ;; When `org-blank-before-new-entry' says so, it is 1.
        ((eq insert-blank-p t) 1)
        ;; `plain-list-item' is 'auto.  Count blank lines separating
-       ;; neighbours items in list.
+       ;; neighbors' items in list.
        (t (let ((next-p (org-list-get-next-item item struct prevs)))
 	    (cond
 	     ;; Is there a next item?

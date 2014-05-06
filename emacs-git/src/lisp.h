@@ -1,6 +1,7 @@
 /* Fundamental definitions for GNU Emacs Lisp interpreter.
 
-Copyright (C) 1985-1987, 1993-1995, 1997-2013 Free Software Foundation, Inc.
+Copyright (C) 1985-1987, 1993-1995, 1997-2014 Free Software Foundation,
+Inc.
 
 This file is part of GNU Emacs.
 
@@ -57,26 +58,52 @@ INLINE_HEADER_BEGIN
 #define max(a, b) ((a) > (b) ? (a) : (b))
 #define min(a, b) ((a) < (b) ? (a) : (b))
 
+/* Number of elements in an array.  */
+#define ARRAYELTS(arr) (sizeof (arr) / sizeof (arr)[0])
+
+/* Number of bits in a Lisp_Object tag.  */
+DEFINE_GDB_SYMBOL_BEGIN (int, GCTYPEBITS)
+#define GCTYPEBITS 3
+DEFINE_GDB_SYMBOL_END (GCTYPEBITS)
+
+/* The number of bits needed in an EMACS_INT over and above the number
+   of bits in a pointer.  This is 0 on systems where:
+   1.  We can specify multiple-of-8 alignment on static variables.
+   2.  We know malloc returns a multiple of 8.  */
+#if (defined alignas \
+     && (defined GNU_MALLOC || defined DOUG_LEA_MALLOC || defined __GLIBC__ \
+	 || defined DARWIN_OS || defined __sun))
+# define NONPOINTER_BITS 0
+#else
+# define NONPOINTER_BITS GCTYPEBITS
+#endif
+
 /* EMACS_INT - signed integer wide enough to hold an Emacs value
    EMACS_INT_MAX - maximum value of EMACS_INT; can be used in #if
    pI - printf length modifier for EMACS_INT
    EMACS_UINT - unsigned variant of EMACS_INT */
 #ifndef EMACS_INT_MAX
-# if LONG_MAX < LLONG_MAX && defined WIDE_EMACS_INT
-typedef long long int EMACS_INT;
-typedef unsigned long long int EMACS_UINT;
-#  define EMACS_INT_MAX LLONG_MAX
-#  define pI "ll"
-# elif INT_MAX < LONG_MAX
-typedef long int EMACS_INT;
-typedef unsigned long EMACS_UINT;
-#  define EMACS_INT_MAX LONG_MAX
-#  define pI "l"
-# else
+# if INTPTR_MAX <= 0
+#  error "INTPTR_MAX misconfigured"
+# elif INTPTR_MAX <= INT_MAX >> NONPOINTER_BITS && !defined WIDE_EMACS_INT
 typedef int EMACS_INT;
 typedef unsigned int EMACS_UINT;
 #  define EMACS_INT_MAX INT_MAX
 #  define pI ""
+# elif INTPTR_MAX <= LONG_MAX >> NONPOINTER_BITS && !defined WIDE_EMACS_INT
+typedef long int EMACS_INT;
+typedef unsigned long EMACS_UINT;
+#  define EMACS_INT_MAX LONG_MAX
+#  define pI "l"
+/* Check versus LLONG_MAX, not LLONG_MAX >> NONPOINTER_BITS.
+   In theory this is not safe, but in practice it seems to be OK.  */
+# elif INTPTR_MAX <= LLONG_MAX
+typedef long long int EMACS_INT;
+typedef unsigned long long int EMACS_UINT;
+#  define EMACS_INT_MAX LLONG_MAX
+#  define pI "ll"
+# else
+#  error "INTPTR_MAX too large"
 # endif
 #endif
 
@@ -88,7 +115,7 @@ enum {  BOOL_VECTOR_BITS_PER_CHAR =
 };
 
 /* An unsigned integer type representing a fixed-length bit sequence,
-   suitable for words in a Lisp bool vector.  Normally it is size_t
+   suitable for bool vector words, GC mark bits, etc.  Normally it is size_t
    for speed, but it is unsigned char on weird platforms.  */
 #if BOOL_VECTOR_BITS_PER_CHAR == CHAR_BIT
 typedef size_t bits_word;
@@ -106,7 +133,6 @@ enum
   {
     BITS_PER_CHAR      = CHAR_BIT,
     BITS_PER_SHORT     = CHAR_BIT * sizeof (short),
-    BITS_PER_INT       = CHAR_BIT * sizeof (int),
     BITS_PER_LONG      = CHAR_BIT * sizeof (long int),
     BITS_PER_EMACS_INT = CHAR_BIT * sizeof (EMACS_INT)
   };
@@ -210,12 +236,6 @@ extern bool suppress_checking EXTERNALLY_VISIBLE;
 
 enum Lisp_Bits
   {
-    /* Number of bits in a Lisp_Object tag.  This can be used in #if,
-       and for GDB's sake also as a regular symbol.  */
-    GCTYPEBITS =
-#define GCTYPEBITS 3
-	GCTYPEBITS,
-
     /* 2**GCTYPEBITS.  This must be a macro that expands to a literal
        integer constant, for MSVC.  */
 #define GCALIGNMENT 8
@@ -239,31 +259,19 @@ enum Lisp_Bits
    This can be used in #if, e.g., '#if VAL_MAX < UINTPTR_MAX' below.  */
 #define VAL_MAX (EMACS_INT_MAX >> (GCTYPEBITS - 1))
 
-/* Unless otherwise specified, use USE_LSB_TAG on systems where:  */
-#ifndef USE_LSB_TAG
-/* 1.  We know malloc returns a multiple of 8.  */
-# if (defined GNU_MALLOC || defined DOUG_LEA_MALLOC || defined __GLIBC__ \
-      || defined DARWIN_OS || defined __sun)
-/* 2.  We can specify multiple-of-8 alignment on static variables.  */
-#  ifdef alignas
-/* 3.  Pointers-as-ints exceed VAL_MAX.
+/* Whether the least-significant bits of an EMACS_INT contain the tag.
    On hosts where pointers-as-ints do not exceed VAL_MAX, USE_LSB_TAG is:
     a. unnecessary, because the top bits of an EMACS_INT are unused, and
     b. slower, because it typically requires extra masking.
-   So, default USE_LSB_TAG to true only on hosts where it might be useful.  */
-#   if VAL_MAX < UINTPTR_MAX
-#    define USE_LSB_TAG true
-#   endif
-#  endif
-# endif
-#endif
-#ifdef USE_LSB_TAG
-# undef USE_LSB_TAG
-enum enum_USE_LSB_TAG { USE_LSB_TAG = true };
-# define USE_LSB_TAG true
-#else
-enum enum_USE_LSB_TAG { USE_LSB_TAG = false };
-# define USE_LSB_TAG false
+   So, USE_LSB_TAG is true only on hosts where it might be useful.  */
+DEFINE_GDB_SYMBOL_BEGIN (bool, USE_LSB_TAG)
+#define USE_LSB_TAG (EMACS_INT_MAX >> GCTYPEBITS < INTPTR_MAX)
+DEFINE_GDB_SYMBOL_END (USE_LSB_TAG)
+
+#if !USE_LSB_TAG && !defined WIDE_EMACS_INT
+# error "USE_LSB_TAG not supported on this platform; please report this." \
+	"Try 'configure --with-wide-int' to work around the problem."
+error !;
 #endif
 
 #ifndef alignas
@@ -338,15 +346,15 @@ enum enum_USE_LSB_TAG { USE_LSB_TAG = false };
 #define lisp_h_XCONS(a) \
    (eassert (CONSP (a)), (struct Lisp_Cons *) XUNTAG (a, Lisp_Cons))
 #define lisp_h_XHASH(a) XUINT (a)
-#define lisp_h_XPNTR(a) \
-   ((void *) (intptr_t) ((XLI (a) & VALMASK) | DATA_SEG_BITS))
+#define lisp_h_XPNTR(a) ((void *) (intptr_t) (XLI (a) & VALMASK))
 #define lisp_h_XSYMBOL(a) \
    (eassert (SYMBOLP (a)), (struct Lisp_Symbol *) XUNTAG (a, Lisp_Symbol))
 #ifndef GC_CHECK_CONS_LIST
 # define lisp_h_check_cons_list() ((void) 0)
 #endif
 #if USE_LSB_TAG
-# define lisp_h_make_number(n) XIL ((EMACS_INT) (n) << INTTYPEBITS)
+# define lisp_h_make_number(n) \
+    XIL ((EMACS_INT) ((EMACS_UINT) (n) << INTTYPEBITS))
 # define lisp_h_XFASTINT(a) XINT (a)
 # define lisp_h_XINT(a) (XLI (a) >> INTTYPEBITS)
 # define lisp_h_XTYPE(a) ((enum Lisp_Type) (XLI (a) & ~VALMASK))
@@ -600,18 +608,8 @@ enum pvec_type
   PVEC_FONT /* Should be last because it's used for range checking.  */
 };
 
-/* DATA_SEG_BITS forces extra bits to be or'd in with any pointers
-   which were stored in a Lisp_Object.  */
-#ifndef DATA_SEG_BITS
-# define DATA_SEG_BITS 0
-#endif
-enum { gdb_DATA_SEG_BITS = DATA_SEG_BITS };
-#undef DATA_SEG_BITS
-
 enum More_Lisp_Bits
   {
-    DATA_SEG_BITS = gdb_DATA_SEG_BITS,
-
     /* For convenience, we also store the number of elements in these bits.
        Note that this size is not necessarily the memory-footprint size, but
        only the number of Lisp_Object fields (that need to be traced by GC).
@@ -628,7 +626,7 @@ enum More_Lisp_Bits
 
     /* Used to extract pseudovector subtype information.  */
     PSEUDOVECTOR_AREA_BITS = PSEUDOVECTOR_SIZE_BITS + PSEUDOVECTOR_REST_BITS,
-    PVEC_TYPE_MASK = 0x3f << PSEUDOVECTOR_AREA_BITS,
+    PVEC_TYPE_MASK = 0x3f << PSEUDOVECTOR_AREA_BITS
   };
 
 /* These functions extract various sorts of values from a Lisp_Object.
@@ -667,7 +665,14 @@ LISP_MACRO_DEFUN (XUNTAG, void *, (Lisp_Object a, int type), (a, type))
 INLINE Lisp_Object
 make_number (EMACS_INT n)
 {
-  return XIL (USE_LSB_TAG ? n << INTTYPEBITS : n & INTMASK);
+  if (USE_LSB_TAG)
+    {
+      EMACS_UINT u = n;
+      n = u << INTTYPEBITS;
+    }
+  else
+    n &= INTMASK;
+  return XIL (n);
 }
 
 /* Extract A's value as a signed integer.  */
@@ -675,7 +680,12 @@ INLINE EMACS_INT
 XINT (Lisp_Object a)
 {
   EMACS_INT i = XLI (a);
-  return (USE_LSB_TAG ? i : i << INTTYPEBITS) >> INTTYPEBITS;
+  if (! USE_LSB_TAG)
+    {
+      EMACS_UINT u = i;
+      i = u << INTTYPEBITS;
+    }
+  return i >> INTTYPEBITS;
 }
 
 /* Like XINT (A), but may be faster.  A must be nonnegative.
@@ -795,6 +805,7 @@ extern _Noreturn Lisp_Object wrong_type_argument (Lisp_Object, Lisp_Object);
 
 /* Defined in emacs.c.  */
 extern bool initialized;
+extern bool might_dump;
 
 /* Defined in eval.c.  */
 extern Lisp_Object Qautoload;
@@ -1562,6 +1573,9 @@ struct Lisp_Symbol
   /* True means that this variable has been explicitly declared
      special (with `defvar' etc), and shouldn't be lexically bound.  */
   bool_bf declared_special : 1;
+
+  /* True if pointed to from purespace and hence can't be GC'd.  */
+  bool_bf pinned : 1;
 
   /* The symbol's name, as a Lisp string.  */
   Lisp_Object name;
@@ -2525,11 +2539,13 @@ CHECK_WINDOW (Lisp_Object x)
 {
   CHECK_TYPE (WINDOWP (x), Qwindowp, x);
 }
+#ifdef subprocesses
 INLINE void
 CHECK_PROCESS (Lisp_Object x)
 {
   CHECK_TYPE (PROCESSP (x), Qprocessp, x);
 }
+#endif
 INLINE void
 CHECK_NATNUM (Lisp_Object x)
 {
@@ -4023,6 +4039,7 @@ extern void syms_of_minibuf (void);
 /* Defined in callint.c.  */
 
 extern Lisp_Object Qminus, Qplus;
+extern Lisp_Object Qprogn;
 extern Lisp_Object Qwhen;
 extern Lisp_Object Qmouse_leave_buffer_hook;
 extern void syms_of_callint (void);
@@ -4134,7 +4151,6 @@ extern bool running_asynch_code;
 
 /* Defined in process.c.  */
 extern Lisp_Object QCtype, Qlocal;
-extern Lisp_Object Qprocessp;
 extern void kill_buffer_processes (Lisp_Object);
 extern bool wait_reading_process_output (intmax_t, int, int, bool,
 					 Lisp_Object,
@@ -4193,9 +4209,8 @@ extern void syms_of_macros (void);
 extern Lisp_Object Qapply;
 extern Lisp_Object Qinhibit_read_only;
 extern void truncate_undo_list (struct buffer *);
-extern void record_marker_adjustment (Lisp_Object, ptrdiff_t);
 extern void record_insert (ptrdiff_t, ptrdiff_t);
-extern void record_delete (ptrdiff_t, Lisp_Object);
+extern void record_delete (ptrdiff_t, Lisp_Object, bool);
 extern void record_first_change (void);
 extern void record_change (ptrdiff_t, ptrdiff_t);
 extern void record_property_change (ptrdiff_t, ptrdiff_t,
@@ -4232,8 +4247,6 @@ extern void init_sigio (int);
 extern void sys_subshell (void);
 extern void sys_suspend (void);
 extern void discard_tty_input (void);
-extern void block_tty_out_signal (void);
-extern void unblock_tty_out_signal (void);
 extern void init_sys_modes (struct tty_display_info *);
 extern void reset_sys_modes (struct tty_display_info *);
 extern void init_all_sys_modes (void);
@@ -4393,6 +4406,7 @@ extern void *xpalloc (void *, ptrdiff_t *, ptrdiff_t, ptrdiff_t, ptrdiff_t);
 
 extern char *xstrdup (const char *);
 extern char *xlispstrdup (Lisp_Object);
+extern void dupstring (char **, char const *);
 extern void xputenv (const char *);
 
 extern char *egetenv (const char *);

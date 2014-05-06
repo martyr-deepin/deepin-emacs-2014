@@ -2,10 +2,11 @@
 @c %**start of header
 @setfilename ../../info/rcirc
 @settitle rcirc Manual
+@documentencoding UTF-8
 @c %**end of header
 
 @copying
-Copyright @copyright{} 2006--2013 Free Software Foundation, Inc.
+Copyright @copyright{} 2006--2014 Free Software Foundation, Inc.
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -211,7 +212,7 @@ Emacs, or join @code{#rcirc}, the channel about @code{rcirc}.
 
 @cindex server buffer
 When you have answered these questions, @code{rcirc} will create a server
-buffer, which will be named something like @code{*irc.freenode.net*},
+buffer, which will be named something like @file{*irc.freenode.net*},
 and a channel buffer for each of the channels you wanted to join.
 
 @kindex RET

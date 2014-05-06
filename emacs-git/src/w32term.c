@@ -1,6 +1,6 @@
 /* Implementation of GUI terminal on the Microsoft Windows API.
 
-Copyright (C) 1989, 1993-2013 Free Software Foundation, Inc.
+Copyright (C) 1989, 1993-2014 Free Software Foundation, Inc.
 
 This file is part of GNU Emacs.
 
@@ -628,25 +628,37 @@ static void
 w32_draw_window_divider (struct window *w, int x0, int x1, int y0, int y1)
 {
   struct frame *f = XFRAME (WINDOW_FRAME (w));
-  RECT r;
-  HDC hdc;
-  struct face *face;
+  HDC hdc = get_frame_dc (f);
+  struct face *face = FACE_FROM_ID (f, WINDOW_DIVIDER_FACE_ID);
+  struct face *face_first = FACE_FROM_ID (f, WINDOW_DIVIDER_FIRST_PIXEL_FACE_ID);
+  struct face *face_last = FACE_FROM_ID (f, WINDOW_DIVIDER_LAST_PIXEL_FACE_ID);
+  unsigned long color = face ? face->foreground : FRAME_FOREGROUND_PIXEL (f);
+  unsigned long color_first = (face_first
+			       ? face_first->foreground
+			       : FRAME_FOREGROUND_PIXEL (f));
+  unsigned long color_last = (face_last
+			      ? face_last->foreground
+			      : FRAME_FOREGROUND_PIXEL (f));
 
-  r.left = x0;
-  r.right = x1;
-  r.top = y0;
-  r.bottom = y1;
-
-  hdc = get_frame_dc (f);
-  face = FACE_FROM_ID (f, WINDOW_DIVIDER_FACE_ID);
-  if (face)
-    w32_fill_rect (f, hdc, face->foreground, &r);
+  if (y1 - y0 > x1 - x0 && x1 - x0 > 2)
+    /* Vertical.  */
+    {
+      w32_fill_area_abs (f, hdc, color_first, x0, y0, x0 + 1, y1);
+      w32_fill_area_abs (f, hdc, color, x0 + 1, y0, x1 - 1, y1);
+      w32_fill_area_abs (f, hdc, color_last, x1 - 1, y0, x1, y1);
+    }
+  else if (x1 - x0 > y1 - y0 && y1 - y0 > 3)
+    /* Horizontal.  */
+    {
+      w32_fill_area_abs (f, hdc, color_first, x0, y0, x1, y0 + 1);
+      w32_fill_area_abs (f, hdc, color, x0, y0 + 1, x1, y1 - 1);
+      w32_fill_area_abs (f, hdc, color_last, x0, y1 - 1, x1, y1);
+    }
   else
-    w32_fill_rect (f, hdc, FRAME_FOREGROUND_PIXEL (f), &r);
+    w32_fill_area_abs (f, hdc, color, x0, y0, x1, y1);
 
   release_frame_dc (f, hdc);
 }
-
 
 /* End update of window W.
 
@@ -1066,10 +1078,7 @@ x_set_glyph_string_gc (struct glyph_string *s)
       s->stippled_p = s->face->stipple != 0;
     }
   else
-    {
-      s->gc = s->face->gc;
-      s->stippled_p = s->face->stipple != 0;
-    }
+    emacs_abort ();
 
   /* GC must have been set.  */
   eassert (s->gc != 0);
@@ -1880,6 +1889,7 @@ static void
 x_draw_image_relief (struct glyph_string *s)
 {
   int x1, y1, thick, raised_p, top_p, bot_p, left_p, right_p;
+  int extra_x, extra_y;
   RECT r;
   int x = s->x;
   int y = s->ybase - image_ascent (s->img, s->face, &s->slice);
@@ -1913,16 +1923,31 @@ x_draw_image_relief (struct glyph_string *s)
 
   x1 = x + s->slice.width - 1;
   y1 = y + s->slice.height - 1;
+
+  extra_x = extra_y = 0;
+  if (s->face->id == TOOL_BAR_FACE_ID)
+    {
+      if (CONSP (Vtool_bar_button_margin)
+	  && INTEGERP (XCAR (Vtool_bar_button_margin))
+	  && INTEGERP (XCDR (Vtool_bar_button_margin)))
+	{
+	  extra_x = XINT (XCAR (Vtool_bar_button_margin));
+	  extra_y = XINT (XCDR (Vtool_bar_button_margin));
+	}
+      else if (INTEGERP (Vtool_bar_button_margin))
+	extra_x = extra_y = XINT (Vtool_bar_button_margin);
+    }
+
   top_p = bot_p = left_p = right_p = 0;
 
   if (s->slice.x == 0)
-    x -= thick, left_p = 1;
+    x -= thick + extra_x, left_p = 1;
   if (s->slice.y == 0)
-    y -= thick, top_p = 1;
+    y -= thick + extra_y, top_p = 1;
   if (s->slice.x + s->slice.width == s->img->width)
-    x1 += thick, right_p = 1;
+    x1 += thick + extra_x, right_p = 1;
   if (s->slice.y + s->slice.height == s->img->height)
-    y1 += thick, bot_p = 1;
+    y1 += thick + extra_y, bot_p = 1;
 
   x_setup_relief_colors (s);
   get_glyph_string_clip_rect (s, &r);
@@ -2057,10 +2082,14 @@ x_draw_image_glyph_string (struct glyph_string *s)
   int x, y;
   int box_line_hwidth = eabs (s->face->box_line_width);
   int box_line_vwidth = max (s->face->box_line_width, 0);
-  int height;
+  int height, width;
   HBITMAP pixmap = 0;
 
-  height = s->height - 2 * box_line_vwidth;
+  height = s->height;
+  if (s->slice.y == 0)
+    height -= box_line_vwidth;
+  if (s->slice.y + s->slice.height >= s->img->height)
+    height -= box_line_vwidth;
 
   /* Fill background with face under the image.  Do it only if row is
      taller than image or if image has a clip mask to reduce
@@ -2073,10 +2102,14 @@ x_draw_image_glyph_string (struct glyph_string *s)
       || s->img->pixmap == 0
       || s->width != s->background_width)
     {
+      width = s->background_width;
       x = s->x;
       if (s->first_glyph->left_box_line_p
 	  && s->slice.x == 0)
-	x += box_line_hwidth;
+	{
+	  x += box_line_hwidth;
+	  width -= box_line_hwidth;
+	}
 
       y = s->y;
       if (s->slice.y == 0)
@@ -2122,7 +2155,7 @@ x_draw_image_glyph_string (struct glyph_string *s)
 	}
       else
 #endif
-	x_draw_glyph_string_bg_rect (s, x, y, s->background_width, height);
+	x_draw_glyph_string_bg_rect (s, x, y, width, height);
 
       s->background_filled_p = 1;
     }
@@ -3716,7 +3749,7 @@ w32_set_vertical_scroll_bar (struct window *w,
 
   /* Compute the left edge and the width of the scroll bar area.  */
   left = WINDOW_SCROLL_BAR_AREA_X (w);
-  width = WINDOW_CONFIG_SCROLL_BAR_WIDTH (w);
+  width = WINDOW_SCROLL_BAR_AREA_WIDTH (w);
 
   /* Does the scroll bar exist yet?  */
   if (NILP (w->vertical_scroll_bar))
@@ -4672,6 +4705,10 @@ w32_read_socket (struct terminal *terminal,
 		  {
 		    bool iconified = FRAME_ICONIFIED_P (f);
 
+		    /* The following was made unconditional in a
+		       pathetic attempt to fix bug#16967 in revision
+		       116716 but, considered counterproductive was made
+		       conditional again in revision 116727.  martin */
 		    if (iconified)
 		      SET_FRAME_VISIBLE (f, 1);
 		    SET_FRAME_ICONIFIED (f, 0);
@@ -4686,7 +4723,7 @@ w32_read_socket (struct terminal *terminal,
 			   here since Windows sends a WM_MOVE message
 			   BEFORE telling us the Window is minimized
 			   when the Window is iconified, with 3000,3000
-			   as the co-ords. */
+			   as the co-ords.  */
 			x_real_positions (f, &f->left_pos, &f->top_pos);
 
 			inev.kind = DEICONIFY_EVENT;
@@ -4720,8 +4757,8 @@ w32_read_socket (struct terminal *terminal,
 	      width = rect.right - rect.left;
 	      text_width = FRAME_PIXEL_TO_TEXT_WIDTH (f, width);
 	      text_height = FRAME_PIXEL_TO_TEXT_HEIGHT (f, height);
-	      rows = FRAME_PIXEL_HEIGHT_TO_TEXT_LINES (f, height);
-	      columns = FRAME_PIXEL_WIDTH_TO_TEXT_COLS (f, width);
+	      /* rows = FRAME_PIXEL_HEIGHT_TO_TEXT_LINES (f, height); */
+	      /* columns = FRAME_PIXEL_WIDTH_TO_TEXT_COLS (f, width); */
 
 	      /* TODO: Clip size to the screen dimensions.  */
 
@@ -4841,6 +4878,10 @@ w32_read_socket (struct terminal *terminal,
 	  if (f)
 	    {
 	      dpyinfo->n_cbits = msg.msg.wParam;
+	      /* The new display could have a different resolution, in
+		 which case we must reconsider what fullscreen
+		 means.  */
+	      x_check_fullscreen (f);
 	      DebPrint (("display change: %d %d\n",
 			 (short) LOWORD (msg.msg.lParam),
 			 (short) HIWORD (msg.msg.lParam)));
@@ -5361,6 +5402,7 @@ Lisp_Object
 x_new_font (struct frame *f, Lisp_Object font_object, int fontset)
 {
   struct font *font = XFONT_OBJECT (font_object);
+  int unit;
 
   if (fontset < 0)
     fontset = fontset_from_font (font_object);
@@ -5372,22 +5414,21 @@ x_new_font (struct frame *f, Lisp_Object font_object, int fontset)
 
   FRAME_FONT (f) = font;
   FRAME_BASELINE_OFFSET (f) = font->baseline_offset;
-  FRAME_COLUMN_WIDTH (f) = font->average_width;
+  FRAME_COLUMN_WIDTH (f) = unit = font->average_width;
   FRAME_LINE_HEIGHT (f) = font->height;
 
   compute_fringe_widths (f, 1);
 
-  /* Compute the scroll bar width in character columns.  */
+  /* Compute number of scrollbar columns.  */
+  unit = FRAME_COLUMN_WIDTH (f);
   if (FRAME_CONFIG_SCROLL_BAR_WIDTH (f) > 0)
-    {
-      int wid = FRAME_COLUMN_WIDTH (f);
-      FRAME_CONFIG_SCROLL_BAR_COLS (f)
-	= (FRAME_CONFIG_SCROLL_BAR_WIDTH (f) + wid - 1) / wid;
-    }
+    FRAME_CONFIG_SCROLL_BAR_COLS (f)
+      = (FRAME_CONFIG_SCROLL_BAR_WIDTH (f) + unit - 1) / unit;
   else
     {
-      int wid = FRAME_COLUMN_WIDTH (f);
-      FRAME_CONFIG_SCROLL_BAR_COLS (f) = (14 + wid - 1) / wid;
+      FRAME_CONFIG_SCROLL_BAR_COLS (f) = (14 + unit - 1) / unit;
+      FRAME_CONFIG_SCROLL_BAR_WIDTH (f) =
+	FRAME_CONFIG_SCROLL_BAR_COLS (f) * unit;
     }
 
   /* Now make the frame display the given font.  */
@@ -5564,18 +5605,22 @@ w32fullscreen_hook (struct frame *f)
       if (FRAME_PREV_FSMODE (f) == FULLSCREEN_BOTH)
         {
           SetWindowLong (hwnd, GWL_STYLE, dwStyle | WS_OVERLAPPEDWINDOW);
-          SetWindowPos (hwnd, NULL, 0, 0, 0, 0,
-                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER |
-                        SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
-        }
+	  SetWindowPlacement (hwnd, &FRAME_NORMAL_PLACEMENT (f));
+	}
+      else if (FRAME_PREV_FSMODE (f) == FULLSCREEN_HEIGHT
+	       || FRAME_PREV_FSMODE (f) == FULLSCREEN_WIDTH)
+	SetWindowPlacement (hwnd, &FRAME_NORMAL_PLACEMENT (f));
 
-      w32_fullscreen_rect (hwnd, f->want_fullscreen,
-                           FRAME_NORMAL_PLACEMENT (f).rcNormalPosition, &rect);
       FRAME_PREV_FSMODE (f) = f->want_fullscreen;
-      if (f->want_fullscreen == FULLSCREEN_MAXIMIZED)
-	PostMessage (FRAME_W32_WINDOW (f), WM_SYSCOMMAND, 0xf030, 0);
+
+      if (f->want_fullscreen == FULLSCREEN_NONE)
+	ShowWindow (hwnd, SW_SHOWNORMAL);
+      else if (f->want_fullscreen == FULLSCREEN_MAXIMIZED)
+	ShowWindow (hwnd, SW_MAXIMIZE);
       else if (f->want_fullscreen == FULLSCREEN_BOTH)
         {
+	  w32_fullscreen_rect (hwnd, f->want_fullscreen,
+			       FRAME_NORMAL_PLACEMENT (f).rcNormalPosition, &rect);
           SetWindowLong (hwnd, GWL_STYLE, dwStyle & ~WS_OVERLAPPEDWINDOW);
           SetWindowPos (hwnd, HWND_TOP, rect.left, rect.top,
                         rect.right - rect.left, rect.bottom - rect.top,
@@ -5583,6 +5628,9 @@ w32fullscreen_hook (struct frame *f)
         }
       else
         {
+	  ShowWindow (hwnd, SW_SHOWNORMAL);
+	  w32_fullscreen_rect (hwnd, f->want_fullscreen,
+			       FRAME_NORMAL_PLACEMENT (f).rcNormalPosition, &rect);
           SetWindowPos (hwnd, HWND_TOP, rect.left, rect.top,
                         rect.right - rect.left, rect.bottom - rect.top, 0);
         }
@@ -5610,15 +5658,41 @@ x_set_window_size (struct frame *f, int change_gravity, int width, int height, b
 
   compute_fringe_widths (f, 0);
 
-  if (pixelwise)
+  if (frame_resize_pixelwise)
     {
-      pixelwidth = FRAME_TEXT_TO_PIXEL_WIDTH (f, width);
-      pixelheight = FRAME_TEXT_TO_PIXEL_HEIGHT (f, height);
+      if (pixelwise)
+	{
+	  pixelwidth = FRAME_TEXT_TO_PIXEL_WIDTH (f, width);
+	  pixelheight = FRAME_TEXT_TO_PIXEL_HEIGHT (f, height);
+	}
+      else
+	{
+	  pixelwidth = FRAME_TEXT_COLS_TO_PIXEL_WIDTH (f, width);
+	  pixelheight = FRAME_TEXT_LINES_TO_PIXEL_HEIGHT (f, height);
+	}
     }
   else
     {
-      pixelwidth = FRAME_TEXT_COLS_TO_PIXEL_WIDTH (f, width);
-      pixelheight = FRAME_TEXT_LINES_TO_PIXEL_HEIGHT (f, height);
+      /* If we don't resize frames pixelwise, round sizes to multiples
+	 of character sizes here.  Otherwise, when enforcing size hints
+	 while processing WM_WINDOWPOSCHANGING in w32_wnd_proc, we might
+	 clip our frame rectangle to a multiple of the frame's character
+	 size and subsequently lose our mode line or scroll bar.
+	 Bug#16923 could be one possible consequence of this.  Carefully
+	 reverse-engineer what WM_WINDOWPOSCHANGING does here since
+	 otherwise we might make our frame too small, see Bug#17077.  */
+      int unit_width = FRAME_COLUMN_WIDTH (f);
+      int unit_height = FRAME_LINE_HEIGHT (f);
+
+      pixelwidth = (((((pixelwise ? width : (width * FRAME_COLUMN_WIDTH (f)))
+		       + FRAME_TOTAL_FRINGE_WIDTH (f))
+		      / unit_width) * unit_width)
+		    + FRAME_SCROLL_BAR_AREA_WIDTH (f)
+		    + 2 * FRAME_INTERNAL_BORDER_WIDTH (f));
+
+      pixelheight = ((((pixelwise ? height : (height * FRAME_LINE_HEIGHT (f)))
+		       / unit_height) * unit_height)
+		     + 2 * FRAME_INTERNAL_BORDER_WIDTH (f));
     }
 
   f->win_gravity = NorthWestGravity;
@@ -5643,39 +5717,38 @@ x_set_window_size (struct frame *f, int change_gravity, int width, int height, b
   }
 
   /* If w32_enable_frame_resize_hack is non-nil, immediately apply the
-     new pixel sizes to the frame and its subwindows.  See discussion
-     of Bug#16028 for why we need this.  */
+     new pixel sizes to the frame and its subwindows.
 
-  if (w32_enable_frame_resize_hack)
-    /* The following mirrors what is done in xterm.c. It appears to be
-     for informing lisp of the new size immediately, while the actual
-     resize will happen asynchronously. But on Windows, the menu bar
-     automatically wraps when the frame is too narrow to contain it,
-     and that causes any calculations made here to come out wrong. The
-     end is some nasty buggy behavior, including the potential loss
-     of the minibuffer.
+     Jason Rumney earlier refused to call change_frame_size right here
+     with the following argument:
+
+     The following mirrors what is done in xterm.c. It appears to be for
+     informing lisp of the new size immediately, while the actual resize
+     will happen asynchronously. But on Windows, the menu bar
+     automatically wraps when the frame is too narrow to contain it, and
+     that causes any calculations made here to come out wrong.  The end
+     is some nasty buggy behavior, including the potential loss of the
+     minibuffer.
 
      Disabling this code is either not sufficient to fix the problems
      completely, or it causes fresh problems, but at least it removes
      the most problematic symptom of the minibuffer becoming unusable.
 
-     -----------------------------------------------------------------
+     However, as the discussion about how to handle frame size
+     parameters on Windows (Bug#1348, Bug#16028) shows, that cure seems
+     worse than the disease.  In particular, menu bar wrapping looks
+     like a non-issue - maybe so because Windows eventually gets back to
+     us with the correct client rectangle anyway.  But we have to avoid
+     calling change_frame_size with a delta of less than one canoncial
+     character size when frame_resize_pixelwise is nil, as explained in
+     the comment above.  */
 
-     Now, strictly speaking, we can't be sure that this is accurate,
-     but the window manager will get around to dealing with the size
-     change request eventually, and we'll hear how it went when the
-     ConfigureNotify event gets here.
+  if (w32_enable_frame_resize_hack)
 
-     We could just not bother storing any of this information here,
-     and let the ConfigureNotify event set everything up, but that
-     might be kind of confusing to the Lisp code, since size changes
-     wouldn't be reported in the frame parameters until some random
-     point in the future when the ConfigureNotify event arrives.
-
-     We pass 1 for DELAY since we can't run Lisp code inside of
-     a BLOCK_INPUT.  */
     {
-      change_frame_size (f, width, height, 0, 1, 0, pixelwise);
+      change_frame_size (f, FRAME_PIXEL_TO_TEXT_WIDTH (f, pixelwidth),
+			 FRAME_PIXEL_TO_TEXT_HEIGHT (f, pixelheight),
+			 0, 1, 0, 1);
       SET_FRAME_GARBAGED (f);
 
       /* If cursor was outside the new size, mark it as off.  */
@@ -5684,7 +5757,8 @@ x_set_window_size (struct frame *f, int change_gravity, int width, int height, b
       /* Clear out any recollection of where the mouse highlighting was,
 	 since it might be in a place that's outside the new frame size.
 	 Actually checking whether it is outside is a pain in the neck,
-	 so don't try--just let the highlighting be done afresh with new size.  */
+	 so don't try--just let the highlighting be done afresh with new
+	 size.  */
       cancel_mouse_face (f);
     }
 
@@ -5736,7 +5810,9 @@ x_set_mouse_pixel_position (struct frame *f, int pix_x, int pix_y)
 void
 x_focus_frame (struct frame *f)
 {
+#if 0
   struct w32_display_info *dpyinfo = &one_w32_display_info;
+#endif
 
   /* Give input focus to frame.  */
   block_input ();
@@ -6410,9 +6486,8 @@ w32_initialize (void)
   Fset_input_mode (Qnil, Qnil, make_number (2), Qnil);
 
   {
-    DWORD input_locale_id = ((DWORD_PTR) GetKeyboardLayout (0) & 0xffffffff);
-    w32_keyboard_codepage =
-      codepage_for_locale ((LCID) (input_locale_id & 0xffff));
+    LCID input_locale_id = LOWORD (GetKeyboardLayout (0));
+    w32_keyboard_codepage = codepage_for_locale (input_locale_id);
   }
 
   /* Create the window thread - it will terminate itself when the app

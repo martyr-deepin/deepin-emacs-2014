@@ -1,9 +1,9 @@
 ;;; frame.el --- multi-frame management independent of window systems
 
-;; Copyright (C) 1993-1994, 1996-1997, 2000-2013 Free Software
+;; Copyright (C) 1993-1994, 1996-1997, 2000-2014 Free Software
 ;; Foundation, Inc.
 
-;; Maintainer: FSF
+;; Maintainer: emacs-devel@gnu.org
 ;; Keywords: internal
 ;; Package: emacs
 
@@ -540,10 +540,14 @@ is not considered (see `next-frame')."
 (defun window-system-for-display (display)
   "Return the window system for DISPLAY.
 Return nil if we don't know how to interpret DISPLAY."
-  (cl-loop for descriptor in display-format-alist
-           for pattern = (car descriptor)
-           for system = (cdr descriptor)
-           when (string-match-p pattern display) return system))
+  ;; MS-Windows doesn't know how to create a GUI frame in a -nw session.
+  (if (and (eq system-type 'windows-nt)
+	   (null (window-system)))
+      nil
+    (cl-loop for descriptor in display-format-alist
+	     for pattern = (car descriptor)
+	     for system = (cdr descriptor)
+	     when (string-match-p pattern display) return system)))
 
 (defun make-frame-on-display (display &optional parameters)
   "Make a frame on display DISPLAY.
@@ -606,7 +610,6 @@ The functions are run with one arg, the newly created frame.")
 (define-obsolete-function-alias 'new-frame 'make-frame "22.1")
 
 (defvar frame-inherited-parameters '()
-  ;; FIXME: Shouldn't we add `font' here as well?
   "Parameters `make-frame' copies from the `selected-frame' to the new frame.")
 
 (defvar x-display-name)
@@ -665,7 +668,7 @@ the new frame according to its own rules."
 	      (cdr (assq 'window-system parameters)))
              (display
               (or (window-system-for-display display)
-                  (error "Don't know how to interpret display \"%S\""
+                  (error "Don't know how to interpret display %S"
                          display)))
 	     (t window-system)))
 	 (frame-creation-function (cdr (assq w frame-creation-function-alist)))
@@ -1370,7 +1373,7 @@ frame's display)."
       (with-no-warnings
        (not (null dos-windows-version))))
      ((memq frame-type '(x w32 ns))
-      t)    ;; FIXME?
+      t)
      (t
       nil))))
 
@@ -1390,12 +1393,14 @@ If DISPLAY is omitted or nil, it defaults to the selected frame's display."
 
 (defun display-pixel-height (&optional display)
   "Return the height of DISPLAY's screen in pixels.
+If DISPLAY is omitted or nil, it defaults to the selected frame's display.
+
 For character terminals, each character counts as a single pixel.
+
 For graphical terminals, note that on \"multi-monitor\" setups this
 refers to the pixel height for all physical monitors associated
 with DISPLAY.  To get information for each physical monitor, use
-`display-monitor-attributes-list'.
-If DISPLAY is omitted or nil, it defaults to the selected frame's display."
+`display-monitor-attributes-list'."
   (let ((frame-type (framep-on-display display)))
     (cond
      ((memq frame-type '(x w32 ns))
@@ -1407,12 +1412,14 @@ If DISPLAY is omitted or nil, it defaults to the selected frame's display."
 
 (defun display-pixel-width (&optional display)
   "Return the width of DISPLAY's screen in pixels.
+If DISPLAY is omitted or nil, it defaults to the selected frame's display.
+
 For character terminals, each character counts as a single pixel.
+
 For graphical terminals, note that on \"multi-monitor\" setups this
 refers to the pixel width for all physical monitors associated
 with DISPLAY.  To get information for each physical monitor, use
-`display-monitor-attributes-list'.
-If DISPLAY is omitted or nil, it defaults to the selected frame's display."
+`display-monitor-attributes-list'."
   (let ((frame-type (framep-on-display display)))
     (cond
      ((memq frame-type '(x w32 ns))
@@ -1422,14 +1429,14 @@ If DISPLAY is omitted or nil, it defaults to the selected frame's display."
 
 (defcustom display-mm-dimensions-alist nil
   "Alist for specifying screen dimensions in millimeters.
-The dimensions will be used for `display-mm-height' and
-`display-mm-width' if defined for the respective display.
+The functions `display-mm-height' and `display-mm-width' consult
+this list before asking the system.
 
-Each element of the alist has the form (display . (width . height)),
-e.g. (\":0.0\" . (287 . 215)).
+Each element has the form (DISPLAY . (WIDTH . HEIGHT)), e.g.
+\(\":0.0\" . (287 . 215)).
 
-If `display' equals t, it specifies dimensions for all graphical
-displays not explicitly specified."
+If `display' is t, it specifies dimensions for all graphical displays
+not explicitly specified."
   :version "22.1"
   :type '(alist :key-type (choice (string :tag "Display name")
 				  (const :tag "Default" t))
@@ -1442,13 +1449,16 @@ displays not explicitly specified."
 
 (defun display-mm-height (&optional display)
   "Return the height of DISPLAY's screen in millimeters.
-System values can be overridden by `display-mm-dimensions-alist'.
-If the information is unavailable, value is nil.
+If the information is unavailable, this function returns nil.
+If DISPLAY is omitted or nil, it defaults to the selected frame's display.
+
+You can override what the system thinks the result should be by
+adding an entry to `display-mm-dimensions-alist'.
+
 For graphical terminals, note that on \"multi-monitor\" setups this
 refers to the height in millimeters for all physical monitors
 associated with DISPLAY.  To get information for each physical
-monitor, use `display-monitor-attributes-list'.
-If DISPLAY is omitted or nil, it defaults to the selected frame's display."
+monitor, use `display-monitor-attributes-list'."
   (and (memq (framep-on-display display) '(x w32 ns))
        (or (cddr (assoc (or display (frame-parameter nil 'display))
 			display-mm-dimensions-alist))
@@ -1459,13 +1469,16 @@ If DISPLAY is omitted or nil, it defaults to the selected frame's display."
 
 (defun display-mm-width (&optional display)
   "Return the width of DISPLAY's screen in millimeters.
-System values can be overridden by `display-mm-dimensions-alist'.
-If the information is unavailable, value is nil.
+If the information is unavailable, this function returns nil.
+If DISPLAY is omitted or nil, it defaults to the selected frame's display.
+
+You can override what the system thinks the result should be by
+adding an entry to `display-mm-dimensions-alist'.
+
 For graphical terminals, note that on \"multi-monitor\" setups this
 refers to the width in millimeters for all physical monitors
 associated with DISPLAY.  To get information for each physical
-monitor, use `display-monitor-attributes-list'.
-If DISPLAY is omitted or nil, it defaults to the selected frame's display."
+monitor, use `display-monitor-attributes-list'."
   (and (memq (framep-on-display display) '(x w32 ns))
        (or (cadr (assoc (or display (frame-parameter nil 'display))
 			display-mm-dimensions-alist))
@@ -1709,14 +1722,14 @@ left untouched.  FRAME nil or omitted means use the selected frame."
   :group 'cursor)
 
 (defcustom blink-cursor-blinks 10
-  "How many times to blink before using a solid cursor on NS and X.
+  "How many times to blink before using a solid cursor on NS, X, and MS-Windows.
 Use 0 or negative value to blink forever."
   :version "24.4"
   :type 'integer
   :group 'cursor)
 
 (defvar blink-cursor-blinks-done 1
-  "Number of blinks done since we started blinking on NS and X")
+  "Number of blinks done since we started blinking on NS, X, and MS-Windows.")
 
 (defvar blink-cursor-idle-timer nil
   "Timer started after `blink-cursor-delay' seconds of Emacs idle time.
@@ -1793,6 +1806,12 @@ This is done when a frame gets focus.  Blink timers may be stopped by
 With a prefix argument ARG, enable Blink Cursor mode if ARG is
 positive, and disable it otherwise.  If called from Lisp, enable
 the mode if ARG is omitted or nil.
+
+If the value of `blink-cursor-blinks' is positive (10 by default),
+the cursor stops blinking after that number of blinks, if Emacs
+gets no input during that time.
+
+See also `blink-cursor-interval' and `blink-cursor-delay'.
 
 This command is effective only on graphical frames.  On text-only
 terminals, cursor blinking is controlled by the terminal."

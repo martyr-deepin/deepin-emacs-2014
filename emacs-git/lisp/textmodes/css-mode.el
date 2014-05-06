@@ -1,6 +1,6 @@
 ;;; css-mode.el --- Major mode to edit CSS files -*- lexical-binding: t -*-
 
-;; Copyright (C) 2006-2013 Free Software Foundation, Inc.
+;; Copyright (C) 2006-2014 Free Software Foundation, Inc.
 
 ;; Author: Stefan Monnier <monnier@iro.umontreal.ca>
 ;; Keywords: hypermedia
@@ -237,7 +237,7 @@
     ;; FIXME: attribute selectors don't work well because they may contain
     ;; strings which have already been highlighted as f-l-string-face and
     ;; thus prevent this highlighting from being applied (actually now that
-    ;; I use `append' this should work better).  But really the part of hte
+    ;; I use `append' this should work better).  But really the part of the
     ;; selector between [...] should simply not be highlighted.
     (,(concat "^\\([ \t]*[^@:{}\n][^:{}]+\\(?::" (regexp-opt css-pseudo-ids t)
               "\\(?:([^)]+)\\)?[^:{\n]*\\)*\\)\\(?:\n[ \t]*\\)*{")

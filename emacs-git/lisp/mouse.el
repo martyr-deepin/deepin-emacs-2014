@@ -1,8 +1,8 @@
 ;;; mouse.el --- window system-independent mouse support  -*- lexical-binding: t -*-
 
-;; Copyright (C) 1993-1995, 1999-2013 Free Software Foundation, Inc.
+;; Copyright (C) 1993-1995, 1999-2014 Free Software Foundation, Inc.
 
-;; Maintainer: FSF
+;; Maintainer: emacs-devel@gnu.org
 ;; Keywords: hardware, mouse
 ;; Package: emacs
 

@@ -1,7 +1,6 @@
 /* Keyboard and mouse input; editor command loop.
 
-Copyright (C) 1985-1989, 1993-1997, 1999-2013 Free Software Foundation,
-Inc.
+Copyright (C) 1985-1989, 1993-1997, 1999-2014 Free Software Foundation, Inc.
 
 This file is part of GNU Emacs.
 
@@ -21,6 +20,7 @@ along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <config.h>
 
 #include "sysstdio.h"
+#include <sys/stat.h>
 
 #include "lisp.h"
 #include "termchar.h"
@@ -228,14 +228,14 @@ static Lisp_Object Qbackward_char;
 Lisp_Object Qundefined;
 static Lisp_Object Qtimer_event_handler;
 
-/* read_key_sequence stores here the command definition of the
+/* `read_key_sequence' stores here the command definition of the
    key sequence that it reads.  */
 static Lisp_Object read_key_sequence_cmd;
 static Lisp_Object read_key_sequence_remapped;
 
 static Lisp_Object Qinput_method_function;
 
-static Lisp_Object Qdeactivate_mark;
+Lisp_Object Qdeactivate_mark;
 
 Lisp_Object Qrecompute_lucid_menubar, Qactivate_menubar_hook;
 
@@ -807,9 +807,13 @@ force_auto_save_soon (void)
 
 DEFUN ("recursive-edit", Frecursive_edit, Srecursive_edit, 0, 0, "",
        doc: /* Invoke the editor command loop recursively.
-To get out of the recursive edit, a command can do `(throw 'exit nil)';
-that tells this function to return.
-Alternatively, `(throw 'exit t)' makes this function signal an error.
+To get out of the recursive edit, a command can throw to `exit' -- for
+instance `(throw 'exit nil)'.
+If you throw a value other than t, `recursive-edit' returns normally
+to the function that called it.  Throwing a t value causes
+`recursive-edit' to quit, so that control returns to the command loop
+one level up.
+
 This function is called by the editor initialization to begin editing.  */)
   (void)
 {
@@ -1442,7 +1446,7 @@ command_loop_1 (void)
       Vthis_command_keys_shift_translated = Qnil;
 
       /* Read next key sequence; i gets its length.  */
-      i = read_key_sequence (keybuf, sizeof keybuf / sizeof keybuf[0],
+      i = read_key_sequence (keybuf, ARRAYELTS (keybuf),
 			     Qnil, 0, 1, 1, 0);
 
       /* A filter may have run while we were reading the input.  */
@@ -1690,7 +1694,7 @@ read_menu_command (void)
      menus.  */
   specbind (Qecho_keystrokes, make_number (0));
 
-  i = read_key_sequence (keybuf, sizeof keybuf / sizeof keybuf[0],
+  i = read_key_sequence (keybuf, ARRAYELTS (keybuf),
 			 Qnil, 0, 1, 1, 1);
 
   unbind_to (count, Qnil);
@@ -1991,7 +1995,7 @@ start_polling (void)
 	 been turned off in process.c.  */
       turn_on_atimers (1);
 
-      /* If poll timer doesn't exist, are we need one with
+      /* If poll timer doesn't exist, or we need one with
 	 a different interval, start a new one.  */
       if (poll_timer == NULL
 	  || poll_timer->interval.tv_sec != polling_period)
@@ -2295,8 +2299,10 @@ read_decoded_event_from_main_queue (struct timespec *end_time,
                                     bool *used_mouse_menu)
 {
 #define MAX_ENCODED_BYTES 16
+#ifndef WINDOWSNT
   Lisp_Object events[MAX_ENCODED_BYTES];
   int n = 0;
+#endif
   while (true)
     {
       Lisp_Object nextevt
@@ -2373,7 +2379,7 @@ read_decoded_event_from_main_queue (struct timespec *end_time,
    -2 means do neither.
    1 means do both.  */
 
-/* The arguments MAP is for menu prompting.  MAP is a keymap.
+/* The argument MAP is a keymap for menu prompting.
 
    PREV_EVENT is the previous input event, or nil if we are reading
    the first event of a key sequence (or not reading a key sequence).
@@ -2887,8 +2893,12 @@ read_char (int commandflag, Lisp_Object map,
     {
       c = read_decoded_event_from_main_queue (end_time, local_getcjmp,
                                               prev_event, used_mouse_menu);
-      if (end_time && timespec_cmp (*end_time, current_timespec ()) <= 0)
-        goto exit;
+      if (NILP(c) && end_time &&
+          timespec_cmp (*end_time, current_timespec ()) <= 0)
+        {
+          goto exit;
+        }
+
       if (EQ (c, make_number (-2)))
         {
 	  /* This is going to exit from read_char
@@ -3820,7 +3830,7 @@ kbd_buffer_get_event (KBOARD **kbp,
     }
 #endif	/* subprocesses */
 
-#ifndef HAVE_DBUS  /* We want to read D-Bus events in batch mode.  */
+#if !defined HAVE_DBUS && !defined USE_FILE_NOTIFY
   if (noninteractive
       /* In case we are running as a daemon, only do this before
 	 detaching from the terminal.  */
@@ -3831,7 +3841,7 @@ kbd_buffer_get_event (KBOARD **kbp,
       *kbp = current_kboard;
       return obj;
     }
-#endif	/* ! HAVE_DBUS  */
+#endif	/* !defined HAVE_DBUS && !defined USE_FILE_NOTIFY  */
 
   /* Wait until there is input available.  */
   for (;;)
@@ -5468,14 +5478,13 @@ make_lispy_event (struct input_event *event)
     case NON_ASCII_KEYSTROKE_EVENT:
       button_down_time = 0;
 
-      for (i = 0; i < sizeof (lispy_accent_codes) / sizeof (int); i++)
+      for (i = 0; i < ARRAYELTS (lispy_accent_codes); i++)
 	if (event->code == lispy_accent_codes[i])
 	  return modify_event_symbol (i,
 				      event->modifiers,
 				      Qfunction_key, Qnil,
 				      lispy_accent_keys, &accent_key_syms,
-				      (sizeof (lispy_accent_keys)
-				       / sizeof (lispy_accent_keys[0])));
+                                      ARRAYELTS (lispy_accent_keys));
 
 #if 0
 #ifdef XK_kana_A
@@ -5484,8 +5493,7 @@ make_lispy_event (struct input_event *event)
 				    event->modifiers & ~shift_modifier,
 				    Qfunction_key, Qnil,
 				    lispy_kana_keys, &func_key_syms,
-				    (sizeof (lispy_kana_keys)
-				     / sizeof (lispy_kana_keys[0])));
+                                    ARRAYELTS (lispy_kana_keys));
 #endif /* XK_kana_A */
 #endif /* 0 */
 
@@ -5496,15 +5504,14 @@ make_lispy_event (struct input_event *event)
 				    event->modifiers,
 				    Qfunction_key, Qnil,
 				    iso_lispy_function_keys, &func_key_syms,
-				    (sizeof (iso_lispy_function_keys)
-				     / sizeof (iso_lispy_function_keys[0])));
+                                    ARRAYELTS (iso_lispy_function_keys));
 #endif
 
       /* Handle system-specific or unknown keysyms.  */
       if (event->code & (1 << 28)
 	  || event->code - FUNCTION_KEY_OFFSET < 0
 	  || (event->code - FUNCTION_KEY_OFFSET
-	      >= sizeof lispy_function_keys / sizeof *lispy_function_keys)
+	      >= ARRAYELTS (lispy_function_keys))
 	  || !lispy_function_keys[event->code - FUNCTION_KEY_OFFSET])
 	{
 	  /* We need to use an alist rather than a vector as the cache
@@ -5523,20 +5530,17 @@ make_lispy_event (struct input_event *event)
 				  event->modifiers,
 				  Qfunction_key, Qnil,
 				  lispy_function_keys, &func_key_syms,
-				  (sizeof (lispy_function_keys)
-				   / sizeof (lispy_function_keys[0])));
+                                  ARRAYELTS (lispy_function_keys));
 
 #ifdef HAVE_NTGUI
     case MULTIMEDIA_KEY_EVENT:
-      if (event->code < (sizeof (lispy_multimedia_keys)
-                         / sizeof (lispy_multimedia_keys[0]))
+      if (event->code < ARRAYELTS (lispy_multimedia_keys)
           && event->code > 0 && lispy_multimedia_keys[event->code])
         {
           return modify_event_symbol (event->code, event->modifiers,
                                       Qfunction_key, Qnil,
                                       lispy_multimedia_keys, &func_key_syms,
-                                      (sizeof (lispy_multimedia_keys)
-                                       / sizeof (lispy_multimedia_keys[0])));
+                                      ARRAYELTS (lispy_multimedia_keys));
         }
       return Qnil;
 #endif
@@ -6258,7 +6262,7 @@ static const char *const modifier_names[] =
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, "alt", "super", "hyper", "shift", "control", "meta"
 };
-#define NUM_MOD_NAMES (sizeof (modifier_names) / sizeof (modifier_names[0]))
+#define NUM_MOD_NAMES ARRAYELTS (modifier_names)
 
 static Lisp_Object modifier_symbols;
 
@@ -7113,7 +7117,12 @@ unblock_input_to (int level)
 /* End critical section.
 
    If doing signal-driven input, and a signal came in when input was
-   blocked, reinvoke the signal handler now to deal with it.  */
+   blocked, reinvoke the signal handler now to deal with it.
+
+   It will also process queued input, if it was not read before.
+   When a longer code sequence does not use block/unblock input
+   at all, the whole input gathered up to the next call to
+   unblock_input will be processed inside that call. */
 
 void
 unblock_input (void)
@@ -7278,7 +7287,7 @@ store_user_signal_events (void)
 }
 
 
-static void menu_bar_item (Lisp_Object, Lisp_Object, Lisp_Object, void*);
+static void menu_bar_item (Lisp_Object, Lisp_Object, Lisp_Object, void *);
 static Lisp_Object menu_bar_one_keymap_changed_items;
 
 /* These variables hold the vector under construction within
@@ -7288,7 +7297,7 @@ static Lisp_Object menu_bar_items_vector;
 static int menu_bar_items_index;
 
 
-static const char* separator_names[] = {
+static const char *separator_names[] = {
   "space",
   "no-line",
   "single-line",
@@ -7896,7 +7905,8 @@ static Lisp_Object QCrtl;
 /* Function prototypes.  */
 
 static void init_tool_bar_items (Lisp_Object);
-static void process_tool_bar_item (Lisp_Object, Lisp_Object, Lisp_Object, void*);
+static void process_tool_bar_item (Lisp_Object, Lisp_Object, Lisp_Object,
+				   void *);
 static bool parse_tool_bar_item (Lisp_Object, Lisp_Object);
 static void append_tool_bar_item (void);
 
@@ -9748,7 +9758,7 @@ read_key_sequence_vs (Lisp_Object prompt, Lisp_Object continue_echo,
 
   memset (keybuf, 0, sizeof keybuf);
   GCPRO1 (keybuf[0]);
-  gcpro1.nvars = (sizeof keybuf / sizeof (keybuf[0]));
+  gcpro1.nvars = ARRAYELTS (keybuf);
 
   if (NILP (continue_echo))
     {
@@ -9762,7 +9772,7 @@ read_key_sequence_vs (Lisp_Object prompt, Lisp_Object continue_echo,
     cancel_hourglass ();
 #endif
 
-  i = read_key_sequence (keybuf, (sizeof keybuf / sizeof (keybuf[0])),
+  i = read_key_sequence (keybuf, ARRAYELTS (keybuf),
 			 prompt, ! NILP (dont_downcase_last),
 			 ! NILP (can_return_switch_frame), 0, 0);
 
@@ -10063,7 +10073,10 @@ DEFUN ("open-dribble-file", Fopen_dribble_file, Sopen_dribble_file, 1, 1,
        "FOpen dribble file: ",
        doc: /* Start writing all keyboard characters to a dribble file called FILE.
 If FILE is nil, close any open dribble file.
-The file will be closed when Emacs exits.  */)
+The file will be closed when Emacs exits.
+
+Be aware that this records ALL characters you type!
+This may include sensitive information such as passwords.  */)
   (Lisp_Object file)
 {
   if (dribble)
@@ -10075,8 +10088,15 @@ The file will be closed when Emacs exits.  */)
     }
   if (!NILP (file))
     {
+      int fd;
+      Lisp_Object encfile;
+
       file = Fexpand_file_name (file, Qnil);
-      dribble = emacs_fopen (SSDATA (file), "w");
+      encfile = ENCODE_FILE (file);
+      fd = emacs_open (SSDATA (encfile), O_WRONLY | O_CREAT | O_EXCL, 0600);
+      if (fd < 0 && errno == EEXIST && unlink (SSDATA (encfile)) == 0)
+	fd = emacs_open (SSDATA (encfile), O_WRONLY | O_CREAT | O_EXCL, 0600);
+      dribble = fd < 0 ? 0 : fdopen (fd, "w");
       if (dribble == 0)
 	report_file_error ("Opening dribble", file);
     }
@@ -10287,6 +10307,9 @@ static void
 handle_interrupt (bool in_signal_handler)
 {
   char c;
+  sigset_t blocked;
+  sigemptyset (&blocked);
+  sigaddset (&blocked, SIGINT);
 
   cancel_echoing ();
 
@@ -10298,9 +10321,6 @@ handle_interrupt (bool in_signal_handler)
 	  /* If SIGINT isn't blocked, don't let us be interrupted by
 	     a SIGINT.  It might be harmful due to non-reentrancy
 	     in I/O functions.  */
-	  sigset_t blocked;
-	  sigemptyset (&blocked);
-	  sigaddset (&blocked, SIGINT);
 	  pthread_sigmask (SIG_BLOCK, &blocked, 0);
 	}
 
@@ -10385,7 +10405,7 @@ handle_interrupt (bool in_signal_handler)
 	  struct gcpro gcpro1, gcpro2, gcpro3, gcpro4;
 
 	  immediate_quit = 0;
-	  pthread_sigmask (SIG_SETMASK, &empty_mask, 0);
+	  pthread_sigmask (SIG_UNBLOCK, &blocked, 0);
 	  saved = gl_state;
 	  GCPRO4 (saved.object, saved.global_code,
 		  saved.current_syntax_table, saved.old_prop);
@@ -10406,7 +10426,7 @@ handle_interrupt (bool in_signal_handler)
         }
     }
 
-  pthread_sigmask (SIG_SETMASK, &empty_mask, 0);
+  pthread_sigmask (SIG_UNBLOCK, &blocked, 0);
 
 /* TODO: The longjmp in this call throws the NS event loop integration off,
          and it seems to do fine without this.  Probably some attention
@@ -10665,7 +10685,7 @@ The elements of this list correspond to the arguments of
     }
   XSETFASTINT (val[3], quit_char);
 
-  return Flist (sizeof (val) / sizeof (val[0]), val);
+  return Flist (ARRAYELTS (val), val);
 }
 
 DEFUN ("posn-at-x-y", Fposn_at_x_y, Sposn_at_x_y, 2, 4, 0,
@@ -11033,7 +11053,7 @@ syms_of_keyboard (void)
 
   {
     int i;
-    int len = sizeof (head_table) / sizeof (head_table[0]);
+    int len = ARRAYELTS (head_table);
 
     for (i = 0; i < len; i++)
       {
@@ -11049,14 +11069,13 @@ syms_of_keyboard (void)
   staticpro (&button_down_location);
   mouse_syms = Fmake_vector (make_number (5), Qnil);
   staticpro (&mouse_syms);
-  wheel_syms = Fmake_vector (make_number (sizeof (lispy_wheel_names)
-					  / sizeof (lispy_wheel_names[0])),
+  wheel_syms = Fmake_vector (make_number (ARRAYELTS (lispy_wheel_names)),
 			     Qnil);
   staticpro (&wheel_syms);
 
   {
     int i;
-    int len = sizeof (modifier_names) / sizeof (modifier_names[0]);
+    int len = ARRAYELTS (modifier_names);
 
     modifier_symbols = Fmake_vector (make_number (len), Qnil);
     for (i = 0; i < len; i++)
@@ -11375,6 +11394,7 @@ and tests the value when the command returns.
 Buffer modification stores t in this variable.  */);
   Vdeactivate_mark = Qnil;
   DEFSYM (Qdeactivate_mark, "deactivate-mark");
+  Fmake_variable_buffer_local (Qdeactivate_mark);
 
   DEFVAR_LISP ("pre-command-hook", Vpre_command_hook,
 	       doc: /* Normal hook run before each command is executed.

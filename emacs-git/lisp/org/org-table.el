@@ -1,6 +1,6 @@
 ;;; org-table.el --- The table editor for Org-mode
 
-;; Copyright (C) 2004-2013 Free Software Foundation, Inc.
+;; Copyright (C) 2004-2014 Free Software Foundation, Inc.
 
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
@@ -1241,6 +1241,7 @@ is always the old value."
 (defun org-table-field-info (arg)
   "Show info about the current field, and highlight any reference at point."
   (interactive "P")
+  (unless (org-at-table-p) (user-error "Not at a table"))
   (org-table-get-specials)
   (save-excursion
     (let* ((pos (point))
@@ -2274,7 +2275,7 @@ KEY is \"@\" or \"$\".  REPLACE is an alist of numbers to replace.
 For all numbers larger than LIMIT, shift them by DELTA."
   (save-excursion
     (goto-char (org-table-end))
-    (when (let ((case-fold-search t)) (looking-at "[ \t]*#\\+tblfm:"))
+    (while (let ((case-fold-search t)) (looking-at "[ \t]*#\\+tblfm:"))
       (let ((msg "The formulas in #+TBLFM have been updated")
 	    (re (concat key "\\([0-9]+\\)"))
 	    (re2
@@ -2288,8 +2289,9 @@ For all numbers larger than LIMIT, shift them by DELTA."
 	  (while (re-search-forward re2 (point-at-eol) t)
 	    (unless (save-match-data (org-in-regexp "remote([^)]+?)"))
 	      (if (equal (char-before (match-beginning 0)) ?.)
-		  (user-error "Change makes TBLFM term %s invalid, use undo to recover"
-			 (match-string 0))
+		  (user-error
+		   "Change makes TBLFM term %s invalid, use undo to recover"
+		   (match-string 0))
 		(replace-match "")))))
 	(while (re-search-forward re (point-at-eol) t)
 	  (unless (save-match-data (org-in-regexp "remote([^)]+?)"))
@@ -2300,7 +2302,8 @@ For all numbers larger than LIMIT, shift them by DELTA."
 	      (message msg))
 	     ((and limit (> n limit))
 	      (replace-match (concat key (int-to-string (+ n delta))) t t)
-	      (message msg)))))))))
+	      (message msg))))))
+      (forward-line))))
 
 (defun org-table-get-specials ()
   "Get the column names and local parameters for this table."

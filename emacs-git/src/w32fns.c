@@ -1,6 +1,6 @@
 /* Graphical user interface functions for the Microsoft Windows API.
 
-Copyright (C) 1989, 1992-2013 Free Software Foundation, Inc.
+Copyright (C) 1989, 1992-2014 Free Software Foundation, Inc.
 
 This file is part of GNU Emacs.
 
@@ -402,12 +402,6 @@ w32_fullscreen_rect (HWND hwnd, int fsmode, RECT normal, RECT *rect)
       rect->right = mi.rcMonitor.right;
       rect->bottom = mi.rcMonitor.bottom;
       break;
-    case FULLSCREEN_MAXIMIZED:
-      rect->left = mi.rcWork.left;
-      rect->top = mi.rcWork.top;
-      rect->right = mi.rcWork.right;
-      rect->bottom = mi.rcWork.bottom;
-      break;
     case FULLSCREEN_WIDTH:
       rect->left = mi.rcWork.left;
       rect->top = normal.top;
@@ -420,7 +414,6 @@ w32_fullscreen_rect (HWND hwnd, int fsmode, RECT normal, RECT *rect)
       rect->right = normal.right;
       rect->bottom = mi.rcWork.bottom;
       break;
-    case FULLSCREEN_NONE:
     default:
       *rect = normal;
       break;
@@ -730,8 +723,7 @@ w32_default_color_map (void)
 
   cmap = Qnil;
 
-  for (i = 0; i < sizeof (w32_color_map) / sizeof (w32_color_map[0]);
-       pc++, i++)
+  for (i = 0; i < ARRAYELTS (w32_color_map); pc++, i++)
     cmap = Fcons (Fcons (build_string (pc->name),
 			 make_number (pc->colorref)),
 		  cmap);
@@ -1720,26 +1712,23 @@ x_set_tool_bar_lines (struct frame *f, Lisp_Object value, Lisp_Object oldval)
   /* If the tool bar gets smaller, the internal border below it
      has to be cleared.  It was formerly part of the display
      of the larger tool bar, and updating windows won't clear it.  */
-  if (delta < 0)
+  if (FRAME_INTERNAL_BORDER_WIDTH (f) != 0 && FRAME_VISIBLE_P (f))
     {
       int height = FRAME_INTERNAL_BORDER_WIDTH (f);
       int width = FRAME_PIXEL_WIDTH (f);
       int y = nlines * unit;
+      HDC hdc = get_frame_dc (f);
 
       block_input ();
-      {
-        HDC hdc = get_frame_dc (f);
-        w32_clear_area (f, hdc, 0, y, width, height);
-        release_frame_dc (f, hdc);
-      }
+      w32_clear_area (f, hdc, 0, y, width, height);
+      release_frame_dc (f, hdc);
       unblock_input ();
-
-      if (WINDOWP (f->tool_bar_window))
-	clear_glyph_matrix (XWINDOW (f->tool_bar_window)->current_matrix);
     }
 
-  run_window_configuration_change_hook (f);
+  if (delta < 0 && WINDOWP (f->tool_bar_window))
+    clear_glyph_matrix (XWINDOW (f->tool_bar_window)->current_matrix);
 
+  run_window_configuration_change_hook (f);
 }
 
 
@@ -1851,11 +1840,11 @@ x_set_title (struct frame *f, Lisp_Object name, Lisp_Object old_name)
 void
 x_set_scroll_bar_default_width (struct frame *f)
 {
-  int wid = FRAME_COLUMN_WIDTH (f);
+  int unit = FRAME_COLUMN_WIDTH (f);
 
   FRAME_CONFIG_SCROLL_BAR_WIDTH (f) = GetSystemMetrics (SM_CXVSCROLL);
-  FRAME_CONFIG_SCROLL_BAR_COLS (f) = (FRAME_CONFIG_SCROLL_BAR_WIDTH (f) +
-				      wid - 1) / wid;
+  FRAME_CONFIG_SCROLL_BAR_COLS (f)
+    = (FRAME_CONFIG_SCROLL_BAR_WIDTH (f) + unit - 1) / unit;
 }
 
 
@@ -2109,6 +2098,7 @@ reset_modifiers (void)
 
 #define CURRENT_STATE(key) ((GetAsyncKeyState (key) & 0x8000) >> 8)
 
+    memset (keystate, 0, sizeof (keystate));
     GetKeyboardState (keystate);
     keystate[VK_SHIFT] = CURRENT_STATE (VK_SHIFT);
     keystate[VK_CONTROL] = CURRENT_STATE (VK_CONTROL);
@@ -3454,6 +3444,7 @@ w32_wnd_proc (HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	  tme.cbSize = sizeof (tme);
 	  tme.dwFlags = TME_LEAVE;
 	  tme.hwndTrack = hwnd;
+	  tme.dwHoverTime = HOVER_DEFAULT;
 
 	  track_mouse_event_fn (&tme);
 	  track_mouse_window = hwnd;
@@ -3813,7 +3804,8 @@ w32_wnd_proc (HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	wp.length = sizeof (WINDOWPLACEMENT);
 	GetWindowPlacement (hwnd, &wp);
 
-	if (wp.showCmd != SW_SHOWMINIMIZED && (lppos->flags & SWP_NOSIZE) == 0)
+	if (wp.showCmd != SW_SHOWMAXIMIZED && wp.showCmd != SW_SHOWMINIMIZED
+	    && (lppos->flags & SWP_NOSIZE) == 0)
 	  {
 	    RECT rect;
 	    int wdiff;
@@ -4260,7 +4252,9 @@ unwind_create_frame (Lisp_Object frame)
 #ifdef GLYPH_DEBUG
       /* Check that reference counts are indeed correct.  */
       eassert (dpyinfo->reference_count == dpyinfo_refcount);
-      eassert (dpyinfo->terminal->image_cache->refcount == image_cache_refcount);
+      eassert ((dpyinfo->terminal->image_cache == NULL
+		&& image_cache_refcount == 0)
+	       || dpyinfo->terminal->image_cache->refcount == image_cache_refcount);
 #endif
       return Qt;
     }
@@ -4346,6 +4340,10 @@ This function is an internal primitive--use `make-frame' instead.  */)
   Lisp_Object parent;
   struct kboard *kb;
 
+  if (!FRAME_W32_P (SELECTED_FRAME ())
+      && !FRAME_INITIAL_P (SELECTED_FRAME ()))
+    error ("Cannot create a GUI frame in a -nw session");
+
   /* Make copy of frame parameters because the original is in pure
      storage now. */
   parameters = Fcopy_alist (parameters);
@@ -4403,7 +4401,7 @@ This function is an internal primitive--use `make-frame' instead.  */)
   XSETFRAME (frame, f);
 
   /* By default, make scrollbars the system standard width. */
-  FRAME_CONFIG_SCROLL_BAR_WIDTH (f) = GetSystemMetrics (SM_CXVSCROLL);
+  x_set_scroll_bar_default_width (f);
 
   f->terminal = dpyinfo->terminal;
 
@@ -4421,12 +4419,6 @@ This function is an internal primitive--use `make-frame' instead.  */)
 
   /* With FRAME_DISPLAY_INFO set up, this unwind-protect is safe.  */
   record_unwind_protect (do_unwind_create_frame, frame);
-
-  /* Avoid calling window-configuration-change-hook; otherwise we could
-     get into all kinds of nasty things like an infloop in next_frame or
-     violating a (height >= 0) assertion in window_box_height.  */
-  record_unwind_protect (unwind_create_frame_1, inhibit_lisp_code);
-  inhibit_lisp_code = Qt;
 
 #ifdef GLYPH_DEBUG
   image_cache_refcount =
@@ -4513,6 +4505,9 @@ This function is an internal primitive--use `make-frame' instead.  */)
 		       "leftFringe", "LeftFringe", RES_TYPE_NUMBER);
   x_default_parameter (f, parameters, Qright_fringe, Qnil,
 		       "rightFringe", "RightFringe", RES_TYPE_NUMBER);
+  /* Process alpha here (Bug#16619).  */
+  x_default_parameter (f, parameters, Qalpha, Qnil,
+                       "alpha", "Alpha", RES_TYPE_NUMBER);
 
   /* Init faces before x_default_parameter is called for scroll-bar
      parameters because that function calls x_set_scroll_bar_width,
@@ -4522,17 +4517,40 @@ This function is an internal primitive--use `make-frame' instead.  */)
      happen.  */
   init_frame_faces (f);
 
-  /* The X resources controlling the menu-bar and tool-bar are
-     processed specially at startup, and reflected in the mode
-     variables; ignore them here.  */
-  x_default_parameter (f, parameters, Qmenu_bar_lines,
-		       NILP (Vmenu_bar_mode)
-		       ? make_number (0) : make_number (1),
-		       NULL, NULL, RES_TYPE_NUMBER);
-  x_default_parameter (f, parameters, Qtool_bar_lines,
-		       NILP (Vtool_bar_mode)
-		       ? make_number (0) : make_number (1),
-		       NULL, NULL, RES_TYPE_NUMBER);
+  /* Avoid calling window-configuration-change-hook; otherwise we
+     could get an infloop in next_frame since the frame is not yet in
+     Vframe_list.  */
+  {
+    ptrdiff_t count2 = SPECPDL_INDEX ();
+
+    record_unwind_protect (unwind_create_frame_1, inhibit_lisp_code);
+    inhibit_lisp_code = Qt;
+
+    /* PXW: This is a duplicate from below.  We have to do it here since
+       otherwise x_set_tool_bar_lines will work with the character sizes
+       installed by init_frame_faces while the frame's pixel size is still
+       calculated from a character size of 1 and we subsequently hit the
+       eassert (height >= 0) assertion in window_box_height.  The
+       non-pixelwise code apparently worked around this because it had one
+       frame line vs one toolbar line which left us with a zero root
+       window height which was obviously wrong as well ...  */
+    change_frame_size (f, FRAME_COLS (f) * FRAME_COLUMN_WIDTH (f),
+		       FRAME_LINES (f) * FRAME_LINE_HEIGHT (f), 1, 0, 0, 1);
+
+    /* The X resources controlling the menu-bar and tool-bar are
+       processed specially at startup, and reflected in the mode
+       variables; ignore them here.  */
+    x_default_parameter (f, parameters, Qmenu_bar_lines,
+			 NILP (Vmenu_bar_mode)
+			 ? make_number (0) : make_number (1),
+			 NULL, NULL, RES_TYPE_NUMBER);
+    x_default_parameter (f, parameters, Qtool_bar_lines,
+			 NILP (Vtool_bar_mode)
+			 ? make_number (0) : make_number (1),
+			 NULL, NULL, RES_TYPE_NUMBER);
+
+    unbind_to (count2, Qnil);
+  }
 
   x_default_parameter (f, parameters, Qbuffer_predicate, Qnil,
 		       "bufferPredicate", "BufferPredicate", RES_TYPE_SYMBOL);
@@ -4582,8 +4600,6 @@ This function is an internal primitive--use `make-frame' instead.  */)
 		       "cursorType", "CursorType", RES_TYPE_SYMBOL);
   x_default_parameter (f, parameters, Qscroll_bar_width, Qnil,
 		       "scrollBarWidth", "ScrollBarWidth", RES_TYPE_NUMBER);
-  x_default_parameter (f, parameters, Qalpha, Qnil,
-                       "alpha", "Alpha", RES_TYPE_NUMBER);
 
   /* Dimensions, especially FRAME_LINES (f), must be done via change_frame_size.
      Change will not be effected unless different from the current
@@ -6524,13 +6540,13 @@ Otherwise, if ONLY-DIR-P is non-nil, the user can only select directories.  */)
 	    if (errno == ENOENT && filename_buf_w[MAX_PATH - 1] != 0)
 	      report_file_error ("filename too long", default_filename);
 	  }
-	len = MultiByteToWideChar (CP_UTF8, MB_ERR_INVALID_CHARS,
-				   SSDATA (prompt), -1, NULL, 0);
+	len = pMultiByteToWideChar (CP_UTF8, MB_ERR_INVALID_CHARS,
+				    SSDATA (prompt), -1, NULL, 0);
 	if (len > 32768)
 	  len = 32768;
 	prompt_w = alloca (len * sizeof (wchar_t));
-	MultiByteToWideChar (CP_UTF8, MB_ERR_INVALID_CHARS,
-			     SSDATA (prompt), -1, prompt_w, len);
+	pMultiByteToWideChar (CP_UTF8, MB_ERR_INVALID_CHARS,
+			      SSDATA (prompt), -1, prompt_w, len);
       }
     else
       {
@@ -6542,18 +6558,18 @@ Otherwise, if ONLY-DIR-P is non-nil, the user can only select directories.  */)
 	    if (errno == ENOENT && filename_buf_a[MAX_PATH - 1] != 0)
 	      report_file_error ("filename too long", default_filename);
 	  }
-	len = MultiByteToWideChar (CP_UTF8, MB_ERR_INVALID_CHARS,
-				   SSDATA (prompt), -1, NULL, 0);
+	len = pMultiByteToWideChar (CP_UTF8, MB_ERR_INVALID_CHARS,
+				    SSDATA (prompt), -1, NULL, 0);
 	if (len > 32768)
 	  len = 32768;
 	prompt_w = alloca (len * sizeof (wchar_t));
-	MultiByteToWideChar (CP_UTF8, MB_ERR_INVALID_CHARS,
-			     SSDATA (prompt), -1, prompt_w, len);
-	len = WideCharToMultiByte (CP_ACP, 0, prompt_w, -1, NULL, 0, NULL, NULL);
+	pMultiByteToWideChar (CP_UTF8, MB_ERR_INVALID_CHARS,
+			      SSDATA (prompt), -1, prompt_w, len);
+	len = pWideCharToMultiByte (CP_ACP, 0, prompt_w, -1, NULL, 0, NULL, NULL);
 	if (len > 32768)
 	  len = 32768;
 	prompt_a = alloca (len);
-	WideCharToMultiByte (CP_ACP, 0, prompt_w, -1, prompt_a, len, NULL, NULL);
+	pWideCharToMultiByte (CP_ACP, 0, prompt_w, -1, prompt_a, len, NULL, NULL);
       }
 #endif /* NTGUI_UNICODE */
 
@@ -6836,50 +6852,74 @@ handler application, but typically it is one of the following common
 operations:
 
  \"open\"    - open DOCUMENT, which could be a file, a directory, or an
-               executable program.  If it is an application, that
-               application is launched in the current buffer's default
+               executable program (application).  If it is an application,
+               that application is launched in the current buffer's default
                directory.  Otherwise, the application associated with
                DOCUMENT is launched in the buffer's default directory.
- \"print\"   - print DOCUMENT, which must be a file
- \"explore\" - start the Windows Explorer on DOCUMENT
+ \"opennew\" - like \"open\", but instruct the application to open
+               DOCUMENT in a new window.
+ \"openas\"  - open the \"Open With\" dialog for DOCUMENT.
+ \"print\"   - print DOCUMENT, which must be a file.
+ \"printto\" - print DOCUMENT, which must be a file, to a specified printer.
+               The printer should be provided in PARAMETERS, see below.
+ \"explore\" - start the Windows Explorer on DOCUMENT.
  \"edit\"    - launch an editor and open DOCUMENT for editing; which
                editor is launched depends on the association for the
-               specified DOCUMENT
- \"find\"    - initiate search starting from DOCUMENT which must specify
-               a directory
+               specified DOCUMENT.
+ \"find\"    - initiate search starting from DOCUMENT, which must specify
+               a directory.
+ \"delete\"  - move DOCUMENT, a file or a directory, to Recycle Bin.
+ \"copy\"    - copy DOCUMENT, which must be a file or a directory, into
+               the clipboard.
+ \"cut\"     - move DOCUMENT, a file or a directory, into the clipboard.
+ \"paste\"   - paste the file whose name is in the clipboard into DOCUMENT,
+               which must be a directory.
+ \"pastelink\"
+           - create a shortcut in DOCUMENT (which must be a directory)
+               the file or directory whose name is in the clipboard.
  \"runas\"   - run DOCUMENT, which must be an excutable file, with
                elevated privileges (a.k.a. \"as Administrator\").
+ \"properties\"
+           - open the the property sheet dialog for DOCUMENT.
  nil       - invoke the default OPERATION, or \"open\" if default is
-               not defined or unavailable
+               not defined or unavailable.
 
 DOCUMENT is typically the name of a document file or a URL, but can
-also be a program executable to run, or a directory to open in the
-Windows Explorer.  If it is a file, it must be a local one; this
-function does not support remote file names.
+also be an executable program to run, or a directory to open in the
+Windows Explorer.  If it is a file or a directory, it must be a local
+one; this function does not support remote file names.
 
-If DOCUMENT is a program executable, the optional third arg PARAMETERS
-can be a string containing command line parameters that will be passed
-to the program; otherwise, PARAMETERS should be nil or unspecified.
+If DOCUMENT is an executable program, the optional third arg PARAMETERS
+can be a string containing command line parameters, separated by blanks,
+that will be passed to the program.  Some values of OPERATION also require
+parameters (e.g., \"printto\" requires the printer address).  Otherwise,
+PARAMETERS should be nil or unspecified.  Note that double quote characters
+in PARAMETERS must each be enclosed in 2 additional quotes, as in \"\"\".
 
 Optional fourth argument SHOW-FLAG can be used to control how the
 application will be displayed when it is invoked.  If SHOW-FLAG is nil
-or unspecified, the application is displayed normally, otherwise it is
-an integer representing a ShowWindow flag:
+or unspecified, the application is displayed as if SHOW-FLAG of 10 was
+specified, otherwise it is an integer between 0 and 11 representing
+a ShowWindow flag:
 
   0 - start hidden
-  1 - start normally
-  3 - start maximized
-  6 - start minimized  */)
+  1 - start as normal-size window
+  3 - start in a maximized window
+  6 - start in a minimized window
+ 10 - start as the application itself specifies; this is the default.  */)
   (Lisp_Object operation, Lisp_Object document, Lisp_Object parameters, Lisp_Object show_flag)
 {
   char *errstr;
   Lisp_Object current_dir = BVAR (current_buffer, directory);;
   wchar_t *doc_w = NULL, *params_w = NULL, *ops_w = NULL;
+#ifdef CYGWIN
   intptr_t result;
-#ifndef CYGWIN
+#else
   int use_unicode = w32_unicode_filenames;
   char *doc_a = NULL, *params_a = NULL, *ops_a = NULL;
-  Lisp_Object absdoc;
+  Lisp_Object absdoc, handler;
+  BOOL success;
+  struct gcpro gcpro1;
 #endif
 
   CHECK_STRING (document);
@@ -6906,82 +6946,6 @@ an integer representing a ShowWindow flag:
 				     GUI_SDATA (current_dir),
 				     (INTEGERP (show_flag)
 				      ? XINT (show_flag) : SW_SHOWDEFAULT));
-#else  /* !CYGWIN */
-  current_dir = ENCODE_FILE (current_dir);
-  /* We have a situation here.  If DOCUMENT is a relative file name,
-     and is not in CURRENT_DIR, ShellExecute below will fail to find
-     it.  So we need to make the file name absolute.  But DOCUMENT
-     does not have to be a file, it can be a URL, for example.  So we
-     make it absolute only if it is an existing file; if it is a file
-     that does not exist, tough.  */
-  absdoc = Fexpand_file_name (document, Qnil);
-  if (!NILP (Ffile_exists_p (absdoc)))
-    document = absdoc;
-  document = ENCODE_FILE (document);
-  if (use_unicode)
-    {
-      wchar_t document_w[MAX_PATH], current_dir_w[MAX_PATH];
-
-      /* Encode filename, current directory and parameters, and
-	 convert operation to UTF-16.  */
-      filename_to_utf16 (SSDATA (current_dir), current_dir_w);
-      filename_to_utf16 (SSDATA (document), document_w);
-      doc_w = document_w;
-      if (STRINGP (parameters))
-	{
-	  int len;
-
-	  parameters = ENCODE_SYSTEM (parameters);
-	  len = MultiByteToWideChar (CP_ACP, MB_ERR_INVALID_CHARS,
-				     SSDATA (parameters), -1, NULL, 0);
-	  if (len > 32768)
-	    len = 32768;
-	  params_w = alloca (len * sizeof (wchar_t));
-	  MultiByteToWideChar (CP_ACP, MB_ERR_INVALID_CHARS,
-			       SSDATA (parameters), -1, params_w, len);
-	}
-      if (STRINGP (operation))
-	{
-	  /* Assume OPERATION is pure ASCII.  */
-	  const char *s = SSDATA (operation);
-	  wchar_t *d;
-	  int len = SBYTES (operation) + 1;
-
-	  if (len > 32768)
-	    len = 32768;
-	  d = ops_w = alloca (len * sizeof (wchar_t));
-	  while (d < ops_w + len - 1)
-	    *d++ = *s++;
-	  *d = 0;
-	}
-      result = (intptr_t) ShellExecuteW (NULL, ops_w, doc_w, params_w,
-					 current_dir_w,
-					 (INTEGERP (show_flag)
-					  ? XINT (show_flag) : SW_SHOWDEFAULT));
-    }
-  else
-    {
-      char document_a[MAX_PATH], current_dir_a[MAX_PATH];
-
-      filename_to_ansi (SSDATA (current_dir), current_dir_a);
-      filename_to_ansi (SSDATA (document), document_a);
-      doc_a = document_a;
-      if (STRINGP (parameters))
-	{
-	  parameters = ENCODE_SYSTEM (parameters);
-	  params_a = SSDATA (parameters);
-	}
-      if (STRINGP (operation))
-	{
-	  /* Assume OPERATION is pure ASCII.  */
-	  ops_a = SSDATA (operation);
-	}
-      result = (intptr_t) ShellExecuteA (NULL, ops_a, doc_a, params_a,
-					 current_dir_a,
-					 (INTEGERP (show_flag)
-					  ? XINT (show_flag) : SW_SHOWDEFAULT));
-    }
-#endif /* !CYGWIN */
 
   if (result > 32)
     return Qt;
@@ -7021,6 +6985,129 @@ an integer representing a ShowWindow flag:
       errstr = w32_strerror (0);
       break;
     }
+
+#else  /* !CYGWIN */
+
+  current_dir = ENCODE_FILE (current_dir);
+  /* We have a situation here.  If DOCUMENT is a relative file name,
+     but its name includes leading directories, i.e. it lives not in
+     CURRENT_DIR, but in its subdirectory, then ShellExecute below
+     will fail to find it.  So we need to make the file name is
+     absolute.  But DOCUMENT does not have to be a file, it can be a
+     URL, for example.  So we make it absolute only if it is an
+     existing file; if it is a file that does not exist, tough.  */
+  GCPRO1 (absdoc);
+  absdoc = Fexpand_file_name (document, Qnil);
+  /* Don't call file handlers for file-exists-p, since they might
+     attempt to access the file, which could fail or produce undesired
+     consequences, see bug#16558 for an example.  */
+  handler = Ffind_file_name_handler (absdoc, Qfile_exists_p);
+  if (NILP (handler))
+    {
+      Lisp_Object absdoc_encoded = ENCODE_FILE (absdoc);
+
+      if (faccessat (AT_FDCWD, SSDATA (absdoc_encoded), F_OK, AT_EACCESS) == 0)
+	document = absdoc_encoded;
+      else
+	document = ENCODE_FILE (document);
+    }
+  else
+    document = ENCODE_FILE (document);
+  UNGCPRO;
+  if (use_unicode)
+    {
+      wchar_t document_w[MAX_PATH], current_dir_w[MAX_PATH];
+      SHELLEXECUTEINFOW shexinfo_w;
+
+      /* Encode filename, current directory and parameters, and
+	 convert operation to UTF-16.  */
+      filename_to_utf16 (SSDATA (current_dir), current_dir_w);
+      filename_to_utf16 (SSDATA (document), document_w);
+      doc_w = document_w;
+      if (STRINGP (parameters))
+	{
+	  int len;
+
+	  parameters = ENCODE_SYSTEM (parameters);
+	  len = pMultiByteToWideChar (CP_ACP, MB_ERR_INVALID_CHARS,
+				      SSDATA (parameters), -1, NULL, 0);
+	  if (len > 32768)
+	    len = 32768;
+	  params_w = alloca (len * sizeof (wchar_t));
+	  pMultiByteToWideChar (CP_ACP, MB_ERR_INVALID_CHARS,
+				SSDATA (parameters), -1, params_w, len);
+	}
+      if (STRINGP (operation))
+	{
+	  /* Assume OPERATION is pure ASCII.  */
+	  const char *s = SSDATA (operation);
+	  wchar_t *d;
+	  int len = SBYTES (operation) + 1;
+
+	  if (len > 32768)
+	    len = 32768;
+	  d = ops_w = alloca (len * sizeof (wchar_t));
+	  while (d < ops_w + len - 1)
+	    *d++ = *s++;
+	  *d = 0;
+	}
+
+      /* Using ShellExecuteEx and setting the SEE_MASK_INVOKEIDLIST
+	 flag succeeds with more OPERATIONs (a.k.a. "verbs"), as it is
+	 able to invoke verbs from shortcut menu extensions, not just
+	 static verbs listed in the Registry.  */
+      memset (&shexinfo_w, 0, sizeof (shexinfo_w));
+      shexinfo_w.cbSize = sizeof (shexinfo_w);
+      shexinfo_w.fMask =
+	SEE_MASK_INVOKEIDLIST | SEE_MASK_FLAG_DDEWAIT | SEE_MASK_FLAG_NO_UI;
+      shexinfo_w.hwnd = NULL;
+      shexinfo_w.lpVerb = ops_w;
+      shexinfo_w.lpFile = doc_w;
+      shexinfo_w.lpParameters = params_w;
+      shexinfo_w.lpDirectory = current_dir_w;
+      shexinfo_w.nShow =
+	(INTEGERP (show_flag) ? XINT (show_flag) : SW_SHOWDEFAULT);
+      success = ShellExecuteExW (&shexinfo_w);
+    }
+  else
+    {
+      char document_a[MAX_PATH], current_dir_a[MAX_PATH];
+      SHELLEXECUTEINFOA shexinfo_a;
+
+      filename_to_ansi (SSDATA (current_dir), current_dir_a);
+      filename_to_ansi (SSDATA (document), document_a);
+      doc_a = document_a;
+      if (STRINGP (parameters))
+	{
+	  parameters = ENCODE_SYSTEM (parameters);
+	  params_a = SSDATA (parameters);
+	}
+      if (STRINGP (operation))
+	{
+	  /* Assume OPERATION is pure ASCII.  */
+	  ops_a = SSDATA (operation);
+	}
+      memset (&shexinfo_a, 0, sizeof (shexinfo_a));
+      shexinfo_a.cbSize = sizeof (shexinfo_a);
+      shexinfo_a.fMask =
+	SEE_MASK_INVOKEIDLIST | SEE_MASK_FLAG_DDEWAIT | SEE_MASK_FLAG_NO_UI;
+      shexinfo_a.hwnd = NULL;
+      shexinfo_a.lpVerb = ops_a;
+      shexinfo_a.lpFile = doc_a;
+      shexinfo_a.lpParameters = params_a;
+      shexinfo_a.lpDirectory = current_dir_a;
+      shexinfo_a.nShow =
+	(INTEGERP (show_flag) ? XINT (show_flag) : SW_SHOWDEFAULT);
+      success = ShellExecuteExA (&shexinfo_a);
+    }
+
+  if (success)
+    return Qt;
+
+  errstr = w32_strerror (0);
+
+#endif /* !CYGWIN */
+
   /* The error string might be encoded in the locale's encoding.  */
   if (!NILP (Vlocale_coding_system))
     {
@@ -7433,15 +7520,15 @@ If the underlying system call fails, value is nil.  */)
      added rather late on.  */
   {
     HMODULE hKernel = GetModuleHandle ("kernel32");
-    BOOL (*pfn_GetDiskFreeSpaceExW)
+    BOOL (WINAPI *pfn_GetDiskFreeSpaceExW)
       (wchar_t *, PULARGE_INTEGER, PULARGE_INTEGER, PULARGE_INTEGER)
-      = (void *) GetProcAddress (hKernel, "GetDiskFreeSpaceExW");
-    BOOL (*pfn_GetDiskFreeSpaceExA)
+      = GetProcAddress (hKernel, "GetDiskFreeSpaceExW");
+    BOOL (WINAPI *pfn_GetDiskFreeSpaceExA)
       (char *, PULARGE_INTEGER, PULARGE_INTEGER, PULARGE_INTEGER)
-      = (void *) GetProcAddress (hKernel, "GetDiskFreeSpaceExA");
+      = GetProcAddress (hKernel, "GetDiskFreeSpaceExA");
     bool have_pfn_GetDiskFreeSpaceEx =
-      (w32_unicode_filenames && pfn_GetDiskFreeSpaceExW
-       || !w32_unicode_filenames && pfn_GetDiskFreeSpaceExA);
+      ((w32_unicode_filenames && pfn_GetDiskFreeSpaceExW)
+       || (!w32_unicode_filenames && pfn_GetDiskFreeSpaceExA));
 
     /* On Windows, we may need to specify the root directory of the
        volume holding FILENAME.  */

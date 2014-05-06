@@ -1,5 +1,5 @@
 ;;; ox-publish.el --- Publish Related Org Mode Files as a Website
-;; Copyright (C) 2006-2013 Free Software Foundation, Inc.
+;; Copyright (C) 2006-2014 Free Software Foundation, Inc.
 
 ;; Author: David O'Toole <dto@gnu.org>
 ;; Maintainer: Carsten Dominik <carsten DOT dominik AT gmail DOT com>
@@ -808,7 +808,8 @@ Default for SITEMAP-FILENAME is 'sitemap.org'."
        (org-mode)
        (let ((title
 	      (let ((property (plist-get (org-export-get-environment) :title)))
-		(if property (org-element-interpret-data property)
+		(if property
+		    (org-no-properties (org-element-interpret-data property))
 		  (file-name-nondirectory (file-name-sans-extension file))))))
 	 (unless visiting (kill-buffer buffer))
 	 (org-publish-cache-set-file-property file :title title)
@@ -1072,7 +1073,7 @@ publishing directory."
 Return value is a list of numbers, or nil.  This function allows
 to resolve external fuzzy links like:
 
-  [[file.org::*fuzzy][description]"
+  [[file.org::*fuzzy][description]]"
   (when org-publish-cache
     (cdr (assoc (org-split-string
 		 (if (eq (aref fuzzy 0) ?*) (substring fuzzy 1) fuzzy))

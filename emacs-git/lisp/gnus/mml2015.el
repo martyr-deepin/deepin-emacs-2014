@@ -1,6 +1,6 @@
 ;;; mml2015.el --- MIME Security with Pretty Good Privacy (PGP)
 
-;; Copyright (C) 2000-2013 Free Software Foundation, Inc.
+;; Copyright (C) 2000-2014 Free Software Foundation, Inc.
 
 ;; Author: Shenghuo Zhu <zsh@cs.rochester.edu>
 ;; Keywords: PGP MIME MML
@@ -28,9 +28,6 @@
 ;;; Code:
 
 (eval-and-compile
-  ;; For Emacs <22.2 and XEmacs.
-  (unless (fboundp 'declare-function) (defmacro declare-function (&rest r)))
-
   (if (locate-library "password-cache")
       (require 'password-cache)
     (require 'password)))
@@ -51,12 +48,10 @@
 ;; Then mml1991 would not need to require mml2015, and mml1991-use
 ;; could be removed.
 (defvar mml2015-use (or
-		     (condition-case nil
-			 (progn
-			   (require 'epg-config)
-			   (epg-check-configuration (epg-configuration))
-			   'epg)
-		       (error))
+		     (progn
+		       (ignore-errors (require 'epg-config))
+		       (and (fboundp 'epg-check-configuration)
+			   'epg))
 		     (progn
 		       (let ((abs-file (locate-library "pgg")))
 			 ;; Don't load PGG if it is marked as obsolete

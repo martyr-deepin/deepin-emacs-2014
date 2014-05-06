@@ -1,5 +1,5 @@
 /* Interface code for dealing with text properties.
-   Copyright (C) 1993-1995, 1997, 1999-2013 Free Software Foundation,
+   Copyright (C) 1993-1995, 1997, 1999-2014 Free Software Foundation,
    Inc.
 
 This file is part of GNU Emacs.
@@ -1741,6 +1741,19 @@ Return t if any property was actually removed, nil otherwise.  */)
 	}
       len -= LENGTH (i);
       i = next_interval (i);
+      if (!i)
+        {
+          if (modified)
+            {
+              if (BUFFERP (object))
+                signal_after_change (XINT (start),
+                                     XINT (end) - XINT (start),
+                                     XINT (end) - XINT (start));
+              return Qt;
+            }
+          else
+            return Qnil;
+        }
     }
 }
 

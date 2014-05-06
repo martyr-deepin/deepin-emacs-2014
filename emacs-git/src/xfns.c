@@ -1,6 +1,6 @@
 /* Functions for the X window system.
 
-Copyright (C) 1989, 1992-2013 Free Software Foundation, Inc.
+Copyright (C) 1989, 1992-2014 Free Software Foundation, Inc.
 
 This file is part of GNU Emacs.
 
@@ -716,6 +716,7 @@ x_set_mouse_color (struct frame *f, Lisp_Object arg, Lisp_Object oldval)
     XRecolorCursor (dpy, hand_cursor, &fore_color, &back_color);
     XRecolorCursor (dpy, hourglass_cursor, &fore_color, &back_color);
     XRecolorCursor (dpy, horizontal_drag_cursor, &fore_color, &back_color);
+    XRecolorCursor (dpy, vertical_drag_cursor, &fore_color, &back_color);
   }
 
   if (FRAME_X_WINDOW (f) != 0)
@@ -997,7 +998,9 @@ x_set_menu_bar_lines (struct frame *f, Lisp_Object value, Lisp_Object oldval)
 #else /* not USE_X_TOOLKIT && not USE_GTK */
   FRAME_MENU_BAR_LINES (f) = nlines;
   FRAME_MENU_BAR_HEIGHT (f) = nlines * FRAME_LINE_HEIGHT (f);
-  resize_frame_windows (f, FRAME_LINES (f), 0, 0);
+  resize_frame_windows (f, FRAME_TEXT_HEIGHT (f), 0, 1);
+  if (FRAME_X_WINDOW (f))
+    x_clear_under_internal_border (f);
 
   /* If the menu bar height gets changed, the internal border below
      the top margin has to be cleared.  Also, if the menu bar gets
@@ -1052,7 +1055,7 @@ x_set_tool_bar_lines (struct frame *f, Lisp_Object value, Lisp_Object oldval)
   int nlines;
 #if ! defined (USE_GTK)
   int delta, root_height;
-  Lisp_Object root_window;
+  int unit = FRAME_LINE_HEIGHT (f);
 #endif
 
   /* Treat tool bars like menu bars.  */
@@ -1089,20 +1092,32 @@ x_set_tool_bar_lines (struct frame *f, Lisp_Object value, Lisp_Object oldval)
   /* Make sure we redisplay all windows in this frame.  */
   windows_or_buffers_changed = 60;
 
-  delta = nlines - FRAME_TOOL_BAR_LINES (f);
+  /* DELTA is in pixels now.  */
+  delta = (nlines - FRAME_TOOL_BAR_LINES (f)) * unit;
 
-  /* Don't resize the tool-bar to more than we have room for.  */
-  root_window = FRAME_ROOT_WINDOW (f);
-  root_height = WINDOW_TOTAL_LINES (XWINDOW (root_window));
-  if (root_height - delta < 1)
+  /* Don't resize the tool-bar to more than we have room for.  Note: The
+     calculations below and the subsequent call to resize_frame_windows
+     are inherently flawed because they can make the toolbar higher than
+     the containing frame.  */
+  if (delta > 0)
     {
-      delta = root_height - 1;
-      nlines = FRAME_TOOL_BAR_LINES (f) + delta;
+      root_height = WINDOW_PIXEL_HEIGHT (XWINDOW (FRAME_ROOT_WINDOW (f)));
+      if (root_height - delta < unit)
+	{
+	  delta = root_height - unit;
+	  /* When creating a new frame and toolbar mode is enabled, we
+	     need at least one toolbar line.  */
+	  nlines = max (FRAME_TOOL_BAR_LINES (f) + delta / unit, 1);
+	}
     }
 
   FRAME_TOOL_BAR_LINES (f) = nlines;
   FRAME_TOOL_BAR_HEIGHT (f) = nlines * FRAME_LINE_HEIGHT (f);
-  resize_frame_windows (f, FRAME_LINES (f), 0, 0);
+  resize_frame_windows (f, FRAME_TEXT_HEIGHT (f), 0, 1);
+#if !defined USE_X_TOOLKIT && !defined USE_GTK
+  if (FRAME_X_WINDOW (f))
+    x_clear_under_internal_border (f);
+#endif
   adjust_frame_glyphs (f);
 
   /* We also have to make sure that the internal border at the top of
@@ -1124,7 +1139,7 @@ x_set_tool_bar_lines (struct frame *f, Lisp_Object value, Lisp_Object oldval)
     {
       int height = FRAME_INTERNAL_BORDER_WIDTH (f);
       int width = FRAME_PIXEL_WIDTH (f);
-      int y = (FRAME_MENU_BAR_LINES (f) + nlines) * FRAME_LINE_HEIGHT (f);
+      int y = nlines * unit;
 
       /* height can be zero here. */
       if (height > 0 && width > 0)
@@ -1139,7 +1154,7 @@ x_set_tool_bar_lines (struct frame *f, Lisp_Object value, Lisp_Object oldval)
 	clear_glyph_matrix (XWINDOW (f->tool_bar_window)->current_matrix);
     }
 
-    run_window_configuration_change_hook (f);
+  run_window_configuration_change_hook (f);
 #endif /* USE_GTK */
 }
 
@@ -1479,7 +1494,7 @@ x_set_title (struct frame *f, Lisp_Object name, Lisp_Object old_name)
 void
 x_set_scroll_bar_default_width (struct frame *f)
 {
-  int wid = FRAME_COLUMN_WIDTH (f);
+  int unit = FRAME_COLUMN_WIDTH (f);
 #ifdef USE_TOOLKIT_SCROLL_BARS
 #ifdef USE_GTK
   int minw = xg_get_default_scrollbar_width ();
@@ -1487,16 +1502,14 @@ x_set_scroll_bar_default_width (struct frame *f)
   int minw = 16;
 #endif
   /* A minimum width of 14 doesn't look good for toolkit scroll bars.  */
-  FRAME_CONFIG_SCROLL_BAR_COLS (f) = (minw + wid - 1) / wid;
+  FRAME_CONFIG_SCROLL_BAR_COLS (f) = (minw + unit - 1) / unit;
   FRAME_CONFIG_SCROLL_BAR_WIDTH (f) = minw;
 #else
-  /* Make the actual width 16 pixels and a multiple of a
-     character width.  */
-  FRAME_CONFIG_SCROLL_BAR_COLS (f) = (16 + wid - 1) / wid;
-
-  /* Use all of that space (aside from required margins) for the
-     scroll bar.  */
-  FRAME_CONFIG_SCROLL_BAR_WIDTH (f) = 16;
+  /* The width of a non-toolkit scrollbar is at least 14 pixels and a
+     multiple of the frame's character width.  */
+  FRAME_CONFIG_SCROLL_BAR_COLS (f) = (14 + unit - 1) / unit;
+  FRAME_CONFIG_SCROLL_BAR_WIDTH (f)
+    = FRAME_CONFIG_SCROLL_BAR_COLS (f) * unit;
 #endif
 }
 
@@ -1628,12 +1641,12 @@ hack_wm_protocols (struct frame *f, Widget widget)
 #ifdef HAVE_X_I18N
 
 static XFontSet xic_create_xfontset (struct frame *);
-static XIMStyle best_xim_style (XIMStyles *, XIMStyles *);
+static XIMStyle best_xim_style (XIMStyles *);
 
 
 /* Supported XIM styles, ordered by preference.  */
 
-static XIMStyle supported_xim_styles[] =
+static const XIMStyle supported_xim_styles[] =
 {
   XIMPreeditPosition | XIMStatusArea,
   XIMPreeditPosition | XIMStatusNothing,
@@ -1928,14 +1941,15 @@ xic_free_xfontset (struct frame *f)
    input method XIM.  */
 
 static XIMStyle
-best_xim_style (XIMStyles *user, XIMStyles *xim)
+best_xim_style (XIMStyles *xim)
 {
   int i, j;
+  int nr_supported = ARRAYELTS (supported_xim_styles);
 
-  for (i = 0; i < user->count_styles; ++i)
+  for (i = 0; i < nr_supported; ++i)
     for (j = 0; j < xim->count_styles; ++j)
-      if (user->supported_styles[i] == xim->supported_styles[j])
-	return user->supported_styles[i];
+      if (supported_xim_styles[i] == xim->supported_styles[j])
+	return supported_xim_styles[i];
 
   /* Return the default style.  */
   return XIMPreeditNothing | XIMStatusNothing;
@@ -1943,42 +1957,41 @@ best_xim_style (XIMStyles *user, XIMStyles *xim)
 
 /* Create XIC for frame F. */
 
-static XIMStyle xic_style;
-
 void
 create_frame_xic (struct frame *f)
 {
   XIM xim;
   XIC xic = NULL;
   XFontSet xfs = NULL;
+  XVaNestedList status_attr = NULL;
+  XVaNestedList preedit_attr = NULL;
+  XRectangle s_area;
+  XPoint spot;
+  XIMStyle xic_style;
 
   if (FRAME_XIC (f))
-    return;
+    goto out;
+
+  xim = FRAME_X_XIM (f);
+  if (!xim)
+    goto out;
+
+  /* Determine XIC style.  */
+  xic_style = best_xim_style (FRAME_X_XIM_STYLES (f));
 
   /* Create X fontset. */
-  xfs = xic_create_xfontset (f);
-  xim = FRAME_X_XIM (f);
-  if (xim)
+  if (xic_style & (XIMPreeditPosition | XIMStatusArea))
     {
-      XRectangle s_area;
-      XPoint spot;
-      XVaNestedList preedit_attr;
-      XVaNestedList status_attr;
+      xfs = xic_create_xfontset (f);
+      if (!xfs)
+        goto out;
 
-      s_area.x = 0; s_area.y = 0; s_area.width = 1; s_area.height = 1;
+      FRAME_XIC_FONTSET (f) = xfs;
+    }
+
+  if (xic_style & XIMPreeditPosition)
+    {
       spot.x = 0; spot.y = 1;
-
-      /* Determine XIC style.  */
-      if (xic_style == 0)
-	{
-	  XIMStyles supported_list;
-	  supported_list.count_styles = (sizeof supported_xim_styles
-					 / sizeof supported_xim_styles[0]);
-	  supported_list.supported_styles = supported_xim_styles;
-	  xic_style = best_xim_style (&supported_list,
-				      FRAME_X_XIM_STYLES (f));
-	}
-
       preedit_attr = XVaCreateNestedList (0,
 					  XNFontSet, xfs,
 					  XNForeground,
@@ -1990,31 +2003,75 @@ create_frame_xic (struct frame *f)
 					   : NULL),
 					  &spot,
 					  NULL);
-      status_attr = XVaCreateNestedList (0,
-					 XNArea,
-					 &s_area,
-					 XNFontSet,
-					 xfs,
-					 XNForeground,
-					 FRAME_FOREGROUND_PIXEL (f),
-					 XNBackground,
-					 FRAME_BACKGROUND_PIXEL (f),
-					 NULL);
 
-      xic = XCreateIC (xim,
-		       XNInputStyle, xic_style,
-		       XNClientWindow, FRAME_X_WINDOW (f),
-		       XNFocusWindow, FRAME_X_WINDOW (f),
-		       XNStatusAttributes, status_attr,
-		       XNPreeditAttributes, preedit_attr,
-		       NULL);
-      XFree (preedit_attr);
-      XFree (status_attr);
+      if (!preedit_attr)
+        goto out;
     }
+
+  if (xic_style & XIMStatusArea)
+    {
+      s_area.x = 0; s_area.y = 0; s_area.width = 1; s_area.height = 1;
+      status_attr = XVaCreateNestedList (0,
+                                         XNArea,
+                                         &s_area,
+                                         XNFontSet,
+                                         xfs,
+                                         XNForeground,
+                                         FRAME_FOREGROUND_PIXEL (f),
+                                         XNBackground,
+                                         FRAME_BACKGROUND_PIXEL (f),
+                                         NULL);
+
+      if (!status_attr)
+        goto out;
+    }
+
+  if (preedit_attr && status_attr)
+    xic = XCreateIC (xim,
+                     XNInputStyle, xic_style,
+                     XNClientWindow, FRAME_X_WINDOW (f),
+                     XNFocusWindow, FRAME_X_WINDOW (f),
+                     XNStatusAttributes, status_attr,
+                     XNPreeditAttributes, preedit_attr,
+                     NULL);
+  else if (preedit_attr)
+    xic = XCreateIC (xim,
+                     XNInputStyle, xic_style,
+                     XNClientWindow, FRAME_X_WINDOW (f),
+                     XNFocusWindow, FRAME_X_WINDOW (f),
+                     XNPreeditAttributes, preedit_attr,
+                     NULL);
+  else if (status_attr)
+    xic = XCreateIC (xim,
+                     XNInputStyle, xic_style,
+                     XNClientWindow, FRAME_X_WINDOW (f),
+                     XNFocusWindow, FRAME_X_WINDOW (f),
+                     XNStatusAttributes, status_attr,
+                     NULL);
+  else
+    xic = XCreateIC (xim,
+                     XNInputStyle, xic_style,
+                     XNClientWindow, FRAME_X_WINDOW (f),
+                     XNFocusWindow, FRAME_X_WINDOW (f),
+                     NULL);
+
+  if (!xic)
+    goto out;
 
   FRAME_XIC (f) = xic;
   FRAME_XIC_STYLE (f) = xic_style;
-  FRAME_XIC_FONTSET (f) = xfs;
+  xfs = NULL; /* Don't free below.  */
+
+ out:
+
+  if (xfs)
+    free_frame_xic (f);
+
+  if (preedit_attr)
+    XFree (preedit_attr);
+
+  if (status_attr)
+    XFree (status_attr);
 }
 
 
@@ -3021,6 +3078,10 @@ This function is an internal primitive--use `make-frame' instead.  */)
 #endif
 		       "internalBorderWidth", "internalBorderWidth",
 		       RES_TYPE_NUMBER);
+  x_default_parameter (f, parms, Qright_divider_width, make_number (0),
+		       NULL, NULL, RES_TYPE_NUMBER);
+  x_default_parameter (f, parms, Qbottom_divider_width, make_number (0),
+		       NULL, NULL, RES_TYPE_NUMBER);
   x_default_parameter (f, parms, Qvertical_scroll_bars,
 #if defined (USE_GTK) && defined (USE_TOOLKIT_SCROLL_BARS)
 		       Qright,

@@ -1,9 +1,9 @@
 ;;; isearch.el --- incremental search minor mode
 
-;; Copyright (C) 1992-1997, 1999-2013 Free Software Foundation, Inc.
+;; Copyright (C) 1992-1997, 1999-2014 Free Software Foundation, Inc.
 
 ;; Author: Daniel LaLiberte <liberte@cs.uiuc.edu>
-;; Maintainer: FSF
+;; Maintainer: emacs-devel@gnu.org
 ;; Keywords: matching
 ;; Package: emacs
 
@@ -131,12 +131,18 @@ a tab, a carriage return (control-M), a newline, and `]+'."
   :version "24.3")
 
 (defcustom search-invisible 'open
-  "If t incremental search can match hidden text.
+  "If t incremental search/query-replace can match hidden text.
 A nil value means don't match invisible text.
 When the value is `open', if the text matched is made invisible by
 an overlay having an `invisible' property and that overlay has a property
 `isearch-open-invisible', then incremental search will show the contents.
 \(This applies when using `outline.el' and `hideshow.el'.)
+
+To temporarily change the value for an active incremental search,
+use \\<isearch-mode-map>\\[isearch-toggle-invisible].
+
+See also the related option `isearch-hide-immediately'.
+
 See also `reveal-mode' if you want overlays to automatically be opened
 whenever point is in one of them."
   :type '(choice (const :tag "Match hidden text" t)
@@ -147,9 +153,9 @@ whenever point is in one of them."
 (defcustom isearch-hide-immediately t
   "If non-nil, re-hide an invisible match right away.
 This variable makes a difference when `search-invisible' is set to `open'.
-It means that after search makes some invisible text visible
-to show the match, it makes the text invisible again when the match moves.
-Ordinarily the text becomes invisible again at the end of the search."
+If nil then do not re-hide opened invisible text when the match moves.
+Whatever the value, all opened invisible text is hidden again after exiting
+the search."
   :type 'boolean
   :group 'isearch)
 
@@ -188,7 +194,7 @@ or to the end of the buffer for a backward search.")
 to the search status stack.")
 
 (defvar isearch-filter-predicate #'isearch-filter-visible
-  "Predicate that filter the search hits that would normally be available.
+  "Predicate that filters the search hits that would normally be available.
 Search hits that dissatisfy the predicate are skipped.  The function
 has two arguments: the positions of start and end of text matched by
 the search.  If this function returns nil, continue searching without
@@ -446,6 +452,7 @@ This is like `describe-bindings', but displays only Isearch keys."
     (define-key map "\M-\C-s" 'isearch-repeat-forward)
     (define-key map "\M-\C-r" 'isearch-repeat-backward)
     (define-key map "\177" 'isearch-delete-char)
+    (define-key map [backspace] 'isearch-delete-char)
     (define-key map "\C-g" 'isearch-abort)
 
     ;; This assumes \e is the meta-prefix-char.
@@ -456,6 +463,7 @@ This is like `describe-bindings', but displays only Isearch keys."
     (define-key map "\C-q" 'isearch-quote-char)
 
     (define-key map "\r" 'isearch-exit)
+    (define-key map [return] 'isearch-exit)
     (define-key map "\C-j" 'isearch-printing-char)
     (define-key map "\t" 'isearch-printing-char)
     (define-key map [?\S-\ ] 'isearch-printing-char)
@@ -567,8 +575,8 @@ matches literally, against one space.  You can toggle the value of this
 variable by the command `isearch-toggle-lax-whitespace'.")
 
 (defvar isearch-cmds nil
-  "Stack of search status sets.
-Each set is a vector of the form:
+  "Stack of search status elements.
+Each element is an `isearch--state' struct where the slots are
  [STRING MESSAGE POINT SUCCESS FORWARD OTHER-END WORD
   INVALID-REGEXP WRAPPED BARRIER WITHIN-BRACKETS CASE-FOLD-SEARCH]")
 
@@ -1946,7 +1954,8 @@ or it might return the position of the end of the line."
     (forward-char arg)))
 
 (defun isearch-yank-char (&optional arg)
-  "Pull next character from buffer into search string."
+  "Pull next character from buffer into search string.
+If optional ARG is non-nil, pull in the next ARG characters."
   (interactive "p")
   (isearch-yank-internal (lambda () (forward-char arg) (point))))
 
@@ -1965,12 +1974,14 @@ Subword is used when `subword-mode' is activated. "
        (forward-char 1)) (point))))
 
 (defun isearch-yank-word (&optional arg)
-  "Pull next word from buffer into search string."
+  "Pull next word from buffer into search string.
+If optional ARG is non-nil, pull in the next ARG words."
   (interactive "p")
   (isearch-yank-internal (lambda () (forward-word arg) (point))))
 
 (defun isearch-yank-line (&optional arg)
-  "Pull rest of line from buffer into search string."
+  "Pull rest of line from buffer into search string.
+If optional ARG is non-nil, yank the next ARG lines."
   (interactive "p")
   (isearch-yank-internal
    (lambda () (let ((inhibit-field-text-motion t))
@@ -2296,6 +2307,9 @@ before the command is executed globally with terminated Isearch."
 With argument, add COUNT copies of the character."
   (interactive "p")
   (let ((char (read-quoted-char (isearch-message t))))
+    (unless (characterp char)
+      (user-error "%s is not a valid character"
+		  (key-description (vector char))))
     ;; Assume character codes 0200 - 0377 stand for characters in some
     ;; single-byte character set, and convert them to Emacs
     ;; characters.

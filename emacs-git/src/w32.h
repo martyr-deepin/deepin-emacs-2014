@@ -2,7 +2,7 @@
 #define EMACS_W32_H
 
 /* Support routines for the NT version of Emacs.
-   Copyright (C) 1994, 2001-2013 Free Software Foundation, Inc.
+   Copyright (C) 1994, 2001-2014 Free Software Foundation, Inc.
 
 This file is part of GNU Emacs.
 
@@ -163,6 +163,7 @@ extern LPBYTE w32_get_resource (char * key, LPDWORD type);
 extern void release_listen_threads (void);
 extern void init_ntproc (int);
 extern void term_ntproc (int);
+extern HANDLE maybe_load_unicows_dll (void);
 extern void globals_of_w32 (void);
 
 extern void term_timers (void);
@@ -173,6 +174,9 @@ extern int _sys_wait_accept (int fd);
 
 extern Lisp_Object QCloaded_from;
 extern HMODULE w32_delayed_load (Lisp_Object);
+
+extern int (WINAPI *pMultiByteToWideChar)(UINT,DWORD,LPCSTR,int,LPWSTR,int);
+extern int (WINAPI *pWideCharToMultiByte)(UINT,DWORD,LPCWSTR,int,LPSTR,int,LPCSTR,LPBOOL);
 
 extern void init_environment (char **);
 extern void check_windows_init_file (void);

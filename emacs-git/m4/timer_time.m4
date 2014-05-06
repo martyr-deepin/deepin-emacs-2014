@@ -1,5 +1,5 @@
 # timer_time.m4 serial 2
-dnl Copyright (C) 2011-2013 Free Software Foundation, Inc.
+dnl Copyright (C) 2011-2014 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
@@ -28,7 +28,7 @@ AC_DEFUN([gl_TIMER_TIME],
 #include <features.h>
 #ifdef __GNU_LIBRARY__
  #if ((__GLIBC__ == 2 && __GLIBC_MINOR__ >= 2) || (__GLIBC__ > 2)) \
-     && !defined __UCLIBC__
+     && !(__UCLIBC__ && __HAS_NO_THREADS__)
   Thread emulation available
  #endif
 #endif

@@ -1,6 +1,6 @@
 ;;; js.el --- Major mode for editing JavaScript  -*- lexical-binding: t -*-
 
-;; Copyright (C) 2008-2013 Free Software Foundation, Inc.
+;; Copyright (C) 2008-2014 Free Software Foundation, Inc.
 
 ;; Author: Karl Landstrom <karl.landstrom@brgeight.se>
 ;;         Daniel Colascione <dan.colascione@gmail.com>
@@ -1302,7 +1302,7 @@ LIMIT defaults to point."
     (up-list -1)))
 
 (defun js--inside-param-list-p ()
-  "Return non-nil iff point is in a function parameter list."
+  "Return non-nil if point is in a function parameter list."
   (ignore-errors
     (save-excursion
       (js--up-nearby-list)
@@ -1313,7 +1313,7 @@ LIMIT defaults to point."
                              (looking-at "function"))))))))
 
 (defun js--inside-dojo-class-list-p ()
-  "Return non-nil iff point is in a Dojo multiple-inheritance class block."
+  "Return non-nil if point is in a Dojo multiple-inheritance class block."
   (ignore-errors
     (save-excursion
       (js--up-nearby-list)
@@ -1352,7 +1352,7 @@ REGEXPS, but only if FRAMEWORK is in `js-enabled-frameworks'."
 (defun js--forward-destructuring-spec (&optional func)
   "Move forward over a JavaScript destructuring spec.
 If FUNC is supplied, call it with no arguments before every
-variable name in the spec.  Return true iff this was actually a
+variable name in the spec.  Return true if this was actually a
 spec.  FUNC must preserve the match data."
   (pcase (char-after)
     (?\[
@@ -1905,13 +1905,11 @@ In particular, return the buffer position of the first `for' kwd."
 (defun js-indent-line ()
   "Indent the current line as JavaScript."
   (interactive)
-  (save-restriction
-    (widen)
-    (let* ((parse-status
-            (save-excursion (syntax-ppss (point-at-bol))))
-           (offset (- (current-column) (current-indentation))))
-      (indent-line-to (js--proper-indentation parse-status))
-      (when (> offset 0) (forward-char offset)))))
+  (let* ((parse-status
+          (save-excursion (syntax-ppss (point-at-bol))))
+         (offset (- (current-column) (current-indentation))))
+    (indent-line-to (js--proper-indentation parse-status))
+    (when (> offset 0) (forward-char offset))))
 
 ;;; Filling
 

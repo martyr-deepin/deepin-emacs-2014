@@ -1,6 +1,6 @@
 ;;; autorevert.el --- revert buffers when files on disk change
 
-;; Copyright (C) 1997-1999, 2001-2013 Free Software Foundation, Inc.
+;; Copyright (C) 1997-1999, 2001-2014 Free Software Foundation, Inc.
 
 ;; Author: Anders Lindgren <andersl@andersl.com>
 ;; Keywords: convenience
@@ -672,7 +672,7 @@ Should `auto-revert-mode' be active in some buffers, those buffers
 are checked.
 
 Non-file buffers that have a custom `revert-buffer-function' and
-a `buffer-stale-function' are reverted either when Auto-Revert
+`buffer-stale-function' are reverted either when Auto-Revert
 Mode is active in that buffer, or when the variable
 `global-auto-revert-non-file-buffers' is non-nil and Global
 Auto-Revert Mode is active.

@@ -1,5 +1,5 @@
 /* Call a Lisp function interactively.
-   Copyright (C) 1985-1986, 1993-1995, 1997, 2000-2013 Free Software
+   Copyright (C) 1985-1986, 1993-1995, 1997, 2000-2014 Free Software
    Foundation, Inc.
 
 This file is part of GNU Emacs.
@@ -38,8 +38,8 @@ static Lisp_Object Qread_number;
 
 Lisp_Object Qmouse_leave_buffer_hook;
 
-static Lisp_Object Qlist, Qlet, Qletx, Qsave_excursion, Qprogn, Qif;
-Lisp_Object Qwhen;
+static Lisp_Object Qlist, Qlet, Qletx, Qsave_excursion, Qif;
+Lisp_Object Qwhen, Qprogn;
 static Lisp_Object preserved_fns;
 
 /* Marker used within call-interactively to refer to point.  */
@@ -308,7 +308,7 @@ invoke it.  If KEYS is omitted or nil, the return value of
 
   specs = Qnil;
   string = 0;
-  /* The idea of FILTER_SPECS is to provide away to
+  /* The idea of FILTER_SPECS is to provide a way to
      specify how to represent the arguments in command history.
      The feature is not fully implemented.  */
   filter_specs = Qnil;

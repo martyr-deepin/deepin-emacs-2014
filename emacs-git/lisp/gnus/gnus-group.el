@@ -1,6 +1,6 @@
 ;;; gnus-group.el --- group mode commands for Gnus
 
-;; Copyright (C) 1996-2013 Free Software Foundation, Inc.
+;; Copyright (C) 1996-2014 Free Software Foundation, Inc.
 
 ;; Author: Lars Magne Ingebrigtsen <larsi@gnus.org>
 ;; Keywords: news
@@ -23,10 +23,6 @@
 ;;; Commentary:
 
 ;;; Code:
-
-;; For Emacs <22.2 and XEmacs.
-(eval-and-compile
-  (unless (fboundp 'declare-function) (defmacro declare-function (&rest r))))
 
 (eval-when-compile
   (require 'cl))
@@ -2728,7 +2724,7 @@ server."
   (interactive
    (list
     (gnus-read-group "Group name: ")
-    (gnus-read-method "From method")))
+    (gnus-read-method "Select method for new group (use tab for completion)")))
 
   (when (stringp method)
     (setq method (or (gnus-server-to-method method) method)))

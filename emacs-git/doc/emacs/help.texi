@@ -1,5 +1,5 @@
 @c This is part of the Emacs manual.
-@c Copyright (C) 1985-1987, 1993-1995, 1997, 2000-2013 Free Software
+@c Copyright (C) 1985-1987, 1993-1995, 1997, 2000-2014 Free Software
 @c Foundation, Inc.
 @c See file emacs.texi for copying conditions.
 @node Help
@@ -378,7 +378,7 @@ alphabetical order, change the variable
 
   Help buffers provide the same commands as View mode (@pxref{View
 Mode}); for instance, @key{SPC} scrolls forward, and @key{DEL} or
-@kbd{S-SPC} scrolls backward.  A few special commands are also
+@kbd{S-@key{SPC}} scrolls backward.  A few special commands are also
 provided:
 
 @table @kbd
@@ -458,7 +458,9 @@ buffer (@pxref{Package Menu}).
 @kindex C-h P
   @kbd{C-h P} (@code{describe-package}) prompts for the name of a
 package, and displays a help buffer describing the attributes of the
-package and the features that it implements.
+package and the features that it implements.  The buffer lists the
+keywords that relate to the package in the form of buttons.  Click on
+a button to see other packages related to that keyword.
 
 @node Language Help
 @section Help for International Language Support
@@ -551,13 +553,13 @@ Emacs Lisp Reference Manual}).
 
 @findex describe-prefix-bindings
   You can get a list of subcommands for a particular prefix key by
-typing @kbd{C-h}, @kbd{?}, or @kbd{F1}
+typing @kbd{C-h}, @kbd{?}, or @key{F1}
 (@code{describe-prefix-bindings}) after the prefix key.  (There are a
 few prefix keys for which not all of these keys work---those that
 provide their own bindings for one of them.  One of these prefix keys
-is @key{ESC} in combination with @kbd{C-h}, because @kbd{ESC C-h} is
-actually @kbd{C-M-h}, which marks a defun.  However, @kbd{ESC F1} and
-@kbd{ESC ?} work fine.)
+is @key{ESC} in combination with @kbd{C-h}, because @kbd{@key{ESC} C-h} is
+actually @kbd{C-M-h}, which marks a defun.  However, @kbd{@key{ESC} @key{F1}}
+and @kbd{@key{ESC} ?} work fine.)
 
 @node Help Files
 @section Help Files
@@ -603,7 +605,8 @@ Display information about where to get external packages
 @item C-h C-f
 Display the Emacs frequently-answered-questions list (@code{view-emacs-FAQ}).
 @item C-h g
-Display information about the GNU Project (@code{describe-gnu-project}).
+Visit a @uref{http://www.gnu.org} page with information about the GNU
+Project (@code{describe-gnu-project}).
 @item C-h C-m
 Display information about ordering printed copies of Emacs manuals
 (@code{view-order-manuals}).

@@ -3,6 +3,7 @@
 @comment %**start of header
 @setfilename ../../info/ebrowse
 @settitle A Class Browser for C++
+@documentencoding UTF-8
 @setchapternewpage odd
 @syncodeindex fn cp
 @comment %**end of header
@@ -10,7 +11,7 @@
 @copying
 This file documents Ebrowse, a C++ class browser for GNU Emacs.
 
-Copyright @copyright{} 2000--2013 Free Software Foundation, Inc.
+Copyright @copyright{} 2000--2014 Free Software Foundation, Inc.
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -494,7 +495,7 @@ The same functionality is available from the menu opened with
 
 @node Member Display
 @section Displaying Members
-@cindex @samp{*Members*} buffer
+@cindex @file{*Members*} buffer
 @cindex @samp{*Globals*}
 @cindex freezing a member buffer
 @cindex member lists, in tree buffers

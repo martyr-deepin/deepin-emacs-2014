@@ -1,5 +1,5 @@
 /* Fringe handling (split from xdisp.c).
-   Copyright (C) 1985-1988, 1993-1995, 1997-2013 Free Software
+   Copyright (C) 1985-1988, 1993-1995, 1997-2014 Free Software
    Foundation, Inc.
 
 This file is part of GNU Emacs.
@@ -474,7 +474,7 @@ static struct fringe_bitmap standard_bitmaps[] =
 
 #define NO_FRINGE_BITMAP 0
 #define UNDEF_FRINGE_BITMAP 1
-#define MAX_STANDARD_FRINGE_BITMAPS (sizeof (standard_bitmaps)/sizeof (standard_bitmaps[0]))
+#define MAX_STANDARD_FRINGE_BITMAPS ARRAYELTS (standard_bitmaps)
 
 static struct fringe_bitmap **fringe_bitmaps;
 static Lisp_Object *fringe_faces;
@@ -695,7 +695,9 @@ draw_fringe_bitmap_1 (struct window *w, struct glyph_row *row, int left_p, int o
 	}
     }
 
-  FRAME_RIF (f)->draw_fringe_bitmap (w, row, &p);
+  if (p.x >= WINDOW_BOX_LEFT_EDGE_X (w)
+      && (p.x + p.wd) <= WINDOW_BOX_LEFT_EDGE_X (w) + WINDOW_PIXEL_WIDTH (w))
+    FRAME_RIF (f)->draw_fringe_bitmap (w, row, &p);
 }
 
 static int

@@ -1,6 +1,6 @@
 /* X Communication module for terminals which understand the X protocol.
 
-Copyright (C) 1986, 1988, 1993-1994, 1996, 1999-2013 Free Software
+Copyright (C) 1986, 1988, 1993-1994, 1996, 1999-2014 Free Software
 Foundation, Inc.
 
 This file is part of GNU Emacs.
@@ -796,7 +796,7 @@ set_frame_menubar (struct frame *f, bool first_time, bool deep_p)
 #ifdef USE_GTK
   /* If we have detached menus, we must update deep so detached menus
      also gets updated.  */
-  deep_p = deep_p || xg_have_tear_offs ();
+  deep_p = deep_p || xg_have_tear_offs (f);
 #endif
 
   if (deep_p)
@@ -1306,6 +1306,8 @@ create_and_show_popup_menu (struct frame *f, widget_value *first_wv,
       for (i = 0; i < 5; i++)
         if (FRAME_DISPLAY_INFO (f)->grabbed & (1 << i))
           break;
+      /* If keys aren't grabbed (i.e., a mouse up event), use 0.  */
+      if (i == 5) i = 0;
     }
 
   /* Display the menu.  */

@@ -1,6 +1,6 @@
 ;;; ox-html.el --- HTML Back-End for Org Export Engine
 
-;; Copyright (C) 2011-2013 Free Software Foundation, Inc.
+;; Copyright (C) 2011-2014 Free Software Foundation, Inc.
 
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;;      Jambunathan K <kjambunathan at gmail dot com>
@@ -170,10 +170,8 @@
     "progress" "section" "video")
   "New elements in html5.
 
-<hgroup> is not included because it's currently impossible to
-wrap special blocks around multiple headlines. For other blocks
-that should contain headlines, use the HTML_CONTAINER property on
-the headline itself.")
+For blocks that should contain headlines, use the HTML_CONTAINER
+property on the headline itself.")
 
 (defconst org-html-special-string-regexps
   '(("\\\\-" . "&#x00ad;")		; shy
@@ -279,6 +277,8 @@ for the JavaScript code in this tag.
   pre.src-sql:before   { content: 'SQL'; }
 
   table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
   td, th { vertical-align:top;  }
   th.right  { text-align: center;  }
   th.left   { text-align: center;   }
@@ -455,6 +455,7 @@ export back-end currently used."
 	      (not org-html-use-infojs)
 	      (and (eq org-html-use-infojs 'when-configured)
 		   (or (not (plist-get exp-plist :infojs-opt))
+		       (string= "" (plist-get exp-plist :infojs-opt))
 		       (string-match "\\<view:nil\\>"
 				     (plist-get exp-plist :infojs-opt)))))
     (let* ((template org-html-infojs-template)
@@ -2659,19 +2660,20 @@ INFO is a plist holding contextual information.  See
 	 (path
 	  (cond
 	   ((member type '("http" "https" "ftp" "mailto"))
-	    (concat type ":" raw-path))
+	    (org-link-escape
+	     (org-link-unescape
+	      (concat type ":" raw-path)) org-link-escape-chars-browser))
 	   ((string= type "file")
 	    ;; Treat links to ".org" files as ".html", if needed.
 	    (setq raw-path
 		  (funcall link-org-files-as-html-maybe raw-path info))
 	    ;; If file path is absolute, prepend it with protocol
-	    ;; component - "file://".
-	    (cond ((file-name-absolute-p raw-path)
-		   (setq raw-path
-			 (concat "file://" (expand-file-name
-					    raw-path))))
-		  ((and home use-abs-url)
-		   (setq raw-path (concat (file-name-as-directory home) raw-path))))
+	    ;; component - "file:".
+	    (cond
+	     ((file-name-absolute-p raw-path)
+	      (setq raw-path (concat "file:" raw-path)))
+	     ((and home use-abs-url)
+	      (setq raw-path (concat (file-name-as-directory home) raw-path))))
 	    ;; Add search option, if any.  A search option can be
 	    ;; relative to a custom-id or a headline title.  Any other
 	    ;; option is ignored.
@@ -2719,9 +2721,9 @@ INFO is a plist holding contextual information.  See
       (let ((destination (org-export-resolve-radio-link link info)))
 	(when destination
 	  (format "<a href=\"#%s\"%s>%s</a>"
-		  (org-export-solidify-link-text path)
-		  attributes
-		  (org-export-data (org-element-contents destination) info)))))
+		  (org-export-solidify-link-text
+		   (org-element-property :value destination))
+		  attributes desc))))
      ;; Links pointing to a headline: Find destination and build
      ;; appropriate referencing command.
      ((member type '("custom-id" "fuzzy" "id"))
@@ -3255,8 +3257,8 @@ contextual information."
 	       (if (equal attributes "") "" (concat " " attributes))
 	       (if (not caption) ""
 		 (format (if org-html-table-caption-above
-			     "<caption align=\"above\">%s</caption>"
-			   "<caption align=\"bottom\">%s</caption>")
+			     "<caption class=\"t-above\">%s</caption>"
+			   "<caption class=\"t-bottom\">%s</caption>")
 			 (concat
 			  "<span class=\"table-number\">"
                           (format (org-html--translate "Table %d:" info) number)
@@ -3438,21 +3440,6 @@ Return output file name."
 				      org-html-extension "html"))
 		      plist pub-dir))
 
-
-;;; FIXME
-
-;;;; org-format-table-html
-;;;; org-format-org-table-html
-;;;; org-format-table-table-html
-;;;; org-table-number-fraction
-;;;; org-table-number-regexp
-;;;; org-html-inline-image-extensions
-;;;; org-export-preferred-target-alist
-;;;; class for anchors
-;;;; org-export-mark-todo-in-toc
-;;;; org-html-format-org-link
-;;;; (caption (and caption (org-xml-encode-org-text caption)))
-;;;; alt = (file-name-nondirectory path)
 
 (provide 'ox-html)
 

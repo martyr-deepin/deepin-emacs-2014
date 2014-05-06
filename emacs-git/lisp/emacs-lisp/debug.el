@@ -1,9 +1,9 @@
 ;;; debug.el --- debuggers and related commands for Emacs  -*- lexical-binding: t -*-
 
-;; Copyright (C) 1985-1986, 1994, 2001-2013 Free Software Foundation,
+;; Copyright (C) 1985-1986, 1994, 2001-2014 Free Software Foundation,
 ;; Inc.
 
-;; Maintainer: FSF
+;; Maintainer: emacs-devel@gnu.org
 ;; Keywords: lisp, tools, maint
 
 ;; This file is part of GNU Emacs.
@@ -829,7 +829,7 @@ To specify a nil argument interactively, exit with an empty minibuffer."
       (progn
         (advice-remove function #'debug--implement-debug-on-entry)
 	function)
-    (message "Cancelling debug-on-entry for all functions")
+    (message "Canceling debug-on-entry for all functions")
     (mapcar #'cancel-debug-on-entry (debug--function-list))))
 
 (defun debugger-list-functions ()

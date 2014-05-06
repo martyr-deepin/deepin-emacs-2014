@@ -1,5 +1,5 @@
 /* unexec for GNU Emacs on Windows NT.
-   Copyright (C) 1994, 2001-2013 Free Software Foundation, Inc.
+   Copyright (C) 1994, 2001-2014 Free Software Foundation, Inc.
 
 This file is part of GNU Emacs.
 
@@ -84,6 +84,13 @@ DWORD_PTR  bss_size_static = 0;
 DWORD_PTR  extra_bss_size_static = 0;
 
 PIMAGE_SECTION_HEADER heap_section;
+
+/* MinGW64 doesn't add a leading underscore to external symbols,
+   whereas configure.ac sets up LD_SWITCH_SYSTEM_TEMACS to force the
+   entry point at __start, with two underscores.  */
+#ifdef __MINGW64__
+#define _start __start
+#endif
 
 /* Startup code for running on NT.  When we are running as the dumped
    version, we need to bootstrap our heap and .bss section into our

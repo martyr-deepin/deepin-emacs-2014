@@ -1,10 +1,10 @@
 ;;; emacsbug.el --- command to report Emacs bugs to appropriate mailing list
 
-;; Copyright (C) 1985, 1994, 1997-1998, 2000-2013
+;; Copyright (C) 1985, 1994, 1997-1998, 2000-2014
 ;;   Free Software Foundation, Inc.
 
 ;; Author: K. Shane Hartman
-;; Maintainer: FSF
+;; Maintainer: emacs-devel@gnu.org
 ;; Keywords: maint mail
 ;; Package: emacs
 
@@ -42,11 +42,6 @@
 
 (define-obsolete-variable-alias 'report-emacs-bug-pretest-address
   'report-emacs-bug-address "24.1")
-
-(defcustom report-emacs-bug-address "bug-gnu-emacs@gnu.org"
-  "Address of mailing list for GNU Emacs bugs."
-  :group 'emacsbug
-  :type 'string)
 
 (defcustom report-emacs-bug-no-confirmation nil
   "If non-nil, suppress the confirmations asked for the sake of novice users."
@@ -230,8 +225,8 @@ usually do not have translators for other languages.\n\n")))
       (insert (propertize "\n" 'display txt)))
 
     (insert "\n\nIn " (emacs-version) "\n")
-    (if (stringp emacs-bzr-version)
-	(insert "Bzr revision: " emacs-bzr-version "\n"))
+    (if (stringp emacs-repository-version)
+	(insert "Repository revision: " emacs-repository-version "\n"))
     (if (fboundp 'x-server-vendor)
 	(condition-case nil
             ;; This is used not only for X11 but also W32 and others.
@@ -251,6 +246,8 @@ usually do not have translators for other languages.\n\n")))
       (insert "Configured using:\n `configure "
 	      system-configuration-options "'\n\n")
       (fill-region (line-beginning-position -1) (point)))
+    (insert "Configured features:\n" system-configuration-features "\n\n")
+    (fill-region (line-beginning-position -1) (point))
     (insert "Important settings:\n")
     (mapc
      (lambda (var)
@@ -322,6 +319,10 @@ usually do not have translators for other languages.\n\n")))
                 shadows)))
     (insert (format "\nFeatures:\n%s\n" features))
     (fill-region (line-beginning-position 0) (point))
+
+    (insert (format "\nMemory information:\n"))
+    (pp (garbage-collect) (current-buffer))
+    
     ;; This is so the user has to type something in order to send easily.
     (use-local-map (nconc (make-sparse-keymap) (current-local-map)))
     (define-key (current-local-map) "\C-c\C-i" 'info-emacs-bug)
@@ -399,7 +400,7 @@ and send the mail again%s."
                             (format " using \\[%s]"
                                     report-emacs-bug-send-command)
                           "")))))
-      (error "M-x report-emacs-bug was cancelled, please read *Bug Help* buffer"))
+      (error "M-x report-emacs-bug was canceled, please read *Bug Help* buffer"))
     ;; Query the user for the SMTP method, so that we can skip
     ;; questions about From header validity if the user is going to
     ;; use mailclient, anyway.

@@ -1,10 +1,10 @@
 ;;; erc-backend.el --- Backend network communication for ERC
 
-;; Copyright (C) 2004-2013 Free Software Foundation, Inc.
+;; Copyright (C) 2004-2014 Free Software Foundation, Inc.
 
 ;; Filename: erc-backend.el
 ;; Author: Lawrence Mitchell <wence@gmx.li>
-;; Maintainer: FSF
+;; Maintainer: emacs-devel@gnu.org
 ;; Created: 2004-05-7
 ;; Keywords: IRC chat client internet
 

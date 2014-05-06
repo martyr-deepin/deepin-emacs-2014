@@ -1,10 +1,10 @@
 ;;; man.el --- browse UNIX manual pages  -*- coding: utf-8 -*-
 
-;; Copyright (C) 1993-1994, 1996-1997, 2001-2013 Free Software
+;; Copyright (C) 1993-1994, 1996-1997, 2001-2014 Free Software
 ;; Foundation, Inc.
 
 ;; Author: Barry A. Warsaw <bwarsaw@cen.com>
-;; Maintainer: FSF
+;; Maintainer: emacs-devel@gnu.org
 ;; Keywords: help
 ;; Adapted-By: ESR, pot
 

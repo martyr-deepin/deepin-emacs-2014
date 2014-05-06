@@ -1,6 +1,6 @@
 ;;; doc-view.el --- View PDF/PostScript/DVI files in Emacs -*- lexical-binding: t -*-
 
-;; Copyright (C) 2007-2013 Free Software Foundation, Inc.
+;; Copyright (C) 2007-2014 Free Software Foundation, Inc.
 ;;
 ;; Author: Tassilo Horn <tsdh@gnu.org>
 ;; Maintainer: Tassilo Horn <tsdh@gnu.org>
@@ -198,6 +198,7 @@ Higher values result in larger images."
 If nil, the document is re-rendered every time the scaling factor is modified.
 This only has an effect if the image libraries linked with Emacs support
 scaling."
+  :version "24.4"
   :type 'boolean)
 
 (defcustom doc-view-image-width 850
@@ -335,7 +336,7 @@ of the page moves to the previous page."
       ;; Don't do it if there's a conversion is running, since in that case, it
       ;; will be done later.
       (with-selected-window (car winprops)
-        (doc-view-goto-page 1)))))
+        (doc-view-goto-page (image-mode-window-get 'page t))))))
 
 (defvar-local doc-view--current-files nil
   "Only used internally.")
@@ -1620,24 +1621,25 @@ If BACKWARD is non-nil, jump to the previous match."
   "Figure out the current document type (`doc-view-doc-type')."
   (let ((name-types
 	 (when buffer-file-name
-	   (cdr (assoc (file-name-extension buffer-file-name)
-		       '(
-			 ;; DVI
-			 ("dvi" dvi)
-			 ;; PDF
-			 ("pdf" pdf) ("epdf" pdf)
-			 ;; PostScript
-			 ("ps" ps) ("eps" ps)
-			 ;; DjVu
-			 ("djvu" djvu)
-			 ;; OpenDocument formats
-			 ("odt" odf) ("ods" odf) ("odp" odf) ("odg" odf)
-			 ("odc" odf) ("odi" odf) ("odm" odf) ("ott" odf)
-			 ("ots" odf) ("otp" odf) ("otg" odf)
-			 ;; Microsoft Office formats (also handled
-			 ;; by the odf conversion chain)
-			 ("doc" odf) ("docx" odf) ("xls" odf) ("xlsx" odf)
-			 ("ppt" odf) ("pptx" odf))))))
+	   (cdr (assoc-ignore-case
+                 (file-name-extension buffer-file-name)
+                 '(
+                   ;; DVI
+                   ("dvi" dvi)
+                   ;; PDF
+                   ("pdf" pdf) ("epdf" pdf)
+                   ;; PostScript
+                   ("ps" ps) ("eps" ps)
+                   ;; DjVu
+                   ("djvu" djvu)
+                   ;; OpenDocument formats.
+                   ("odt" odf) ("ods" odf) ("odp" odf) ("odg" odf)
+                   ("odc" odf) ("odi" odf) ("odm" odf) ("ott" odf)
+                   ("ots" odf) ("otp" odf) ("otg" odf)
+                   ;; Microsoft Office formats (also handled by the odf
+                   ;; conversion chain).
+                   ("doc" odf) ("docx" odf) ("xls" odf) ("xlsx" odf)
+                   ("ppt" odf) ("pps" odf) ("pptx" odf))))))
 	(content-types
 	 (save-excursion
 	   (goto-char (point-min))
@@ -1861,20 +1863,23 @@ See the command `doc-view-mode' for more information on this mode."
          `((page     . ,(doc-view-current-page))
            (handler  . doc-view-bookmark-jump))))
 
-
 ;;;###autoload
 (defun doc-view-bookmark-jump (bmk)
   ;; This implements the `handler' function interface for record type
   ;; returned by `doc-view-bookmark-make-record', which see.
-  (prog1 (bookmark-default-handler bmk)
-    (let ((page (bookmark-prop-get bmk 'page)))
-      (when (not (eq major-mode 'doc-view-mode))
-        (doc-view-toggle-display))
-      (with-selected-window
-       (or (get-buffer-window (current-buffer) 0)
-	   (selected-window))
-       (doc-view-goto-page page)))))
-
+  (let ((page (bookmark-prop-get bmk 'page))
+	(show-fn-sym (make-symbol "doc-view-bookmark-after-jump-hook")))
+    (fset show-fn-sym
+	  (lambda ()
+	    (remove-hook 'bookmark-after-jump-hook show-fn-sym)
+	    (when (not (eq major-mode 'doc-view-mode))
+	      (doc-view-toggle-display))
+	    (with-selected-window
+		(or (get-buffer-window (current-buffer) 0)
+		    (selected-window))
+	      (doc-view-goto-page page))))
+    (add-hook 'bookmark-after-jump-hook show-fn-sym)
+    (bookmark-default-handler bmk)))
 
 (provide 'doc-view)
 

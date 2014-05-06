@@ -1,10 +1,63 @@
+2014-05-01  Glenn Morris  <rgm@gnu.org>
+
+	* ede.el (ede-project-directories, ede-check-project-directory):
+	* semantic/ia-sb.el (semantic-ia-sb-show-doc):
+	* semantic/tag.el (semantic-tag-in-buffer-p):
+	* semantic/bovine/c.el (semantic-tag-abstract-p):
+	Doc fixes (replace `iff').
+
+2014-04-01  Glenn Morris  <rgm@gnu.org>
+
+	* ede/emacs.el (ede-emacs-version): Update AC_INIT regexp.  (Bug#17160)
+
+2014-03-29  Glenn Morris  <rgm@gnu.org>
+
+	* ede/dired.el (ede-dired-minor-mode): Add autoload cookie.
+	(generated-autoload-file, generated-autoload-load-name):
+	Set file-local values.
+	* ede.el: Load ede/loaddefs at compile time too.
+	(ede-dired-minor-mode): Remove hand-written autoload.
+
+2014-03-04  Glenn Morris  <rgm@gnu.org>
+
+	* semantic/util.el (semantic-complete-symbol):
+	Replace use of obsolete argument of display-completion-list.
+
+2014-02-03  Glenn Morris  <rgm@gnu.org>
+
+	* semantic/senator.el (senator-copy-tag-to-register):
+	Use register-read-with-preview, if available.
+
+2014-01-13  Eric Ludlam  <zappo@gnu.org>
+
+	* semantic/analyze/refs.el (semantic-analyze-refs-impl): Fix typo
+	in a doc string.
+
+	* semantic/ia.el (semantic-ia-complete-symbol): Ignore case if
+	prefix is all lower case.
+	(semantic-ia-fast-jump): Push mark before jumping to an include file.
+
+	* semantic/complete.el (semantic-displayor-point-position):
+	Calculate if the toolbar is on the left when calculating point
+	position.
+
+2014-01-08  Paul Eggert  <eggert@cs.ucla.edu>
+
+	Spelling fixes.
+	* semantic/decorate/include.el (semantic-decoration-mouse-3):
+	Rename from semantic-decoratiton-mouse-3.  All uses changed.
+
+2013-12-28  Glenn Morris  <rgm@gnu.org>
+
+	* ede/linux.el (project-linux-build-directory-default)
+	(project-linux-architecture-default): Fix custom types.  Add version.
+
 2013-12-12  David Engster  <deng@randomsample.de>
 
-	* semantic/analyze.el
-	(semantic-analyze-find-tag-sequence-default): Always add scope to
-	the local miniscope for each type.  Otherwise, structure tags are
-	not analyzed correctly.  Also, always search the extended
-	miniscope even when not dealing with types.
+	* semantic/analyze.el (semantic-analyze-find-tag-sequence-default):
+	Always add scope to the local miniscope for each type.  Otherwise,
+	structure tags are not analyzed correctly.  Also, always search
+	the extended miniscope even when not dealing with types.
 
 	* semantic/ctxt.el (semantic-get-local-variables-default): Also
 	try to parse local variables for buffers which are currently
@@ -19,7 +72,7 @@
 	completable types, pull in types which are referenced through
 	'using' statements, and also preserve their filenames.
 
-	* semanitc/bovine/c.el (semantic/analyze/refs): Require.
+	* semantic/bovine/c.el (semantic/analyze/refs): Require.
 	(semantic-analyze-tag-references): New override.  Mainly copied
 	from the default implementation, but if nothing could be found (or
 	just the tag itself), drop all namespaces from the scope and
@@ -235,7 +288,7 @@
 
 2013-07-29  David Engster  <deng@randomsample.de>
 
-	* lisp/cedet/cedet.el (cedet-packages): Remove speedbar since its
+	* cedet.el (cedet-packages): Remove speedbar since its
 	development does no longer happens in CEDET upstream but in Emacs
 	proper.  Also remove cedet-contrib and cogre since those are only
 	in upstream.
@@ -252,7 +305,7 @@
 
 2013-07-27  Eric Ludlam  <zappo@gnu.org>
 
-	* lisp/cedet/semantic/edit.el (semantic-edits-splice-remove):
+	* semantic/edit.el (semantic-edits-splice-remove):
 	Wrap debug message removing middle tag in semantic-edits-verbose-flag
 	check.
 
@@ -440,7 +493,7 @@
 
 2013-03-21  Eric Ludlam  <zappo@gnu.org>
 
-	* semantic.el (navigate-menu): Yank Tag :enable. Make sure
+	* semantic.el (navigate-menu): Yank Tag :enable.  Make sure
 	`senator-tag-ring' is bound.
 	(semantic-parse-region-default): Stop reversing the output of
 	parse-whole-stream.
@@ -542,18 +595,15 @@
 
 	* srecode/srt-mode.el:
 	* srecode/compile.el:
-	* semantic/elp.el:
 	* semantic/db-el.el:
 	* semantic/complete.el:
 	* ede.el:
-	* cogre.el:
 	* srecode/table.el:
 	* srecode/mode.el:
 	* srecode/insert.el:
 	* srecode/compile.el:
 	* semantic/decorate/include.el:
 	* semantic/db.el:
-	* semantic/adebug.el:
 	* ede/auto.el:
 	* srecode/dictionary.el:
 	* semantic/ede-grammar.el:
@@ -793,9 +843,9 @@
 	* ede.el (ede-buffer-belongs-to-project-p): Use ede-object-project
 	to allow use in more kinds of buffers.
 	(ede-project-forms-menu): Add `Default configuration' menu item.
-        (ede-configuration-forms-menu): New, for use in above.
-        (ede-project-configurations-set): New command used from menu.
-        (ede-java-classpath): New conveninece for Java support.
+	(ede-configuration-forms-menu): New, for use in above.
+	(ede-project-configurations-set): New command used from menu.
+	(ede-java-classpath): New conveninece for Java support.
 	(ede-apply-object-keymap): Combine keybindings from the project
 	and the target, not just whatever is local to the buffer.
 	(ede-apply-target-options): Call fcn to apply project local
@@ -862,9 +912,9 @@
 	(-scheme, -makefile-misc, ede-proj-target-makefile-program)
 	(-makefile-archive, -makefile-shared-object)
 	(ede-proj-target-makefile-info, -grammar): New autoloads.
-        (ede-proj-project): Inherit from eieio-persistent-read.
+	(ede-proj-project): Inherit from eieio-persistent-read.
 	Specify extension and header line.
-        (ede-proj-load, ede-proj-save): Replace with impl using
+	(ede-proj-load, ede-proj-save): Replace with impl using
 	eieio-persistent-read.
 
 	* ede/project-am.el (project-add-file): Use ede-target-parent
@@ -908,7 +958,7 @@
 	* semantic/db-typecache.el
 	(semanticdb-abstract-table::semanticdb-typecache-find-method):
 	Allow proxied tags to be resolved during the search.
-        (semanticdb-typecache-complete-flush): Support missing or empty
+	(semanticdb-typecache-complete-flush): Support missing or empty
 	pointmax slot, to allow for more database types.
 
 	* semantic/db.el (semanticdb-abstract-table): Add db-refs slot.
@@ -973,7 +1023,7 @@
 
 	* srecode/compile.el (srecode-compile-templates): Add "framework"
 	special variable support.
-        (srecode-compile-template-table): Support framework specifier.
+	(srecode-compile-template-table): Support framework specifier.
 
 	* srecode/cpp.el (srecode-semantic-handle-:c)
 	(srecode-semantic-handle-:cpp): New functions.
@@ -998,7 +1048,7 @@
 	* srecode/srt-mode.el (srecode-font-lock-keywords): Update.
 
 	* srecode/table.el (srecode-template-table): Add :framework slot.
-        (srecode-dump): Dump it.
+	(srecode-dump): Dump it.
 	(srecode-mode-table): Add new modetables slot.
 	(srecode-get-mode-table): Find the mode, but also find all parent
 	modes, and merge the tables together in :tables from :modetables.
@@ -1034,7 +1084,7 @@
 	(ede-proj-makefile-insert-variables): Do not insert preload items.
 	(ede-proj-target-elisp-autoloads): Don't depend on cedet-autogen.
 
-        * ede/util.el (ede-make-buffer-writable):
+	* ede/util.el (ede-make-buffer-writable):
 	* semantic/debug.el (semantic-debug-mode): Set buffer-read-only
 	instead of calling toggle-read-only.
 
@@ -1056,9 +1106,9 @@
 	(semantic-c-convert-spp-value-to-hideif-value)
 	(semantic-c-evaluate-symbol-for-hideif, semantic-c-hideif-lookup)
 	(semantic-c-hideif-defined): Revive hideif code from CEDET trunk.
-        (semantic-lex-c-if, semantic-c-do-lex-ifdef): Revert changes for
+	(semantic-lex-c-if, semantic-c-do-lex-ifdef): Revert changes for
 	regular expression parsing.
-        (semantic-cpp-lexer): Add semantic-lex-c-ifdef.
+	(semantic-cpp-lexer): Add semantic-lex-c-ifdef.
 	(semantic-expand-c-tag): Check if tag is non-nil before adding it
 	to return list.
 	(semantic-expand-c-extern-C, semantic-expand-c-complex-type):
@@ -1158,9 +1208,9 @@
 	(project-compile-project, project-compiler-target): New methods.
 
 	* inversion.el (inversion-decoders): New regexps for SXEmacs.
-        (inversion-package-version): More verbose error message.
-        (inversion-<): Deal with new special cases.
-        (inversion-require-emacs): New argument sxemacs-ver; use it.
+	(inversion-package-version): More verbose error message.
+	(inversion-<): Deal with new special cases.
+	(inversion-require-emacs): New argument sxemacs-ver; use it.
 
 2012-10-01  Nelson Ferreira  <nelson.ferreira@ieee.org>
 
@@ -1213,7 +1263,7 @@
 
 	* semantic/wisent/python.el (wisent-python-string-start-re)
 	(wisent-python-string-re, wisent-python-forward-string)
-	(wisent-python-forward-line,wisent-python-lex-string):
+	(wisent-python-forward-line, wisent-python-lex-string):
 	New variables.
 	(wisent-python-forward-balanced-expression): New function.
 
@@ -1316,7 +1366,7 @@
 	(ede-directory-safe-p): Check it.
 	(ede-initialize-state-current-buffer, ede, ede-new)
 	(ede-check-project-directory, ede-rescan-toplevel)
-	(ede-load-project-file, ede-parent-project, ede-current-project):
+	(ede-load-project-file, ede-parent-project, ede-current-project)
 	(ede-target-parent): Avoid loading in a project unless it is safe,
 	since it may involve malicious code.  This security flaw was
 	pointed out by Hiroshi Oota.
@@ -1429,7 +1479,7 @@
 	(semantic-decoration-unknown-include-describe): Fix filenames in
 	docstring.
 
-	* semantic/ede-grammar.el (semantic-ede-grammar-compiler-wisent):
+	* semantic/ede-grammar.el (semantic-ede-grammar-compiler-wisent)
 	(semantic-ede-grammar-compiler-bovine): Fix requires that are
 	added to the grammar-make-script.
 
@@ -1446,7 +1496,7 @@
 
 2011-10-19  Chong Yidong  <cyd@gnu.org>
 
-	* ede.el (ede-minor-mode,global-ede-mode):
+	* ede.el (ede-minor-mode, global-ede-mode):
 	* semantic.el (semantic-mode): Doc fix to reflect new
 	define-minor-mode calling behavior.
 
@@ -1670,10 +1720,10 @@
 	Synch EDE to CEDET 1.0.
 
 	* cedet-idutils.el (cedet-idutils-make-command): New option.
-	(cedet-idutils-mkid-call):
+	(cedet-idutils-mkid-call)
 	(cedet-idutils-create/update-database): New functions.
 
-	* cedet-cscope.el (cedet-cscope-create):
+	* cedet-cscope.el (cedet-cscope-create)
 	(cedet-cscope-create/update-database): New functions.
 	(cedet-cscope-support-for-directory): Make interactive.
 
@@ -1725,7 +1775,7 @@
 	(ede-project-root, ede-project-root-directory): Move to
 	ede/auto.el.
 
-	* ede/locate.el (ede-locate-flush-hash):
+	* ede/locate.el (ede-locate-flush-hash)
 	(ede-locate-create/update-root-database): New methods.
 	(initialize-instance): Use ede-locate-flush-hash.
 
@@ -1838,7 +1888,7 @@
 	(semantic-decoration-on-includes-highlight-default): Check that
 	the include tag has a position.
 
-	* semantic/complete.el (semantic-collector-local-members):
+	* semantic/complete.el (semantic-collector-local-members)
 	(semantic-complete-read-tag-local-members)
 	(semantic-complete-jump-local-members): New class and functions.
 	(semantic-complete-self-insert): Save excursion before completing.
@@ -2010,7 +2060,7 @@
 
 	Use define-minor-mode in CEDET where applicable.
 
-	* srecode/mode.el (srecode-minor-mode,global-srecode-minor-mode):
+	* srecode/mode.el (srecode-minor-mode, global-srecode-minor-mode):
 	Use define-minor-mode.
 
 	* semantic/util-modes.el (semantic-add-minor-mode):
@@ -2497,7 +2547,7 @@
 	(semantic-analyzer-debug-global-symbol)
 	(semantic-analyzer-debug-missing-innertype)
 	(semantic-analyzer-debug-insert-include-summary):
-	* semantic/util.el (semantic-file-tag-table):
+	* semantic/util.el (semantic-file-tag-table)
 	(semantic-describe-buffer-var-helper, semantic-something-to-tag-table)
 	(semantic-recursive-find-nonterminal-by-name):
 	* semantic/tag-ls.el (semantic-tag-calculate-parent-default):
@@ -2505,15 +2555,15 @@
 	* semantic/symref.el (semantic-symref-parse-tool-output):
 	* semantic/sb.el (semantic-sb-fetch-tag-table):
 	* semantic/lex-spp.el (semantic-lex-spp-lex-text-string):
-	* semantic/idle.el (semantic-idle-work-for-one-buffer):
+	* semantic/idle.el (semantic-idle-work-for-one-buffer)
 	(semantic-idle-summary-maybe-highlight):
 	* semantic/ia-sb.el (semantic-ia-speedbar)
 	(semantic-ia-sb-tag-info):
 	* semantic/grammar.el (semantic-analyze-possible-completions):
 	* semantic/find.el (semantic-brute-find-tag-by-position):
-	* semantic/ede-grammar.el (project-compile-target):
+	* semantic/ede-grammar.el (project-compile-target)
 	(ede-proj-makefile-insert-variables):
-	* semantic/debug.el (semantic-debug-set-parser-location):
+	* semantic/debug.el (semantic-debug-set-parser-location)
 	(semantic-debug-set-source-location, semantic-debug-interface-layout)
 	(semantic-debug-mode, semantic-debug):
 	* semantic/db.el (semanticdb-needs-refresh-p):
@@ -2544,10 +2594,10 @@
 	* ede.el (ede-buffer-header-file, ede-find-target)
 	(ede-buffer-documentation-files, ede-project-buffers, ede-set)
 	(ede-target-buffers, ede-buffers, ede-make-project-local-variable):
-	* cedet-idutils.el (cedet-idutils-fnid-call):
+	* cedet-idutils.el (cedet-idutils-fnid-call)
 	(cedet-idutils-lid-call, cedet-idutils-expand-filename)
 	(cedet-idutils-version-check):
-	* cedet-global.el (cedet-gnu-global-call):
+	* cedet-global.el (cedet-gnu-global-call)
 	(cedet-gnu-global-expand-filename, cedet-gnu-global-root)
 	(cedet-gnu-global-version-check, cedet-gnu-global-scan-hits):
 	* cedet-cscope.el (cedet-cscope-call)
@@ -2774,8 +2824,6 @@
 	srecode/insert.
 
 	* srecode/srt-mode.el (srecode-template-mode): Doc fix.
-
-	* files.el (auto-mode-alist): Add .srt and Project.ede.
 
 	* semantic.el (semantic-mode):
 	Handle srecode-template-mode-hook as well.
@@ -3020,7 +3068,7 @@
 ;; coding: utf-8
 ;; End:
 
-	Copyright (C) 2009-2013 Free Software Foundation, Inc.
+	Copyright (C) 2009-2014 Free Software Foundation, Inc.
 
   This file is part of GNU Emacs.
 

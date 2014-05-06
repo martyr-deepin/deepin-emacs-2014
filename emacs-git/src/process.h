@@ -1,5 +1,5 @@
 /* Definitions for asynchronous process control in GNU Emacs.
-   Copyright (C) 1985, 1994, 2001-2013 Free Software Foundation, Inc.
+   Copyright (C) 1985, 1994, 2001-2014 Free Software Foundation, Inc.
 
 This file is part of GNU Emacs.
 
@@ -213,8 +213,8 @@ enum
 
 /* Defined in callproc.c.  */
 
-extern void block_child_signal (void);
-extern void unblock_child_signal (void);
+extern void block_child_signal (sigset_t *);
+extern void unblock_child_signal (sigset_t const *);
 extern Lisp_Object encode_current_directory (void);
 extern void record_kill_process (struct Lisp_Process *, Lisp_Object);
 

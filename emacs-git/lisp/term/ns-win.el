@@ -1,6 +1,6 @@
 ;;; ns-win.el --- lisp side of interface with NeXT/Open/GNUstep/MacOS X window system  -*- lexical-binding: t -*-
 
-;; Copyright (C) 1993-1994, 2005-2013 Free Software Foundation, Inc.
+;; Copyright (C) 1993-1994, 2005-2014 Free Software Foundation, Inc.
 
 ;; Authors: Carl Edman
 ;;	Christian Limpach
@@ -59,7 +59,8 @@
 ;;;; Command line argument handling.
 
 (defvar x-invocation-args)
-(defvar ns-command-line-resources nil)  ; FIXME unused?
+;; Set in term/common-win.el; currently unused by Nextstep's x-open-connection.
+(defvar x-command-line-resources)
 
 ;; nsterm.m.
 (defvar ns-input-file)
@@ -626,7 +627,7 @@ the last file dropped is selected."
                                   `(mouse-1 POSITION 1))))
         (if (y-or-n-p (format "Print buffer %s? " (buffer-name)))
             (print-buffer)
-	  (error "Cancelled")))
+	  (error "Canceled")))
     (print-buffer)))
 
 ;;;; Font support.
@@ -863,6 +864,12 @@ See the documentation of `create-fontset-from-fontset-spec' for the format.")
      (t
       nil))))
 
+(defun ns-suspend-error ()
+  ;; Don't allow suspending if any of the frames are NS frames.
+  (if (memq 'ns (mapcar 'window-system (frame-list)))
+      (error "Cannot suspend Emacs while running under NS")))
+
+
 ;; Set some options to be as Nextstep-like as possible.
 (setq frame-title-format t
       icon-title-format t)
@@ -896,9 +903,9 @@ See the documentation of `create-fontset-from-fontset-spec' for the format.")
             (format "Creation of the standard fontset failed: %s" err)
             :error)))
 
-  (x-open-connection (system-name) nil t)
+  (x-open-connection (system-name) x-command-line-resources t)
 
-  ;; Add GNUStep menu items Services, Hide and Quit.  Rename Help to Info
+  ;; Add GNUstep menu items Services, Hide and Quit.  Rename Help to Info
   ;; and put it first (i.e. omit from menu-bar-final-items.
   (if (featurep 'gnustep)
       (progn
@@ -944,6 +951,10 @@ See the documentation of `create-fontset-from-fontset-spec' for the format.")
   (ns-set-resource nil "ApplePressAndHoldEnabled" "NO")
 
   (x-apply-session-resources)
+
+  ;; Don't let Emacs suspend under NS.
+  (add-hook 'suspend-hook 'ns-suspend-error)
+
   (setq ns-initialized t))
 
 ;; Any display name is OK.

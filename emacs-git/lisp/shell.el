@@ -1,10 +1,11 @@
 ;;; shell.el --- specialized comint.el for running the shell -*- lexical-binding: t -*-
 
-;; Copyright (C) 1988, 1993-1997, 2000-2013 Free Software Foundation, Inc.
+;; Copyright (C) 1988, 1993-1997, 2000-2014 Free Software Foundation,
+;; Inc.
 
 ;; Author: Olin Shivers <shivers@cs.cmu.edu>
 ;;	Simon Marshall <simon@gnu.org>
-;; Maintainer: FSF <emacs-devel@gnu.org>
+;; Maintainer: emacs-devel@gnu.org
 ;; Keywords: processes
 
 ;; This file is part of GNU Emacs.
@@ -791,8 +792,11 @@ and `shell-pushd-dunique' control the behavior of the relevant command.
 Environment variables are expanded, see function `substitute-in-file-name'."
   (if shell-dirtrackp
       ;; We fail gracefully if we think the command will fail in the shell.
-      (with-demoted-errors "Couldn't cd: %s"
-	  (let ((start (progn (string-match
+;;;      (with-demoted-errors "Directory tracker failure: %s"
+      ;; This fails so often that it seems better to just ignore errors (?).
+      ;; Eg even: foo=/tmp; cd $foo is beyond us (bug#17159).
+      (ignore-errors
+        (let ((start (progn (string-match
 			       (concat "^" shell-command-separator-regexp)
 			       str) ; skip whitespace
 			      (match-end 0)))
@@ -1108,12 +1112,13 @@ See `shell-command-regexp'."
 (defun shell-dynamic-complete-command ()
   "Dynamically complete the command at point.
 This function is similar to `comint-dynamic-complete-filename', except that it
-searches `exec-path' (minus the trailing Emacs library path) for completion
+searches `exec-path' (minus trailing `exec-directory') for completion
 candidates.  Note that this may not be the same as the shell's idea of the
 path.
 
-Completion is dependent on the value of `shell-completion-execonly', plus
-those that effect file completion.
+Completion is dependent on the value of `shell-completion-execonly',
+`shell-completion-fignore', plus those that affect file completion.  See Info
+node `Shell Options'.
 
 Returns t if successful."
   (interactive)
@@ -1138,7 +1143,9 @@ Returns t if successful."
          (start (if (zerop (length filename)) (point) (match-beginning 0)))
          (end (if (zerop (length filename)) (point) (match-end 0)))
 	 (filenondir (file-name-nondirectory filename))
-	 (path-dirs (cdr (reverse exec-path))) ;FIXME: Why `cdr'?
+	 ; why cdr? see `shell-dynamic-complete-command'
+	 (path-dirs (append (cdr (reverse exec-path))
+	   (if (memq system-type '(windows-nt ms-dos)) '("."))))
 	 (cwd (file-name-as-directory (expand-file-name default-directory)))
 	 (ignored-extensions
 	  (and comint-completion-fignore

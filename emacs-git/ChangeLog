@@ -1,3 +1,393 @@
+2014-05-05  Glenn Morris  <rgm@gnu.org>
+
+	* autogen.sh: Check any pre-existing ACLOCAL_PATH.
+
+2014-05-04  Paul Eggert  <eggert@cs.ucla.edu>
+
+	Consult libpng-config more consistently (Bug#17339).
+	This is mainly for simplicity, but it should also avoid
+	some future problems like the ones we recently had with NetBSD.
+	* configure.ac (LIBPNG): Configure after LIBZ.  Use libpng-config
+	for cflags, too.  Append -lz if we're not already doing that with
+	LIBZ.  Do not bother appending -lm, since we always append that.
+	Coalesce some duplicate code.
+
+	* autogen.sh: Use ‘"’ to quote a message that often contains ‘'’.
+
+	Require ImageMagick >= 6.3.5, due to PixelSetMagickColor (Bug#17339).
+	* configure.ac (IMAGEMAGICK_MODULE): Bump prereq from 6.2.8 to 6.3.5.
+	A more-complicated fix would be to remove uses of PixelSetMagickColor,
+	introduced in ImageMagick 6.3.5 (Sept. 2007).
+
+2014-05-04  Glenn Morris  <rgm@gnu.org>
+
+	* configure.ac (LIBPNG): Consult libpng-config for the precise
+	form of "-lpng" to use.  (Bug#17339)
+
+2014-05-03  Glenn Morris  <rgm@gnu.org>
+
+	* autogen.sh: If all else fails, try using pkg-config to find pkg.m4.
+
+2014-05-03  Paul Eggert  <eggert@cs.ucla.edu>
+
+	Get --enable-gcc-warnings to work after touching configure.ac.
+	Preserve ACLOCAL_PATH in later builds, so that by default it has
+	the same value as it did in the first build after initial checkout.
+	* Makefile.in (ACLOCAL_PATH): New macro.
+	($(srcdir)/aclocal.m4): Use it.
+	* configure.ac (ACLOCAL_PATH): AC_SUBST it.
+	* autogen.sh (env_space): New var.
+	Tell user what variables, if any, to pass to 'configure'.
+
+	Get --enable-gcc-warnings working again.
+	The recent changes to configure.ac removed the transliteration of
+	-I to -isystem in CFLAGS, which is needed for --enable-gcc-warnings.
+	Bring this back while keeping the spirit of the recent changes.
+	* configure.ac (edit_cflags): Restore this shell var, and put it
+	at the top level, where it'll be useful when emacs-24 is next merged.
+	(EMACS_CHECK_MODULES): New macro.  All uses of PKG_CHECK_MODULES
+	changed to use it.
+
+	Make it easier on maintainers who use their own Automake.
+	* autogen.sh (ACLOCAL_PATH, AUTORECONF_ENV): New vars.
+	Set them to avoid problems when maintainers prepend their own
+	Automake installations to their PATH.  Report an error if pkg.m4
+	can't be found.
+
+2014-05-02  Glenn Morris  <rgm@gnu.org>
+
+	* configure.ac (PKG_CONFIG_PATH): Declare with AC_ARG_VAR.
+
+	* configure.ac (--with-pkg-config-prog): Remove.
+	Use the PKG_CONFIG environment variable instead if you need it.
+
+	* configure.ac: Use pkg-config's pkg.m4, rather than reinventing it.
+	Add explicit AC_SUBST's where needed.
+	* autogen.sh (progs): Add pkg-config.
+	(pkg_config_min): New variable.
+
+	* configure.ac (AC_CONFIG_MACRO_DIR): Use it.
+
+	* autogen.sh (get_version): Handle no leading whitespace.
+	(check_version, main): Handle program names with hyphens.
+
+2014-04-30  Glenn Morris  <rgm@gnu.org>
+
+	* configure.ac: Treat MirBSD as OpenBSD.  (Bug#17339)
+
+2014-04-21  Daniel Colascione  <dancol@dancol.org>
+
+	* .bzrignore: Add a.out to bzr ignore list (a test generates this
+	file).
+
+2014-04-19  Paul Eggert  <eggert@cs.ucla.edu>
+
+	Link to glib-using libraries when checking for glib (Bug#17289).
+	* configure.ac (XGSELOBJ): Include GTK_LIBS, RSVG_LIBS, etc.
+	when testing whether Glib is linked in.  Similarly for CFLAGS.
+
+2014-04-17  Paul Eggert  <eggert@cs.ucla.edu>
+
+	* GNUmakefile: Speed up 'make bootstrap' in fresh checkout.
+	(ORDINARY_GOALS): New macro, which excludes 'bootstrap'.
+	(bootstrap, .PHONY): New rules.
+	* INSTALL.REPO: Document current procedure better.
+	Move copyright notice to just before license notice.
+
+	* Makefile.in (FRC, force-info): Remove.
+	All uses removed.  This hack is no longer needed here
+	now that we can assume GNU Make's .PHONY feature works.
+	(bootstrap): No need to make 'info', since 'all' now implies 'info'.
+
+2014-04-16  Eli Zaretskii  <eliz@gnu.org>
+
+	* config.bat: Update for Emacs 24.4.
+
+2014-04-16  Paul Eggert  <eggert@cs.ucla.edu>
+
+	Port to IRIX 6.5 (Bug#9684).
+	This port requires IRIX cc, as I did not have time to get
+	undump working with the old GCC on the system I had access to,
+	but that's better than nothing.
+	* configure.ac (gl_GCC_VERSION_IFELSE): Remove unused macro
+	that wouldn't have worked anyway, with IRIX cc.
+	(emacs_cv_clang, emacs_cv_sanitize_address)
+	(ns_osx_have_104, ns_osx_have_105):
+	Don't assume '#error' makes the compiler fail,
+	as this doesn't work with IRIX cc.
+	(CFLAGS, LIBS): Don't let the GnuTLS results infect later 'configure'
+	checks.  This runs afoul of an IRIX configuration where GnuTLS is
+	in an optional library that also contains getdelim, and causes
+	a later 'configure' to incorrectly think getdelim is supported.
+
+2014-04-16  Eli Zaretskii  <eliz@gnu.org>
+
+	* configure.ac (LN_S_FILEONLY, LN_S): Use "/bin/ln" on MinGW, to
+	ensure the MSYS ln.exe is invoked.
+
+2014-04-15  Paul Eggert  <eggert@cs.ucla.edu>
+
+	Remove DATA_SEG_BITS.
+	* configure.ac (DATA_SEG_BITS): Remove.  All uses removed.
+
+2014-04-14  Paul Eggert  <eggert@cs.ucla.edu>
+
+	* autogen.sh: Use autoreconf's -f option (Bug#17258).
+
+	Clean up configure-time library handling a bit.
+	This patch was inspired by emacs-24 bzr 116961, which fixed
+	a bug due to sloppy library handling in 'configure'.
+	* configure.ac (LIB_MATH, LIB_PTHREAD, LIBXMU):
+	Use AC_SEARCH_LIBS instead of AC_CHECK_LIB as per Autoconf manual.
+	(LIB_MATH, LIB_PTHREAD, HAVE_X11, IMAGEMAGICK_LIBS, GTK_LIBS)
+	(DBUS_LIBS, LIBXMU, XFT_LIBS, LIBXSM, LIBXML2_LIBS, LIBS_MAIL)
+	(with_kerberos):
+	Don't let the library choice infect $LIBS.
+	(dnet_ntoa, cma_open): Remove obsolete tests.
+	(emacs_pthread_function): Probe for pthread_kill, not pthread_self,
+	as that's a bit more selective on GNU/Linux.
+	(LIBXEXT): Remove.
+	(touchlock): Test for existence when $LIBS_MAIL is in use.
+	(AC_CHECK_FUNCS): Use only $LIB_MATH in addition to $LIBS
+	when testing for typical functions like accept4, lrand48.
+	(random, rint): Remove obsolete HP-UX 9 A.09.05 test.
+
+2014-04-11  Glenn Morris  <rgm@gnu.org>
+
+	* make-dist: Do not distribute generated admin/grammars/Makefile.
+	Do distribute lib-src/update-game-score.exe.manifest.
+
+2014-04-11  Ken Brown  <kbrown@cornell.edu>
+
+	* configure.ac (EMACS_MANIFEST): Revert last change (but leave
+	UPDATE_MANIFEST empty).
+
+2014-04-07  Ken Brown  <kbrown@cornell.edu>
+
+	* configure.ac (EMACS_MANIFEST, UPDATE_MANIFEST): Leave these
+	variables empty on Cygwin.  (Bug#17176)
+
+2014-04-03  Glenn Morris  <rgm@gnu.org>
+
+	* make-dist: Further update AC_INIT regexp.
+
+2014-04-02  Glenn Morris  <rgm@gnu.org>
+
+	* configure.ac: Make the final "Does Emacs use Gsettings" message
+	consistent with src/config.h.
+
+2014-03-31  Jan Djärv  <jan.h.d@swipnet.se>
+
+	* configure.ac: Fix errors from previous checkin (GSettings check).
+
+2014-03-29  Jan Djärv  <jan.h.d@swipnet.se>
+
+	* configure.ac: Add check that GSettings is in libgio (Bug#17118).
+
+2014-03-28  Glenn Morris  <rgm@gnu.org>
+
+	* configure.ac (AC_INIT): Add "GNU" in package, add bug address.
+	(PACKAGE_BUGREPORT): Use it.
+	(make-dist): Update AC_INIT regexp.
+
+	* configure.ac (ACL_SUMMARY): Rename from acl_summary, for consistency.
+	(EMACS_CONFIG_FEATURES): New define.
+
+2014-03-27  Paul Eggert  <eggert@cs.ucla.edu>
+
+	* configure.ac: Suggest './configure MAKE=gmake' in diagnostic.
+	This tends to work better than 'MAKE=gmake ./configure' if later
+	builds run config.status etc.
+
+2014-03-27  Glenn Morris  <rgm@gnu.org>
+
+	* configure.ac: Require GNU make.
+	(HAVE_GNU_MAKE): Remove.
+
+2014-03-26  Paul Eggert  <eggert@cs.ucla.edu>
+
+	Merge from gnulib, incorporating:
+	2014-03-26 strftime: wrap macros in "do {...} while(0)"
+	* lib/strftime.c: Update from gnulib.
+
+2014-03-26  Glenn Morris  <rgm@gnu.org>
+
+	* configure.ac (CLASH_DETECTION): Remove option.  Every platform
+	supports it, and the runtime option `create-lockfiles' replaces it.
+
+2014-03-23  Daniel Colascione  <dancol@dancol.org>
+
+	* configure.ac: (Bug#17069) Include GFILENOTIFY objects in glib check.
+
+2014-03-22  Glenn Morris  <rgm@gnu.org>
+
+	* make-dist: Do not distribute lib-src/testfile.
+
+2014-03-21  Eli Zaretskii  <eliz@gnu.org>
+
+	* configure.ac: Bump version to 24.4.50.
+
+2014-03-21  Glenn Morris  <rgm@gnu.org>
+
+	* Makefile.in (all): Depend on `info'.  (Bug#16626)
+
+2014-03-07  Paul Eggert  <eggert@cs.ucla.edu>
+
+	Merge from gnulib, incorporating:
+	2014-03-04 stdint: fix missing SIZE_MAX on Android
+	2013-03-02 sys_types: avoid autoconf warning about gl_SYS_TYPES_H
+	* lib/gnulib.mk, m4/gnulib-comp.m4: Regenerate.
+	* lib/stdint.in.h, lib/sys_types.in.h, m4/sys_types_h.m4:
+	Update from gnulib.
+
+2014-03-05  Glenn Morris  <rgm@gnu.org>
+
+	* configure.ac: Tweak the "unported" error message.
+
+2014-03-05  Paul Eggert  <eggert@cs.ucla.edu>
+
+	Fix configuration bug on Solaris 2.5.1 (Bug#16905).
+	* configure.ac: Fix a bug in shell pattern matching that caused
+	'configure' to treat Solaris 2.5.1 as if it were Solaris 10 or later.
+
+2014-02-25  Paul Eggert  <eggert@penguin.cs.ucla.edu>
+
+	Merge from gnulib (Bug#16825).
+	2014-02-25 unistd: port readlink to Mac OS X 10.3.9
+
+2014-02-24  Paul Eggert  <eggert@cs.ucla.edu>
+
+	Merge from gnulib, incorporating:
+	2014-02-21 timer: fix uClibc detection of threading
+	2014-02-21 maintainer-makefiles: provide AC_PROG_SED for older autoconf
+
+2014-02-18  Mirek Kaim  <mirek.kaim@outlook.com>  (tiny change)
+
+	* configure.ac [HAVE_W32]: Test for ImageMagick.  (Bug#16754)
+
+2014-02-14  Paul Eggert  <eggert@cs.ucla.edu>
+
+	* Makefile.in (install-arch-indep): Allow ' ' in destdir (Bug#16717).
+	This fixes a bug in the previous change.  Also, use $(SHELL)
+	rather than sh, as that's more likely to be portable.
+
+2014-02-13  Paul Eggert  <eggert@cs.ucla.edu>
+
+	* Makefile.in (install-arch-indep): Simplify (Bug#16717).
+	This should make it more reliable, and hopefully more portable to
+	non-GNU 'make' implementations such as HP-UX 'make'.
+
+2014-02-13  Juanma Barranquero  <lekktu@gmail.com>
+
+	* Makefile.in (install-nt): Also pass datadir.
+
+2014-02-05  Paul Eggert  <eggert@cs.ucla.edu>
+
+	Merge from gnulib, incorporating:
+	2014-01-23 pthread: work around winpthread header pollution on mingw
+	* lib/time.in.h: Update from gnulib.
+
+2014-01-23  Paul Eggert  <eggert@cs.ucla.edu>
+
+	Merge from gnulib, incorporating:
+	2014-01-22 qacl: check for fchmod
+	* m4/acl.m4: Update from gnulib.
+
+2014-01-22  Paul Eggert  <eggert@cs.ucla.edu>
+
+	Fix miscellaneous update-game-score bugs.
+	* configure.ac (difftime): Remove.
+
+2014-01-20  Paul Eggert  <eggert@cs.ucla.edu>
+
+	Merge from gnulib, incorporating:
+	2014-01-20 stdalign: port to HP-UX compilers
+	2014-01-16 strtoimax: port to platforms lacking 'long long'
+	2014-01-16 update from texinfo
+	* lib/stdalign.in.h, lib/strtoimax.c: Update from gnulib.
+
+2014-01-12  Glenn Morris  <rgm@gnu.org>
+
+	* README: Replace reference to etc/MAILINGLISTS.
+
+2014-01-11  Fabrice Popineau  <fabrice.popineau@gmail.com>
+
+	* configure.ac: Read $srcdir/nt/mingw-cfg.site when $MSYSTEM is
+	"MINGW64" as well.
+
+2014-01-11  Paul Eggert  <eggert@cs.ucla.edu>
+
+	Merge from gnulib, incorporating:
+	2014-01-07 update from texinfo
+	2014-01-06 md5, sha1, sha256, sha512: support older autoconf
+
+2014-01-09  Eric S. Raymond  <esr@thyrsus.com>
+
+	* INSTALL, configure.ac, etc/CONTRIBUTE, nt/INSTALL: Remove
+	unnecessarily specific references to Bazaar that could better
+	simply be to the repository.
+
+2014-01-08  Eric S. Raymond  <esr@thyrsus.com>
+
+	* INSTALL.BZR: Rename to INSTALL.REPO.  Remove refs to specific VCS.
+	* INSTALL, autogen.sh: Update for above change.
+
+2014-01-05  Paul Eggert  <eggert@cs.ucla.edu>
+
+	Port to GNU/Linux with recent grsecurity/PaX patches (Bug#16343).
+	Problem and proposed patch reported by Ulrich Mueller;
+	this patch uses a somewhat-different approach.
+	* configure.ac (SETFATTR): New variable.
+
+2014-01-03  Paul Eggert  <eggert@cs.ucla.edu>
+
+	Merge from gnulib, incorporating:
+	2014-01-02 manywarnings: remove -Wmudflap
+	This ports better to GCC 4.9-to-be.
+
+2013-12-31  Fabrice Popineau  <fabrice.popineau@supelec.fr>
+
+	* configure.ac (canonical, C_SWITCH_SYSTEM): Support a 64-bit
+	MinGW64 build on MS-Windows.
+
+2013-12-29  Jan Djärv  <jan.h.d@swipnet.se>
+
+	* configure.ac (xcsdkdir): Only set if using xcrun.
+
+2013-12-29  Paul Eggert  <eggert@cs.ucla.edu>
+
+	* configure.ac (LIBXML2_CFLAGS): Fix xcrun-related quoting problem.
+	Reported by YAMAMOTO Mitsuharu in:
+	http://lists.gnu.org/archive/html/emacs-devel/2013-12/msg00995.html
+
+2013-12-28  Jan Djärv  <jan.h.d@swipnet.se>
+
+	* configure.ac: Fix CC detection for xcrun case.
+
+2013-12-28  Paul Eggert  <eggert@cs.ucla.edu>
+
+	Fix problem with MAKE and xcrun configuration.
+	* configure.ac: Don't set MAKE unless 'make' doesn't work.
+	Set it only in the environment, not in the makefile.
+	Problem reported by Glenn Morris in:
+	http://lists.gnu.org/archive/html/emacs-devel/2013-12/msg00969.html
+
+2013-12-27  Paul Eggert  <eggert@cs.ucla.edu>
+
+	Port xcrun configuration to GNU/Linux.
+	* configure.ac (xcsdkdir): Default to empty.
+	(XCRUN): Don't require Darwin for xcrun.  Move xcrun checking to
+	just before AM_INIT_AUTOMAKE, to make the dependency between it
+	and automake clearer.
+	(CC): Don't use AC_PROG_CC twice; only the first use expands to the
+	shell code that is wanted, which breaks 'configure' on non-Darwin
+	platforms.  Instead, fix CC by hand if it's not found.
+
+2013-12-27  Jan Djärv  <jan.h.d@swipnet.se>
+
+	* configure.ac: Detect xcrun on OSX and use it for make, gcc and
+	libxml.
+
 2013-12-26  Paul Eggert  <eggert@cs.ucla.edu>
 
 	Fix core dumps with gcc -fsanitize=address and GNU/Linux.
@@ -12,7 +402,6 @@
 	* build-aux/update-copyright: New file.
 	* make-dist: Distribute it.
 	* lib/gnulib.mk, m4/gnulib-comp.m4: Regenerate.
-	* msdos/autogen/Makefile.in: Update copyright year.
 
 2013-12-23  Andreas Schwab  <schwab@linux-m68k.org>
 
@@ -273,7 +662,7 @@
 	config.status computes it.
 	* Makefile.in (epaths-force-w32): Move srcdir tweak here.
 
-	* autogen: Remove directory.  Move update_autogen to admin/.
+	* autogen/: Remove directory.  Move update_autogen to admin/.
 	* autogen.sh: Remove reference to copy_autogen.
 	* GNUmakefile (configure):
 	* Makefile.in (bootstrap): Do not try to run copy_autogen.
@@ -1526,7 +1915,7 @@
 
 	* lib/makefile.w32-in (GNULIBOBJS): Add $(BLD)/fpending.$(O) and
 	$(BLD)/close-stream.$(O).
-	($(BLD)/close-stream.$(O)):
+	($(BLD)/close-stream.$(O))
 	($(BLD)/fpending.$(O)): New dependencies.
 
 2012-11-03  Paul Eggert  <eggert@cs.ucla.edu>
@@ -1652,11 +2041,6 @@
 
 	Merge from gnulib, incorporating:
 	2012-09-22 sockets, sys_stat: remove AC_C_INLINE in MSVC-only cases
-
-2012-09-19  Tassilo Horn  <tsdh@gnu.org>
-
-	* doc/emacs/misc.texi (DocView Slicing): Document new slice from
-	BoundingBox feature.
 
 2012-09-18  Jan Djärv  <jan.h.d@swipnet.se>
 
@@ -1991,9 +2375,8 @@
 	All uses changed to waitpid and WEXITSTATUS.
 
 	Avoid needless autoheader after autogen.sh.
-	* src/stamp-h.in: Remove from bzr repository; no longer needed there.
-	* .bzrignore: Add it.
-	* autogen.sh: Create it.
+	* .bzrignore: Add src/stamp-h.in.
+	* autogen.sh: Create src/stamp-h.in.
 
 2012-08-01  Glenn Morris  <rgm@gnu.org>
 
@@ -2094,11 +2477,6 @@
 	* configure.ac (opsysfile): Set to empty on aix4-2, freebsd,
 	gnu-linux, gnu-kfreebsd; and to usg5-4-common.h on sol2*, unixware.
 
-2012-07-30  Paul Eggert  <eggert@cs.ucla.edu>
-
-	Merge from gnulib, incorporating:
-	* doc/misc/texinfo.tex: Update to 2012-07-29.17 version.
-
 2012-07-29  Jan Djärv  <jan.h.d@swipnet.se>
 
 	* Makefile.in (install-arch-indep): Handle space in locallisppath.
@@ -2191,7 +2569,7 @@
 
 	* configure.ac (opsysfile): Use bsd-common on gnu systems.
 
-	* configure.ac (GNU_LIBRARY_PENDING_OUTPUT_COUNT):
+	* configure.ac (GNU_LIBRARY_PENDING_OUTPUT_COUNT)
 	(SIGNALS_VIA_CHARACTERS): Move here from src/s.
 
 2012-07-11  Paul Eggert  <eggert@cs.ucla.edu>
@@ -2407,8 +2785,8 @@
 
 2012-06-24  Eli Zaretskii  <eliz@gnu.org>
 
-	* lib/makefile.w32-in ($(BLD)/dtotimespec.$(O)):
-	($(BLD)/timespec-add.$(O)):
+	* lib/makefile.w32-in ($(BLD)/dtotimespec.$(O))
+	($(BLD)/timespec-add.$(O))
 	($(BLD)/timespec-sub.$(O)): Don't depend on
 	$(EMACS_ROOT)/nt/inc/sys/time.h.
 
@@ -2428,9 +2806,9 @@
 	* lib/makefile.w32-in (GNULIBOBJS): Add $(BLD)/dtotimespec.$(O),
 	$(BLD)/gettime.$(O), $(BLD)/timespec-add.$(O), and
 	$(BLD)/timespec-sub.$(O).
-	($(BLD)/dtotimespec.$(O)):
-	($(BLD)/gettime.$(O)):
-	($(BLD)/timespec-add.$(O)):
+	($(BLD)/dtotimespec.$(O))
+	($(BLD)/gettime.$(O))
+	($(BLD)/timespec-add.$(O))
 	($(BLD)/timespec-sub.$(O)): New dependencies.
 
 	* lib/stat-time.h:
@@ -2560,9 +2938,9 @@
 	* config.bat (lib): Create/update lib/stdalign.in-h and
 	lib/sys_types.in-h.
 
-	* lib/makefile.w32-in ($(BLD)/md5.$(O)):
-	($(BLD)/sha1.$(O)):
-	($(BLD)/sha256.$(O)):
+	* lib/makefile.w32-in ($(BLD)/md5.$(O))
+	($(BLD)/sha1.$(O))
+	($(BLD)/sha256.$(O))
 	($(BLD)/sha512.$(O)): Depend on $(EMACS_ROOT)/nt/inc/stdalign.h.
 	Suggested by Christoph Scholtes <cschol2112@googlemail.com>.
 
@@ -2620,7 +2998,7 @@
 	New files.
 	* build-aux/move-if-change, build-aux/snippet/_Noreturn.h:
 	* build-aux/snippet/arg-nonnull.h, build-aux/snippet/c++defs.h:
-	* build-aux/snippet/warn-on-use.h, doc/misc/texinfo.tex:
+	* build-aux/snippet/warn-on-use.h:
 	* lib/alloca.in.h, lib/allocator.h, lib/careadlinkat.c:
 	* lib/careadlinkat.h, lib/dosname.h, lib/dup2.c, lib/filemode.c:
 	* lib/filemode.h, lib/ftoastr.c, lib/ftoastr.h, lib/getloadavg.c:
@@ -2973,7 +3351,6 @@
 	(WARN_CFLAGS, GNULIB_WARN_CFLAGS): New variable.
 	(PKG_CHECK_MODULES, C_SWITCH_X_SITE): Use -isystem rather than -I,
 	when including system files with GCC.
-	* etc/NEWS: Mention --enable-gcc-warnings.
 	* INSTALL (DETAILED BUILDING AND INSTALLATION): Likewise.
 	* lib/Makefile.am (AM_CFLAGS): New macro.
 	* m4/manywarnings.m4, m4/warnings.m4: New files, from gnulib.
@@ -3246,7 +3623,7 @@
 	* Makefile.in (GNULIB_TOOL_FLAGS): Avoid msvc-inval, msvc-nothrow,
 	pathmax, and raise, since these are needed only to address
 	MSVC-related issues that Emacs doesn't have.
-	* doc/misc/texinfo.tex, lib/dup2.c, lib/gnulib.mk, lib/signal.in.h:
+	* lib/dup2.c, lib/gnulib.mk, lib/signal.in.h:
 	* lib/sigprocmask.c, lib/stat.c, lib/stdio.in.h, lib/sys_stat.in.h:
 	* lib/unistd.in.h, m4/dup2.m4, m4/getloadavg.m4, m4/gl-comp.m4:
 	* m4/include_next.m4, m4/signal_h.m4, m4/signalblocking.m4:
@@ -3915,7 +4292,7 @@
 	src/makefile.w32-in and adapt.  Depend on stamp_BLD.
 	(GNULIBOBJS): Add $(BLD)/filemode.$(O).
 
-2011-02-20  Paul Eggert  <eggert@cs.ucla.edu>
+2011-02-21  Paul Eggert  <eggert@cs.ucla.edu>
 
 	Import filemode module from gnulib.
 	* .bzrignore: Add lib/sys/.
@@ -3924,7 +4301,6 @@
 	* lib/filemode.c: Renamed from src/filemode.c and regenerated
 	from gnulib.  This adds support for some more file types, e.g.,
 	Cray DMF migrated files.
-	* lisp/emacs-lisp/find-gc.el (find-gc-source-files): Remove filemode.c.
 	* lib/filemode.h, lib/sys_stat.in.h, m4/filemode.m4, m4/st_dm_mode.m4:
 	* m4/sys_stat_h.m4: New files, generated from gnulib.
 	* aclocal.m4, configure, lib/Makefile.in, lib/gnulib.mk, m4/gl-comp.m4:
@@ -3961,8 +4337,6 @@
 	* lib/stdint.in.h, m4/longlong.m4, m4/stdint.m4, m4/md5.m4: New files,
 	imported from gnulib.
 	* Makefile.in (MAKEFILE_MODULES): Add crypto/md5.
-	* admin/notes/copyright: Remove src/md5.c and src/md5.h as
-	special cases.
 
 2011-02-19  Eli Zaretskii  <eliz@gnu.org>
 
@@ -3982,7 +4356,6 @@
 	Import getloadavg module from gnulib.
 	* .bzrignore: Add lib/stdlib.h.
 	* Makefile.in (GNULIB_MODULES): Add getloadavg.
-	* admin/notes/copyright: Remove src/getloadavg.c as a special case.
 	* configure.in (LIBS_SYSTEM): Omit -lkstat on sol2*; gnulib does this.
 	(AC_CONFIG_LIBOBJ_DIR, AC_FUNC_GETLOADAVG, GETLOADAVG_FILES):
 	Remove; gnulib does this now.
@@ -3996,7 +4369,7 @@
 	* lib/stdlib.in.h, m4/getloadavg.m4, m4/stdlib_h.m4: New files,
 	from gnulib.
 	* aclocal.m4, configure, lib/Makefile.in, lib/gnulib.mk, m4/gl-comp.m4:
-	* src/config.in: Regenerate.
+	Regenerate.
 
 2011-02-15  Paul Eggert  <eggert@cs.ucla.edu>
 
@@ -4094,7 +4467,7 @@
 	$(BLD)/time_r.$(O).
 	($(BLD)/dtoastr.$(O)): Depend on $(EMACS_ROOT)/src/s/ms-w32.h and
 	$(EMACS_ROOT)/src/m/intel386.h.
-	($(BLD)/strftime.$(O)):
+	($(BLD)/strftime.$(O))
 	($(BLD)/time_r.$(O)): Define prerequisites.
 
 2011-01-31  Paul Eggert  <eggert@cs.ucla.edu>
@@ -4423,7 +4796,7 @@
 	* m4/gnulib-common.m4, m4/gnulib-comp.m4, m4/gnulib-tool.m4, missing:
 	New files, generated automatically, with 'make sync-from-gnulib'
 	followed by 'make'.
-	* configure, lisp/dired.el, src/config.in: Regenerate.
+	* configure: Regenerate.
 
 	Automate syncing from gnulib.
 	* INSTALL, README: Document new subdirectory 'lib'.
@@ -4800,7 +5173,7 @@
 	* configure.in (HAVE_SOUND, HAVE_X_I18N, HAVE_X11R6_XIM):
 	Set with AC_DEFINE rather than AH_BOTTOM.
 
-	* configure.in (C_OPTIMIZE_SWITCH, CANNOT_DUMP, SYSTEM_MALLOC):
+	* configure.in (C_OPTIMIZE_SWITCH, CANNOT_DUMP, SYSTEM_MALLOC)
 	(USE_MMAP_FOR_BUFFERS, C_WARNING_SWITCH, CFLAGS, REAL_CFLAGS):
 	Set with shell, not cpp.
 	(LIBX): Remove, just use -lX11 in the one place this was used.
@@ -13169,7 +13542,7 @@
 ;; coding: utf-8
 ;; End:
 
-  Copyright (C) 1993-1999, 2001-2013 Free Software Foundation, Inc.
+  Copyright (C) 1993-1999, 2001-2014 Free Software Foundation, Inc.
 
   This file is part of GNU Emacs.
 

@@ -1,6 +1,6 @@
 /* Parameters and display hooks for terminal devices.
 
-Copyright (C) 1985-1986, 1993-1994, 2001-2013 Free Software Foundation,
+Copyright (C) 1985-1986, 1993-1994, 2001-2014 Free Software Foundation,
 Inc.
 
 This file is part of GNU Emacs.
@@ -643,7 +643,7 @@ extern void delete_terminal (struct terminal *);
 /* The initial terminal device, created by initial_term_init.  */
 extern struct terminal *initial_terminal;
 
-#ifdef WINDOWSNT
+#ifdef DOS_NT
 extern unsigned char *encode_terminal_code (struct glyph *, int,
 					    struct coding_system *);
 #endif

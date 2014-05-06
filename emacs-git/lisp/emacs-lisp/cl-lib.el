@@ -1,6 +1,6 @@
 ;;; cl-lib.el --- Common Lisp extensions for Emacs  -*- lexical-binding: t -*-
 
-;; Copyright (C) 1993, 2001-2013 Free Software Foundation, Inc.
+;; Copyright (C) 1993, 2001-2014 Free Software Foundation, Inc.
 
 ;; Author: Dave Gillespie <daveg@synaptics.com>
 ;; Version: 1.0
@@ -151,9 +151,6 @@ an element already on the list.
                (setq ,place (cons ,var ,place))))
 	`(setq ,place (cl-adjoin ,x ,place ,@keys)))
     `(cl-callf2 cl-adjoin ,x ,place ,@keys)))
-
-(defun cl--set-elt (seq n val)
-  (if (listp seq) (setcar (nthcdr n seq) val) (aset seq n val)))
 
 (defun cl--set-buffer-substring (start end val)
   (save-excursion (delete-region start end)
@@ -625,7 +622,6 @@ If ALIST is non-nil, the new pairs are prepended to it."
   `(insert (prog1 ,store (erase-buffer))))
 (gv-define-simple-setter buffer-substring cl--set-buffer-substring)
 (gv-define-simple-setter current-buffer set-buffer)
-(gv-define-simple-setter current-case-table set-case-table)
 (gv-define-simple-setter current-column move-to-column t)
 (gv-define-simple-setter current-global-map use-global-map t)
 (gv-define-setter current-input-mode (store)

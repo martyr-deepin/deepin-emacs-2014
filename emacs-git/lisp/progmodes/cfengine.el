@@ -1,6 +1,6 @@
 ;;; cfengine.el --- mode for editing Cfengine files
 
-;; Copyright (C) 2001-2013 Free Software Foundation, Inc.
+;; Copyright (C) 2001-2014 Free Software Foundation, Inc.
 
 ;; Author: Dave Love <fx@gnu.org>
 ;; Maintainer: Ted Zlatanov <tzz@lifelogs.com>
@@ -47,7 +47,7 @@
 
 ;; It's *highly* recommended that you enable the eldoc minor mode:
 
-;; (add-hook 'cfengine3-mode-hook 'turn-on-eldoc-mode)
+;; (add-hook 'cfengine3-mode-hook 'eldoc-mode)
 
 ;; This is not the same as the mode written by Rolf Ebert
 ;; <ebert@waporo.muc.de>, distributed with cfengine-2.0.5.  It does
@@ -80,11 +80,12 @@
 Used for syntax discovery and checking.  Set to nil to disable
 the `compile-command' override.  In that case, the ElDoc support
 will use a fallback syntax definition."
+  :version "24.4"
   :group 'cfengine
-  :type 'file)
+  :type '(choice file (const nil)))
 
 (defcustom cfengine-parameters-indent '(promise pname 0)
-  "*Indentation of CFEngine3 promise parameters (hanging indent).
+  "Indentation of CFEngine3 promise parameters (hanging indent).
 
 For example, say you have this code:
 
@@ -138,7 +139,7 @@ bundle agent rcfiles
                 perms => mog(\"600\", \"tzz\", \"tzz\");
 }
 "
-
+  :version "24.4"
   :group 'cfengine
   :type '(list
           (choice (const :tag "Anchor at beginning of promise" promise)
@@ -1256,8 +1257,8 @@ Calls `cfengine-cf-promises' with \"-s json\""
 
 (defun cfengine3-documentation-function ()
   "Document CFengine 3 functions around point.
-Intended as the value of `eldoc-documentation-function', which
-see.  Use it by executing `turn-on-eldoc-mode'."
+Intended as the value of `eldoc-documentation-function', which see.
+Use it by enabling `eldoc-mode'."
   (let ((fdef (cfengine3--current-function)))
     (when fdef
       (cfengine3-format-function-docstring fdef))))

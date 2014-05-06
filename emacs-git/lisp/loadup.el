@@ -1,9 +1,9 @@
 ;;; loadup.el --- load up standardly loaded Lisp files for Emacs
 
-;; Copyright (C) 1985-1986, 1992, 1994, 2001-2013
-;;   Free Software Foundation, Inc.
+;; Copyright (C) 1985-1986, 1992, 1994, 2001-2014 Free Software
+;; Foundation, Inc.
 
-;; Maintainer: FSF
+;; Maintainer: emacs-devel@gnu.org
 ;; Keywords: internal
 ;; Package: emacs
 
@@ -328,7 +328,7 @@ lost after dumping")))
 				(string-to-number
 				 (substring name (length base) exelen))))
 			     files)))
-      (setq emacs-bzr-version (condition-case nil (emacs-bzr-get-version)
+      (setq emacs-repository-version (condition-case nil (emacs-repository-get-version)
                               (error nil)))
       ;; `emacs-version' is a constant, so we shouldn't change it with `setq'.
       (defconst emacs-version

@@ -1,5 +1,5 @@
 /* Interfaces to system-dependent kernel and library entries.
-   Copyright (C) 1985-1988, 1993-1995, 1999-2013 Free Software
+   Copyright (C) 1985-1988, 1993-1995, 1999-2014 Free Software
    Foundation, Inc.
 
 This file is part of GNU Emacs.
@@ -128,7 +128,7 @@ static const int baud_convert[] =
 /* Return the current working directory.  Returns NULL on errors.
    Any other returned value must be freed with free. This is used
    only when get_current_dir_name is not defined on the system.  */
-char*
+char *
 get_current_dir_name (void)
 {
   char *buf;
@@ -255,7 +255,7 @@ init_baud_rate (int fd)
 #endif /* not DOS_NT */
     }
 
-  baud_rate = (emacs_ospeed < sizeof baud_convert / sizeof baud_convert[0]
+  baud_rate = (emacs_ospeed < ARRAYELTS (baud_convert)
 	       ? baud_convert[emacs_ospeed] : 9600);
   if (baud_rate == 0)
     baud_rate = 1200;
@@ -603,6 +603,7 @@ init_sigio (int fd)
 #endif
 }
 
+#ifndef DOS_NT
 static void
 reset_sigio (int fd)
 {
@@ -610,6 +611,7 @@ reset_sigio (int fd)
   fcntl (fd, F_SETFL, old_fcntl_flags[fd]);
 #endif
 }
+#endif
 
 void
 request_sigio (void)
@@ -692,21 +694,21 @@ init_foreground_group (void)
 /* Block and unblock SIGTTOU.  */
 
 void
-block_tty_out_signal (void)
+block_tty_out_signal (sigset_t *oldset)
 {
 #ifdef SIGTTOU
   sigset_t blocked;
   sigemptyset (&blocked);
   sigaddset (&blocked, SIGTTOU);
-  pthread_sigmask (SIG_BLOCK, &blocked, 0);
+  pthread_sigmask (SIG_BLOCK, &blocked, oldset);
 #endif
 }
 
 void
-unblock_tty_out_signal (void)
+unblock_tty_out_signal (sigset_t const *oldset)
 {
 #ifdef SIGTTOU
-  pthread_sigmask (SIG_SETMASK, &empty_mask, 0);
+  pthread_sigmask (SIG_SETMASK, oldset, 0);
 #endif
 }
 
@@ -721,10 +723,11 @@ static void
 tcsetpgrp_without_stopping (int fd, pid_t pgid)
 {
 #ifdef SIGTTOU
+  sigset_t oldset;
   block_input ();
-  block_tty_out_signal ();
+  block_tty_out_signal (&oldset);
   tcsetpgrp (fd, pgid);
-  unblock_tty_out_signal ();
+  unblock_tty_out_signal (&oldset);
   unblock_input ();
 #endif
 }
@@ -1506,7 +1509,9 @@ emacs_sigaction_init (struct sigaction *action, signal_handler_t handler)
   /* When handling a signal, block nonfatal system signals that are caught
      by Emacs.  This makes race conditions less likely.  */
   sigaddset (&action->sa_mask, SIGALRM);
+#ifdef SIGCHLD
   sigaddset (&action->sa_mask, SIGCHLD);
+#endif
 #ifdef SIGDANGER
   sigaddset (&action->sa_mask, SIGDANGER);
 #endif
@@ -1524,9 +1529,6 @@ emacs_sigaction_init (struct sigaction *action, signal_handler_t handler)
       sigaddset (&action->sa_mask, SIGIO);
 #endif
     }
-
-  if (! IEEE_FLOATING_POINT)
-    sigaddset (&action->sa_mask, SIGFPE);
 
   action->sa_handler = handler;
   action->sa_flags = emacs_sigaction_flags ();
@@ -1643,7 +1645,10 @@ deliver_fatal_thread_signal (int sig)
 static _Noreturn void
 handle_arith_signal (int sig)
 {
-  pthread_sigmask (SIG_SETMASK, &empty_mask, 0);
+  sigset_t blocked;
+  sigemptyset (&blocked);
+  sigaddset (&blocked, sig);
+  pthread_sigmask (SIG_UNBLOCK, &blocked, 0);
   xsignal0 (Qarith_error);
 }
 
@@ -1711,7 +1716,9 @@ init_signals (bool dumping)
 # ifdef SIGBUS
       sys_siglist[SIGBUS] = "Bus error";
 # endif
+# ifdef SIGCHLD
       sys_siglist[SIGCHLD] = "Child status changed";
+# endif
 # ifdef SIGCONT
       sys_siglist[SIGCONT] = "Continued";
 # endif
@@ -2182,6 +2189,9 @@ emacs_fopen (char const *file, char const *mode)
 int
 emacs_pipe (int fd[2])
 {
+#ifdef MSDOS
+  return pipe (fd);
+#else  /* !MSDOS */
   int result = pipe2 (fd, O_CLOEXEC);
   if (! O_CLOEXEC && result == 0)
     {
@@ -2189,6 +2199,7 @@ emacs_pipe (int fd[2])
       fcntl (fd[1], F_SETFD, FD_CLOEXEC);
     }
   return result;
+#endif	/* !MSDOS */
 }
 
 /* Approximate posix_close and POSIX_CLOSE_RESTART well enough for Emacs.

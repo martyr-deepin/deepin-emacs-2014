@@ -1,7 +1,7 @@
 #!/bin/bash
 ### update_autogen - update some auto-generated files in the Emacs tree
 
-## Copyright (C) 2011-2013 Free Software Foundation, Inc.
+## Copyright (C) 2011-2014 Free Software Foundation, Inc.
 
 ## Author: Glenn Morris <rgm@gnu.org>
 
@@ -46,6 +46,14 @@ PD=${0%/*}
 cd $PD
 cd ../
 [ -d admin ] || die "Could not locate admin directory"
+
+if [ -d .bzr ]; then
+    vcs=bzr
+elif [ -d .git ]; then
+    vcs=git
+else
+    die "Cannot determine vcs"
+fi
 
 
 usage ()
@@ -140,24 +148,39 @@ OPTIND=1
 [ "$quiet" ] && exec 1> /dev/null
 
 
-echo "Running bzr status..."
+## Run status on inputs, list modified files on stdout.
+status ()
+{
+    local statflag="-S"
+    [ "$vcs" = "git" ] && statflag="-s"
 
-bzr status -S ${autogendir:+$sources} ${ldefs_flag:+lisp} \
-    ${info_flag:+doc} >| $tempfile || \
-    die "bzr status error for input files"
+    $vcs status $statflag "$@" >| $tempfile || die "$vcs status error for $@"
+
+    local stat file modified
+
+    while read stat file; do
+
+        [ "$stat" != "M" ] && \
+            die "Unexpected status ($stat) for generated $file"
+        modified="$modified $file"
+
+    done < $tempfile
+
+    echo "$modified"
+
+    return 0
+}                               # function status
+
+
+echo "Checking input file status..."
 
 ## The lisp portion could be more permissive, eg only care about .el files.
-while read stat file; do
+modified=$(status ${autogendir:+$sources} ${ldefs_flag:+lisp} ${info_flag:+doc}) || die
 
-    case $stat in
-        M)
-            echo "Locally modified: $file"
-            [ "$force" ] || die "There are local modifications"
-            ;;
-
-        *) die "Unexpected status ($stat) for $file" ;;
-    esac
-done < $tempfile
+[ "$modified" ] && {
+    echo "Locally modified: $modified"
+    [ "$force" ] || die "There are local modifications"
+}
 
 
 ## Probably this is overkill, and there's no need to "bootstrap" just
@@ -205,8 +228,11 @@ commit ()
 
     echo "Committing..."
 
-    ## bzr status output is always relative to top-level, not PWD.
-    bzr commit -m "Auto-commit of $type files." "$@" || return $?
+    $vcs commit -m "Auto-commit of $type files." "$@" || return $?
+
+    [ "$vcs" = "git" ] && {
+        $vcs push || return $?
+    }
 
     echo "Committed files: $@"
 }                               # function commit
@@ -245,7 +271,7 @@ EOF
                 *-xtra.texi|*efaq-w32.texi) continue ;;
             esac
 
-            dircat=`sed -n -e 's/@value{emacsname}/Emacs/' -e 's/^@dircategory //p' $file`
+            dircat=$(sed -n -e 's/@value{emacsname}/Emacs/' -e 's/^@dircategory //p' $file)
 
             ## TODO warn about unknown topics (check-info in top-level
             ## Makefile does this).
@@ -259,21 +285,11 @@ EOF
         done
     done
 
-    bzr status -S $outfile >| $tempfile || \
-        die "bzr status error for generated $outfile"
-
     local modified
 
-    while read stat file; do
+    modified=$(status $outfile) || die
 
-        [ "$stat" != "M" ] && \
-            die "Unexpected status ($stat) for generated $file"
-
-        modified="$modified $file"
-
-    done < $tempfile
-
-    commit "info/dir" $modified || die "bzr commit error"
+    commit "info/dir" $modified || die "commit error"
 }                               # function info_dir
 
 
@@ -287,23 +303,12 @@ EOF
 
     echo "Checking status of generated files..."
 
-    bzr status -S $basegen >| $tempfile || \
-        die "bzr status error for generated files"
+    modified=$(status $basegen) || die
 
-    modified=
+    ## bzr status output is always relative to top-level, not PWD.
+    [ "$vcs" = "bzr" ] && cd $oldpwd
 
-    while read stat file; do
-
-        [ "$stat" != "M" ] && \
-            die "Unexpected status ($stat) for generated $file"
-
-        modified="$modified $file"
-
-    done < $tempfile
-
-    cd $oldpwd
-
-    commit "generated" $modified || die "bzr commit error"
+    commit "generated" $modified || die "commit error"
 
     exit 0
 }                               # $autogendir
@@ -317,8 +322,9 @@ EOF
 
 echo "Finding loaddef targets..."
 
-sed -n -e '/^AUTOGEN_VCS/,/^$/ s/\\//p' lisp/Makefile.in | \
-    sed '/AUTOGEN_VCS/d' >| $tempfile || die "sed error"
+sed -n -e '/^AUTOGEN_VCS/,/^$/p' lisp/Makefile.in | \
+    sed -e '/AUTOGEN_VCS/d' -e '/^$/d' -e 's/\\//' \
+    >| $tempfile || die "sed error"
 
 genfiles=
 
@@ -370,24 +376,14 @@ echo "Checking status of loaddef files..."
 ## It probably would be fine to just check+commit lisp/, since
 ## making autoloads should not effect any other files.  But better
 ## safe than sorry.
-bzr status -S $genfiles ${ldefs_out#lisp/} >| $tempfile || \
-    die "bzr status error for generated files"
+modified=$(status $genfiles ${ldefs_out#lisp/}) || die
 
 
-modified=
-
-while read stat file; do
-
-    [ "$stat" != "M" ] && die "Unexpected status ($stat) for generated $file"
-    modified="$modified $file"
-
-done < $tempfile
+## bzr status output is always relative to top-level, not PWD.
+[ "$vcs" = "bzr" ] && cd ../
 
 
-cd ../
-
-
-commit "loaddefs" $modified || die "bzr commit error"
+commit "loaddefs" $modified || die "commit error"
 
 
 exit 0

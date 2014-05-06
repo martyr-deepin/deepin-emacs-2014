@@ -2,9 +2,10 @@
 
 ### make-info-dir - create info/dir, for systems without install-info
 
-## Copyright (C) 2013 Free Software Foundation, Inc.
+## Copyright (C) 2013-2014 Free Software Foundation, Inc.
 
 ## Author: Glenn Morris <rgm@gnu.org>
+## Maintainer: emacs-devel@gnu.org
 
 ## This file is part of GNU Emacs.
 

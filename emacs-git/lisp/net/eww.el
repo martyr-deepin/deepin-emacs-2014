@@ -1,6 +1,6 @@
 ;;; eww.el --- Emacs Web Wowser
 
-;; Copyright (C) 2013 Free Software Foundation, Inc.
+;; Copyright (C) 2013-2014 Free Software Foundation, Inc.
 
 ;; Author: Lars Magne Ingebrigtsen <larsi@gnus.org>
 ;; Keywords: html
@@ -33,6 +33,7 @@
 (defgroup eww nil
   "Emacs Web Wowser"
   :version "24.4"
+  :link '(custom-manual "(eww) Top")
   :group 'hypermedia
   :prefix "eww-")
 
@@ -50,8 +51,8 @@
   :group 'eww
   :type 'string)
 
-(defcustom eww-download-path "~/Downloads/"
-  "Path where files will downloaded."
+(defcustom eww-download-directory "~/Downloads/"
+  "Directory where files will downloaded."
   :version "24.4"
   :group 'eww
   :type 'string)
@@ -157,8 +158,9 @@ word(s) will be searched for via `eww-search-prefix'."
          (user-error "FTP is not supported."))
         (t
          (if (and (= (length (split-string url)) 1)
-                  (or (> (length (split-string url "\\.")) 1)
-                      (string-match eww-local-regex url)))
+                 (or (and (not (string-match-p "\\`[\"\'].*[\"\']\\'" url))
+                          (> (length (split-string url "\\.")) 1))
+                     (string-match eww-local-regex url)))
              (progn
                (unless (string-match-p "\\`[a-zA-Z][-a-zA-Z0-9+.]*://" url)
                  (setq url (concat "http://" url)))
@@ -184,12 +186,6 @@ word(s) will be searched for via `eww-search-prefix'."
   (let ((redirect (plist-get status :redirect)))
     (when redirect
       (setq url redirect)))
-  (setq-local eww-next-url nil)
-  (setq-local eww-previous-url nil)
-  (setq-local eww-up-url nil)
-  (setq-local eww-home-url nil)
-  (setq-local eww-start-url nil)
-  (setq-local eww-contents-url nil)
   (let* ((headers (eww-parse-headers))
 	 (content-type
 	  (mail-header-parse-content-type
@@ -391,7 +387,13 @@ word(s) will be searched for via `eww-search-prefix'."
     (remove-overlays)
     (erase-buffer))
   (unless (eq major-mode 'eww-mode)
-    (eww-mode)))
+    (eww-mode))
+  (setq-local eww-next-url nil)
+  (setq-local eww-previous-url nil)
+  (setq-local eww-up-url nil)
+  (setq-local eww-home-url nil)
+  (setq-local eww-start-url nil)
+  (setq-local eww-contents-url nil))
 
 (defun eww-view-source ()
   (interactive)
@@ -410,8 +412,8 @@ word(s) will be searched for via `eww-search-prefix'."
     (suppress-keymap map)
     (define-key map "q" 'quit-window)
     (define-key map "g" 'eww-reload)
-    (define-key map [tab] 'shr-next-link)
-    (define-key map [backtab] 'shr-previous-link)
+    (define-key map [?\t] 'shr-next-link)
+    (define-key map [?\M-\t] 'shr-previous-link)
     (define-key map [delete] 'scroll-down-command)
     (define-key map [?\S-\ ] 'scroll-down-command)
     (define-key map "\177" 'scroll-down-command)
@@ -590,8 +592,8 @@ appears in a <link> or <a> tag."
     (define-key map [(control a)] 'eww-beginning-of-text)
     (define-key map [(control c) (control c)] 'eww-submit)
     (define-key map [(control e)] 'eww-end-of-text)
-    (define-key map [tab] 'shr-next-link)
-    (define-key map [backtab] 'shr-previous-link)
+    (define-key map [?\t] 'shr-next-link)
+    (define-key map [?\M-\t] 'shr-previous-link)
     map))
 
 (defvar eww-textarea-map
@@ -599,8 +601,8 @@ appears in a <link> or <a> tag."
     (set-keymap-parent map text-mode-map)
     (define-key map "\r" 'forward-line)
     (define-key map [(control c) (control c)] 'eww-submit)
-    (define-key map [tab] 'shr-next-link)
-    (define-key map [backtab] 'shr-previous-link)
+    (define-key map [?\t] 'shr-next-link)
+    (define-key map [?\M-\t] 'shr-previous-link)
     map))
 
 (defvar eww-select-map
@@ -1071,7 +1073,7 @@ Differences in #targets are ignored."
     (let* ((obj (url-generic-parse-url url))
            (path (car (url-path-and-query obj)))
            (file (eww-make-unique-file-name (file-name-nondirectory path)
-					    eww-download-path)))
+					    eww-download-directory)))
       (write-file file)
       (message "Saved %s" file))))
 
@@ -1282,32 +1284,30 @@ Differences in #targets are ignored."
   (interactive)
   (when (null eww-history)
     (error "No eww-histories are defined"))
-  (set-buffer (get-buffer-create "*eww history*"))
-  (eww-history-mode)
-  (let ((inhibit-read-only t)
-	(domain-length 0)
-	(title-length 0)
-	url title format start)
-    (erase-buffer)
-    (dolist (history eww-history)
-      (setq start (point))
-      (setq domain-length (max domain-length (length (plist-get history :url))))
-      (setq title-length (max title-length (length (plist-get history :title))))
-      )
-    (setq format (format "%%-%ds %%-%ds" title-length domain-length)
-	  header-line-format
-	  (concat " " (format format "Title" "URL")))
-
-    (dolist (history eww-history)
-      (setq url (plist-get history :url))
-      (setq title (plist-get history :title))
-      (insert (format format title url))
-      (insert "\n")
-      (put-text-property start (point) 'eww-history history)
-      )
-    (goto-char (point-min)))
-  (pop-to-buffer "*eww history*")
-  )
+  (let ((eww-history-trans eww-history))
+    (set-buffer (get-buffer-create "*eww history*"))
+    (eww-history-mode)
+    (let ((inhibit-read-only t)
+	  (domain-length 0)
+	  (title-length 0)
+	  url title format start)
+      (erase-buffer)
+      (dolist (history eww-history-trans)
+	(setq start (point))
+	(setq domain-length (max domain-length (length (plist-get history :url))))
+	(setq title-length (max title-length (length (plist-get history :title)))))
+      (setq format (format "%%-%ds %%-%ds" title-length domain-length)
+	    header-line-format
+	    (concat " " (format format "Title" "URL")))
+      (dolist (history eww-history-trans)
+	(setq start (point))
+	(setq url (plist-get history :url))
+	(setq title (plist-get history :title))
+	(insert (format format title url))
+	(insert "\n")
+	(put-text-property start (1+ start) 'eww-history history))
+      (goto-char (point-min)))
+    (pop-to-buffer "*eww history*")))
 
 (defun eww-history-browse ()
   "Browse the history under point in eww."
@@ -1315,39 +1315,23 @@ Differences in #targets are ignored."
   (let ((history (get-text-property (line-beginning-position) 'eww-history)))
     (unless history
       (error "No history on the current line"))
-    (eww-history-quit)
-    (pop-to-buffer "*eww*")
-    (eww-browse-url (plist-get history :url))))
-
-(defun eww-history-quit ()
-  "Kill the current buffer."
-  (interactive)
-  (kill-buffer (current-buffer)))
-
-(defvar eww-history-kill-ring nil)
-
-(defun eww-history-kill ()
-  "Kill the current history."
-  (interactive)
-  (let* ((start (line-beginning-position))
-	 (history (get-text-property start 'eww-history))
-	 (inhibit-read-only t))
-    (unless history
-      (error "No history on the current line"))
-    (forward-line 1)
-    (push (buffer-substring start (point)) eww-history-kill-ring)
-    (delete-region start (point))
-    (setq eww-history (delq history eww-history))
-    ))
+    (quit-window)
+    (eww-restore-history history)))
 
 (defvar eww-history-mode-map
   (let ((map (make-sparse-keymap)))
     (suppress-keymap map)
-    (define-key map "q" 'eww-history-quit)
-    (define-key map [(control k)] 'eww-history-kill)
+    (define-key map "q" 'quit-window)
     (define-key map "\r" 'eww-history-browse)
-                (define-key map "n" 'next-error-no-select)
-                (define-key map "p" 'previous-error-no-select)
+;;    (define-key map "n" 'next-error-no-select)
+;;    (define-key map "p" 'previous-error-no-select)
+
+    (easy-menu-define nil map
+      "Menu for `eww-history-mode-map'."
+      '("Eww History"
+        ["Exit" quit-window t]
+        ["Browse" eww-history-browse
+         :active (get-text-property (line-beginning-position) 'eww-history)]))
     map))
 
 (define-derived-mode eww-history-mode nil "eww history"

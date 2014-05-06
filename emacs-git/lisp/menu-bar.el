@@ -1,9 +1,9 @@
 ;;; menu-bar.el --- define a default menu bar
 
-;; Copyright (C) 1993-1995, 2000-2013 Free Software Foundation, Inc.
+;; Copyright (C) 1993-1995, 2000-2014 Free Software Foundation, Inc.
 
-;; Author: RMS
-;; Maintainer: FSF
+;; Author: Richard M. Stallman
+;; Maintainer: emacs-devel@gnu.org
 ;; Keywords: internal, mouse
 ;; Package: emacs
 
@@ -149,8 +149,11 @@
                   :help "Recover edits from a crashed session"))
     (bindings--define-key menu [revert-buffer]
       '(menu-item "Revert Buffer" revert-buffer
-                  :enable (or revert-buffer-function
-                              revert-buffer-insert-file-contents-function
+                  :enable (or (not (eq revert-buffer-function
+                                       'revert-buffer--default))
+                              (not (eq
+                                    revert-buffer-insert-file-contents-function
+                                    'revert-buffer-insert-file-contents--default-function))
                               (and buffer-file-number
                                    (or (buffer-modified-p)
                                        (not (verify-visited-file-modtime
@@ -919,7 +922,7 @@ by \"Save Options\" in Custom buffers.")
       (selected-frame)))
 
 (defun menu-bar-positive-p (val)
-  "Return non-nil iff VAL is a positive number."
+  "Return non-nil if VAL is a positive number."
   (and (numberp val)
        (> val 0)))
 
@@ -1635,14 +1638,6 @@ key, a click, or a menu-item"))
                   :help "Read the Introduction to Emacs Lisp Programming"))
     menu))
 
-(defun menu-bar-help-extra-packages ()
-  "Display help about some additional packages available for Emacs."
-  (interactive)
-  (let (enable-local-variables)
-    (view-file (expand-file-name "MORE.STUFF"
-				 data-directory))
-    (goto-address-mode 1)))
-
 (defun help-with-tutorial-spec-language ()
   "Use the Emacs tutorial, specifying which language you want."
   (interactive)
@@ -1670,8 +1665,8 @@ key, a click, or a menu-item"))
     (bindings--define-key menu [sep2]
       menu-bar-separator)
     (bindings--define-key menu [external-packages]
-      '(menu-item "Finding Extra Packages" menu-bar-help-extra-packages
-                  :help "Lisp packages distributed separately for use in Emacs"))
+      '(menu-item "Finding Extra Packages" view-external-packages
+                  :help "How to get more Lisp packages for use in Emacs"))
     (bindings--define-key menu [find-emacs-packages]
       '(menu-item "Search Built-in Packages" finder-by-keyword
                   :help "Find built-in packages and features by keyword"))

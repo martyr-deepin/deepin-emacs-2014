@@ -1,5 +1,5 @@
 /* NeXT/Open/GNUstep / MacOSX Cocoa selection processing for emacs.
-   Copyright (C) 1993-1994, 2005-2006, 2008-2013 Free Software
+   Copyright (C) 1993-1994, 2005-2006, 2008-2014 Free Software
    Foundation, Inc.
 
 This file is part of GNU Emacs.
@@ -351,7 +351,7 @@ On Nextstep, FRAME is unused.  */)
   check_window_system (NULL);
   CHECK_SYMBOL (selection);
   if (NILP (value))
-      error ("selection value may not be nil.");
+    error ("Selection value may not be nil");
   pb = ns_symbol_to_pb (selection);
   if (pb == nil) return Qnil;
 

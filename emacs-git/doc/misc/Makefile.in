@@ -1,6 +1,6 @@
 ### @configure_input@
 
-# Copyright (C) 1994, 1996-2013 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1996-2014 Free Software Foundation, Inc.
 
 # This file is part of GNU Emacs.
 
@@ -65,12 +65,12 @@ DOCMISC_W32 = @DOCMISC_W32@
 ## Info files to build and install on all platforms.
 INFO_COMMON = ada-mode auth autotype bovine calc ccmode cl \
 	dbus dired-x ebrowse ede ediff edt eieio \
-	emacs-mime epa erc ert eshell eudc efaq \
+	emacs-mime epa erc ert eshell eudc efaq eww \
 	flymake forms gnus emacs-gnutls htmlfontify idlwave ido info.info \
 	mairix-el message mh-e newsticker nxml-mode octave-mode \
 	org pcl-cvs pgg rcirc remember reftex sasl \
 	sc semantic ses sieve smtpmail speedbar srecode todo-mode tramp \
-	url vip viper widget wisent woman
+	url vhdl-mode vip viper widget wisent woman
 
 ## Info files to install on current platform.
 INFO_INSTALL = $(INFO_COMMON) $(DOCMISC_INFO_W32)
@@ -193,7 +193,7 @@ calc.pdf: $(calc_deps)
 calc.html: $(calc_deps)
 	$(MAKEINFO) $(MAKEINFO_OPTS) $(HTML_OPTS) -o $@ ${srcdir}/calc.texi
 
-ccmode_deps = ${srcdir}/cc-mode.texi ${gfdl}
+cc_mode_deps = ${srcdir}/cc-mode.texi ${gfdl}
 ccmode : $(buildinfodir)/ccmode$(INFO_EXT)
 $(buildinfodir)/ccmode$(INFO_EXT): $(cc_mode_deps)
 	$(mkinfodir)
@@ -409,6 +409,18 @@ eudc.pdf: $(eudc_deps)
 	$(ENVADD) $(TEXI2PDF) ${srcdir}/eudc.texi
 eudc.html: $(eudc_deps)
 	$(MAKEINFO) $(MAKEINFO_OPTS) $(HTML_OPTS) -o $@ ${srcdir}/eudc.texi
+
+eww_deps = ${srcdir}/eww.texi ${gfdl}
+eww : $(buildinfodir)/eww$(INFO_EXT)
+$(buildinfodir)/eww$(INFO_EXT): $(eww_deps)
+	$(mkinfodir)
+	$(MAKEINFO) $(MAKEINFO_OPTS) $(INFO_OPTS) -o $@ ${srcdir}/eww.texi
+eww.dvi: $(eww_deps)
+	$(ENVADD) $(TEXI2DVI) ${srcdir}/eww.texi
+eww.pdf: $(eww_deps)
+	$(ENVADD) $(TEXI2PDF) ${srcdir}/eww.texi
+eww.html: $(eww_deps)
+	$(MAKEINFO) $(MAKEINFO_OPTS) $(HTML_OPTS) -o $@ ${srcdir}/eww.texi
 
 flymake_deps = ${srcdir}/flymake.texi ${gfdl}
 flymake : $(buildinfodir)/flymake$(INFO_EXT)
@@ -780,6 +792,18 @@ url.pdf: $(url_deps)
 url.html: $(url_deps)
 	$(MAKEINFO) $(MAKEINFO_OPTS) $(HTML_OPTS) -o $@ ${srcdir}/url.texi
 
+vhdl_mode_deps = ${srcdir}/vhdl-mode.texi ${gfdl}
+vhdl-mode : $(buildinfodir)/vhdl-mode$(INFO_EXT)
+$(buildinfodir)/vhdl-mode$(INFO_EXT): $(vhdl_mode_deps)
+	$(mkinfodir)
+	$(MAKEINFO) $(MAKEINFO_OPTS) $(INFO_OPTS) -o $@ ${srcdir}/vhdl-mode.texi
+vhdl-mode.dvi: $(vhdl_mode_deps)
+	$(ENVADD) $(TEXI2DVI) ${srcdir}/vhdl-mode.texi
+vhdl-mode.pdf: $(vhdl_mode_deps)
+	$(ENVADD) $(TEXI2PDF) ${srcdir}/vhdl-mode.texi
+vhdl-mode.html: $(vhdl_mode_deps)
+	$(MAKEINFO) $(MAKEINFO_OPTS) $(HTML_OPTS) -o $@ ${srcdir}/vhdl-mode.texi
+
 vip_deps = ${srcdir}/vip.texi ${gfdl}
 vip : $(buildinfodir)/vip$(INFO_EXT)
 $(buildinfodir)/vip$(INFO_EXT): $(vip_deps)
@@ -858,9 +882,12 @@ distclean: clean
 
 ## buildinfodir is relative to srcdir.
 infoclean:
-	cd $(buildinfodir); for file in $(INFO_TARGETS); do \
+	for file in $(INFO_TARGETS); do \
 	  file=`echo $${file} | sed 's/\.info$$//'`${INFO_EXT}; \
-	  rm -f $${file} $${file}-[1-9] $${file}-[1-9][0-9]; \
+	  rm -f \
+	    $(buildinfodir)/$${file} \
+	    $(buildinfodir)/$${file}-[1-9] \
+	    $(buildinfodir)/$${file}-[1-9][0-9]; \
 	done
 
 maintainer-clean: distclean infoclean

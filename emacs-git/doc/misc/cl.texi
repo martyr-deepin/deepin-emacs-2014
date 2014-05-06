@@ -1,12 +1,13 @@
 \input texinfo    @c -*-texinfo-*-
 @setfilename ../../info/cl
 @settitle Common Lisp Extensions
+@documentencoding UTF-8
 @include emacsver.texi
 
 @copying
 This file documents the GNU Emacs Common Lisp emulation package.
 
-Copyright @copyright{} 1993, 2001--2013 Free Software Foundation, Inc.
+Copyright @copyright{} 1993, 2001--2014 Free Software Foundation, Inc.
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -1281,13 +1282,8 @@ cells of symbols rather than on the value cells.  Each @var{binding}
 must be a list of the form @samp{(@var{name} @var{arglist}
 @var{forms}@dots{})}, which defines a function exactly as if
 it were a @code{cl-defun} form.  The function @var{name} is defined
-accordingly for the duration of the body of the @code{cl-flet}; then
-the old function definition, or lack thereof, is restored.
-
-You can use @code{cl-flet} to disable or modify the behavior of
-functions (including Emacs primitives) in a temporary, localized fashion.
-(Compare this with the idea of advising functions.
-@xref{Advising Functions,,,elisp,GNU Emacs Lisp Reference Manual}.)
+accordingly but only within the body of the @code{cl-flet}, hiding any external
+definition if applicable.
 
 The bindings are lexical in scope.  This means that all references to
 the named functions must appear physically within the body of the
@@ -1495,7 +1491,7 @@ simply returning @code{nil}.
 
 @node Blocks and Exits
 @section Blocks and Exits
-@cindex block 
+@cindex block
 
 @noindent
 Common Lisp @dfn{blocks} provide a non-local exit mechanism very
@@ -1559,6 +1555,19 @@ This macro is exactly like @code{(cl-return-from nil @var{result})}.
 Common Lisp loops like @code{cl-do} and @code{cl-dolist} implicitly enclose
 themselves in @code{nil} blocks.
 @end defmac
+
+@c FIXME?  Maybe this should be in a separate section?
+@defmac cl-tagbody &rest labels-or-statements
+This macro executes statements while allowing for control transfer to
+user-defined labels.  Each element of @var{labels-or-statements} can
+be either a label (an integer or a symbol), or a cons-cell
+(a statement).  This distinction is made before macroexpansion.
+Statements are executed in sequence, discarding any return value.
+Any statement can transfer control at any time to the statements that follow
+one of the labels with the special form @code{(go @var{label})}.
+Labels have lexical scope and dynamic extent.
+@end defmac
+
 
 @node Iteration
 @section Iteration
@@ -2618,10 +2627,10 @@ In this package, @code{cl-locally} is no different from @code{progn}.
 @end defmac
 
 @defmac cl-the type form
-Type information provided by @code{cl-the} is ignored in this package;
-in other words, @code{(cl-the @var{type} @var{form})} is equivalent to
-@var{form}.  Future byte-compiler optimizations may make use of this
-information.
+@code{cl-the} returns the value of @code{form}, first checking (if
+optimization settings permit) that it is of type @code{type}.  Future
+byte-compiler optimizations may also make use of this information to
+improve runtime efficiency.
 
 For example, @code{mapcar} can map over both lists and arrays.  It is
 hard for the compiler to expand @code{mapcar} into an in-line loop
@@ -4237,6 +4246,40 @@ of the included type and the first new slot.
 
 Except as noted, the @code{cl-defstruct} facility of this package is
 entirely compatible with that of Common Lisp.
+
+The @code{cl-defstruct} package also provides a few structure
+introspection functions.
+
+@defun cl-struct-sequence-type struct-type
+This function returns the underlying data structure for
+@code{struct-type}, which is a symbol.  It returns @code{vector} or
+@code{list}, or @code{nil} if @code{struct-type} is not actually a
+structure.
+@end defun
+
+@defun cl-struct-slot-info struct-type
+This function returns a list of slot descriptors for structure
+@code{struct-type}.  Each entry in the list is @code{(name . opts)},
+where @code{name} is the name of the slot and @code{opts} is the list
+of slot options given to @code{defstruct}.  Dummy entries represent
+the slots used for the struct name and that are skipped to implement
+@code{:initial-offset}.
+@end defun
+
+@defun cl-struct-slot-offset struct-type slot-name
+Return the offset of slot @code{slot-name} in @code{struct-type}.  The
+returned zero-based slot index is relative to the start of the
+structure data type and is adjusted for any structure name and
+:initial-offset slots.  Signal error if struct @code{struct-type} does
+not contain @code{slot-name}.
+@end defun
+
+@defun cl-struct-slot-value struct-type slot-name inst
+Return the value of slot @code{slot-name} in @code{inst} of
+@code{struct-type}.  @code{struct} and @code{slot-name} are symbols.
+@code{inst} is a structure instance.  This routine is also a
+@code{setf} place.  Can signal the same errors as @code{cl-struct-slot-offset}.
+@end defun
 
 @node Assertions
 @chapter Assertions and Errors

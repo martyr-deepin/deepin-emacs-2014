@@ -1,5 +1,5 @@
 /* Definitions and headers for communication with NeXT/Open/GNUstep API.
-   Copyright (C) 1989, 1993, 2005, 2008-2013 Free Software Foundation,
+   Copyright (C) 1989, 1993, 2005, 2008-2014 Free Software Foundation,
    Inc.
 
 This file is part of GNU Emacs.
@@ -42,6 +42,9 @@ along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifndef MAC_OS_X_VERSION_10_8
 #define MAC_OS_X_VERSION_10_8 1080
 #endif
+#ifndef MAC_OS_X_VERSION_10_9
+#define MAC_OS_X_VERSION_10_9 1090
+#endif
 
 #if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7
 #define HAVE_NATIVE_FS
@@ -51,7 +54,7 @@ along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #ifdef __OBJC__
 
-/* CGFloat on GNUStep may be 4 or 8 byte, but functions expect float* for some
+/* CGFloat on GNUstep may be 4 or 8 byte, but functions expect float* for some
    versions.
    On Cocoa >= 10.5, functions expect CGFloat*. Make compatible type.  */
 #ifdef NS_IMPL_COCOA
@@ -159,6 +162,7 @@ typedef float EmacsCGFloat;
    int scrollbarsNeedingUpdate;
    EmacsToolbar *toolbar;
    NSRect ns_userRect;
+   BOOL wait_for_tool_bar;
    }
 
 /* AppKit-side interface */
@@ -183,7 +187,7 @@ typedef float EmacsCGFloat;
 - (BOOL) fsIsNative;
 - (BOOL) isFullscreen;
 #ifdef HAVE_NATIVE_FS
-- (void) updateCollectionBehaviour;
+- (void) updateCollectionBehavior;
 #endif
 
 #ifdef NS_IMPL_GNUSTEP

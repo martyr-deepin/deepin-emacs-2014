@@ -1,5 +1,5 @@
 /* Definitions and global variables for intervals.
-   Copyright (C) 1993-1994, 2000-2013 Free Software Foundation, Inc.
+   Copyright (C) 1993-1994, 2000-2014 Free Software Foundation, Inc.
 
 This file is part of GNU Emacs.
 
@@ -132,6 +132,14 @@ struct interval
 
 /* Use these functions to set Lisp_Object
    or pointer slots of struct interval.  */
+
+INLINE void
+set_interval_object (INTERVAL i, Lisp_Object obj)
+{
+  eassert (BUFFERP (obj) || STRINGP (obj));
+  i->up_obj = 1;
+  i->up.obj = obj;
+}
 
 INLINE void
 set_interval_parent (INTERVAL i, INTERVAL parent)

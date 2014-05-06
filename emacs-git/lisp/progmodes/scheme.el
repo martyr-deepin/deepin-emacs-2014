@@ -1,6 +1,6 @@
-;;; scheme.el --- Scheme (and DSSSL) editing mode
+;;; scheme.el --- Scheme (and DSSSL) editing mode    -*- lexical-binding: t; -*-
 
-;; Copyright (C) 1986-1988, 1997-1998, 2001-2013 Free Software
+;; Copyright (C) 1986-1988, 1997-1998, 2001-2014 Free Software
 ;; Foundation, Inc.
 
 ;; Author: Bill Rozas <jinx@martigny.ai.mit.edu>
@@ -140,11 +140,8 @@
   (setq-local add-log-current-defun-function #'lisp-current-defun-name)
   (setq-local comment-start ";")
   (setq-local comment-add 1)
-  ;; Look within the line for a ; following an even number of backslashes
-  ;; after either a non-backslash or the line beginning.
-  (setq-local comment-start-skip
-	      "\\(\\(^\\|[^\\\\\n]\\)\\(\\\\\\\\\\)*\\);+[ \t]*")
-  (setq-local font-lock-comment-start-skip ";+ *")
+  (setq-local comment-start-skip ";+[ \t]*")
+  (setq-local comment-use-syntax t)
   (setq-local comment-column 40)
   (setq-local parse-sexp-ignore-comments t)
   (setq-local lisp-indent-function 'scheme-indent-function)
@@ -287,7 +284,9 @@ See `run-hooks'."
                    "\\|-module"
 		   "\\)\\)\\>"
 		   ;; Any whitespace and declared object.
-		   "[ \t]*(?"
+		   ;; The "(*" is for curried definitions, e.g.,
+		   ;;  (define ((sum a) b) (+ a b))
+		   "[ \t]*(*"
 		   "\\(\\sw+\\)?")
 	   '(1 font-lock-keyword-face)
 	   '(6 (cond ((match-beginning 3) font-lock-function-name-face)
@@ -498,20 +497,20 @@ indentation."
 
 ;;; Let is different in Scheme
 
-(defun would-be-symbol (string)
-  (not (string-equal (substring string 0 1) "(")))
+;; (defun scheme-would-be-symbol (string)
+;;   (not (string-equal (substring string 0 1) "(")))
 
-(defun next-sexp-as-string ()
-  ;; Assumes that it is protected by a save-excursion
-  (forward-sexp 1)
-  (let ((the-end (point)))
-    (backward-sexp 1)
-    (buffer-substring (point) the-end)))
+;; (defun scheme-next-sexp-as-string ()
+;;   ;; Assumes that it is protected by a save-excursion
+;;   (forward-sexp 1)
+;;   (let ((the-end (point)))
+;;     (backward-sexp 1)
+;;     (buffer-substring (point) the-end)))
 
 ;; This is correct but too slow.
 ;; The one below works almost always.
 ;;(defun scheme-let-indent (state indent-point)
-;;  (if (would-be-symbol (next-sexp-as-string))
+;;  (if (scheme-would-be-symbol (scheme-next-sexp-as-string))
 ;;      (scheme-indent-specform 2 state indent-point)
 ;;      (scheme-indent-specform 1 state indent-point)))
 

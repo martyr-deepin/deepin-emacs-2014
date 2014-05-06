@@ -1,9 +1,9 @@
 ;;; dnd.el --- drag and drop support.  -*- coding: utf-8 -*-
 
-;; Copyright (C) 2005-2013 Free Software Foundation, Inc.
+;; Copyright (C) 2005-2014 Free Software Foundation, Inc.
 
 ;; Author: Jan Djärv <jan.h.d@swipnet.se>
-;; Maintainer: FSF
+;; Maintainer: emacs-devel@gnu.org
 ;; Keywords: window, drag, drop
 ;; Package: emacs
 

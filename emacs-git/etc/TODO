@@ -1,6 +1,6 @@
 Emacs TODO List                                                   -*-outline-*-
 
-Copyright (C) 2001-2013 Free Software Foundation, Inc.
+Copyright (C) 2001-2014 Free Software Foundation, Inc.
 See the end of the file for license conditions.
 
 
@@ -231,6 +231,9 @@ Perspectives also need to interact with the tabs.
 
 ** FFI (foreign function interface)
 See eg http://lists.gnu.org/archive/html/emacs-devel/2013-10/msg00246.html
+
+** Replace unexec with a more portable form of dumping
+See eg http://lists.gnu.org/archive/html/emacs-devel/2014-01/msg01034.html
 
 ** Imenu could be extended into a file-structure browsing mechanism
 using code like that of customize-groups.
@@ -529,7 +532,7 @@ rather than interactively.  This a trivial one-liner in easy-mode.el.
 ** Optionally make the cursor a little thinner at the end of a line
   or the end of the buffer.
 
-** Port the conservative stack marking code of Emacs' garbage collector
+** Port the conservative stack marking code of Emacs's garbage collector
   to more systems, so that we can completely get rid of GCPROs.  Note
   that Boehm garbage collector provides this.
 
@@ -553,8 +556,8 @@ rather than interactively.  This a trivial one-liner in easy-mode.el.
   snmp-mode [?], soundex [should be interactive?], strokes [start from
   the web page], talk, thingatpt [interactive functions?], type-break,
   vcursor, xscheme, zone-mode [?], mlconvert [?], iso-cvt,
-  feedmail [?], uce, gametree, meese, page-ext,
-  refbib, refer, scribe, spell [obsolete?], texinfo, underline,
+  feedmail [?], uce, gametree, page-ext,
+  refbib, refer, scribe, texinfo, underline,
   cmacexp, hideif, mantemp [obsolete?], pcomplete, xml,
   cvs-status (should be described in PCL-CVS manual); other progmodes,
   probably in separate manual.
@@ -1221,6 +1224,9 @@ systems for HTML/XML files automatically."
 ** Merge ibuffer.el and buff-menu.el.
    More specifically do what's needed to make ibuffer.el the default,
    or just an extension of buff-menu.el.
+
+** Replace linum.el with nlinum.el
+   http://lists.gnu.org/archive/html/emacs-devel/2013-08/msg00379.html
 
 ** Use pcomplete by default in shell-mode.
    This means to make it behave (by default) more like the current code.

@@ -26,7 +26,7 @@ This is the @cite{GNU Emacs Manual},
 @end ifnottex
 updated for Emacs version @value{EMACSVER}.
 
-Copyright @copyright{} 1985--1987, 1993--2013 Free Software Foundation, Inc.
+Copyright @copyright{} 1985--1987, 1993--2014 Free Software Foundation, Inc.
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -190,6 +190,7 @@ Advanced Features
 * Rmail::               Reading mail in Emacs.
 * Gnus::                A flexible mail and news reader.
 * Document View::       Viewing PDF, PS and DVI files.
+* EWW::                 A web browser in Emacs.
 * Shell::               Executing shell commands from Emacs.
 * Emacs Server::        Using Emacs as an editing server.
 * Printing::            Printing hardcopies of buffers or regions.
@@ -492,7 +493,7 @@ Using Multiple Buffers
 
 * Select Buffer::       Creating a new buffer or reselecting an old one.
 * List Buffers::        Getting a list of buffers that exist.
-* Misc Buffer::         Renaming; changing read-onlyness; copying text.
+* Misc Buffer::         Renaming; changing read-only status; copying text.
 * Kill Buffer::         Killing buffers you no longer need.
 * Several Buffers::     How to go through the list of all buffers
                           and operate variously on several of them.
@@ -667,8 +668,9 @@ Editing Programs
 * Documentation::       Getting documentation of functions you plan to call.
 * Hideshow::            Displaying blocks selectively.
 * Symbol Completion::   Completion on symbol names of your program or language.
-* Glasses::             Making identifiersLikeThis more readable.
+* MixedCase Words::     Dealing with identifiersLikeThis.
 * Semantic::            Suite of editing tools based on source code parsing.
+* Prettifying Symbols:: Display symbols as composed characters.
 * Misc for Programs::   Other Emacs features useful for editing programs.
 * C Modes::             Special commands of C, C++, Objective-C,
                           Java, IDL, Pike and AWK modes.
@@ -1338,9 +1340,12 @@ If you find GNU Emacs useful, please @strong{send a donation} to the
 Free Software Foundation to support our work.  Donations to the Free
 Software Foundation are tax deductible in the US@.  If you use GNU Emacs
 at your workplace, please suggest that the company make a donation.
-For more information on how you can help, see
+To donate, see @url{https://my.fsf.org/donate/}.
+For other ways in which you can help, see
 @url{http://www.gnu.org/help/help.html}.
 
+@c The command view-order-manuals uses this anchor.
+@anchor{Printed Books}
 We also sell hardcopy versions of this manual and @cite{An
 Introduction to Programming in Emacs Lisp}, by Robert J. Chassell.
 You can visit our online store at @url{http://shop.fsf.org/}.

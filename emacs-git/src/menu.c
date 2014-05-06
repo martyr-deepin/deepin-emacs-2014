@@ -1,6 +1,6 @@
 /* Platform-independent code for terminal communications.
 
-Copyright (C) 1986, 1988, 1993-1994, 1996, 1999-2013 Free Software
+Copyright (C) 1986, 1988, 1993-1994, 1996, 1999-2014 Free Software
 Foundation, Inc.
 
 This file is part of GNU Emacs.
@@ -415,7 +415,8 @@ single_menu_item (Lisp_Object key, Lisp_Object item, Lisp_Object dummy, void *sk
 	item_string = concat2 (prefix, item_string);
   }
 
-  if (FRAME_TERMCAP_P (XFRAME (Vmenu_updating_frame))
+  if ((FRAME_TERMCAP_P (XFRAME (Vmenu_updating_frame))
+       || FRAME_MSDOS_P (XFRAME (Vmenu_updating_frame)))
       && !NILP (map))
     /* Indicate visually that this is a submenu.  */
     item_string = concat2 (item_string, build_string (" >"));
@@ -1442,9 +1443,19 @@ no quit occurs and `x-popup-menu' returns nil.  */)
 			    keymaps, title, &error_name);
   else
 #endif
+#ifndef MSDOS
   if (FRAME_TERMCAP_P (f))
-    selection = tty_menu_show (f, xpos, ypos, for_click, keymaps, title,
-			       kbd_menu_navigation, &error_name);
+    {
+      ptrdiff_t count1 = SPECPDL_INDEX ();
+
+      /* Avoid crashes if, e.g., another client will connect while we
+	 are in a menu.  */
+      temporarily_switch_to_single_kboard (f);
+      selection = tty_menu_show (f, xpos, ypos, for_click, keymaps, title,
+				 kbd_menu_navigation, &error_name);
+      unbind_to (count1, Qnil);
+    }
+#endif
 
 #ifdef HAVE_NS
   unbind_to (specpdl_count, Qnil);
@@ -1553,20 +1564,23 @@ for instance using the window manager, then this produces a quit and
      Do this before creating the widget value that points to Lisp
      string contents, because Fredisplay may GC and relocate them.  */
   Fredisplay (Qt);
-#if defined (USE_X_TOOLKIT) || defined (USE_GTK)
+
+#if defined USE_X_TOOLKIT || defined USE_GTK
   if (FRAME_WINDOW_P (f))
     return xw_popup_dialog (f, header, contents);
-  else
 #endif
-#if defined (HAVE_NTGUI) && defined (HAVE_DIALOGS)
+#ifdef HAVE_NTGUI
   if (FRAME_W32_P (f))
-    return w32_popup_dialog (f, header, contents);
-  else
+    {
+      Lisp_Object selection = w32_popup_dialog (f, header, contents);
+
+      if (!EQ (selection, Qunsupported__w32_dialog))
+	return selection;
+    }
 #endif
 #ifdef HAVE_NS
   if (FRAME_NS_P (f))
     return ns_popup_dialog (position, header, contents);
-  else
 #endif
   /* Display a menu with these alternatives
      in the middle of frame F.  */

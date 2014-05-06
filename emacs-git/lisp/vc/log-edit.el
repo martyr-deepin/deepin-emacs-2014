@@ -1,6 +1,6 @@
 ;;; log-edit.el --- Major mode for editing CVS commit messages -*- lexical-binding: t -*-
 
-;; Copyright (C) 1999-2013 Free Software Foundation, Inc.
+;; Copyright (C) 1999-2014 Free Software Foundation, Inc.
 
 ;; Author: Stefan Monnier <monnier@iro.umontreal.ca>
 ;; Keywords: pcl-cvs cvs commit log vc
@@ -120,8 +120,9 @@ If SETUP is 'force, this variable has no effect."
   :type 'boolean)
 
 (defcustom log-edit-setup-add-author nil
-  "Non-nil means `log-edit' should add the `Author:' header when
-its SETUP argument is non-nil."
+  "Non-nil means `log-edit' may add the `Author:' header.
+This applies when its SETUP argument is non-nil."
+  :version "24.4"
   :group 'log-edit
   :type 'boolean
   :safe 'booleanp)
@@ -270,7 +271,7 @@ WHOAMI (interactive prefix) non-nil means prompt for user name
 and site.  FILE-NAME is the name of the change log; if nil, use
 `change-log-default-name'.
 
-This may be useful as a `log-edit-checkin-hook' to update change logs
+This may be useful as a `vc-checkin-hook' to update change logs
 automatically."
   (interactive (if current-prefix-arg
 		   (list current-prefix-arg
@@ -354,6 +355,21 @@ The first subexpression is the actual text of the field.")
       (set-match-data (list start (point)))
       (point))))
 
+(defun log-edit--match-first-line (limit)
+  (let ((start (point)))
+    (rfc822-goto-eoh)
+    (skip-chars-forward "\n")
+    (and (< start (line-end-position))
+         (< (point) limit)
+         (save-excursion
+           (not (re-search-backward "^Summary:[ \t]*[^ \t\n]" nil t)))
+         (looking-at ".+")
+         (progn
+           (goto-char (match-end 0))
+           (put-text-property (point-min) (point)
+                              'jit-lock-defer-multiline t)
+           (point)))))
+
 (defvar log-edit-font-lock-keywords
   ;; Copied/inspired by message-font-lock-keywords.
   `((log-edit-match-to-eoh
@@ -369,7 +385,8 @@ The first subexpression is the actual text of the field.")
          nil lax))
      ("^\n"
       (progn (goto-char (match-end 0)) (1+ (match-end 0))) nil
-      (0 '(:height 0.1 :inverse-video t))))))
+      (0 '(:height 0.1 :inverse-video t))))
+    (log-edit--match-first-line (0 'log-edit-summary))))
 
 (defvar log-edit-font-lock-gnu-style nil
   "If non-nil, highlight common failures to follow the GNU coding standards.")
@@ -472,6 +489,7 @@ commands (under C-x v for VC, for example).
 \\{log-edit-mode-map}"
   (set (make-local-variable 'font-lock-defaults)
        '(log-edit-font-lock-keywords t))
+  (setq-local jit-lock-contextually t)  ;For the "first line is summary".
   (make-local-variable 'log-edit-comment-ring-index)
   (add-hook 'kill-buffer-hook 'log-edit-remember-comment nil t)
   (hack-dir-local-variables-non-file-buffer))

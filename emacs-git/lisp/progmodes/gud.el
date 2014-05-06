@@ -1,9 +1,10 @@
 ;;; gud.el --- Grand Unified Debugger mode for running GDB and other debuggers
 
-;; Copyright (C) 1992-1996, 1998, 2000-2013 Free Software Foundation, Inc.
+;; Copyright (C) 1992-1996, 1998, 2000-2014 Free Software Foundation,
+;; Inc.
 
 ;; Author: Eric S. Raymond <esr@snark.thyrsus.com>
-;; Maintainer: FSF
+;; Maintainer: emacs-devel@gnu.org
 ;; Keywords: unix, tools
 
 ;; This file is part of GNU Emacs.
@@ -1367,7 +1368,7 @@ and source-file directory for your debugger."
   )
 
 ;; ======================================================================
-;; xdb (HP PARISC debugger) functions
+;; xdb (HP PA-RISC debugger) functions
 
 ;; History of argument lists passed to xdb.
 (defvar gud-xdb-history nil)

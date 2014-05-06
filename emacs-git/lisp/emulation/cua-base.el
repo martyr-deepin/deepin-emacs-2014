@@ -1,6 +1,6 @@
 ;;; cua-base.el --- emulate CUA key bindings
 
-;; Copyright (C) 1997-2013 Free Software Foundation, Inc.
+;; Copyright (C) 1997-2014 Free Software Foundation, Inc.
 
 ;; Author: Kim F. Storm <storm@cua.dk>
 ;; Keywords: keyboard emulations convenience cua
@@ -1085,7 +1085,7 @@ If window cannot be scrolled further, move cursor to bottom line instead.
 A near full screen is `next-screen-context-lines' less than a full screen.
 Negative ARG means scroll downward.
 If ARG is the atom `-', scroll downward by nearly full screen."
-  (interactive "P")
+  (interactive "^P")
   (cond
    ((eq arg '-) (cua-scroll-down nil))
    ((< (prefix-numeric-value arg) 0)
@@ -1106,7 +1106,7 @@ If window cannot be scrolled further, move cursor to top line instead.
 A near full screen is `next-screen-context-lines' less than a full screen.
 Negative ARG means scroll upward.
 If ARG is the atom `-', scroll upward by nearly full screen."
-  (interactive "P")
+  (interactive "^P")
   (cond
    ((eq arg '-) (cua-scroll-up nil))
    ((< (prefix-numeric-value arg) 0)
@@ -1155,19 +1155,6 @@ If ARG is the atom `-', scroll upward by nearly full screen."
     (if (timerp cua--prefix-override-timer)
 	(cancel-timer cua--prefix-override-timer))
     (setq cua--prefix-override-timer nil))
-
-  (cond
-   ;; Only symbol commands can have necessary properties
-   ((not (symbolp this-command))
-    nil)
-
-   ((not (eq (get this-command 'CUA) 'move))
-    nil)
-
-   ;; Set mark if user explicitly said to do so
-   (cua--rectangle ;FIXME: ??
-    (unless mark-active
-      (push-mark-command nil nil))))
 
   ;; Detect extension of rectangles by mouse or other movement
   (setq cua--buffer-and-point-before-command
@@ -1367,36 +1354,6 @@ If ARG is the atom `-', scroll upward by nearly full screen."
   )
 
 
-;; Setup standard movement commands to be recognized by CUA.
-
-(dolist (cmd
- '(forward-char backward-char
-   right-char left-char
-   right-word left-word
-   next-line previous-line
-   forward-word backward-word
-   end-of-line beginning-of-line
-   end-of-visual-line beginning-of-visual-line
-   move-end-of-line move-beginning-of-line
-   end-of-buffer beginning-of-buffer
-   scroll-up scroll-down
-   scroll-up-command scroll-down-command
-   up-list down-list backward-up-list
-   end-of-defun beginning-of-defun
-   forward-sexp backward-sexp
-   forward-list backward-list
-   forward-sentence backward-sentence
-   forward-paragraph backward-paragraph
-   ;; CC mode motion commands
-   c-forward-conditional c-backward-conditional
-   c-down-conditional c-up-conditional
-   c-down-conditional-with-else c-up-conditional-with-else
-   c-beginning-of-statement c-end-of-statement))
-  (put cmd 'CUA 'move))
-
-;; Only called if pc-selection-mode is t, which means pc-select is loaded.
-(declare-function pc-selection-mode "pc-select" (&optional arg))
-
 ;; State prior to enabling cua-mode
 ;; Value is a list with the following elements:
 ;;   delete-selection-mode
@@ -1426,12 +1383,7 @@ options:
 
 You can customize `cua-enable-cua-keys' to completely disable the
 CUA bindings, or `cua-prefix-override-inhibit-delay' to change
-the prefix fallback behavior.
-
-CUA mode manages Transient Mark mode internally.  Trying to disable
-Transient Mark mode while CUA mode is enabled does not work; if you
-only want to highlight the region when it is selected using a
-shifted movement key, set `cua-highlight-region-shift-only'."
+the prefix fallback behavior."
   :global t
   :group 'cua
   :set-after '(cua-enable-modeline-indications

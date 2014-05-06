@@ -1,6 +1,7 @@
 ;;; arc-mode.el --- simple editing of archives
 
-;; Copyright (C) 1995, 1997-1998, 2001-2013 Free Software Foundation, Inc.
+;; Copyright (C) 1995, 1997-1998, 2001-2014 Free Software Foundation,
+;; Inc.
 
 ;; Author: Morten Welinder <terra@gnu.org>
 ;; Keywords: files archives msdog editing major-mode
@@ -77,7 +78,7 @@
 ;;             interaction among members.
 ;;             Headers come in three flavors called level 0, 1 and 2 headers.
 ;;             Level 2 header is free of DOS specific restrictions and most
-;;             prevalently used.  Also level 1 and 2 headers consist of base
+;;             commonly used.  Also level 1 and 2 headers consist of base
 ;;             and extension headers.  For more details see
 ;;             http://homepage1.nifty.com/dangan/en/Content/Program/Java/jLHA/Notes/Notes.html
 ;;             http://www.osirusoft.com/joejared/lzhformat.html

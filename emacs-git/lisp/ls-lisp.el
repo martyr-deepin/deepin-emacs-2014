@@ -1,10 +1,10 @@
 ;;; ls-lisp.el --- emulate insert-directory completely in Emacs Lisp
 
-;; Copyright (C) 1992, 1994, 2000-2013 Free Software Foundation, Inc.
+;; Copyright (C) 1992, 1994, 2000-2014 Free Software Foundation, Inc.
 
 ;; Author: Sebastian Kremer <sk@thp.uni-koeln.de>
 ;; Modified by: Francis J. Wright <F.J.Wright@maths.qmw.ac.uk>
-;; Maintainer: FSF
+;; Maintainer: emacs-devel@gnu.org
 ;; Keywords: unix, dired
 ;; Package: emacs
 

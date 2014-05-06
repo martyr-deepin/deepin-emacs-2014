@@ -1,5 +1,5 @@
 /* Header for coding system handler.
-   Copyright (C) 2001-2013 Free Software Foundation, Inc.
+   Copyright (C) 2001-2014 Free Software Foundation, Inc.
    Copyright (C) 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
      2005, 2006, 2007, 2008, 2009, 2010, 2011
      National Institute of Advanced Industrial Science and Technology (AIST)
@@ -468,7 +468,9 @@ struct coding_system
      the eol format.  */
   ptrdiff_t head_ascii;
 
-  ptrdiff_t detected_utf8_chars;
+  /* How many bytes/chars at the source are detected as valid utf-8
+     sequence.  Set by detect_coding_utf_8.  */
+  ptrdiff_t detected_utf8_bytes, detected_utf8_chars;
 
   /* Used internally in coding.c.  See the comment of detect_ascii.  */
   int eol_seen;
@@ -477,7 +479,7 @@ struct coding_system
   ptrdiff_t produced, produced_char, consumed, consumed_char;
 
   /* Number of error source data found in a decoding routine.  */
-  int errors;
+  ptrdiff_t errors;
 
   /* Store the positions of error source data.  */
   ptrdiff_t *error_positions;
@@ -741,7 +743,7 @@ extern wchar_t *to_unicode (Lisp_Object str, Lisp_Object *buf);
 extern Lisp_Object from_unicode (Lisp_Object str);
 
 /* Convert WSTR to an Emacs string.  */
-extern Lisp_Object from_unicode_buffer (const wchar_t* wstr);
+extern Lisp_Object from_unicode_buffer (const wchar_t *wstr);
 
 #endif /* WINDOWSNT || CYGWIN */
 

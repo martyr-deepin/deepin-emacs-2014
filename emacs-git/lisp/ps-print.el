@@ -1,6 +1,6 @@
 ;;; ps-print.el --- print text from the buffer as PostScript
 
-;; Copyright (C) 1993-2013 Free Software Foundation, Inc.
+;; Copyright (C) 1993-2014 Free Software Foundation, Inc.
 
 ;; Author: Jim Thompson (was <thompson@wg2.waii.com>)
 ;;	Jacques Duthen (was <duthen@cegelec-red.fr>)
@@ -6121,7 +6121,7 @@ to the equivalent Latin-1 characters.")
     (goto-char from)
 
     ;; ...break the region up into chunks separated by tabs, linefeeds,
-    ;; pagefeeds, control characters, and plot each chunk.
+    ;; formfeeds, control characters, and plot each chunk.
     (while (< from to)
       ;; skip lines between cut markers
       (and ps-begin-cut-regexp ps-end-cut-regexp
@@ -6429,6 +6429,7 @@ If FACE is not a valid face name, use default face."
   (save-restriction
     (narrow-to-region from to)
     (ps-print-ensure-fontified from to)
+    (deactivate-mark)                   ;bug#16866.
     (ps-generate-postscript-with-faces1 from to)))
 
 (defun ps-generate-postscript (from to)
@@ -6588,7 +6589,7 @@ If FACE is not a valid face name, use default face."
 ;; To make this file smaller, some commands go in a separate file.
 ;; But autoload them here to make the separation invisible.
 
-;;;### (autoloads nil "ps-mule" "ps-mule.el" "a90e8414a27ac8fdf093251ac648d761")
+;;;### (autoloads nil "ps-mule" "ps-mule.el" "173235d6520575a877c25be437fb9e5f")
 ;;; Generated autoloads from ps-mule.el
 
 (defvar ps-multibyte-buffer nil "\

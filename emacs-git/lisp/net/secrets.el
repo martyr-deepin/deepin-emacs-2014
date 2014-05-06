@@ -1,6 +1,6 @@
 ;;; secrets.el --- Client interface to gnome-keyring and kwallet.
 
-;; Copyright (C) 2010-2013 Free Software Foundation, Inc.
+;; Copyright (C) 2010-2014 Free Software Foundation, Inc.
 
 ;; Author: Michael Albinus <michael.albinus@gmx.de>
 ;; Keywords: comm password passphrase
@@ -609,6 +609,8 @@ The object paths of the found items are returned as list."
       (while (consp (cdr attributes))
 	(unless (keywordp (car attributes))
 	  (error 'wrong-type-argument (car attributes)))
+        (unless (stringp (cadr attributes))
+          (error 'wrong-type-argument (cadr attributes)))
 	(setq props (add-to-list
 		     'props
 		     (list :dict-entry
@@ -647,6 +649,8 @@ The object path of the created item is returned."
 	(while (consp (cdr attributes))
 	  (unless (keywordp (car attributes))
 	    (error 'wrong-type-argument (car attributes)))
+          (unless (stringp (cadr attributes))
+            (error 'wrong-type-argument (cadr attributes)))
 	  (setq props (add-to-list
 		       'props
 		       (list :dict-entry

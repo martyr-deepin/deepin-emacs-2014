@@ -1,6 +1,6 @@
 ;;; whitespace.el --- minor mode to visualize TAB, (HARD) SPACE, NEWLINE
 
-;; Copyright (C) 2000-2013 Free Software Foundation, Inc.
+;; Copyright (C) 2000-2014 Free Software Foundation, Inc.
 
 ;; Author: Vinicius Jose Latorre <viniciusjl@ig.com.br>
 ;; Maintainer: Vinicius Jose Latorre <viniciusjl@ig.com.br>
@@ -344,7 +344,7 @@
 ;; Thanks to Andreas Roehler <andreas.roehler@easy-emacs.de> for
 ;; indicating defface byte-compilation warnings.
 ;;
-;; Thanks to TimOCallaghan (EmacsWiki) for the idea about highlight
+;; Thanks to Tim O'Callaghan (EmacsWiki) for the idea about highlight
 ;; "long" lines.  See EightyColumnRule (EmacsWiki).
 ;;
 ;; Thanks to Yanghui Bian <yanghuibian@gmail.com> for indicating a new
@@ -557,7 +557,7 @@ See also `whitespace-display-mappings' for documentation."
 (defvar whitespace-space 'whitespace-space
   "Symbol face used to visualize SPACE.
 Used when `whitespace-style' includes the value `spaces'.")
-(make-obsolete-variable 'whitespace-space "use the face instead" "24.4")
+(make-obsolete-variable 'whitespace-space "use the face instead." "24.4")
 
 
 (defface whitespace-space
@@ -573,7 +573,7 @@ Used when `whitespace-style' includes the value `spaces'.")
 (defvar whitespace-hspace 'whitespace-hspace
   "Symbol face used to visualize HARD SPACE.
 Used when `whitespace-style' includes the value `spaces'.")
-(make-obsolete-variable 'whitespace-hspace "use the face instead" "24.4")
+(make-obsolete-variable 'whitespace-hspace "use the face instead." "24.4")
 
 (defface whitespace-hspace		; 'nobreak-space
   '((((class color) (background dark))
@@ -588,7 +588,7 @@ Used when `whitespace-style' includes the value `spaces'.")
 (defvar whitespace-tab 'whitespace-tab
   "Symbol face used to visualize TAB.
 Used when `whitespace-style' includes the value `tabs'.")
-(make-obsolete-variable 'whitespace-tab "use the face instead" "24.4")
+(make-obsolete-variable 'whitespace-tab "use the face instead." "24.4")
 
 (defface whitespace-tab
   '((((class color) (background dark))
@@ -605,7 +605,7 @@ Used when `whitespace-style' includes the value `tabs'.")
 See `whitespace-display-mappings'.
 Used when `whitespace-style' includes the values `newline-mark'
 and `newline'.")
-(make-obsolete-variable 'whitespace-newline "use the face instead" "24.4")
+(make-obsolete-variable 'whitespace-newline "use the face instead." "24.4")
 
 (defface whitespace-newline
   '((default :weight normal)
@@ -624,7 +624,7 @@ See `whitespace-display-mappings'."
 (defvar whitespace-trailing 'whitespace-trailing
   "Symbol face used to visualize trailing blanks.
 Used when `whitespace-style' includes the value `trailing'.")
-(make-obsolete-variable 'whitespace-trailing "use the face instead" "24.4")
+(make-obsolete-variable 'whitespace-trailing "use the face instead." "24.4")
 
 (defface whitespace-trailing		; 'trailing-whitespace
   '((default :weight bold)
@@ -638,7 +638,7 @@ Used when `whitespace-style' includes the value `trailing'.")
   "Symbol face used to visualize \"long\" lines.
 See `whitespace-line-column'.
 Used when `whitespace-style' includes the value `line'.")
-(make-obsolete-variable 'whitespace-line "use the face instead" "24.4")
+(make-obsolete-variable 'whitespace-line "use the face instead." "24.4")
 
 (defface whitespace-line
   '((((class mono)) :inverse-video t :weight bold :underline t)
@@ -653,7 +653,7 @@ See `whitespace-line-column'."
   "Symbol face used to visualize SPACEs before TAB.
 Used when `whitespace-style' includes the value `space-before-tab'.")
 (make-obsolete-variable 'whitespace-space-before-tab
-                        "use the face instead" "24.4")
+                        "use the face instead." "24.4")
 
 (defface whitespace-space-before-tab
   '((((class mono)) :inverse-video t :weight bold :underline t)
@@ -665,7 +665,7 @@ Used when `whitespace-style' includes the value `space-before-tab'.")
 (defvar whitespace-indentation 'whitespace-indentation
   "Symbol face used to visualize 8 or more SPACEs at beginning of line.
 Used when `whitespace-style' includes the value `indentation'.")
-(make-obsolete-variable 'whitespace-indentation "use the face instead" "24.4")
+(make-obsolete-variable 'whitespace-indentation "use the face instead." "24.4")
 
 (defface whitespace-indentation
   '((((class mono)) :inverse-video t :weight bold :underline t)
@@ -677,7 +677,7 @@ Used when `whitespace-style' includes the value `indentation'.")
 (defvar whitespace-empty 'whitespace-empty
   "Symbol face used to visualize empty lines at beginning and/or end of buffer.
 Used when `whitespace-style' includes the value `empty'.")
-(make-obsolete-variable 'whitespace-empty "use the face instead" "24.4")
+(make-obsolete-variable 'whitespace-empty "use the face instead." "24.4")
 
 (defface whitespace-empty
   '((((class mono)) :inverse-video t :weight bold :underline t)
@@ -690,7 +690,7 @@ Used when `whitespace-style' includes the value `empty'.")
   "Symbol face used to visualize 8 or more SPACEs after TAB.
 Used when `whitespace-style' includes the value `space-after-tab'.")
 (make-obsolete-variable 'whitespace-space-after-tab
-                        "use the face instead" "24.4")
+                        "use the face instead." "24.4")
 
 (defface whitespace-space-after-tab
   '((((class mono)) :inverse-video t :weight bold :underline t)
@@ -1084,7 +1084,7 @@ See also `whitespace-style', `whitespace-newline' and
                (not (memq major-mode (cdr whitespace-global-modes)))
              (memq major-mode whitespace-global-modes)))
           (t nil))
-         ;; ...we have a display (we're running a batch job)
+         ;; ...we have a display (not running a batch job)
          (not noninteractive)
          ;; ...the buffer is not internal (name starts with a space)
          (not (eq (aref (buffer-name) 0) ?\ ))

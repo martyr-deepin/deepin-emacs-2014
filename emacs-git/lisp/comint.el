@@ -1,10 +1,10 @@
 ;;; comint.el --- general command interpreter in a window stuff -*- lexical-binding: t -*-
 
-;; Copyright (C) 1988, 1990, 1992-2013 Free Software Foundation, Inc.
+;; Copyright (C) 1988, 1990, 1992-2014 Free Software Foundation, Inc.
 
 ;; Author: Olin Shivers <shivers@cs.cmu.edu>
 ;;	Simon Marshall <simon@gnu.org>
-;; Maintainer: FSF
+;; Maintainer: emacs-devel@gnu.org
 ;; Keywords: processes
 ;; Package: emacs
 
@@ -186,8 +186,8 @@ wish to put something like the following in your init file:
 
 \(add-hook 'comint-mode-hook
 	  (lambda ()
-	    (define-key comint-mode-map \"\\C-w\" 'comint-kill-region)
-	    (define-key comint-mode-map [C-S-backspace]
+	    (define-key comint-mode-map [remap kill-region] 'comint-kill-region)
+	    (define-key comint-mode-map [remap kill-whole-line]
 	      'comint-kill-whole-line)))
 
 If you sometimes use comint-mode on text-only terminals or with `emacs -nw',
@@ -347,14 +347,12 @@ This variable is buffer-local."
       "Old" "old" "New" "new" "'s" "login"
       "Kerberos" "CVS" "UNIX" " SMB" "LDAP" "[sudo]" "Repeat" "Bad") t)
    " +\\)"
-   (regexp-opt
-    '("password" "Password" "passphrase" "Passphrase"
-      "pass phrase" "Pass phrase" "Response"))
+   "\\(?:" (regexp-opt password-word-equivalents) "\\|Response\\)"
    "\\(?:\\(?:, try\\)? *again\\| (empty for no passphrase)\\| (again)\\)?\
-\\(?: for .+\\)?:\\s *\\'")
+\\(?: for [^:：៖]+\\)?[:：៖]\\s *\\'")
   "Regexp matching prompts for passwords in the inferior process.
 This is used by `comint-watch-for-password-prompt'."
-  :version "24.1"
+  :version "24.4"
   :type 'regexp
   :group 'comint)
 
@@ -748,11 +746,11 @@ The buffer name is made by surrounding the file name of PROGRAM with `*'s.
 The file name is used to make a symbol name, such as `comint-sh-hook', and any
 hooks on this symbol are run in the buffer.
 See `make-comint' and `comint-exec'."
+  (declare (interactive-only make-comint))
   (interactive "sRun program: ")
   (let ((name (file-name-nondirectory program)))
     (switch-to-buffer (make-comint name program))
     (run-hooks (intern-soft (concat "comint-" name "-hook")))))
-(put 'comint-run 'interactive-only 'make-comint)
 
 (defun comint-exec (buffer name command startfile switches)
   "Start up a process named NAME in buffer BUFFER for Comint modes.
@@ -1771,6 +1769,12 @@ If the Comint is Lucid Common Lisp,
 
 Similarly for Soar, Scheme, etc."
   (interactive)
+  ;; If we're currently completing, stop.  We're definitely done
+  ;; completing, and by sending the input, we might cause side effects
+  ;; that will confuse the code running in the completion
+  ;; post-command-hook.
+  (when completion-in-region-mode
+    (completion-in-region-mode -1))
   ;; Note that the input string does not include its terminal newline.
   (let ((proc (get-buffer-process (current-buffer))))
     (if (not proc) (user-error "Current buffer has no process")
@@ -2318,7 +2322,8 @@ process if STRING contains a password prompt defined by
 `comint-password-prompt-regexp'.
 
 This function could be in the list `comint-output-filter-functions'."
-  (when (string-match comint-password-prompt-regexp string)
+  (when (let ((case-fold-search t))
+	  (string-match comint-password-prompt-regexp string))
     (when (string-match "^[ \n\r\t\v\f\b\a]+" string)
       (setq string (replace-match "" t t string)))
     (send-invisible string)))
@@ -3275,8 +3280,12 @@ See also `comint-dynamic-complete-filename'."
 
 (defun comint-dynamic-list-completions (completions &optional common-substring)
   "Display a list of sorted COMPLETIONS.
-The meaning of COMMON-SUBSTRING is the same as in `display-completion-list'.
-Typing SPC flushes the completions buffer."
+Typing SPC flushes the completions buffer.
+
+The optional argument COMMON-SUBSTRING, if non-nil, should be a string
+specifying a common substring for adding the faces
+`completions-first-difference' and `completions-common-part' to
+the completions."
   (let ((window (get-buffer-window "*Completions*" 0)))
     (setq completions (sort completions 'string-lessp))
     (if (and (eq last-command this-command)
@@ -3307,7 +3316,8 @@ Typing SPC flushes the completions buffer."
       (setq comint-dynamic-list-completions-config
 	    (current-window-configuration))
       (with-output-to-temp-buffer "*Completions*"
-	(display-completion-list completions common-substring))
+        (display-completion-list
+         (completion-hilit-commonality completions (length common-substring))))
       (if (window-minibuffer-p)
 	  (minibuffer-message "Type space to flush; repeat completion command to scroll")
 	(message "Type space to flush; repeat completion command to scroll")))
@@ -3322,8 +3332,9 @@ Typing SPC flushes the completions buffer."
 	    (and (consp first) (consp (event-start first))
 		 (eq (window-buffer (posn-window (event-start first)))
 		     (get-buffer "*Completions*"))
-		 (eq (key-binding key) 'mouse-choose-completion)))
-	  ;; If the user does mouse-choose-completion with the mouse,
+		 (memq (key-binding key)
+                       '(mouse-choose-completion choose-completion))))
+	  ;; If the user does choose-completion with the mouse,
 	  ;; execute the command, then delete the completion window.
 	  (progn
 	    (choose-completion first)
@@ -3631,8 +3642,8 @@ This function does not need to be invoked by the end user."
     ;; If we see the prompt, tidy up
     ;; We'll look for the prompt in the original string, so nobody can
     ;; clobber it
-    (and (string-match comint-redirect-finished-regexp 
-                       (concat comint-redirect-previous-input-string 
+    (and (string-match comint-redirect-finished-regexp
+                       (concat comint-redirect-previous-input-string
                                input-string))
 	 (progn
 	   (and comint-redirect-verbose

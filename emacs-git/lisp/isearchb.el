@@ -1,9 +1,9 @@
 ;;; isearchb --- a marriage between iswitchb and isearch
 
-;; Copyright (C) 2004-2013 Free Software Foundation, Inc.
+;; Copyright (C) 2004-2014 Free Software Foundation, Inc.
 
 ;; Author: John Wiegley <johnw@gnu.org>
-;; Maintainer: FSF
+;; Maintainer: emacs-devel@gnu.org
 ;; Created: 16 Apr 2004
 ;; Version: 1.5
 ;; Keywords: lisp

@@ -1,8 +1,8 @@
 ;;; startup.el --- process Emacs shell arguments  -*- lexical-binding: t -*-
 
-;; Copyright (C) 1985-1986, 1992, 1994-2013 Free Software Foundation, Inc.
+;; Copyright (C) 1985-1986, 1992, 1994-2014 Free Software Foundation, Inc.
 
-;; Maintainer: FSF
+;; Maintainer: emacs-devel@gnu.org
 ;; Keywords: internal
 ;; Package: emacs
 
@@ -281,14 +281,20 @@ these functions will invoke the debugger.")
   "Normal hook run after loading init files and handling the command line.")
 
 (defvar term-setup-hook nil
-  "Normal hook run after loading terminal-specific Lisp code.
-It also follows `emacs-startup-hook'.  This hook exists for users to set,
-so as to override the definitions made by the terminal-specific file.
-Emacs never sets this variable itself.")
+  "Normal hook run immediately after `emacs-startup-hook'.
+In new code, there is no reason to use this instead of `emacs-startup-hook'.
+If you want to execute terminal-specific Lisp code, for example
+to override the definitions made by the terminal-specific file,
+see `tty-setup-hook'.")
+
+(make-obsolete-variable 'term-setup-hook
+			"use either `emacs-startup-hook' or \
+`tty-setup-hook' instead." "24.4")
 
 (defvar inhibit-startup-hooks nil
-  "Non-nil means don't run `term-setup-hook' and `emacs-startup-hook'.
-This is because we already did so.")
+  "Non-nil means don't run some startup hooks, because we already did.
+Currently this applies to: `emacs-startup-hook', `term-setup-hook',
+and `window-setup-hook'.")
 
 (defvar keyboard-type nil
   "The brand of keyboard you are using.
@@ -639,9 +645,7 @@ It is the default value of the variable `top-level'."
 				       (emacs-pid)
 				       (system-name))))))))
 	(unless inhibit-startup-hooks
-	  (run-hooks 'emacs-startup-hook)
-	  (and term-setup-hook
-	       (run-hooks 'term-setup-hook)))
+	  (run-hooks 'emacs-startup-hook 'term-setup-hook))
 
 	;; Don't do this if we failed to create the initial frame,
 	;; for instance due to a dense colormap.
@@ -677,8 +681,8 @@ It is the default value of the variable `top-level'."
 	;; Now we know the user's default font, so add it to the menu.
 	(if (fboundp 'font-menu-add-default)
 	    (font-menu-add-default))
-	(and window-setup-hook
-	     (run-hooks 'window-setup-hook))))
+	(unless inhibit-startup-hooks
+	  (run-hooks 'window-setup-hook))))
     ;; Subprocesses of Emacs do not have direct access to the terminal, so
     ;; unless told otherwise they should only assume a dumb terminal.
     ;; We are careful to do it late (after term-setup-hook), although the
@@ -731,7 +735,6 @@ opening the first frame (e.g. open a connection to an X server).")
 (defun tty-handle-args (args)
   "Handle the X-like command-line arguments \"-fg\", \"-bg\", \"-name\", etc."
   (let (rest)
-    (message "%S" args)
     (while (and args
 		(not (equal (car args) "--")))
       (let* ((argi (pop args))
@@ -1062,7 +1065,7 @@ please check its value")
 
     ;; Sites should not disable this.  Only individuals should disable
     ;; the startup screen.
-    (setq inhibit-startup-screen t)
+    (setq inhibit-startup-screen nil)
 
     ;; Warn for invalid user name.
     (when init-file-user
@@ -1280,8 +1283,9 @@ the `--debug-init' option to view a complete error backtrace."
   ;; Load library for our terminal type.
   ;; User init file can set term-file-prefix to nil to prevent this.
   (unless (or noninteractive
-              initial-window-system)
-    (tty-run-terminal-initialization (selected-frame)))
+              initial-window-system
+              (daemonp))
+    (tty-run-terminal-initialization (selected-frame) nil t))
 
   ;; Update the out-of-memory error message based on user's key bindings
   ;; for save-some-buffers.
@@ -1395,8 +1399,9 @@ If this is nil, no message will be displayed."
             `("GNU/Linux"
               ,(lambda (_button) (browse-url "http://www.gnu.org/gnu/linux-and-gnu.html"))
 	     "Browse http://www.gnu.org/gnu/linux-and-gnu.html")
-          `("GNU" ,(lambda (_button) (describe-gnu-project))
-	   "Display info on the GNU project")))
+          `("GNU" ,(lambda (_button)
+		     (browse-url "http://www.gnu.org/gnu/thegnuproject.html"))
+	    "Browse http://www.gnu.org/gnu/thegnuproject.html")))
      " operating system.\n\n"
      :face variable-pitch
      :link ("Emacs Tutorial" ,(lambda (_button) (help-with-tutorial)))
@@ -1589,24 +1594,26 @@ a face or button specification."
 
 (declare-function image-size "image.c" (spec &optional pixels frame))
 
+(defun fancy-splash-image-file ()
+  (cond ((stringp fancy-splash-image) fancy-splash-image)
+	((display-color-p)
+	 (cond ((<= (display-planes) 8)
+		(if (image-type-available-p 'xpm)
+		    "splash.xpm"
+		  "splash.pbm"))
+	       ((or (image-type-available-p 'svg)
+		    (image-type-available-p 'imagemagick))
+		"splash.svg")
+	       ((image-type-available-p 'png)
+		"splash.png")
+	       ((image-type-available-p 'xpm)
+		"splash.xpm")
+	       (t "splash.pbm")))
+	(t "splash.pbm")))
+
 (defun fancy-splash-head ()
   "Insert the head part of the splash screen into the current buffer."
-  (let* ((image-file (cond ((stringp fancy-splash-image)
-			    fancy-splash-image)
-			   ((display-color-p)
-			    (cond ((<= (display-planes) 8)
-				   (if (image-type-available-p 'xpm)
-				       "splash.xpm"
-				     "splash.pbm"))
-				  ((or (image-type-available-p 'svg)
-				       (image-type-available-p 'imagemagick))
-				   "splash.svg")
-				  ((image-type-available-p 'png)
-				   "splash.png")
-				  ((image-type-available-p 'xpm)
-				   "splash.xpm")
-				  (t "splash.pbm")))
-			   (t "splash.pbm")))
+  (let* ((image-file (fancy-splash-image-file))
 	 (img (create-image image-file))
 	 (image-width (and img (car (image-size img))))
 	 (window-width (window-width)))
@@ -1810,10 +1817,7 @@ we put it on this frame."
                  (image-type-available-p 'pbm)))
     (let ((frame (fancy-splash-frame)))
       (when frame
-	(let* ((img (create-image (or fancy-splash-image
-				      (if (and (display-color-p)
-					       (image-type-available-p 'xpm))
-					  "splash.xpm" "splash.pbm"))))
+	(let* ((img (create-image (fancy-splash-image-file)))
 	       (image-height (and img (cdr (image-size img nil frame))))
 	       ;; We test frame-height so that, if the frame is split
 	       ;; by displaying a warning, that doesn't cause the normal
@@ -2426,10 +2430,7 @@ A fancy display is used on graphic displays, normal otherwise."
       ;; If there are no switches to process, we might as well
       ;; run this hook now, and there may be some need to do it
       ;; before doing any output.
-      (run-hooks 'emacs-startup-hook)
-      (and term-setup-hook
-	   (run-hooks 'term-setup-hook))
-      (setq inhibit-startup-hooks t)
+      (run-hooks 'emacs-startup-hook 'term-setup-hook)
 
       ;; It's important to notice the user settings before we
       ;; display the startup message; otherwise, the settings
@@ -2441,10 +2442,9 @@ A fancy display is used on graphic displays, normal otherwise."
       ;; If there are no switches to process, we might as well
       ;; run this hook now, and there may be some need to do it
       ;; before doing any output.
-      (when window-setup-hook
-	(run-hooks 'window-setup-hook)
-	;; Don't let the hook be run twice.
-	(setq window-setup-hook nil))
+      (run-hooks 'window-setup-hook)
+
+      (setq inhibit-startup-hooks t)
 
       ;; ;; Do this now to avoid an annoying delay if the user
       ;; ;; clicks the menu bar during the sit-for.

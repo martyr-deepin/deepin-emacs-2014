@@ -1,6 +1,6 @@
 ;;; cus-start.el --- define customization properties of builtins
 
-;; Copyright (C) 1997, 1999-2013 Free Software Foundation, Inc.
+;; Copyright (C) 1997, 1999-2014 Free Software Foundation, Inc.
 
 ;; Author: Per Abrahamsen <abraham@dina.kvl.dk>
 ;; Keywords: internal
@@ -198,6 +198,8 @@ Leaving \"Default\" unchecked is equivalent with specifying a default of
 
 	     ;; editfns.c
 	     (user-full-name mail string)
+	     ;; emacs.c
+	     (report-emacs-bug-address emacsbug string)
 	     ;; eval.c
 	     (max-specpdl-size limits integer)
 	     (max-lisp-eval-depth limits integer)
@@ -317,7 +319,7 @@ Leaving \"Default\" unchecked is equivalent with specifying a default of
 	     (enable-recursive-minibuffers minibuffer boolean)
 	     (history-length minibuffer
 			     (choice (const :tag "Infinite" t) integer)
-			     "22.1")
+			     "24.5")	; 30 -> 100
 	     (history-delete-duplicates minibuffer boolean "22.1")
 	     (read-buffer-completion-ignore-case minibuffer boolean "23.1")
 

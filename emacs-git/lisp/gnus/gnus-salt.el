@@ -1,6 +1,6 @@
 ;;; gnus-salt.el --- alternate summary mode interfaces for Gnus
 
-;; Copyright (C) 1996-1999, 2001-2013 Free Software Foundation, Inc.
+;; Copyright (C) 1996-1999, 2001-2014 Free Software Foundation, Inc.
 
 ;; Author: Lars Magne Ingebrigtsen <larsi@gnus.org>
 ;; Keywords: news
@@ -879,12 +879,15 @@ it in the environment specified by BINDINGS."
       (set-buffer buf))))
 
 (defun gnus-tree-highlight-article (article face)
-  (with-current-buffer (gnus-get-tree-buffer)
-    (let (region)
-      (when (setq region (gnus-tree-article-region article))
-	(gnus-put-text-property (car region) (cdr region) 'face face)
-	(set-window-point
-	 (gnus-get-buffer-window (current-buffer) t) (cdr region))))))
+  ;; The save-excursion here is apparently necessary because
+  ;; `set-window-point' somehow manages to alter the buffer position.
+  (save-excursion
+    (with-current-buffer (gnus-get-tree-buffer)
+      (let (region)
+	(when (setq region (gnus-tree-article-region article))
+	  (gnus-put-text-property (car region) (cdr region) 'face face)
+	  (set-window-point
+	   (gnus-get-buffer-window (current-buffer) t) (cdr region)))))))
 
 ;;; Allow redefinition of functions.
 (gnus-ems-redefine)

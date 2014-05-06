@@ -1,7 +1,7 @@
 /* NeXT/Open/GNUstep / MacOSX communication module.
 
-Copyright (C) 1989, 1993-1994, 2005-2006, 2008-2013
-  Free Software Foundation, Inc.
+Copyright (C) 1989, 1993-1994, 2005-2006, 2008-2014 Free Software
+Foundation, Inc.
 
 This file is part of GNU Emacs.
 
@@ -2012,8 +2012,7 @@ ns_convert_key (unsigned code)
     Internal call used by NSView-keyDown.
    -------------------------------------------------------------------------- */
 {
-  const unsigned last_keysym = (sizeof (convert_ns_to_X_keysym)
-                                / sizeof (convert_ns_to_X_keysym[0]));
+  const unsigned last_keysym = ARRAYELTS (convert_ns_to_X_keysym);
   unsigned keysym;
   /* An array would be faster, but less easy to read. */
   for (keysym = 0; keysym < last_keysym; keysym += 2)
@@ -3433,7 +3432,7 @@ ns_send_appdefined (int value)
   /*NSTRACE (ns_send_appdefined); */
 
 #ifdef NS_IMPL_GNUSTEP
-  // GNUStep needs postEvent to happen on the main thread.
+  // GNUstep needs postEvent to happen on the main thread.
   if (! [[NSThread currentThread] isMainThread])
     {
       EmacsApp *app = (EmacsApp *)NSApp;
@@ -3497,16 +3496,16 @@ check_native_fs ()
       if (FRAME_NS_P (f))
         {
           EmacsView *view = FRAME_NS_VIEW (f);
-          [view updateCollectionBehaviour];
+          [view updateCollectionBehavior];
         }
     }
 }
 #endif
 
-/* GNUStep and OSX <= 10.4 does not have cancelTracking.  */
+/* GNUstep and OSX <= 10.4 does not have cancelTracking.  */
 #if defined (NS_IMPL_COCOA) && \
   MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5
-/* Check if menu open should be cancelled or continued as normal.  */
+/* Check if menu open should be canceled or continued as normal.  */
 void
 ns_check_menu_open (NSMenu *menu)
 {
@@ -5119,9 +5118,17 @@ not_in_argv (NSString *arg)
       /* (Carbon way: [theEvent keyCode]) */
 
       /* is it a "function key"? */
-      fnKeysym = (code < 0x00ff && (flags&NSNumericPadKeyMask))
-	? ns_convert_key ([theEvent keyCode] | NSNumericPadKeyMask)
-	: ns_convert_key (code);
+      /* Note: Sometimes a plain key will have the NSNumericPadKeyMask
+         flag set (this is probably a bug in the OS).
+      */
+      if (code < 0x00ff && (flags&NSNumericPadKeyMask))
+        {
+          fnKeysym = ns_convert_key ([theEvent keyCode] | NSNumericPadKeyMask);
+        }
+      if (fnKeysym == 0)
+        {
+          fnKeysym = ns_convert_key (code);
+        }
 
       if (fnKeysym)
         {
@@ -5750,12 +5757,19 @@ not_in_argv (NSString *arg)
   if (! [self isFullscreen])
     {
 #ifdef NS_IMPL_GNUSTEP
-      // GNUStep does not always update the tool bar height.  Force it.
+      // GNUstep does not always update the tool bar height.  Force it.
       if (toolbar) update_frame_tool_bar (emacsframe);
 #endif
 
       extra = FRAME_NS_TITLEBAR_HEIGHT (emacsframe)
         + FRAME_TOOLBAR_HEIGHT (emacsframe);
+    }
+
+  if (wait_for_tool_bar)
+    {
+      if (FRAME_TOOLBAR_HEIGHT (emacsframe) == 0)
+        return;
+      wait_for_tool_bar = NO;
     }
 
   neww = (int)wr.size.width - emacsframe->border_width;
@@ -5950,6 +5964,7 @@ if (cols > 0 && rows > 0)
   if (is_focus_frame)
     dpyinfo->x_focus_frame = 0;
 
+  emacsframe->mouse_moved = 0;
   ns_frame_rehighlight (emacsframe);
 
   /* FIXME: for some reason needed on second and subsequent clicks away
@@ -6069,6 +6084,13 @@ if (cols > 0 && rows > 0)
                                    ns_window_num]];
   [win setToolbar: toolbar];
   [toolbar setVisible: NO];
+
+  /* Don't set frame garbaged until tool bar is up to date?
+     This avoids an extra clear and redraw (flicker) at frame creation.  */
+  if (FRAME_EXTERNAL_TOOL_BAR (f)) wait_for_tool_bar = YES;
+  else wait_for_tool_bar = NO;
+
+
 #ifdef NS_IMPL_COCOA
   {
     NSButton *toggleButton;
@@ -6316,7 +6338,7 @@ if (cols > 0 && rows > 0)
   [self setFSValue: fs_before_fs];
   fs_before_fs = -1;
 #ifdef HAVE_NATIVE_FS
-  [self updateCollectionBehaviour];
+  [self updateCollectionBehavior];
 #endif
   if (FRAME_EXTERNAL_TOOL_BAR (emacsframe))
     {
@@ -6348,7 +6370,7 @@ if (cols > 0 && rows > 0)
 }
 
 #ifdef HAVE_NATIVE_FS
-- (void)updateCollectionBehaviour
+- (void)updateCollectionBehavior
 {
   if (! [self isFullscreen])
     {
@@ -6395,6 +6417,14 @@ if (cols > 0 && rows > 0)
 
   if (fs_state != FULLSCREEN_BOTH)
     {
+      NSScreen *screen = [w screen];
+
+#if defined (NS_IMPL_COCOA) && \
+  MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_9
+      /* Hide ghost menu bar on secondary monitor? */
+      if (! onFirstScreen)
+        onFirstScreen = [NSScreen screensHaveSeparateSpaces];
+#endif
       /* Hide dock and menubar if we are on the primary screen.  */
       if (onFirstScreen)
         {
@@ -6415,7 +6445,7 @@ if (cols > 0 && rows > 0)
                                  styleMask:NSBorderlessWindowMask
                                    backing:NSBackingStoreBuffered
                                      defer:YES
-                                    screen:[w screen]];
+                                    screen:screen];
 
       [fw setContentView:[w contentView]];
       [fw setTitle:[w title]];
@@ -6438,7 +6468,7 @@ if (cols > 0 && rows > 0)
       [fw makeKeyAndOrderFront:NSApp];
       [fw makeFirstResponder:self];
       [w orderOut:self];
-      r = [fw frameRectForContentRect:[[fw screen] frame]];
+      r = [fw frameRectForContentRect:[screen frame]];
       [fw setFrame: r display:YES animate:YES];
       [self windowDidEnterFullScreen:nil];
       [fw display];
@@ -6777,7 +6807,7 @@ if (cols > 0 && rows > 0)
     }
   else
     {
-      error ("Invalid data type in dragging pasteboard.");
+      error ("Invalid data type in dragging pasteboard");
       return NO;
     }
 }
@@ -6946,7 +6976,8 @@ if (cols > 0 && rows > 0)
 {
   /* When making the frame visible for the first time or if there is just
      one screen, we want to constrain.  Other times not.  */
-  NSUInteger nr_screens = [[NSScreen screens] count];
+  NSArray *screens = [NSScreen screens];
+  NSUInteger nr_screens = [screens count], nr_eff_screens = 0, i;
   struct frame *f = ((EmacsView *)[self delegate])->emacsframe;
   NSTRACE (constrainFrameRect);
   NSTRACE_RECT ("input", frameRect);
@@ -6954,6 +6985,31 @@ if (cols > 0 && rows > 0)
   if (ns_menu_bar_should_be_hidden ())
     return frameRect;
 
+  if (nr_screens == 1)
+    return [super constrainFrameRect:frameRect toScreen:screen];
+
+#ifdef NS_IMPL_COCOA
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_9
+  // If separate spaces is on, it is like each screen is independent.  There is
+  // no spanning of frames across screens.
+  if ([NSScreen screensHaveSeparateSpaces])
+    return [super constrainFrameRect:frameRect toScreen:screen];
+#endif
+#endif
+
+  for (i = 0; i < nr_screens; ++i) 
+    {
+      NSScreen *s = [screens objectAtIndex: i];
+      NSRect scrrect = [s frame];
+      NSRect intersect = NSIntersectionRect (frameRect, scrrect);
+
+      if (intersect.size.width > 0 || intersect.size.height > 0)
+        ++nr_eff_screens;
+    }
+
+  if (nr_eff_screens == 1)
+    return [super constrainFrameRect:frameRect toScreen:screen];
+  
   /* The default implementation does two things 1) ensure that the top
      of the rectangle is below the menu bar (or below the top of the
      screen) and 2) resizes windows larger than the screen. As we
@@ -7636,7 +7692,7 @@ Only works on OSX 10.6 or later.  */);
      doc: /*Non-nil means to use native fullscreen on OSX >= 10.7.
 Nil means use fullscreen the old (< 10.7) way.  The old way works better with
 multiple monitors, but lacks tool bar.  This variable is ignored on OSX < 10.7.
-Default is t for OSX >= 10.7, nil otherwise. */);
+Default is t for OSX >= 10.7, nil otherwise.  */);
 #ifdef HAVE_NATIVE_FS
   ns_use_native_fullscreen = YES;
 #else
@@ -7646,9 +7702,9 @@ Default is t for OSX >= 10.7, nil otherwise. */);
 
   DEFVAR_BOOL ("ns-use-srgb-colorspace", ns_use_srgb_colorspace,
      doc: /*Non-nil means to use sRGB colorspace on OSX >= 10.7.
-Note that this does not apply to images.            
-This variable is ignored on OSX < 10.7 and GNUStep.  Default is nil. */);
-  ns_use_srgb_colorspace = NO;
+Note that this does not apply to images.
+This variable is ignored on OSX < 10.7 and GNUstep.  */);
+  ns_use_srgb_colorspace = YES;
 
   /* TODO: move to common code */
   DEFVAR_LISP ("x-toolkit-scroll-bars", Vx_toolkit_scroll_bars,

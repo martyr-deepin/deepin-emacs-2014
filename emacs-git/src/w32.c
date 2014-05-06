@@ -1,6 +1,6 @@
 /* Utility and Unix shadow routines for GNU Emacs on the Microsoft Windows API.
 
-Copyright (C) 1994-1995, 2000-2013 Free Software Foundation, Inc.
+Copyright (C) 1994-1995, 2000-2014 Free Software Foundation, Inc.
 
 This file is part of GNU Emacs.
 
@@ -303,6 +303,8 @@ static BOOL g_b_init_convert_sddl_to_sd;
 static BOOL g_b_init_is_valid_security_descriptor;
 static BOOL g_b_init_set_file_security_w;
 static BOOL g_b_init_set_file_security_a;
+static BOOL g_b_init_set_named_security_info_w;
+static BOOL g_b_init_set_named_security_info_a;
 static BOOL g_b_init_get_adapters_info;
 
 /*
@@ -377,6 +379,22 @@ typedef BOOL (WINAPI *SetFileSecurityA_Proc) (
     LPCSTR lpFileName,
     SECURITY_INFORMATION SecurityInformation,
     PSECURITY_DESCRIPTOR pSecurityDescriptor);
+typedef DWORD (WINAPI *SetNamedSecurityInfoW_Proc) (
+    LPCWSTR lpObjectName,
+    SE_OBJECT_TYPE ObjectType,
+    SECURITY_INFORMATION SecurityInformation,
+    PSID psidOwner,
+    PSID psidGroup,
+    PACL pDacl,
+    PACL pSacl);
+typedef DWORD (WINAPI *SetNamedSecurityInfoA_Proc) (
+    LPCSTR lpObjectName,
+    SE_OBJECT_TYPE ObjectType,
+    SECURITY_INFORMATION SecurityInformation,
+    PSID psidOwner,
+    PSID psidGroup,
+    PACL pDacl,
+    PACL pSacl);
 typedef BOOL (WINAPI * GetSecurityDescriptorOwner_Proc) (
     PSECURITY_DESCRIPTOR pSecurityDescriptor,
     PSID *pOwner,
@@ -459,6 +477,9 @@ typedef BOOL (WINAPI *IsValidSecurityDescriptor_Proc) (PSECURITY_DESCRIPTOR);
 typedef DWORD (WINAPI *GetAdaptersInfo_Proc) (
     PIP_ADAPTER_INFO pAdapterInfo,
     PULONG pOutBufLen);
+
+int (WINAPI *pMultiByteToWideChar)(UINT,DWORD,LPCSTR,int,LPWSTR,int);
+int (WINAPI *pWideCharToMultiByte)(UINT,DWORD,LPCWSTR,int,LPSTR,int,LPCSTR,LPBOOL);
 
   /* ** A utility function ** */
 static BOOL
@@ -808,6 +829,69 @@ set_file_security (const char *lpFileName,
       filename_to_ansi (lpFileName, filename_a);
       return (s_pfn_Set_File_SecurityA (filename_a, SecurityInformation,
 					pSecurityDescriptor));
+    }
+}
+
+static DWORD WINAPI
+set_named_security_info (LPCTSTR lpObjectName,
+			 SE_OBJECT_TYPE ObjectType,
+			 SECURITY_INFORMATION SecurityInformation,
+			 PSID psidOwner,
+			 PSID psidGroup,
+			 PACL pDacl,
+			 PACL pSacl)
+{
+  static SetNamedSecurityInfoW_Proc s_pfn_Set_Named_Security_InfoW = NULL;
+  static SetNamedSecurityInfoA_Proc s_pfn_Set_Named_Security_InfoA = NULL;
+  HMODULE hm_advapi32 = NULL;
+  if (is_windows_9x () == TRUE)
+    {
+      errno = ENOTSUP;
+      return ENOTSUP;
+    }
+  if (w32_unicode_filenames)
+    {
+      wchar_t filename_w[MAX_PATH];
+
+      if (g_b_init_set_named_security_info_w == 0)
+	{
+	  g_b_init_set_named_security_info_w = 1;
+	  hm_advapi32 = LoadLibrary ("Advapi32.dll");
+	  s_pfn_Set_Named_Security_InfoW =
+	    (SetNamedSecurityInfoW_Proc) GetProcAddress (hm_advapi32,
+							 "SetNamedSecurityInfoW");
+	}
+      if (s_pfn_Set_Named_Security_InfoW == NULL)
+	{
+	  errno = ENOTSUP;
+	  return ENOTSUP;
+	}
+      filename_to_utf16 (lpObjectName, filename_w);
+      return (s_pfn_Set_Named_Security_InfoW (filename_w, ObjectType,
+					      SecurityInformation, psidOwner,
+					      psidGroup, pDacl, pSacl));
+    }
+  else
+    {
+      char filename_a[MAX_PATH];
+
+      if (g_b_init_set_named_security_info_a == 0)
+	{
+	  g_b_init_set_named_security_info_a = 1;
+	  hm_advapi32 = LoadLibrary ("Advapi32.dll");
+	  s_pfn_Set_Named_Security_InfoA =
+	    (SetNamedSecurityInfoA_Proc) GetProcAddress (hm_advapi32, 
+							 "SetNamedSecurityInfoA");
+	}
+      if (s_pfn_Set_Named_Security_InfoA == NULL)
+	{
+	  errno = ENOTSUP;
+	  return ENOTSUP;
+	}
+      filename_to_ansi (lpObjectName, filename_a);
+      return (s_pfn_Set_Named_Security_InfoA (filename_a, ObjectType,
+					      SecurityInformation, psidOwner,
+					      psidGroup, pDacl, pSacl));
     }
 }
 
@@ -1324,7 +1408,7 @@ w32_valid_pointer_p (void *p, int size)
    conversion back and forth from UTF-8 to UTF-16, then don't: first,
    it was measured to take only a few microseconds on a not-so-fast
    machine, and second, that's exactly what the ANSI APIs we used
-   before do anyway, because they are just thin wrappers around the
+   before did anyway, because they are just thin wrappers around the
    Unicode APIs.)
 
    The variables file-name-coding-system and default-file-name-coding-system
@@ -1351,8 +1435,8 @@ w32_valid_pointer_p (void *p, int size)
 
      For the same reasons, no CRT function or Win32 API can be called
      directly in Emacs sources, without either converting the file
-     name sfrom UTF-8 to either UTF-16 or ANSI codepage, or going
-     through some shadowing function defined here.
+     names from UTF-8 to UTF-16 or ANSI codepage, or going through
+     some shadowing function defined here.
 
    . Environment variables stored in Vprocess_environment are encoded
      in the ANSI codepage, so if getenv/egetenv is used for a variable
@@ -1373,7 +1457,7 @@ w32_valid_pointer_p (void *p, int size)
    . Running subprocesses in non-ASCII directories and with non-ASCII
      file arguments is limited to the current codepage (even though
      Emacs is perfectly capable of finding an executable program file
-     even in a directory whose name cannot be encoded in the current
+     in a directory whose name cannot be encoded in the current
      codepage).  This is because the command-line arguments are
      encoded _before_ they get to the w32-specific level, and the
      encoding is not known in advance (it doesn't have to be the
@@ -1391,8 +1475,8 @@ w32_valid_pointer_p (void *p, int size)
      the current codepage.
 
    . Turning on w32-unicode-filename on Windows 9X (if it at all
-     works) requires UNICOWS.DLL, which is currently loaded only in a
-     GUI session.  */
+     works) requires UNICOWS.DLL, which is thus a requirement even in
+     non-GUI sessions, something the we previously avoided.  */
 
 
 
@@ -1462,8 +1546,8 @@ codepage_for_filenames (CPINFO *cp_info)
 int
 filename_to_utf16 (const char *fn_in, wchar_t *fn_out)
 {
-  int result = MultiByteToWideChar (CP_UTF8, MB_ERR_INVALID_CHARS, fn_in, -1,
-				    fn_out, MAX_PATH);
+  int result = pMultiByteToWideChar (CP_UTF8, MB_ERR_INVALID_CHARS, fn_in, -1,
+				     fn_out, MAX_PATH);
 
   if (!result)
     {
@@ -1489,8 +1573,8 @@ filename_to_utf16 (const char *fn_in, wchar_t *fn_out)
 int
 filename_from_utf16 (const wchar_t *fn_in, char *fn_out)
 {
-  int result = WideCharToMultiByte (CP_UTF8, 0, fn_in, -1,
-				    fn_out, MAX_UTF8_PATH, NULL, NULL);
+  int result = pWideCharToMultiByte (CP_UTF8, 0, fn_in, -1,
+				     fn_out, MAX_UTF8_PATH, NULL, NULL);
 
   if (!result)
     {
@@ -1523,8 +1607,8 @@ filename_to_ansi (const char *fn_in, char *fn_out)
       int result;
       int codepage = codepage_for_filenames (NULL);
 
-      result  = WideCharToMultiByte (codepage, 0, fn_utf16, -1,
-				     fn_out, MAX_PATH, NULL, NULL);
+      result  = pWideCharToMultiByte (codepage, 0, fn_utf16, -1,
+				      fn_out, MAX_PATH, NULL, NULL);
       if (!result)
 	{
 	  DWORD err = GetLastError ();
@@ -1553,8 +1637,8 @@ filename_from_ansi (const char *fn_in, char *fn_out)
 {
   wchar_t fn_utf16[MAX_PATH];
   int codepage = codepage_for_filenames (NULL);
-  int result = MultiByteToWideChar (codepage, MB_ERR_INVALID_CHARS, fn_in, -1,
-				    fn_utf16, MAX_PATH);
+  int result = pMultiByteToWideChar (codepage, MB_ERR_INVALID_CHARS, fn_in, -1,
+				     fn_utf16, MAX_PATH);
 
   if (!result)
     {
@@ -1623,7 +1707,7 @@ static unsigned num_of_processors;
 /* We maintain 1-sec samples for the last 16 minutes in a circular buffer.  */
 static struct load_sample samples[16*60];
 static int first_idx = -1, last_idx = -1;
-static int max_idx = sizeof (samples) / sizeof (samples[0]);
+static int max_idx = ARRAYELTS (samples);
 
 static int
 buf_next (int from)
@@ -2329,7 +2413,6 @@ unsetenv (const char *name)
 {
   char *var;
   size_t name_len;
-  int retval;
 
   if (name == NULL || *name == '\0' || strchr (name, '=') != NULL)
     {
@@ -2428,7 +2511,7 @@ init_environment (char ** argv)
 
   int i;
 
-  const int imax = sizeof (tempdirs) / sizeof (tempdirs[0]);
+  const int imax = ARRAYELTS (tempdirs);
 
   /* Implementation note: This function explicitly works with ANSI
      file names, not with UTF-8 encoded file names.  This is because
@@ -2501,7 +2584,7 @@ init_environment (char ** argv)
       {"LANG", NULL},
     };
 
-#define N_ENV_VARS sizeof (dflt_envvars)/sizeof (dflt_envvars[0])
+#define N_ENV_VARS ARRAYELTS (dflt_envvars)
 
     /* We need to copy dflt_envvars[] and work on the copy because we
        don't want the dumped Emacs to inherit the values of
@@ -3952,8 +4035,8 @@ sys_link (const char * old, const char * new)
       /* We used to pass MB_PRECOMPOSED as the 2nd arg here, but MSDN
 	 indicates that flag is unsupported for CP_UTF8, and OTOH says
 	 it is the default anyway.  */
-      wlen = MultiByteToWideChar (CP_UTF8, 0, newname, -1,
-				  data.wid.cStreamName, MAX_PATH);
+      wlen = pMultiByteToWideChar (CP_UTF8, 0, newname, -1,
+				   data.wid.cStreamName, MAX_PATH);
       if (wlen > 0)
 	{
 	  LPVOID context = NULL;
@@ -4661,10 +4744,9 @@ stat_worker (const char * path, struct stat * buf, int follow_symlinks)
       return -1;
     }
 
-  /* Remove trailing directory separator, unless name is the root
-     directory of a drive or UNC volume in which case ensure there
-     is a trailing separator. */
   len = strlen (name);
+  /* Allocate 1 extra byte so that we could append a slash to a root
+     directory, down below.  */
   name = strcpy (alloca (len + 2), name);
 
   /* Avoid a somewhat costly call to is_symlink if the filesystem
@@ -4879,6 +4961,7 @@ stat_worker (const char * path, struct stat * buf, int follow_symlinks)
 	}
       else if (rootdir)
 	{
+	  /* Make sure root directories end in a slash.  */
 	  if (!IS_DIRECTORY_SEP (name[len-1]))
 	    strcat (name, "\\");
 	  if (GetDriveType (name) < 2)
@@ -4894,6 +4977,8 @@ stat_worker (const char * path, struct stat * buf, int follow_symlinks)
 	{
 	  int have_wfd = -1;
 
+	  /* Make sure non-root directories do NOT end in a slash,
+	     otherwise FindFirstFile might fail.  */
 	  if (IS_DIRECTORY_SEP (name[len-1]))
 	    name[len - 1] = 0;
 
@@ -5054,7 +5139,10 @@ fstatat (int fd, char const *name, struct stat *st, int flags)
 
   if (fd != AT_FDCWD)
     {
-      if (_snprintf (fullname, sizeof fullname, "%s/%s", dir_pathname, name)
+      char lastc = dir_pathname[strlen (dir_pathname) - 1];
+
+      if (_snprintf (fullname, sizeof fullname, "%s%s%s",
+		     dir_pathname, IS_DIRECTORY_SEP (lastc) ? "" : "/", name)
 	  < 0)
 	{
 	  errno = ENAMETOOLONG;
@@ -5263,6 +5351,30 @@ utime (const char *name, struct utimbuf *times)
       return -1;
     }
   return 0;
+}
+
+int
+sys_umask (int mode)
+{
+  static int current_mask;
+  int retval, arg = 0;
+
+  /* The only bit we really support is the write bit.  Files are
+     always readable on MS-Windows, and the execute bit does not exist
+     at all.  */
+  /* FIXME: if the GROUP and OTHER bits are reset, we should use ACLs
+     to prevent access by other users on NTFS.  */
+  if ((mode & S_IWRITE) != 0)
+    arg |= S_IWRITE;
+
+  retval = _umask (arg);
+  /* Merge into the return value the bits they've set the last time,
+     which msvcrt.dll ignores and never returns.  Emacs insists on its
+     notion of mask being identical to what we return.  */
+  retval |= (current_mask & ~S_IWRITE);
+  current_mask = mode;
+
+  return retval;
 }
 
 
@@ -5874,7 +5986,7 @@ acl_set_file (const char *fname, acl_type_t type, acl_t acl)
   DWORD err;
   int st = 0, retval = -1;
   SECURITY_INFORMATION flags = 0;
-  PSID psid;
+  PSID psidOwner, psidGroup;
   PACL pacl;
   BOOL dflt;
   BOOL dacl_present;
@@ -5900,11 +6012,13 @@ acl_set_file (const char *fname, acl_type_t type, acl_t acl)
   else
     fname = filename;
 
-  if (get_security_descriptor_owner ((PSECURITY_DESCRIPTOR)acl, &psid, &dflt)
-      && psid)
+  if (get_security_descriptor_owner ((PSECURITY_DESCRIPTOR)acl, &psidOwner,
+				     &dflt)
+      && psidOwner)
     flags |= OWNER_SECURITY_INFORMATION;
-  if (get_security_descriptor_group ((PSECURITY_DESCRIPTOR)acl, &psid, &dflt)
-      && psid)
+  if (get_security_descriptor_group ((PSECURITY_DESCRIPTOR)acl, &psidGroup,
+				     &dflt)
+      && psidGroup)
     flags |= GROUP_SECURITY_INFORMATION;
   if (get_security_descriptor_dacl ((PSECURITY_DESCRIPTOR)acl, &dacl_present,
 				    &pacl, &dflt)
@@ -5931,10 +6045,22 @@ acl_set_file (const char *fname, acl_type_t type, acl_t acl)
 
   e = errno;
   errno = 0;
+  /* SetFileSecurity is deprecated by MS, and sometimes fails when
+     DACL inheritance is involved, but it seems to preserve ownership
+     better than SetNamedSecurityInfo, which is important e.g., in
+     copy-file.  */
   if (!set_file_security (fname, flags, (PSECURITY_DESCRIPTOR)acl))
     {
       err = GetLastError ();
 
+      if (errno != ENOTSUP)
+	err = set_named_security_info (fname, SE_FILE_OBJECT, flags,
+				       psidOwner, psidGroup, pacl, NULL);
+    }
+  else
+    err = ERROR_SUCCESS;
+  if (err != ERROR_SUCCESS)
+    {
       if (errno == ENOTSUP)
 	;
       else if (err == ERROR_INVALID_OWNER
@@ -8570,6 +8696,13 @@ w32_delayed_load (Lisp_Object library_id)
 			       /* Possibly truncated */
 			       ? make_specified_string (name, -1, len, 1)
 			       : Qnil);
+		/* This prevents thread start and end notifications
+		   from being sent to the DLL, for every thread we
+		   start.  We don't need those notifications because
+		   threads we create never use any of these DLLs, only
+		   the main thread uses them.  This is supposed to
+		   speed up thread creation.  */
+		DisableThreadLibraryCalls (dll_handle);
 		break;
 	      }
 	  }
@@ -8625,22 +8758,22 @@ check_windows_init_file (void)
 		   "not unpacked properly.\nSee the README.W32 file in the "
 		   "top-level Emacs directory for more information.",
 		   init_file_name, load_path);
-	  needed = MultiByteToWideChar (CP_UTF8, MB_ERR_INVALID_CHARS, buffer,
-					-1, NULL, 0);
+	  needed = pMultiByteToWideChar (CP_UTF8, MB_ERR_INVALID_CHARS, buffer,
+					 -1, NULL, 0);
 	  if (needed > 0)
 	    {
 	      wchar_t *msg_w = alloca ((needed + 1) * sizeof (wchar_t));
 
-	      MultiByteToWideChar (CP_UTF8, MB_ERR_INVALID_CHARS, buffer, -1,
-				   msg_w, needed);
-	      needed = WideCharToMultiByte (CP_ACP, 0, msg_w, -1,
-					    NULL, 0, NULL, NULL);
+	      pMultiByteToWideChar (CP_UTF8, MB_ERR_INVALID_CHARS, buffer, -1,
+				    msg_w, needed);
+	      needed = pWideCharToMultiByte (CP_ACP, 0, msg_w, -1,
+					     NULL, 0, NULL, NULL);
 	      if (needed > 0)
 		{
 		  char *msg_a = alloca (needed + 1);
 
-		  WideCharToMultiByte (CP_ACP, 0, msg_w, -1, msg_a, needed,
-				       NULL, NULL);
+		  pWideCharToMultiByte (CP_ACP, 0, msg_w, -1, msg_a, needed,
+					NULL, NULL);
 		  msg = msg_a;
 		}
 	    }
@@ -8799,6 +8932,57 @@ shutdown_handler (DWORD type)
   return FALSE;
 }
 
+/* On Windows 9X, load UNICOWS.DLL and return its handle, or die.  On
+   NT, return a handle to GDI32.DLL.  */
+HANDLE
+maybe_load_unicows_dll (void)
+{
+  if (os_subtype == OS_9X)
+    {
+      HANDLE ret = LoadLibrary ("Unicows.dll");
+      if (ret)
+	{
+	  /* These two functions are present on Windows 9X as stubs
+	     that always fail.  We need the real implementations from
+	     UNICOWS.DLL, so we must call these functions through
+	     pointers, and assign the correct addresses to these
+	     pointers at program startup (see emacs.c, which calls
+	     this function early on).  */
+	  pMultiByteToWideChar = GetProcAddress (ret, "MultiByteToWideChar");
+	  pWideCharToMultiByte = GetProcAddress (ret, "WideCharToMultiByte");
+	  return ret;
+	}
+      else
+	{
+	  int button;
+
+	  button = MessageBox (NULL,
+			       "Emacs cannot load the UNICOWS.DLL library.\n"
+			       "This library is essential for using Emacs\n"
+			       "on this system.  You need to install it.\n\n"
+			       "Emacs will exit when you click OK.",
+			       "Emacs cannot load UNICOWS.DLL",
+			       MB_ICONERROR | MB_TASKMODAL
+			       | MB_SETFOREGROUND | MB_OK);
+	  switch (button)
+	    {
+	    case IDOK:
+	    default:
+	      exit (1);
+	    }
+	}
+    }
+  else
+    {
+      /* On NT family of Windows, these two functions are always
+	 linked in, so we just assign their addresses to the 2
+	 pointers; no need for the LoadLibrary dance.  */
+      pMultiByteToWideChar = MultiByteToWideChar;
+      pWideCharToMultiByte = WideCharToMultiByte;
+      return LoadLibrary ("Gdi32.dll");
+    }
+}
+
 /*
 	globals_of_w32 is used to initialize those global variables that
 	must always be initialized on startup even when the global variable
@@ -8849,6 +9033,8 @@ globals_of_w32 (void)
   g_b_init_is_valid_security_descriptor = 0;
   g_b_init_set_file_security_w = 0;
   g_b_init_set_file_security_a = 0;
+  g_b_init_set_named_security_info_w = 0;
+  g_b_init_set_named_security_info_a = 0;
   g_b_init_get_adapters_info = 0;
   num_of_processors = 0;
   /* The following sets a handler for shutdown notifications for
@@ -9069,8 +9255,6 @@ ssize_t
 emacs_gnutls_pull (gnutls_transport_ptr_t p, void* buf, size_t sz)
 {
   int n, err;
-  SELECT_TYPE fdset;
-  struct timespec timeout;
   struct Lisp_Process *process = (struct Lisp_Process *)p;
   int fd = process->infd;
 

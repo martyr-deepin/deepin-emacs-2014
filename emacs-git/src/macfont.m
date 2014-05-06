@@ -1,5 +1,5 @@
 /* Font driver on Mac OSX Core text.
-   Copyright (C) 2009-2013 Free Software Foundation, Inc.
+   Copyright (C) 2009-2014 Free Software Foundation, Inc.
 
 This file is part of GNU Emacs.
 
@@ -30,6 +30,7 @@ Original author: YAMAMOTO Mitsuharu
 #include "composite.h"
 #include "fontset.h"
 #include "font.h"
+#include "termchar.h"
 #include "nsgui.h"
 #include "nsterm.h"
 #include "macfont.h"
@@ -84,7 +85,7 @@ static Lisp_Object QCminspace;
 
 struct macfont_metrics;
 
-/* The actual structure for Mac font that can be casted to struct font.  */
+/* The actual structure for Mac font that can be cast to struct font.  */
 
 struct macfont_info
 {
@@ -236,8 +237,7 @@ mac_font_get_glyph_for_cid (FontRef font, CharacterCollection collection,
     unichar characters[] = {0xfffd};
     NSString *string =
       [NSString stringWithCharacters:characters
-			      length:(sizeof (characters)
-				      / sizeof (characters[0]))];
+			      length:ARRAYELTS (characters)];
     NSGlyphInfo *glyphInfo =
       [NSGlyphInfo glyphInfoWithCharacterIdentifier:cid
 					 collection:collection
@@ -630,24 +630,21 @@ get_cgcolor(unsigned long idx, struct frame *f)
   return cgColor;
 }
 
-#define CG_SET_FILL_COLOR_WITH_GC_FOREGROUND(context, s)                \
+#define CG_SET_FILL_COLOR_WITH_FACE_FOREGROUND(context, face, f)        \
   do {                                                                  \
-    CGColorRef refcol_ = get_cgcolor (NS_FACE_FOREGROUND (s->face),     \
-                                      s->f);                            \
+    CGColorRef refcol_ = get_cgcolor (NS_FACE_FOREGROUND (face), f);    \
     CGContextSetFillColorWithColor (context, refcol_) ;                 \
     CGColorRelease (refcol_);                                           \
   } while (0)
-#define CG_SET_FILL_COLOR_WITH_GC_BACKGROUND(context, s)                \
+#define CG_SET_FILL_COLOR_WITH_FACE_BACKGROUND(context, face, f)        \
   do {                                                                  \
-    CGColorRef refcol_ = get_cgcolor (NS_FACE_BACKGROUND (s->face),\
-                                      s->f);                            \
+    CGColorRef refcol_ = get_cgcolor (NS_FACE_BACKGROUND (face), f);    \
     CGContextSetFillColorWithColor (context, refcol_);                  \
     CGColorRelease (refcol_);                                           \
   } while (0)
-#define CG_SET_STROKE_COLOR_WITH_GC_FOREGROUND(context, s)              \
+#define CG_SET_STROKE_COLOR_WITH_FACE_FOREGROUND(context, face, f)      \
   do {                                                                  \
-    CGColorRef refcol_ = get_cgcolor (NS_FACE_FOREGROUND (s->face),\
-                                      s->f);                            \
+    CGColorRef refcol_ = get_cgcolor (NS_FACE_FOREGROUND (face), f);    \
     CGContextSetStrokeColorWithColor (context, refcol_);                \
     CGColorRelease (refcol_);                                           \
   } while (0)
@@ -828,7 +825,7 @@ macfont_store_descriptor_attributes (FontDescriptorRef desc,
 	    {{0, 100}, {1, 200}, {CGFLOAT_MAX, CGFLOAT_MAX}}}};
       int i;
 
-      for (i = 0; i < sizeof (numeric_traits) / sizeof (numeric_traits[0]); i++)
+      for (i = 0; i < ARRAYELTS (numeric_traits); i++)
 	{
 	  num = CFDictionaryGetValue (dict, numeric_traits[i].trait);
 	  if (num && CFNumberGetValue (num, kCFNumberCGFloatType, &floatval))
@@ -1910,7 +1907,7 @@ macfont_create_attributes_with_spec (Lisp_Object spec)
   if (! traits)
     goto err;
 
-  for (i = 0; i < sizeof (numeric_traits) / sizeof (numeric_traits[0]); i++)
+  for (i = 0; i < ARRAYELTS (numeric_traits); i++)
     {
       tmp = AREF (spec, numeric_traits[i].index);
       if (INTEGERP (tmp))
@@ -2719,6 +2716,7 @@ macfont_draw (struct glyph_string *s, int from, int to, int x, int y,
   BOOL isComposite = s->first_glyph->type == COMPOSITE_GLYPH;
   int end = isComposite ? s->cmp_to : s->nchars;
   int len = end - s->cmp_from;
+  struct face *face = s->face;
   int i;
 
   block_input ();
@@ -2741,7 +2739,14 @@ macfont_draw (struct glyph_string *s, int from, int to, int x, int y,
 
   if (with_background)
     {
-      CG_SET_FILL_COLOR_WITH_GC_BACKGROUND (context, s);
+      if (s->hl == DRAW_MOUSE_FACE) 
+        {
+          face = FACE_FROM_ID (s->f, MOUSE_HL_INFO (s->f)->mouse_face_face_id);
+          if (!face)
+            face = FACE_FROM_ID (s->f, MOUSE_FACE_ID);
+        }
+
+      CG_SET_FILL_COLOR_WITH_FACE_BACKGROUND (context, face, f);
       CGContextFillRect (context,
 			 CGRectMake (x, y,
                                      s->width, FONT_HEIGHT (s->font)));
@@ -2776,7 +2781,7 @@ macfont_draw (struct glyph_string *s, int from, int to, int x, int y,
 	}
 
       CGContextScaleCTM (context, 1, -1);
-      CG_SET_FILL_COLOR_WITH_GC_FOREGROUND (context, s);
+      CG_SET_FILL_COLOR_WITH_FACE_FOREGROUND (context, face, s->f);
       if (macfont_info->synthetic_italic_p)
 	atfm = synthetic_italic_atfm;
       else
@@ -2785,7 +2790,7 @@ macfont_draw (struct glyph_string *s, int from, int to, int x, int y,
 	{
 	  CGContextSetTextDrawingMode (context, kCGTextFillStroke);
 	  CGContextSetLineWidth (context, synthetic_bold_factor * font_size);
-	  CG_SET_STROKE_COLOR_WITH_GC_FOREGROUND (context, s);
+	  CG_SET_STROKE_COLOR_WITH_FACE_FOREGROUND (context, face, f);
 	}
       if (no_antialias_p)
 	CGContextSetShouldAntialias (context, false);
@@ -3578,7 +3583,7 @@ mac_ctfont_create_line_with_string_and_font (CFStringRef string,
     {
       attributes = CFDictionaryCreate (NULL, (const void **) keys,
 				       (const void **) values,
-				       sizeof (keys) / sizeof (keys[0]),
+                                       ARRAYELTS (keys),
 				       &kCFTypeDictionaryKeyCallBacks,
 				       &kCFTypeDictionaryValueCallBacks);
       CFRelease (values[1]);
@@ -3789,8 +3794,8 @@ mac_ctfont_get_glyph_for_cid (CTFontRef font, CTCharacterCollection collection,
   CTLineRef ctline = NULL;
 
   string = CFStringCreateWithCharacters (NULL, characters,
-					 sizeof (characters)
-					 / sizeof (characters[0]));
+                                         ARRAYELTS (characters));
+
   if (string)
     {
       CTGlyphInfoRef glyph_info =
@@ -3805,7 +3810,7 @@ mac_ctfont_get_glyph_for_cid (CTFontRef font, CTCharacterCollection collection,
 
 	  attributes = CFDictionaryCreate (NULL, (const void **) keys,
 					   (const void **) values,
-					   sizeof (keys) / sizeof (keys[0]),
+                                           ARRAYELTS (keys),
 					   &kCFTypeDictionaryKeyCallBacks,
 					   &kCFTypeDictionaryValueCallBacks);
 	  CFRelease (glyph_info);

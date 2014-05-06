@@ -1,9 +1,9 @@
 ;;; tmm.el --- text mode access to menu-bar  -*- lexical-binding: t -*-
 
-;; Copyright (C) 1994-1996, 2000-2013 Free Software Foundation, Inc.
+;; Copyright (C) 1994-1996, 2000-2014 Free Software Foundation, Inc.
 
 ;; Author: Ilya Zakharevich <ilya@math.mps.ohio-state.edu>
-;; Maintainer: FSF
+;; Maintainer: emacs-devel@gnu.org
 ;; Keywords: convenience
 
 ;; This file is part of GNU Emacs.

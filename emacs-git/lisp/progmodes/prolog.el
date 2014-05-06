@@ -1,6 +1,6 @@
 ;;; prolog.el --- major mode for Prolog (and Mercury) -*- lexical-binding:t -*-
 
-;; Copyright (C) 1986-1987, 1997-1999, 2002-2003, 2011-2013 Free
+;; Copyright (C) 1986-1987, 1997-1999, 2002-2003, 2011-2014 Free
 ;; Software Foundation, Inc.
 
 ;; Authors: Emil Åström <emil_astrom(at)hotmail(dot)com>
@@ -3228,7 +3228,7 @@ PREFIX is the prefix of the search regexp."
 
 (unless (fboundp 'region-exists-p)
   (defun region-exists-p ()
-    "Non-nil iff the mark is set.  Lobotomized version for Emacsen that do not provide their own."
+    "Non-nil if the mark is set.  Lobotomized version for Emacsen that do not provide their own."
     (mark)))
 
 

@@ -1,6 +1,6 @@
 ;;; package.el --- Simple package system for Emacs  -*- lexical-binding:t -*-
 
-;; Copyright (C) 2007-2013 Free Software Foundation, Inc.
+;; Copyright (C) 2007-2014 Free Software Foundation, Inc.
 
 ;; Author: Tom Tromey <tromey@redhat.com>
 ;;         Daniel Hackney <dan@haxney.org>
@@ -205,11 +205,9 @@ If VERSION is nil, the package is not loaded (it is \"disabled\")."
 
 (defvar Info-directory-list)
 (declare-function info-initialize "info" ())
-(declare-function url-http-parse-response "url-http" ())
 (declare-function url-http-file-exists-p "url-http" (url))
 (declare-function lm-header "lisp-mnt" (header))
 (declare-function lm-commentary "lisp-mnt" (&optional file))
-(defvar url-http-end-of-headers)
 
 (defcustom package-archives '(("gnu" . "http://elpa.gnu.org/packages/"))
   "An alist of archives from which to fetch.
@@ -330,7 +328,10 @@ contrast, `package-user-dir' contains packages for personal use."
                              (unless (memq (car rest-plist) '(:kind :archive))
                                (let ((value (cadr rest-plist)))
                                  (when value
-                                   (push (cons (car rest-plist) value)
+                                   (push (cons (car rest-plist)
+                                               (if (eq (car-safe value) 'quote)
+                                                   (cadr value)
+                                                 value))
                                          alist))))
                              (setq rest-plist (cddr rest-plist)))
                            alist)))))
@@ -381,6 +382,12 @@ Slots:
     (`single ".el")
     (`tar ".tar")
     (kind (error "Unknown package kind: %s" kind))))
+
+(defun package-desc--keywords (pkg-desc)
+  (let ((keywords (cdr (assoc :keywords (package-desc-extras pkg-desc)))))
+    (if (eq (car-safe keywords) 'quote)
+        (nth 1 keywords)
+      keywords)))
 
 ;; Package descriptor format used in finder-inf.el and package--builtins.
 (cl-defstruct (package--bi-desc
@@ -529,7 +536,7 @@ specifying the minimum acceptable version."
     (let ((bi (assq package package--builtin-versions)))
       (cond
        (bi (version-list-<= min-version (cdr bi)))
-       (min-version nil)
+       ((remove 0 min-version) nil)
        (t
         (require 'finder-inf nil t) ; For `package--builtins'.
         (assq package package--builtins))))))
@@ -630,7 +637,7 @@ EXTRA-PROPERTIES is currently unused."
 	     ";; End:\n"
 	     ";;; " (file-name-nondirectory file)
 	     " ends here\n")
-     nil file))
+     nil file nil 'silent))
   file)
 
 (defvar generated-autoload-file)
@@ -698,8 +705,7 @@ untar into a directory named DIR; otherwise, signal an error."
           (package--alist-to-plist
            (package-desc-extras pkg-desc))))
         "\n")
-       nil
-       pkg-file))))
+       nil pkg-file nil 'silent))))
 
 (defun package--alist-to-plist (alist)
   (apply #'nconc (mapcar (lambda (pair) (list (car pair) (cdr pair))) alist)))
@@ -748,7 +754,7 @@ untar into a directory named DIR; otherwise, signal an error."
 
 (defun package--write-file-no-coding (file-name)
   (let ((buffer-file-coding-system 'no-conversion))
-    (write-region (point-min) (point-max) file-name)))
+    (write-region (point-min) (point-max) file-name nil 'silent)))
 
 (defmacro package--with-work-buffer (location file &rest body)
   "Run BODY in a buffer containing the contents of FILE at LOCATION.
@@ -760,37 +766,14 @@ This macro retrieves FILE from LOCATION into a temporary buffer,
 and evaluates BODY while that buffer is current.  This work
 buffer is killed afterwards.  Return the last value in BODY."
   (declare (indent 2) (debug t))
-  `(let* ((http (string-match "\\`https?:" ,location))
-	  (buffer
-	   (if http
-	       (url-retrieve-synchronously (concat ,location ,file))
-	     (generate-new-buffer "*package work buffer*"))))
-     (prog1
-	 (with-current-buffer buffer
-	   (if http
-	       (progn (package-handle-response)
-		      (re-search-forward "^$" nil 'move)
-		      (forward-char)
-		      (delete-region (point-min) (point)))
-	     (unless (file-name-absolute-p ,location)
-	       (error "Archive location %s is not an absolute file name"
-		      ,location))
-	     (insert-file-contents (expand-file-name ,file ,location)))
-	   ,@body)
-       (kill-buffer buffer))))
-
-(defun package-handle-response ()
-  "Handle the response from a `url-retrieve-synchronously' call.
-Parse the HTTP response and throw if an error occurred.
-The url package seems to require extra processing for this.
-This should be called in a `save-excursion', in the download buffer.
-It will move point to somewhere in the headers."
-  ;; We assume HTTP here.
-  (require 'url-http)
-  (let ((response (url-http-parse-response)))
-    (when (or (< response 200) (>= response 300))
-      (error "Error during download request:%s"
-	     (buffer-substring-no-properties (point) (line-end-position))))))
+  `(with-temp-buffer
+     (if (string-match-p "\\`https?:" ,location)
+	 (url-insert-file-contents (concat ,location ,file))
+       (unless (file-name-absolute-p ,location)
+	 (error "Archive location %s is not an absolute file name"
+		,location))
+       (insert-file-contents (expand-file-name ,file ,location)))
+     ,@body))
 
 (defun package--archive-file-exists-p (location file)
   (let ((http (string-match "\\`https?:" location)))
@@ -815,30 +798,26 @@ It will move point to somewhere in the headers."
 (defun package--check-signature (location file)
   "Check signature of the current buffer.
 GnuPG keyring is located under \"gnupg\" in `package-user-dir'."
-  (let ((context (epg-make-context 'OpenPGP))
-	(homedir (expand-file-name "gnupg" package-user-dir))
-	(sig-file (concat file ".sig"))
-	sig-content
-	good-signatures)
-    (condition-case-unless-debug error
-	(setq sig-content (package--with-work-buffer location sig-file
-			    (buffer-string)))
-      (error "Failed to download %s: %S" sig-file (cdr error)))
+  (let* ((context (epg-make-context 'OpenPGP))
+         (homedir (expand-file-name "gnupg" package-user-dir))
+         (sig-file (concat file ".sig"))
+         (sig-content (package--with-work-buffer location sig-file
+			(buffer-string))))
     (epg-context-set-home-directory context homedir)
     (epg-verify-string context sig-content (buffer-string))
     ;; The .sig file may contain multiple signatures.  Success if one
     ;; of the signatures is good.
-    (setq good-signatures
-	  (delq nil (mapcar (lambda (sig)
-			      (if (eq (epg-signature-status sig) 'good)
-				  sig))
-			    (epg-context-result-for context 'verify))))
-    (if (null good-signatures)
-	(error "Failed to verify signature %s: %S"
-	       sig-file
-	       (mapcar #'epg-signature-to-string
-		       (epg-context-result-for context 'verify)))
-      good-signatures)))
+    (let ((good-signatures
+           (delq nil (mapcar (lambda (sig)
+                               (if (eq (epg-signature-status sig) 'good)
+                                   sig))
+                             (epg-context-result-for context 'verify)))))
+      (if (null good-signatures)
+          (error "Failed to verify signature %s: %S"
+                 sig-file
+                 (mapcar #'epg-signature-to-string
+                         (epg-context-result-for context 'verify)))
+        good-signatures))))
 
 (defun package-install-from-archive (pkg-desc)
   "Download and install a tar package."
@@ -866,7 +845,8 @@ GnuPG keyring is located under \"gnupg\" in `package-user-dir'."
 		    (expand-file-name
 		     (concat (package-desc-full-name pkg-desc)
 			     ".signed")
-		     package-user-dir))
+		     package-user-dir)
+                    nil 'silent)
       ;; Update the old pkg-desc which will be shown on the description buffer.
       (setf (package-desc-signed pkg-desc) t)
       ;; Update the new (activated) pkg-desc as well.
@@ -880,13 +860,13 @@ GnuPG keyring is located under \"gnupg\" in `package-user-dir'."
   "Return true if PACKAGE, of MIN-VERSION or newer, is installed.
 MIN-VERSION should be a version list."
   (unless package--initialized (error "package.el is not yet initialized!"))
-    (or
-     (let ((pkg-descs (cdr (assq package package-alist))))
-       (and pkg-descs
-            (version-list-<= min-version
-                             (package-desc-version (car pkg-descs)))))
-     ;; Also check built-in packages.
-     (package-built-in-p package min-version)))
+  (or
+   (let ((pkg-descs (cdr (assq package package-alist))))
+     (and pkg-descs
+	  (version-list-<= min-version
+			   (package-desc-version (car pkg-descs)))))
+   ;; Also check built-in packages.
+   (package-built-in-p package min-version)))
 
 (defun package-compute-transaction (packages requirements)
   "Return a list of packages to be installed, including PACKAGES.
@@ -915,10 +895,10 @@ not included in this list."
             (setq already pkg)))
       (cond
        (already
-        (if (version-list-< next-version (package-desc-version already))
+        (if (version-list-<= next-version (package-desc-version already))
             ;; Move to front, so it gets installed early enough (bug#14082).
             (setq packages (cons already (delq already packages)))
-          (error "Need package `%s-%s', but only %s is available"
+          (error "Need package `%s-%s', but only %s is being installed"
                  next-pkg (package-version-join next-version)
                  (package-version-join (package-desc-version already)))))
 
@@ -1039,14 +1019,9 @@ Also, add the originating archive to the `package-desc' structure."
          (existing-packages (assq name package-archive-contents))
          (pinned-to-archive (assoc name package-pinned-packages)))
     (cond
-     ;; Skip entirely if pinned to another archive or already installed.
-     ((or (and pinned-to-archive
-               (not (equal (cdr pinned-to-archive) archive)))
-          (let ((bi (assq name package--builtin-versions)))
-            (and bi (version-list-= version (cdr bi))))
-          (let ((ins (cdr (assq name package-alist))))
-            (and ins (version-list-= version
-                                     (package-desc-version (car ins))))))
+     ;; Skip entirely if pinned to another archive.
+     ((and pinned-to-archive
+           (not (equal (cdr pinned-to-archive) archive)))
       nil)
      ((not existing-packages)
       (push (list name pkg-desc) package-archive-contents))
@@ -1082,8 +1057,11 @@ in an archive in `package-archives'.  Interactively, prompt for its name."
        (package-refresh-contents))
      (list (intern (completing-read
                     "Install package: "
-                    (mapcar (lambda (elt) (symbol-name (car elt)))
-                            package-archive-contents)
+                    (delq nil
+                          (mapcar (lambda (elt)
+                                    (unless (package-installed-p (car elt))
+                                      (symbol-name (car elt))))
+                                  package-archive-contents))
                     nil t)))))
   (package-download-transaction
    (if (package-desc-p pkg)
@@ -1120,6 +1098,8 @@ is wrapped around any parts requiring it."
                  ((symbolp dep) `(,dep "0"))
                  ((stringp dep)
                   (error "Invalid requirement specifier: %S" dep))
+                 ((and (listp dep) (null (cdr dep)))
+                  (list (car dep) "0"))
                  (t dep)))
               deps))))
 
@@ -1230,8 +1210,11 @@ The file can either be a tar file or an Emacs Lisp file."
 	(if (file-exists-p signed-file)
 	    (delete-file signed-file)))
       ;; Update package-alist.
-      (let* ((name (package-desc-name pkg-desc)))
-        (delete pkg-desc (assq name package-alist)))
+      (let* ((name (package-desc-name pkg-desc))
+             (pkgs (assq name package-alist)))
+        (delete pkg-desc pkgs)
+        (unless (cdr pkgs)
+          (setq package-alist (delq pkgs package-alist))))
       (message "Package `%s' deleted." (package-desc-full-name pkg-desc)))))
 
 (defun package-archive-base (desc)
@@ -1259,7 +1242,7 @@ similar to an entry in `package-alist'.  Save the cached copy to
 		     (car archive)))))
       ;; Read the retrieved buffer to make sure it is valid (e.g. it
       ;; may fetch a URL redirect page).
-      (when (listp (read buffer))
+      (when (listp (read (current-buffer)))
 	(make-directory dir t)
 	(setq buffer-file-name (expand-file-name file dir))
 	(let ((version-control 'never)
@@ -1269,7 +1252,8 @@ similar to an entry in `package-alist'.  Save the cached copy to
       ;; Write out good signatures into archive-contents.signed file.
       (write-region (mapconcat #'epg-signature-to-string good-signatures "\n")
 		    nil
-		    (expand-file-name (concat file ".signed") dir)))))
+		    (expand-file-name (concat file ".signed") dir)
+                    nil 'silent))))
 
 (declare-function epg-check-configuration "epg-config"
 		  (config &optional minimum-version))
@@ -1376,7 +1360,7 @@ If optional arg NO-ACTIVATE is non-nil, don't activate packages."
          (archive (if desc (package-desc-archive desc)))
          (extras (and desc (package-desc-extras desc)))
          (homepage (cdr (assoc :url extras)))
-         (keywords (cdr (assoc :keywords extras)))
+         (keywords (if desc (package-desc--keywords desc)))
          (built-in (eq pkg-dir 'builtin))
          (installable (and archive (not built-in)))
          (status (if desc (package-desc-status desc) "orphan"))
@@ -1558,7 +1542,7 @@ If optional arg NO-ACTIVATE is non-nil, don't activate packages."
     (define-key map "i" 'package-menu-mark-install)
     (define-key map "U" 'package-menu-mark-upgrades)
     (define-key map "r" 'package-menu-refresh)
-    (define-key map "f" 'package-menu-filter-interactive)
+    (define-key map "f" 'package-menu-filter)
     (define-key map "~" 'package-menu-mark-obsolete-for-deletion)
     (define-key map "x" 'package-menu-execute)
     (define-key map "h" 'package-menu-quick-help)
@@ -1567,9 +1551,6 @@ If optional arg NO-ACTIVATE is non-nil, don't activate packages."
     (define-key menu-map [mq]
       '(menu-item "Quit" quit-window
 		  :help "Quit package selection"))
-    (define-key menu-map [mf]
-      '(menu-item "Filter" package-menu-filter-interactive
-		  :help "Filter package selection (q to go back)"))
     (define-key menu-map [s1] '("--"))
     (define-key menu-map [mn]
       '(menu-item "Next" next-line
@@ -1594,6 +1575,9 @@ If optional arg NO-ACTIVATE is non-nil, don't activate packages."
       '(menu-item "Mark Upgradable Packages" package-menu-mark-upgrades
 		  :help "Mark packages that have a newer version for upgrading"))
     (define-key menu-map [s3] '("--"))
+    (define-key menu-map [mf]
+      '(menu-item "Filter Package List..." package-menu-filter
+		  :help "Filter package selection (q to go back)"))
     (define-key menu-map [mg]
       '(menu-item "Update Package List" revert-buffer
 		  :help "Update the list of packages"))
@@ -1612,7 +1596,7 @@ If optional arg NO-ACTIVATE is non-nil, don't activate packages."
       '(menu-item "Help" package-menu-quick-help
 		  :help "Show short key binding help for package-menu-mode"))
     (define-key menu-map [mc]
-      '(menu-item "View Commentary" package-menu-view-commentary
+      '(menu-item "Describe Package" package-menu-describe-package
 		  :help "Display information about this package"))
     map)
   "Local keymap for `package-menu-mode' buffers.")
@@ -1625,11 +1609,13 @@ If optional arg NO-ACTIVATE is non-nil, don't activate packages."
 Letters do not insert themselves; instead, they are commands.
 \\<package-menu-mode-map>
 \\{package-menu-mode-map}"
-  (setq tabulated-list-format [("Package" 18 package-menu--name-predicate)
-			       ("Version" 12 nil)
-			       ("Status"  10 package-menu--status-predicate)
-			       ("Archive" 10 package-menu--archive-predicate)
-			       ("Description" 0 nil)])
+  (setq tabulated-list-format
+        `[("Package" 18 package-menu--name-predicate)
+          ("Version" 12 nil)
+          ("Status"  10 package-menu--status-predicate)
+          ,@(if (cdr package-archives)
+                '(("Archive" 10 package-menu--archive-predicate)))
+          ("Description" 0 nil)])
   (setq tabulated-list-padding 2)
   (setq tabulated-list-sort-key (cons "Status" nil))
   (add-hook 'tabulated-list-revert-hook 'package-menu--refresh nil t)
@@ -1726,8 +1712,7 @@ KEYWORDS should be nil or a list of keywords."
   "Collect all package keywords"
   (let (keywords)
     (package--mapc (lambda (desc)
-                     (let* ((extras (and desc (package-desc-extras desc)))
-                            (desc-keywords (cdr (assoc :keywords extras))))
+                     (let* ((desc-keywords (and desc (package-desc--keywords desc))))
                        (setq keywords (append keywords desc-keywords)))))
     keywords))
 
@@ -1768,8 +1753,7 @@ Built-in packages are converted with `package--from-builtin'."
   "Test if package DESC has any of the given KEYWORDS.
 When none are given, the package matches."
   (if keywords
-      (let* ((extras (and desc (package-desc-extras desc)))
-             (desc-keywords (cdr (assoc :keywords extras)))
+      (let* ((desc-keywords (and desc (package-desc--keywords desc)))
              found)
         (dolist (k keywords)
           (when (and (not found)
@@ -1805,28 +1789,29 @@ Return (PKG-DESC [NAME VERSION STATUS DOC])."
   (let* ((pkg-desc (car pkg))
 	 (status  (cdr pkg))
 	 (face (pcase status
-		(`"built-in"  'font-lock-builtin-face)
-		(`"available" 'default)
-		(`"new"       'bold)
-		(`"held"      'font-lock-constant-face)
-		(`"disabled"  'font-lock-warning-face)
-		(`"installed" 'font-lock-comment-face)
-		(`"unsigned"  'font-lock-warning-face)
-		(_            'font-lock-warning-face)))) ; obsolete.
+                 (`"built-in"  'font-lock-builtin-face)
+                 (`"available" 'default)
+                 (`"new"       'bold)
+                 (`"held"      'font-lock-constant-face)
+                 (`"disabled"  'font-lock-warning-face)
+                 (`"installed" 'font-lock-comment-face)
+                 (`"unsigned"  'font-lock-warning-face)
+                 (_            'font-lock-warning-face)))) ; obsolete.
     (list pkg-desc
-	  (vector (list (symbol-name (package-desc-name pkg-desc))
-			'face 'link
-			'follow-link t
-			'package-desc pkg-desc
-			'action 'package-menu-describe-package)
-		  (propertize (package-version-join
-                               (package-desc-version pkg-desc))
-			      'font-lock-face face)
-		  (propertize status 'font-lock-face face)
-		  (propertize (or (package-desc-archive pkg-desc) "")
-                              'font-lock-face face)
-		  (propertize (package-desc-summary pkg-desc)
-                              'font-lock-face face)))))
+	  `[,(list (symbol-name (package-desc-name pkg-desc))
+                   'face 'link
+                   'follow-link t
+                   'package-desc pkg-desc
+                   'action 'package-menu-describe-package)
+            ,(propertize (package-version-join
+                          (package-desc-version pkg-desc))
+                         'font-lock-face face)
+            ,(propertize status 'font-lock-face face)
+            ,@(if (cdr package-archives)
+                  (list (propertize (or (package-desc-archive pkg-desc) "")
+                                    'font-lock-face face)))
+            ,(propertize (package-desc-summary pkg-desc)
+                         'font-lock-face face)])))
 
 (defun package-menu-refresh ()
   "Download the Emacs Lisp package archive.
@@ -2101,14 +2086,21 @@ When KEYWORDS are given, only packages with those KEYWORDS are
 shown."
   (interactive)
   (require 'finder-inf nil t)
-  (let ((buf (get-buffer-create "*Packages*")))
+  (let* ((buf (get-buffer-create "*Packages*"))
+         (win (get-buffer-window buf)))
     (with-current-buffer buf
       (package-menu-mode)
       (package-menu--generate nil packages keywords))
-    (switch-to-buffer buf)))
+    (if win
+        (select-window win)
+      (switch-to-buffer buf))))
 
-(defun package-menu-filter-interactive (keyword)
-  "Filter the *Packages* buffer."
+;; package-menu--generate rebinds "q" on the fly, so we have to
+;; hard-code the binding in the doc-string here.
+(defun package-menu-filter (keyword)
+  "Filter the *Packages* buffer.
+Show only those items that relate to the specified KEYWORD.
+To restore the full package list, type `q'."
   (interactive (list (completing-read "Keyword: " (package-all-keywords))))
   (package-show-package-list t (list keyword)))
 

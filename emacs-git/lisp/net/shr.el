@@ -1,6 +1,6 @@
 ;;; shr.el --- Simple HTML Renderer
 
-;; Copyright (C) 2010-2013 Free Software Foundation, Inc.
+;; Copyright (C) 2010-2014 Free Software Foundation, Inc.
 
 ;; Author: Lars Magne Ingebrigtsen <larsi@gnus.org>
 ;; Keywords: html
@@ -90,6 +90,7 @@ used."
 Alternative suggestions are:
 - \"  \"
 - \"  \""
+  :version "24.4"
   :type 'string
   :group 'shr)
 
@@ -98,6 +99,12 @@ Alternative suggestions are:
   :version "24.4"
   :group 'shr
   :type 'function)
+
+(defcustom shr-image-animate t
+  "Non nil means that images that can be animated will be."
+  :version "24.4"
+  :group 'shr
+  :type 'boolean)
 
 (defvar shr-content-function nil
   "If bound, this should be a function that will return the content.
@@ -140,8 +147,8 @@ cid: URL as the argument.")
     (define-key map "a" 'shr-show-alt-text)
     (define-key map "i" 'shr-browse-image)
     (define-key map "z" 'shr-zoom-image)
-    (define-key map [tab] 'shr-next-link)
-    (define-key map [backtab] 'shr-previous-link)
+    (define-key map [?\t] 'shr-next-link)
+    (define-key map [?\M-\t] 'shr-previous-link)
     (define-key map [follow-link] 'mouse-face)
     (define-key map [mouse-2] 'shr-browse-url)
     (define-key map "I" 'shr-insert-image)
@@ -168,6 +175,7 @@ cid: URL as the argument.")
      (libxml-parse-html-region (point-min) (point-max))))
   (goto-char (point-min)))
 
+;;;###autoload
 (defun shr-render-region (begin end &optional buffer)
   "Display the HTML rendering of the region between BEGIN and END."
   (interactive "r")
@@ -357,6 +365,14 @@ size, and full-buffer size."
 	(push (shr-transform-dom sub) result)))
     (nreverse result)))
 
+(defsubst shr-generic (cont)
+  (dolist (sub cont)
+    (cond
+     ((eq (car sub) 'text)
+      (shr-insert (cdr sub)))
+     ((listp (cdr sub))
+      (shr-descend sub)))))
+
 (defun shr-descend (dom)
   (let ((function
 	 (or
@@ -379,20 +395,16 @@ size, and full-buffer size."
 	(shr-generic (cdr dom)))
       (when (and shr-target-id
 		 (equal (cdr (assq :id (cdr dom))) shr-target-id))
+	;; If the element was empty, we don't have anything to put the
+	;; anchor on.  So just insert a dummy character.
+	(when (= start (point))
+	  (insert "*"))
 	(put-text-property start (1+ start) 'shr-target-id shr-target-id))
       ;; If style is set, then this node has set the color.
       (when style
 	(shr-colorize-region start (point)
 			     (cdr (assq 'color shr-stylesheet))
 			     (cdr (assq 'background-color shr-stylesheet)))))))
-
-(defun shr-generic (cont)
-  (dolist (sub cont)
-    (cond
-     ((eq (car sub) 'text)
-      (shr-insert (cdr sub)))
-     ((listp (cdr sub))
-      (shr-descend sub)))))
 
 (defmacro shr-char-breakable-p (char)
   "Return non-nil if a line can be broken before and after CHAR."
@@ -455,10 +467,11 @@ size, and full-buffer size."
       (insert elem)
       (setq shr-state nil)
       (let (found)
-	(when (and (> (current-column) shr-width)
-		   (progn
-		     (setq found (shr-find-fill-point))
-		     (not (eolp))))
+	(while (and (> (current-column) shr-width)
+		    (> shr-width 0)
+		    (progn
+		      (setq found (shr-find-fill-point))
+		      (not (eolp))))
 	  (when (eq (preceding-char) ? )
 	    (delete-char -1))
 	  (insert "\n")
@@ -469,7 +482,13 @@ size, and full-buffer size."
 	  (when (> shr-indentation 0)
 	    (shr-indent))
 	  (end-of-line))
-	(insert " ")))
+	(if (<= (current-column) shr-width)
+	    (insert " ")
+	  ;; In case we couldn't get a valid break point (because of a
+	  ;; word that's longer than `shr-width'), just break anyway.
+	  (insert "\n")
+	  (when (> shr-indentation 0)
+	    (shr-indent)))))
     (unless (string-match "[ \t\r\n ]\\'" text)
       (delete-char -1)))))
 
@@ -478,7 +497,7 @@ size, and full-buffer size."
     (backward-char 1))
   (let ((bp (point))
 	failed)
-    (while (not (or (setq failed (= (current-column) shr-indentation))
+    (while (not (or (setq failed (<= (current-column) shr-indentation))
 		    (eq (preceding-char) ? )
 		    (eq (following-char) ? )
 		    (shr-char-breakable-p (preceding-char))
@@ -486,7 +505,8 @@ size, and full-buffer size."
 		    (and (shr-char-kinsoku-bol-p (preceding-char))
 			 (shr-char-breakable-p (following-char))
 			 (not (shr-char-kinsoku-bol-p (following-char))))
-		    (shr-char-kinsoku-eol-p (following-char))))
+		    (shr-char-kinsoku-eol-p (following-char))
+		    (bolp)))
       (backward-char 1))
     (if failed
 	;; There's no breakable point, so we give it up.
@@ -496,7 +516,8 @@ size, and full-buffer size."
 	    (while (setq found (re-search-forward
 				"\\(\\c>\\)\\| \\|\\c<\\|\\c|"
 				(line-end-position) 'move)))
-	    (if (and found (not (match-beginning 1)))
+	    (if (and found
+		     (not (match-beginning 1)))
 		(goto-char (match-beginning 0)))))
       (or
        (eolp)
@@ -507,7 +528,7 @@ size, and full-buffer size."
 	 (while (and (not (memq (preceding-char) (list ?\C-@ ?\n ? )))
 		     (shr-char-kinsoku-eol-p (preceding-char)))
 	   (backward-char 1))
-	 (when (setq failed (= (current-column) shr-indentation))
+	 (when (setq failed (<= (current-column) shr-indentation))
 	   ;; There's no breakable point that doesn't violate kinsoku,
 	   ;; so we look for the second best position.
 	   (while (and (progn
@@ -527,7 +548,7 @@ size, and full-buffer size."
 		      (not (memq (preceding-char) (list ?\C-@ ?\n ? )))
 		      (or (shr-char-kinsoku-eol-p (preceding-char))
 			  (shr-char-kinsoku-bol-p (following-char)))))))
-	 (when (setq failed (= (current-column) shr-indentation))
+	 (when (setq failed (<= (current-column) shr-indentation))
 	   ;; There's no breakable point that doesn't violate kinsoku,
 	   ;; so we go to the second best position.
 	   (if (looking-at "\\(\\c<+\\)\\c<")
@@ -589,7 +610,7 @@ size, and full-buffer size."
 	 (concat (nth 3 base) url))
 	(t
 	 ;; Totally relative.
-	 (concat (car base) (cadr base) url))))
+	 (concat (car base) (expand-file-name url (cadr base))))))
 
 (defun shr-ensure-newline ()
   (unless (zerop (current-column))
@@ -750,14 +771,15 @@ element is the data blob and the second element is the content-type."
 	      (insert-sliced-image image (or alt "*") nil 20 1)
 	    (insert-image image (or alt "*")))
 	  (put-text-property start (point) 'image-size size)
-	  (when (cond ((fboundp 'image-multi-frame-p)
+	  (when (and shr-image-animate
+                     (cond ((fboundp 'image-multi-frame-p)
 		       ;; Only animate multi-frame things that specify a
 		       ;; delay; eg animated gifs as opposed to
 		       ;; multi-page tiffs.  FIXME?
-		       (cdr (image-multi-frame-p image)))
-		      ((fboundp 'image-animated-p)
-		       (image-animated-p image)))
-	    (image-animate image nil 60)))
+                            (cdr (image-multi-frame-p image)))
+                           ((fboundp 'image-animated-p)
+                            (image-animated-p image))))
+            (image-animate image nil 60)))
 	image)
     (insert alt)))
 
@@ -957,11 +979,18 @@ ones, in case fg and bg are nil."
 (defun shr-dom-to-xml (dom)
   "Convert DOM into a string containing the xml representation."
   (let ((arg " ")
-        (text ""))
+        (text "")
+	url)
     (dolist (sub (cdr dom))
       (cond
        ((listp (cdr sub))
-        (setq text (concat text (shr-dom-to-xml sub))))
+	;; Ignore external image definitions if required.
+	;; <image xlink:href="http://TRACKING_URL/"/>
+	(when (or (not (eq (car sub) 'image))
+		  (not (setq url (cdr (assq ':xlink:href (cdr sub)))))
+		  (not shr-blocked-images)
+		  (not (string-match shr-blocked-images url)))
+	  (setq text (concat text (shr-dom-to-xml sub)))))
        ((eq (car sub) 'text)
         (setq text (concat text (cdr sub))))
        (t
@@ -975,7 +1004,8 @@ ones, in case fg and bg are nil."
             (car dom))))
 
 (defun shr-tag-svg (cont)
-  (when (image-type-available-p 'svg)
+  (when (and (image-type-available-p 'svg)
+	     (not shr-inhibit-images))
     (funcall shr-put-image-function
              (shr-dom-to-xml (cons 'svg cont))
              "SVG Image")))
@@ -1213,7 +1243,9 @@ The preference is a float determined from `shr-prefer-media-type'."
 	  (put-text-property start (point) 'image-url url)
 	  (put-text-property start (point) 'image-displayer
 			     (shr-image-displayer shr-content-function))
-	  (put-text-property start (point) 'help-echo alt))
+	  (put-text-property start (point) 'help-echo
+			     (or (cdr (assq :title cont))
+				 alt)))
 	(setq shr-state 'image)))))
 
 (defun shr-tag-pre (cont)

@@ -1,9 +1,9 @@
 ;;; lisp.el --- Lisp editing commands for Emacs  -*- lexical-binding:t -*-
 
-;; Copyright (C) 1985-1986, 1994, 2000-2013 Free Software Foundation,
+;; Copyright (C) 1985-1986, 1994, 2000-2014 Free Software Foundation,
 ;; Inc.
 
-;; Maintainer: FSF
+;; Maintainer: emacs-devel@gnu.org
 ;; Keywords: lisp, languages
 ;; Package: emacs
 
@@ -57,10 +57,14 @@ Should take the same arguments and behave similarly to `forward-sexp'.")
 
 (defun forward-sexp (&optional arg)
   "Move forward across one balanced expression (sexp).
-With ARG, do it that many times.  Negative arg -N means
-move backward across N balanced expressions.
-This command assumes point is not in a string or comment.
-Calls `forward-sexp-function' to do the work, if that is non-nil."
+With ARG, do it that many times.  Negative arg -N means move
+backward across N balanced expressions.  This command assumes
+point is not in a string or comment.  Calls
+`forward-sexp-function' to do the work, if that is non-nil.  If
+unable to move over a sexp, signal `scan-error' with three
+arguments: a message, the start of the obstacle (usually a
+parenthesis or list marker of some kind), and end of the
+obstacle."
   (interactive "^p")
   (or arg (setq arg 1))
   (if forward-sexp-function
@@ -106,6 +110,8 @@ This command assumes point is not in a string or comment."
 
 (defun forward-list (&optional arg)
   "Move forward across one balanced group of parentheses.
+This command will also work on other parentheses-like expressions
+defined by the current language mode.
 With ARG, do it that many times.
 Negative arg -N means move backward across N groups of parentheses.
 This command assumes point is not in a string or comment."
@@ -115,6 +121,8 @@ This command assumes point is not in a string or comment."
 
 (defun backward-list (&optional arg)
   "Move backward across one balanced group of parentheses.
+This command will also work on other parentheses-like expressions
+defined by the current language mode.
 With ARG, do it that many times.
 Negative arg -N means move forward across N groups of parentheses.
 This command assumes point is not in a string or comment."
@@ -124,6 +132,8 @@ This command assumes point is not in a string or comment."
 
 (defun down-list (&optional arg)
   "Move forward down one level of parentheses.
+This command will also work on other parentheses-like expressions
+defined by the current language mode.
 With ARG, do this that many times.
 A negative argument means move backward but still go down a level.
 This command assumes point is not in a string or comment."
@@ -134,34 +144,92 @@ This command assumes point is not in a string or comment."
       (goto-char (or (scan-lists (point) inc -1) (buffer-end arg)))
       (setq arg (- arg inc)))))
 
-(defun backward-up-list (&optional arg)
+(defun backward-up-list (&optional arg escape-strings no-syntax-crossing)
   "Move backward out of one level of parentheses.
-With ARG, do this that many times.
-A negative argument means move forward but still to a less deep spot.
-This command assumes point is not in a string or comment."
-  (interactive "^p")
-  (up-list (- (or arg 1))))
+This command will also work on other parentheses-like expressions
+defined by the current language mode.  With ARG, do this that
+many times.  A negative argument means move forward but still to
+a less deep spot.  If ESCAPE-STRINGS is non-nil (as it is
+interactively), move out of enclosing strings as well.  If
+NO-SYNTAX-CROSSING is non-nil (as it is interactively), prefer to
+break out of any enclosing string instead of moving to the start
+of a list broken across multiple strings.  On error, location of
+point is unspecified."
+  (interactive "^p\nd\nd")
+  (up-list (- (or arg 1)) escape-strings no-syntax-crossing))
 
-(defun up-list (&optional arg)
+(defun up-list (&optional arg escape-strings no-syntax-crossing)
   "Move forward out of one level of parentheses.
-With ARG, do this that many times.
-A negative argument means move backward but still to a less deep spot.
-This command assumes point is not in a string or comment."
-  (interactive "^p")
+This command will also work on other parentheses-like expressions
+defined by the current language mode.  With ARG, do this that
+many times.  A negative argument means move backward but still to
+a less deep spot.  If ESCAPE-STRINGS is non-nil (as it is
+interactively), move out of enclosing strings as well. If
+NO-SYNTAX-CROSSING is non-nil (as it is interactively), prefer to
+break out of any enclosing string instead of moving to the start
+of a list broken across multiple strings.  On error, location of
+point is unspecified."
+  (interactive "^p\nd\nd")
   (or arg (setq arg 1))
   (let ((inc (if (> arg 0) 1 -1))
-        pos)
+        (pos nil))
     (while (/= arg 0)
-      (if (null forward-sexp-function)
-          (goto-char (or (scan-lists (point) inc 1) (buffer-end arg)))
-	(condition-case err
-	    (while (progn (setq pos (point))
-			  (forward-sexp inc)
-			  (/= (point) pos)))
-	  (scan-error (goto-char (nth (if (> arg 0) 3 2) err))))
-	(if (= (point) pos)
-            (signal 'scan-error
-                    (list "Unbalanced parentheses" (point) (point)))))
+      (condition-case err
+          (save-restriction
+            ;; If we've been asked not to cross string boundaries
+            ;; and we're inside a string, narrow to that string so
+            ;; that scan-lists doesn't find a match in a different
+            ;; string.
+            (when no-syntax-crossing
+              (let* ((syntax (syntax-ppss))
+                     (string-comment-start (nth 8 syntax)))
+                (when string-comment-start
+                  (save-excursion
+                    (goto-char string-comment-start)
+                    (narrow-to-region
+                     (point)
+                     (if (nth 3 syntax) ; in string
+                         (condition-case nil
+                             (progn (forward-sexp) (point))
+                           (scan-error (point-max)))
+                       (forward-comment 1)
+                       (point)))))))
+            (if (null forward-sexp-function)
+                (goto-char (or (scan-lists (point) inc 1)
+                               (buffer-end arg)))
+              (condition-case err
+                  (while (progn (setq pos (point))
+                                (forward-sexp inc)
+                                (/= (point) pos)))
+                (scan-error (goto-char (nth (if (> arg 0) 3 2) err))))
+              (if (= (point) pos)
+                  (signal 'scan-error
+                          (list "Unbalanced parentheses" (point) (point))))))
+        (scan-error
+         (let ((syntax nil))
+           (or
+            ;; If we bumped up against the end of a list, see whether
+            ;; we're inside a string: if so, just go to the beginning
+            ;; or end of that string.
+            (and escape-strings
+                 (or syntax (setf syntax (syntax-ppss)))
+                 (nth 3 syntax)
+                 (goto-char (nth 8 syntax))
+                 (progn (when (> inc 0)
+                          (forward-sexp))
+                        t))
+            ;; If we narrowed to a comment above and failed to escape
+            ;; it, the error might be our fault, not an indication
+            ;; that we're out of syntax.  Try again from beginning or
+            ;; end of the comment.
+            (and no-syntax-crossing
+                 (or syntax (setf syntax (syntax-ppss)))
+                 (nth 4 syntax)
+                 (goto-char (nth 8 syntax))
+                 (or (< inc 0)
+                     (forward-comment 1))
+                 (setf arg (+ arg inc)))
+            (signal (car err) (cdr err))))))
       (setq arg (- arg inc)))))
 
 (defun kill-sexp (&optional arg)
@@ -709,8 +777,10 @@ considered."
       (dolist (p (nth 9 ppss))
         (push (cdr (syntax-after p)) closer))
       (setq closer (apply #'string closer))
-      (let* ((sexp (car (read-from-string
-                         (concat txt "lisp--witness--lisp" closer))))
+      (let* ((sexp (condition-case nil
+                       (car (read-from-string
+                             (concat txt "lisp--witness--lisp" closer)))
+                     (end-of-file nil)))
              (macroexpand-advice (lambda (expander form &rest args)
                                    (condition-case nil
                                        (apply expander form args)
@@ -815,7 +885,8 @@ considered."
 		  (scan-error pos)))
 	   (end
 	    (unless (or (eq beg (point-max))
-			(member (char-syntax (char-after beg)) '(?\" ?\( ?\))))
+			(member (char-syntax (char-after beg))
+                                '(?\s ?\" ?\( ?\))))
 	      (condition-case nil
 		  (save-excursion
 		    (goto-char beg)
@@ -830,9 +901,17 @@ considered."
                 ;; use it to provide a more specific completion table in some
                 ;; cases.  E.g. filter out keywords that are not understood by
                 ;; the macro/function being called.
-                (list nil (completion-table-in-turn
+                (list nil (completion-table-merge
                            lisp--local-variables-completion-table
-                           obarray)       ;Could be anything.
+                           (apply-partially #'completion-table-with-predicate
+                                            obarray
+                                            ;; Don't include all symbols
+                                            ;; (bug#16646).
+                                            (lambda (sym)
+                                              (or (boundp sym)
+                                                  (fboundp sym)
+                                                  (symbol-plist sym)))
+                                            'strict))
                       :annotation-function
                       (lambda (str) (if (fboundp (intern-soft str)) " <f>"))
                       :company-doc-buffer #'lisp--company-doc-buffer

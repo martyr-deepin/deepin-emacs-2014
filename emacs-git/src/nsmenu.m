@@ -1,5 +1,5 @@
 /* NeXT/Open/GNUstep and MacOSX Cocoa menu and toolbar module.
-   Copyright (C) 2007-2013 Free Software Foundation, Inc.
+   Copyright (C) 2007-2014 Free Software Foundation, Inc.
 
 This file is part of GNU Emacs.
 
@@ -1054,8 +1054,10 @@ free_frame_tool_bar (struct frame *f)
     Under NS we just hide the toolbar until it might be needed again.
    -------------------------------------------------------------------------- */
 {
+  EmacsView *view = FRAME_NS_VIEW (f);
   block_input ();
-  [[FRAME_NS_VIEW (f) toolbar] setVisible: NO];
+  view->wait_for_tool_bar = NO;
+  [[view toolbar] setVisible: NO];
   FRAME_TOOLBAR_HEIGHT (f) = 0;
   unblock_input ();
 }
@@ -1071,6 +1073,7 @@ update_frame_tool_bar (struct frame *f)
   NSWindow *window = [view window];
   EmacsToolbar *toolbar = [view toolbar];
 
+  if (view == nil || toolbar == nil) return;
   block_input ();
 
 #ifdef NS_IMPL_COCOA
@@ -1096,7 +1099,7 @@ update_frame_tool_bar (struct frame *f)
       /* Check if this is a separator.  */
       if (EQ (TOOLPROP (TOOL_BAR_ITEM_TYPE), Qt))
         {
-          /* Skip separators.  Newer OSX don't show them, and on GNUStep they
+          /* Skip separators.  Newer OSX don't show them, and on GNUstep they
              are wide as a button, thus overflowing the toolbar most of
              the time.  */
           continue;
@@ -1176,9 +1179,13 @@ update_frame_tool_bar (struct frame *f)
   FRAME_TOOLBAR_HEIGHT (f) =
     NSHeight ([window frameRectForContentRect: NSMakeRect (0, 0, 0, 0)])
     - FRAME_NS_TITLEBAR_HEIGHT (f);
-    if (FRAME_TOOLBAR_HEIGHT (f) < 0) // happens if frame is fullscreen.
-      FRAME_TOOLBAR_HEIGHT (f) = 0;
-    unblock_input ();
+  if (FRAME_TOOLBAR_HEIGHT (f) < 0) // happens if frame is fullscreen.
+    FRAME_TOOLBAR_HEIGHT (f) = 0;
+
+  if (view->wait_for_tool_bar && FRAME_TOOLBAR_HEIGHT (f) > 0)
+      [view setNeedsDisplay: YES];
+
+  unblock_input ();
 }
 
 
@@ -1936,7 +1943,7 @@ void
 syms_of_nsmenu (void)
 {
 #ifndef NS_IMPL_COCOA
-  /* Don't know how to keep track of this in Next/Open/Gnustep.  Always
+  /* Don't know how to keep track of this in Next/Open/GNUstep.  Always
      update menus there.  */
   trackingMenu = 1;
 #endif

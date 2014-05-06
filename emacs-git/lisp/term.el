@@ -1,6 +1,6 @@
 ;;; term.el --- general command interpreter in a window stuff
 
-;; Copyright (C) 1988, 1990, 1992, 1994-1995, 2001-2013 Free Software
+;; Copyright (C) 1988, 1990, 1992, 1994-1995, 2001-2014 Free Software
 ;; Foundation, Inc.
 
 ;; Author: Per Bothner <per@bothner.com>
@@ -975,8 +975,8 @@ is buffer-local."
 	   (display-graphic-p)
 	   overflow-newline-into-fringe
 	   (/= (frame-parameter nil 'right-fringe) 0))
-      (window-width)
-    (1- (window-width))))
+      (window-body-width)
+    (1- (window-body-width))))
 
 
 (put 'term-mode 'mode-class 'special)
@@ -4137,8 +4137,9 @@ Typing SPC flushes the help buffer."
 	    (and (consp first)
 		 (eq (window-buffer (posn-window (event-start first)))
 		     (get-buffer "*Completions*"))
-		 (eq (key-binding key) 'mouse-choose-completion)))
-	  ;; If the user does mouse-choose-completion with the mouse,
+		 (memq (key-binding key)
+                       '(mouse-choose-completion choose-completion))))
+	  ;; If the user does choose-completion with the mouse,
 	  ;; execute the command, then delete the completion window.
 	  (progn
 	    (choose-completion first)

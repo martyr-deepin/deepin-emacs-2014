@@ -1,6 +1,6 @@
 @c -*-texinfo-*-
 @c This is part of the GNU Emacs Lisp Reference Manual.
-@c Copyright (C) 1990-1995, 1998-1999, 2001-2013 Free Software
+@c Copyright (C) 1990-1995, 1998-1999, 2001-2014 Free Software
 @c Foundation, Inc.
 @c See the file elisp.texi for copying conditions.
 @node Control Structures
@@ -322,7 +322,8 @@ In the last clause, @code{code} is a variable that gets bound to the value that
 was returned by @code{(get-return-code x)}.
 
 To give a more complex example, a simple interpreter for a little
-expression language could look like:
+expression language could look like (note that this example requires
+lexical binding):
 
 @example
 (defun evaluate (exp env)
@@ -341,11 +342,6 @@ element list starting with the symbol @code{add}, then extracts the second and
 third elements and binds them to the variables @code{x} and @code{y}.
 @code{(pred numberp)} is a pattern that simply checks that @code{exp}
 is a number, and @code{_} is the catch-all pattern that matches anything.
-
-Note that the the lambda being the result of the @code{fn} clause is a
-closure (@pxref{Closures}), so the file defining @code{evaluate} must
-have lexical binding enabled (@pxref{Using Lexical Binding}, for how
-to enable it).
 
 Here are some sample programs including their evaluation results:
 
@@ -1256,10 +1252,13 @@ Here's the example at the beginning of this subsection rewritten using
 @end example
 @end defmac
 
-@defmac with-demoted-errors body@dots{}
+@defmac with-demoted-errors format body@dots{}
 This macro is like a milder version of @code{ignore-errors}.  Rather
 than suppressing errors altogether, it converts them into messages.
-Use this form around code that is not expected to signal errors, but
+It uses the string @var{format} to format the message.
+@var{format} should contain a single @samp{%}-sequence; e.g.,
+@code{"Error: %S"}.  Use @code{with-demoted-errors} around code
+that is not expected to signal errors, but
 should be robust if one does occur.  Note that this macro uses
 @code{condition-case-unless-debug} rather than @code{condition-case}.
 @end defmac

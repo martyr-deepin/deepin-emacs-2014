@@ -1,6 +1,6 @@
 ;;; ipa-praat.el --- Inputting IPA characters with the conventions of Praat
 
-;; Copyright (C) 2011-2013 Free Software Foundation, Inc.
+;; Copyright (C) 2011-2014 Free Software Foundation, Inc.
 
 ;; Author: Oliver Scholz <epameinondas@gmx.de>
 ;; Keywords: multilingual, input method, IPA
@@ -23,7 +23,7 @@
 ;;; Commentary:
 
 ;; This is a new input method for IPA characters and diacritics, which follows
-;; the conventions of Praat, a GPLed program for phonetical analysis.
+;; the conventions of Praat, a GPLed program for phonetic analysis.
 ;;
 ;; This input method is much more complete than the current ipa.el.
 
@@ -34,7 +34,7 @@
 (quail-define-package
  "ipa-praat" "IPA" "IPAP" t
  "International Phonetic Alphabet input method.
-This follows the input method of the phonetical analysis program
+This follows the input method of the phonetic analysis program
 Praat (http://www.fon.hum.uva.nl/praat/).
 
 

@@ -1,6 +1,6 @@
 ;;; ipa.el --- Quail package for inputting IPA characters  -*-coding: utf-8;-*-
 
-;; Copyright (C) 2009-2013 Free Software Foundation, Inc.
+;; Copyright (C) 2009-2014 Free Software Foundation, Inc.
 ;; Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
 ;;   2006, 2007, 2008, 2009, 2010, 2011
 ;;   National Institute of Advanced Industrial Science and Technology (AIST)
@@ -440,7 +440,7 @@ displays them, incorrectly, as separate from the modified glyphs.")
  (">\\" "ʡ")	;; Epiglottal plosive			U+02A1
  ("^" "↑")	;; Upstep				U+2191
  ("!" "↓")	;; Downstep				U+2193
- ("!\\" "ǃ")	;; Postalveolal click			U+01C3
+ ("!\\" "ǃ")	;; Postalveolar click			U+01C3
  ("\\" "ǀ")	;; Dental click				U+01C0
  ("\\|\\" "ǁ")	;; Lateral alveolar click		U+01C1
  ("=\\" "ǂ")	;; Palatal click			U+01C2
@@ -475,7 +475,7 @@ displays them, incorrectly, as separate from the modified glyphs.")
  ("_d" "̪")	;; Dental				U+032A
  ("_e" "̴")	;; Velarized or pharyngeal		U+0334
 
- ("<F>" "↙")	;; Global fall; SOUTH EAST ARROW; may be a bit smaller than
+ ("<F>" "↘")	;; Global fall; SOUTH EAST ARROW; may be a bit smaller than
 		;; intended.
  ("_F" "̂")	;; Falling tone				U+0302
  ("_G" "ˠ")	;; Velarized				U+02E0

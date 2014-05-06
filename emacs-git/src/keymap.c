@@ -1,5 +1,5 @@
 /* Manipulation of keymaps
-   Copyright (C) 1985-1988, 1993-1995, 1998-2013 Free Software
+   Copyright (C) 1985-1988, 1993-1995, 1998-2014 Free Software
    Foundation, Inc.
 
 This file is part of GNU Emacs.
@@ -1894,7 +1894,7 @@ struct accessible_keymaps_data {
 
 static void
 accessible_keymaps_1 (Lisp_Object key, Lisp_Object cmd, Lisp_Object args, void *data)
-/* Use void* data to be compatible with map_keymap_function_t.  */
+/* Use void * data to be compatible with map_keymap_function_t.  */
 {
   struct accessible_keymaps_data *d = data; /* Cast! */
   Lisp_Object maps = d->maps;

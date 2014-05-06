@@ -1,6 +1,6 @@
 /* Functions for image support on window system.
 
-Copyright (C) 1989, 1992-2013 Free Software Foundation, Inc.
+Copyright (C) 1989, 1992-2014 Free Software Foundation, Inc.
 
 This file is part of GNU Emacs.
 
@@ -22,11 +22,7 @@ along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <unistd.h>
 
 #ifdef HAVE_PNG
-#if defined HAVE_LIBPNG_PNG_H
-# include <libpng/png.h>
-#else
 # include <png.h>
-#endif
 #endif
 
 #include <setjmp.h>
@@ -160,6 +156,7 @@ XPutPixel (XImagePtr ximage, int x, int y, unsigned long pixel)
 
 /* Functions to access the contents of a bitmap, given an id.  */
 
+#ifdef HAVE_X_WINDOWS
 static int
 x_bitmap_height (struct frame *f, ptrdiff_t id)
 {
@@ -171,6 +168,7 @@ x_bitmap_width (struct frame *f, ptrdiff_t id)
 {
   return FRAME_DISPLAY_INFO (f)->bitmaps[id - 1].width;
 }
+#endif
 
 #if defined (HAVE_X_WINDOWS) || defined (HAVE_NTGUI)
 ptrdiff_t
@@ -2019,6 +2017,7 @@ x_create_x_image_and_pixmap (struct frame *f, int width, int height, int depth,
       XSETINT (errcode, err);
       image_error ("Unable to create bitmap, error code %d", errcode, Qnil);
       x_destroy_x_image (*ximg);
+      *ximg = NULL;
       return 0;
     }
 
@@ -3952,9 +3951,7 @@ xpm_str_to_color_key (const char *s)
 {
   int i;
 
-  for (i = 0;
-       i < sizeof xpm_color_key_strings / sizeof xpm_color_key_strings[0];
-       i++)
+  for (i = 0; i < ARRAYELTS (xpm_color_key_strings); i++)
     if (strcmp (xpm_color_key_strings[i], s) == 0)
       return i;
   return -1;
@@ -5215,6 +5212,7 @@ pbm_load (struct frame *f, struct image *img)
       image_error ("Not a PBM image: `%s'", img->spec, Qnil);
     error:
       xfree (contents);
+      img->pixmap = NO_PIXMAP;
       return 0;
     }
 
@@ -5608,24 +5606,26 @@ init_png_functions (void)
 
 #endif /* WINDOWSNT */
 
-/* Possibly inefficient/inexact substitutes for _setjmp and _longjmp.
-   Do not use sys_setjmp, as PNG supports only jmp_buf.  The _longjmp
-   substitute may munge the signal mask, but that should be OK here.
-   MinGW (MS-Windows) uses _setjmp and defines setjmp to _setjmp in
-   the system header setjmp.h; don't mess up that.  */
-#ifndef HAVE__SETJMP
-# define _setjmp(j) setjmp (j)
-# define _longjmp longjmp
+/* Fast implementations of setjmp and longjmp.  Although setjmp and longjmp
+   will do, POSIX _setjmp and _longjmp (if available) are often faster.
+   Do not use sys_setjmp, as PNG supports only jmp_buf.
+   It's OK if the longjmp substitute restores the signal mask.  */
+#ifdef HAVE__SETJMP
+# define FAST_SETJMP(j) _setjmp (j)
+# define FAST_LONGJMP _longjmp
+#else
+# define FAST_SETJMP(j) setjmp (j)
+# define FAST_LONGJMP longjmp
 #endif
 
-#if (PNG_LIBPNG_VER < 10500)
-#define PNG_LONGJMP(ptr) (_longjmp ((ptr)->jmpbuf, 1))
+#if PNG_LIBPNG_VER < 10500
+#define PNG_LONGJMP(ptr) FAST_LONGJMP ((ptr)->jmpbuf, 1)
 #define PNG_JMPBUF(ptr) ((ptr)->jmpbuf)
 #else
 /* In libpng version 1.5, the jmpbuf member is hidden. (Bug#7908)  */
-#define PNG_LONGJMP(ptr) (fn_png_longjmp ((ptr), 1))
+#define PNG_LONGJMP(ptr) fn_png_longjmp (ptr, 1)
 #define PNG_JMPBUF(ptr) \
-  (*fn_png_set_longjmp_fn ((ptr), _longjmp, sizeof (jmp_buf)))
+  (*fn_png_set_longjmp_fn (ptr, FAST_LONGJMP, sizeof (jmp_buf)))
 #endif
 
 /* Error and warning handlers installed when the PNG library
@@ -5810,7 +5810,7 @@ png_load_body (struct frame *f, struct image *img, struct png_load_context *c)
 
   /* Set error jump-back.  We come back here when the PNG library
      detects an error.  */
-  if (_setjmp (PNG_JMPBUF (png_ptr)))
+  if (FAST_SETJMP (PNG_JMPBUF (png_ptr)))
     {
     error:
       if (c->png_ptr)
@@ -6258,9 +6258,6 @@ struct my_jpeg_error_mgr
       MY_JPEG_INVALID_IMAGE_SIZE,
       MY_JPEG_CANNOT_CREATE_X
     } failure_code;
-#ifdef lint
-  FILE *fp;
-#endif
 };
 
 
@@ -6475,7 +6472,8 @@ jpeg_load_body (struct frame *f, struct image *img,
 {
   Lisp_Object file, specified_file;
   Lisp_Object specified_data;
-  FILE *fp = NULL;
+  /* The 'volatile' silences a bogus diagnostic; see GCC bug 54561.  */
+  FILE * IF_LINT (volatile) fp = NULL;
   JSAMPARRAY buffer;
   int row_stride, x, y;
   XImagePtr ximg = NULL;
@@ -6507,8 +6505,6 @@ jpeg_load_body (struct frame *f, struct image *img,
       image_error ("Invalid image data `%s'", specified_data, Qnil);
       return 0;
     }
-
-  IF_LINT (mgr->fp = fp);
 
   /* Customize libjpeg's error handling to call my_error_exit when an
      error is detected.  This function will perform a longjmp.  */
@@ -6547,9 +6543,6 @@ jpeg_load_body (struct frame *f, struct image *img,
       x_clear_image (f, img);
       return 0;
     }
-
-  /* Silence a bogus diagnostic; see GCC bug 54561.  */
-  IF_LINT (fp = mgr->fp);
 
   /* Create the JPEG decompression object.  Let it read from fp.
 	 Read the JPEG image header.  */
@@ -7586,7 +7579,7 @@ gif_load (struct frame *f, struct image *img)
 	  }
 
       /* Apply the pixel values.  */
-      if (gif->SavedImages[j].ImageDesc.Interlace)
+      if (GIFLIB_MAJOR < 5 && gif->SavedImages[j].ImageDesc.Interlace)
 	{
 	  int row, pass;
 
@@ -7906,7 +7899,7 @@ imagemagick_error (MagickWand *wand)
   image_error ("ImageMagick error: %s",
 	       build_string (description),
 	       Qnil);
-  description = (char *) MagickRelinquishMemory (description);
+  MagickRelinquishMemory (description);
 }
 
 /* Possibly give ImageMagick some extra help to determine the image
@@ -8544,7 +8537,10 @@ and `imagemagick-types-inhibit'.  */)
     {
       Qimagemagicktype = intern (imtypes[i]);
       typelist = Fcons (Qimagemagicktype, typelist);
+      imtypes[i] = MagickRelinquishMemory (imtypes[i]);
     }
+
+  MagickRelinquishMemory (imtypes);
   return Fnreverse (typelist);
 }
 
@@ -8652,7 +8648,6 @@ DEF_IMGLIB_FN (void, rsvg_handle_get_dimensions, (RsvgHandle *, RsvgDimensionDat
 DEF_IMGLIB_FN (gboolean, rsvg_handle_write, (RsvgHandle *, const guchar *, gsize, GError **));
 DEF_IMGLIB_FN (gboolean, rsvg_handle_close, (RsvgHandle *, GError **));
 DEF_IMGLIB_FN (GdkPixbuf *, rsvg_handle_get_pixbuf, (RsvgHandle *));
-DEF_IMGLIB_FN (void *, rsvg_handle_set_size_callback, (RsvgHandle *, RsvgSizeFunc, gpointer, GDestroyNotify));
 
 DEF_IMGLIB_FN (int, gdk_pixbuf_get_width, (const GdkPixbuf *));
 DEF_IMGLIB_FN (int, gdk_pixbuf_get_height, (const GdkPixbuf *));
@@ -8674,13 +8669,18 @@ Lisp_Object Qgdk_pixbuf, Qglib, Qgobject;
 static bool
 init_svg_functions (void)
 {
-  HMODULE library, gdklib, glib, gobject;
+  HMODULE library, gdklib = NULL, glib = NULL, gobject = NULL;
 
   if (!(glib = w32_delayed_load (Qglib))
       || !(gobject = w32_delayed_load (Qgobject))
       || !(gdklib = w32_delayed_load (Qgdk_pixbuf))
       || !(library = w32_delayed_load (Qsvg)))
-    return 0;
+    {
+      if (gdklib)  FreeLibrary (gdklib);
+      if (gobject) FreeLibrary (gobject);
+      if (glib)    FreeLibrary (glib);
+      return 0;
+    }
 
   LOAD_IMGLIB_FN (library, rsvg_handle_new);
   LOAD_IMGLIB_FN (library, rsvg_handle_get_dimensions);

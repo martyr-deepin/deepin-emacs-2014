@@ -1,5 +1,5 @@
 @c This is part of the Emacs manual.
-@c Copyright (C) 1985-1987, 1993-1995, 1997, 1999-2013 Free Software
+@c Copyright (C) 1985-1987, 1993-1995, 1997, 1999-2014 Free Software
 @c Foundation, Inc.
 @c See file emacs.texi for copying conditions.
 @node Frames
@@ -136,7 +136,7 @@ the position where you clicked and inserts the contents of the primary
 selection (@code{mouse-yank-primary}).  @xref{Primary Selection}.
 This behavior is consistent with other X applications.  Alternatively,
 you can rebind @kbd{Mouse-2} to @code{mouse-yank-at-click}, which
-performs a yank at point.
+performs a yank at the position you click.
 
 @vindex mouse-yank-at-point
   If you change the variable @code{mouse-yank-at-point} to a
@@ -802,8 +802,8 @@ When a file or directory is expanded, the @samp{[+]} changes to
 hiding its contents.
 
   You navigate through the speedbar using the keyboard, too.  Typing
-@kbd{RET} while point is on a line in the speedbar is equivalent to
-clicking the item on the current line, and @kbd{SPC} expands or
+@key{RET} while point is on a line in the speedbar is equivalent to
+clicking the item on the current line, and @key{SPC} expands or
 contracts the item.  @kbd{U} displays the parent directory of the
 current directory.  To copy, delete, or rename the file on the current
 line, type @kbd{C}, @kbd{D}, and @kbd{R} respectively.  To create a

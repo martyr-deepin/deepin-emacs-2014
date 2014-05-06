@@ -1,14 +1,14 @@
 GNU Emacs Installation Guide
-Copyright (C) 1992, 1994, 1996-1997, 2000-2013
-  Free Software Foundation, Inc.
+Copyright (C) 1992, 1994, 1996-1997, 2000-2014 Free Software Foundation,
+Inc.
 See the end of the file for license conditions.
 
 
 This file contains general information on building GNU Emacs.
 For more information specific to the MS-Windows, GNUstep/Mac OS X, and
 MS-DOS ports, also read the files nt/INSTALL, nextstep/INSTALL, and
-msdos/INSTALL.  For information about building from a Bazaar checkout
-(rather than a release), also read the file INSTALL.BZR.
+msdos/INSTALL.  For information about building from a repository checkout
+(rather than a release), also read the file INSTALL.REPO.
 
 
 BASIC INSTALLATION
@@ -23,6 +23,9 @@ find some things, or what options to use.
 `configure' creates a `Makefile' in several subdirectories, and a
 `src/config.h' file containing system-dependent definitions.
 Running the `make' utility then builds the package for your system.
+
+Building Emacs requires GNU make, <http://www.gnu.org/software/make/>.
+On most systems that Emacs supports, this is the default `make' program.
 
 Here's the procedure to build Emacs using `configure' on systems which
 are supported by it.  In some cases, if the simplified procedure fails,
@@ -49,7 +52,6 @@ sections if you need to.
 		 SOURCE-DIR/configure
 
       where SOURCE-DIR is the top-level Emacs source directory.
-      This may not work unless you use GNU make.
 
   3. When `configure' finishes, it prints several lines of details
      about the system configuration.  Read those details carefully
@@ -254,14 +256,11 @@ accept a list of directories, separated with colons.
 To get more attractive menus, you can specify an X toolkit when you
 configure Emacs; use the option `--with-x-toolkit=TOOLKIT', where
 TOOLKIT is `gtk' (the default), `athena', or `motif' (`yes' and
-`lucid' are synonyms for `athena').  On some systems, it does not work
-to use a toolkit with shared libraries.  A free implementation of
-Motif, called LessTif, is available from <http://www.lesstif.org>.
-Compiling with LessTif or Motif causes a standard File Selection
-Dialog to pop up when you invoke file commands with the mouse.  You
-can get fancy 3D-style scroll bars, even without Gtk or LessTif/Motif,
-if you have the Xaw3d library installed (see "Image support libraries"
-above for Xaw3d availability).
+`lucid' are synonyms for `athena').  Compiling with Motif causes a
+standard File Selection Dialog to pop up when you invoke file commands
+with the mouse.  You can get fancy 3D-style scroll bars, even without
+Gtk or Motif, if you have the Xaw3d library installed (see
+"Image support libraries" above for Xaw3d availability).
 
 You can tell configure where to search for GTK by specifying
 `--with-pkg-config-prog=PATH' where PATH is the pathname to
@@ -295,8 +294,7 @@ or more of these options:
   --without-gif        for GIF image support
   --without-png        for PNG image support
 
-Use --without-toolkit-scroll-bars to disable LessTif/Motif or Xaw3d
-scroll bars.
+Use --without-toolkit-scroll-bars to disable Motif or Xaw3d scroll bars.
 
 Use --without-xim to inhibit the default use of X Input Methods.
 In this case, the X resource useXIM can be used to turn on use of XIM.
@@ -439,12 +437,8 @@ SOURCE-DIR refers to the top-level Emacs source directory which is
 where Emacs's configure script is located.  `configure' looks for the
 Emacs source code in the directory that `configure' is in.
 
-To build in a separate directory, you must use a version of `make'
-that supports the `VPATH' variable, such as GNU `make'.
-
-(Do not try to build in a separate directory by creating many links
-to the real source directory--there is no need, and installation will
-fail.)
+(Do not try to build in a separate directory by creating many links to
+the real source directory--there is no need, and installation will fail.)
 
 4) Put into `./lisp/site-init.el' or `./lisp/site-load.el' any Emacs
 Lisp code you want Emacs to load before it is dumped out.  Use
@@ -730,8 +724,8 @@ Strictly speaking, not all of the executables in `./lib-src' need be copied.
     are used by Emacs; they do need to be copied.
 - The programs `etags', `ctags', and `emacsclient' are intended to be
     run by users; they are handled below.
-- The programs `make-docfile' and `test-distrib' were
-    used in building Emacs, and are not needed any more.
+- The program `make-docfile' was used in building Emacs, and is
+    not needed any more.
 
 2) Copy the files in `./info' to the place specified in
 `./lisp/site-init.el' or `./lisp/info.el'.  Note that if the

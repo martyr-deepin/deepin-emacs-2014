@@ -1,11 +1,11 @@
 ;;; font-lock.el --- Electric font lock mode
 
-;; Copyright (C) 1992-2013 Free Software Foundation, Inc.
+;; Copyright (C) 1992-2014 Free Software Foundation, Inc.
 
 ;; Author: Jamie Zawinski
 ;;	Richard Stallman
 ;;	Stefan Monnier
-;; Maintainer: FSF
+;; Maintainer: emacs-devel@gnu.org
 ;; Keywords: languages, faces
 ;; Package: emacs
 
@@ -458,7 +458,7 @@ This variable is set by major modes via the variable `font-lock-defaults'.
 Be careful when composing regexps for this list; a poorly written pattern can
 dramatically slow things down!
 
-A compiled keywords list starts with t.  It is produced internal
+A compiled keywords list starts with t.  It is produced internally
 by `font-lock-compile-keywords' from a user-level keywords list.
 Its second element is the user-level keywords list that was
 compiled.  The remaining elements have the same form as
@@ -1764,12 +1764,14 @@ If SYNTACTIC-KEYWORDS is non-nil, it means these keywords are used for
 				 (funcall keywords)
 			       (eval keywords)))))
 
-(defun font-lock-value-in-major-mode (alist)
-  "Return value in ALIST for `major-mode', or ALIST if it is not an alist.
-Structure is ((MAJOR-MODE . VALUE) ...) where MAJOR-MODE may be t."
-  (if (consp alist)
-      (cdr (or (assq major-mode alist) (assq t alist)))
-    alist))
+(defun font-lock-value-in-major-mode (values)
+  "If VALUES is an list, use `major-mode' as a key and return the `assq' value.
+VALUES should then be an alist on the form ((MAJOR-MODE . VALUE) ...) where
+MAJOR-MODE may be t.
+If VALUES isn't a list, return VALUES."
+  (if (consp values)
+      (cdr (or (assq major-mode values) (assq t values)))
+    values))
 
 (defun font-lock-choose-keywords (keywords level)
   "Return LEVELth element of KEYWORDS.

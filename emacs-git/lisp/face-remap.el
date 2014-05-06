@@ -1,6 +1,6 @@
 ;;; face-remap.el --- Functions for managing `face-remapping-alist'  -*- lexical-binding: t -*-
 ;;
-;; Copyright (C) 2008-2013 Free Software Foundation, Inc.
+;; Copyright (C) 2008-2014 Free Software Foundation, Inc.
 ;;
 ;; Author: Miles Bader <miles@gnu.org>
 ;; Keywords: faces, face remapping, display, user commands
@@ -135,7 +135,9 @@ other than the normal definition of FACE via `face-remap-set-base'."
     (let ((faces (cdr entry)))
       (if (symbolp faces)
 	  (setq faces (list faces)))
-      (setcdr entry (face-remap-order (cons specs faces))))
+      (setcdr entry (face-remap-order (cons specs faces)))
+      ;; Force redisplay of this buffer.
+      (force-mode-line-update))
     (cons face specs)))
 
 (defun face-remap-remove-relative (cookie)
@@ -150,7 +152,9 @@ COOKIE should be the return value from that function."
 		    (and (eq (car-safe updated-entries) (car cookie))
 			 (null (cdr updated-entries))))
 	    (setq face-remapping-alist
-		  (remq remapping face-remapping-alist)))
+		  (remq remapping face-remapping-alist))
+	    ;; Force redisplay of this buffer.
+	    (force-mode-line-update))
 	  (cdr cookie))))))
 
 ;;;###autoload
@@ -167,7 +171,9 @@ to apply on top of the normal definition of FACE."
       (if (null (cddr entry))		; nothing except base remapping
 	  (setq face-remapping-alist	; so remove entire entry
 		(remq entry face-remapping-alist))
-	(setcar (last entry) face)))))  ; otherwise, just inherit global def
+	(setcar (last entry) face))
+      ;; Force redisplay of this buffer.
+      (force-mode-line-update))))  ; otherwise, just inherit global def
 
 ;;;###autoload
 (defun face-remap-set-base (face &rest specs)
@@ -194,7 +200,9 @@ not to inherit from the global definition of FACE at all."
     (let ((entry (assq face face-remapping-alist)))
       (if entry
 	  (setcar (last entry) specs)	; overwrite existing base entry
-	(push (list face specs) face-remapping-alist)))))
+	(push (list face specs) face-remapping-alist)))
+    ;; Force redisplay of this buffer.
+    (force-mode-line-update)))
 
 
 ;; ----------------------------------------------------------------
@@ -343,6 +351,9 @@ a top-level keymap, `text-scale-increase' or
 It may contain any value suitable for a `face' text property,
 including a face name, a list of face names, a face-attribute
 plist, etc."
+  :type '(choice (face)
+		 (repeat :tag "List of faces" face)
+		 (plist :tag "Face property list"))
   :group 'display
   :version "23.1")
 

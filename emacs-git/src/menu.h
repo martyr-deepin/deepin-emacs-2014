@@ -1,5 +1,5 @@
 /* Functions to manipulate menus.
-   Copyright (C) 2008-2013 Free Software Foundation, Inc.
+   Copyright (C) 2008-2014 Free Software Foundation, Inc.
 
 This file is part of GNU Emacs.
 
@@ -20,6 +20,10 @@ along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.  */
 #define MENU_H
 
 #include "systime.h" /* for Time */
+
+#ifdef HAVE_NTGUI
+extern Lisp_Object Qunsupported__w32_dialog;
+#endif
 
 extern void x_set_menu_bar_lines (struct frame *f,
                                   Lisp_Object value,

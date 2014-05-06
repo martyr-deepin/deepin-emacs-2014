@@ -1,11 +1,11 @@
 ;;; bytecomp.el --- compilation of Lisp code into byte code -*- lexical-binding: t -*-
 
-;; Copyright (C) 1985-1987, 1992, 1994, 1998, 2000-2013
-;;   Free Software Foundation, Inc.
+;; Copyright (C) 1985-1987, 1992, 1994, 1998, 2000-2014 Free Software
+;; Foundation, Inc.
 
 ;; Author: Jamie Zawinski <jwz@lucid.com>
 ;;	Hallvard Furuseth <hbf@ulrik.uio.no>
-;; Maintainer: FSF
+;; Maintainer: emacs-devel@gnu.org
 ;; Keywords: lisp
 ;; Package: emacs
 
@@ -356,7 +356,7 @@ else the global value will be modified."
 (defvar byte-compile-interactive-only-functions nil
   "List of commands that are not meant to be called from Lisp.")
 (make-obsolete-variable 'byte-compile-interactive-only-functions
-			"use the `interactive-only' symbol property instead"
+			"use the `interactive-only' symbol property instead."
 			"24.4")
 
 (defvar byte-compile-not-obsolete-vars nil
@@ -421,31 +421,46 @@ Filled in `cconv-analyse-form' but initialized and consulted here.")
 
 (defvar byte-compiler-error-flag)
 
+(defun byte-compile-recurse-toplevel (form non-toplevel-case)
+  "Implement `eval-when-compile' and `eval-and-compile'.
+Return the compile-time value of FORM."
+  ;; Macroexpand (not macroexpand-all!) form at toplevel in case it
+  ;; expands into a toplevel-equivalent `progn'.  See CLHS section
+  ;; 3.2.3.1, "Processing of Top Level Forms".  The semantics are very
+  ;; subtle: see test/automated/bytecomp-tests.el for interesting
+  ;; cases.
+  (setf form (macroexpand form byte-compile-macro-environment))
+  (if (eq (car-safe form) 'progn)
+      (cons 'progn
+            (mapcar (lambda (subform)
+                      (byte-compile-recurse-toplevel
+                       subform non-toplevel-case))
+                    (cdr form)))
+    (funcall non-toplevel-case form)))
+
 (defconst byte-compile-initial-macro-environment
-  '(
+  `(
     ;; (byte-compiler-options . (lambda (&rest forms)
     ;;     		       (apply 'byte-compiler-options-handler forms)))
     (declare-function . byte-compile-macroexpand-declare-function)
-    (eval-when-compile . (lambda (&rest body)
-			   (list
-			    'quote
-			    (byte-compile-eval
-                             (byte-compile-top-level
-                              (byte-compile-preprocess (cons 'progn body)))))))
-    (eval-and-compile . (lambda (&rest body)
-                          ;; Byte compile before running it.  Do it piece by
-                          ;; piece, in case further expressions need earlier
-                          ;; ones to be evaluated already, as is the case in
-                          ;; eieio.el.
-                          `(progn
-                             ,@(mapcar (lambda (exp)
-                                         (let ((cexp
-                                                (byte-compile-top-level
-                                                 (byte-compile-preprocess
-                                                  exp))))
-                                           (eval cexp)
-                                           cexp))
-                                       body)))))
+    (eval-when-compile . ,(lambda (&rest body)
+                                  (let ((result nil))
+                                    (byte-compile-recurse-toplevel
+                                     (cons 'progn body)
+                                     (lambda (form)
+                                       (setf result
+                                             (byte-compile-eval
+                                              (byte-compile-top-level
+                                               (byte-compile-preprocess form))))))
+                                    (list 'quote result))))
+    (eval-and-compile . ,(lambda (&rest body)
+                                 (byte-compile-recurse-toplevel
+                                  (cons 'progn body)
+                                  (lambda (form)
+                                    (let ((compiled (byte-compile-top-level
+                                                     (byte-compile-preprocess form))))
+                                      (eval compiled lexical-binding)
+                                      compiled))))))
   "The default macro-environment passed to macroexpand by the compiler.
 Placing a macro here will cause a macro to have different semantics when
 expanded by the compiler as when expanded by the interpreter.")
@@ -1265,8 +1280,7 @@ Each function's symbol gets added to `byte-compile-noruntime-functions'."
 		       (if (byte-code-function-p def)
 			   (aref def 0)
 			 '(&rest def)))))
-		(if (and (fboundp (car form))
-			 (subrp (symbol-function (car form))))
+		(if (subrp (symbol-function (car form)))
 		    (subr-arity (symbol-function (car form))))))
 	 (ncall (length (cdr form))))
     ;; Check many or unevalled from subr-arity.
@@ -1706,16 +1720,14 @@ The value is non-nil if there were no errors, nil if errors."
 ;;  (interactive "fByte compile file: \nP")
   (interactive
    (let ((file buffer-file-name)
-	 (file-name nil)
 	 (file-dir nil))
      (and file
 	  (derived-mode-p 'emacs-lisp-mode)
-	  (setq file-name (file-name-nondirectory file)
-		file-dir (file-name-directory file)))
+	  (setq file-dir (file-name-directory file)))
      (list (read-file-name (if current-prefix-arg
 			       "Byte compile and load file: "
 			     "Byte compile file: ")
-			   file-dir file-name nil)
+			   file-dir buffer-file-name nil)
 	   current-prefix-arg)))
   ;; Expand now so we get the current buffer's defaults
   (setq filename (expand-file-name filename))
@@ -2201,9 +2213,12 @@ list that represents a doc string reference.
    (t form)))
 
 ;; byte-hunk-handlers cannot call this!
-(defun byte-compile-toplevel-file-form (form)
-  (let ((byte-compile-current-form nil))	; close over this for warnings.
-    (byte-compile-file-form (byte-compile-preprocess form t))))
+(defun byte-compile-toplevel-file-form (top-level-form)
+  (byte-compile-recurse-toplevel
+   top-level-form
+   (lambda (form)
+     (let ((byte-compile-current-form nil)) ; close over this for warnings.
+       (byte-compile-file-form (byte-compile-preprocess form t))))))
 
 ;; byte-hunk-handlers can call this.
 (defun byte-compile-file-form (form)
@@ -2396,9 +2411,8 @@ not to take responsibility for the actual compilation of the code."
              (byte-compile-warn "%s `%s' defined multiple times in this file"
                                 (if macro "macro" "function")
                                 name)))
-          ((and (fboundp name)
-                (eq (car-safe (symbol-function name))
-                    (if macro 'lambda 'macro)))
+          ((eq (car-safe (symbol-function name))
+               (if macro 'lambda 'macro))
            (when (byte-compile-warning-enabled-p 'redefine)
              (byte-compile-warn "%s `%s' being redefined as a %s"
                                 (if macro "function" "macro")
@@ -2532,7 +2546,7 @@ If FORM is a lambda or a macro, byte-compile it as a function."
    (byte-compile-close-variables
     (let* ((lexical-binding lexical-binding)
            (fun (if (symbolp form)
-		    (and (fboundp form) (symbol-function form))
+		    (symbol-function form)
 		  form))
 	   (macro (eq (car-safe fun) 'macro)))
       (if macro
@@ -2710,7 +2724,6 @@ for symbols generated by the byte compiler itself."
               (cdr compiled)
               ;; optionally, the doc string.
               (cond (lexical-binding
-                     (require 'help-fns)
                      (list (help-add-fundoc-usage doc arglist)))
                     ((or doc int)
                      (list doc)))
@@ -2946,10 +2959,12 @@ for symbols generated by the byte compiler itself."
 				    (format "; use `%s' instead."
 					    interactive-only))
 				   (t "."))))
-        (if (and (fboundp (car form))
-                 (eq (car-safe (symbol-function (car form))) 'macro))
-            (byte-compile-log-warning
-             (format "Forgot to expand macro %s" (car form)) nil :error))
+        (if (eq (car-safe (symbol-function (car form))) 'macro)
+            (progn
+              (debug)
+              (byte-compile-log-warning
+               (format "Forgot to expand macro %s in %S" (car form) form)
+               nil :error)))
         (if (and handler
                  ;; Make sure that function exists.
                  (and (functionp handler)

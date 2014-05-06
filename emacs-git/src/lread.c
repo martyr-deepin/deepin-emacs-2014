@@ -1,6 +1,7 @@
 /* Lisp parsing and input streams.
 
-Copyright (C) 1985-1989, 1993-1995, 1997-2013 Free Software Foundation, Inc.
+Copyright (C) 1985-1989, 1993-1995, 1997-2014 Free Software Foundation,
+Inc.
 
 This file is part of GNU Emacs.
 
@@ -1762,6 +1763,29 @@ end_of_file_error (void)
   xsignal0 (Qend_of_file);
 }
 
+static Lisp_Object
+readevalloop_eager_expand_eval (Lisp_Object val, Lisp_Object macroexpand)
+{
+  /* If we macroexpand the toplevel form non-recursively and it ends
+     up being a `progn' (or if it was a progn to start), treat each
+     form in the progn as a top-level form.  This way, if one form in
+     the progn defines a macro, that macro is in effect when we expand
+     the remaining forms.  See similar code in bytecomp.el.  */
+  val = call2 (macroexpand, val, Qnil);
+  if (EQ (CAR_SAFE (val), Qprogn))
+    {
+      Lisp_Object subforms = XCDR (val);
+      val = Qnil;
+      for (; CONSP (subforms); subforms = XCDR (subforms))
+          val = readevalloop_eager_expand_eval (XCAR (subforms),
+                                                macroexpand);
+    }
+  else
+      val = eval_sub (call2 (macroexpand, val, Qt));
+
+  return val;
+}
+
 /* UNIBYTE specifies how to set load_convert_to_unibyte
    for this invocation.
    READFUN, if non-nil, is used instead of `read'.
@@ -1929,8 +1953,9 @@ readevalloop (Lisp_Object readcharfun,
 
       /* Now eval what we just read.  */
       if (!NILP (macroexpand))
-	val = call1 (macroexpand, val);
-      val = eval_sub (val);
+        val = readevalloop_eager_expand_eval (val, macroexpand);
+      else
+        val = eval_sub (val);
 
       if (printflag)
 	{
@@ -2052,7 +2077,7 @@ STREAM or the value of `standard-input' may be:
   if (EQ (stream, Qt))
     stream = Qread_char;
   if (EQ (stream, Qread_char))
-    /* FIXME: ¿¡ When is this used !?  */
+    /* FIXME: ?! When is this used !?  */
     return call1 (intern ("read-minibuffer"),
 		  build_string ("Lisp expression: "));
 
@@ -2653,9 +2678,10 @@ read1 (Lisp_Object readcharfun, int *pch, bool first_in_list)
 	  /* Accept compiled functions at read-time so that we don't have to
 	     build them using function calls.  */
 	  Lisp_Object tmp;
+	  struct Lisp_Vector *vec;
 	  tmp = read_vector (readcharfun, 1);
-	  struct Lisp_Vector* vec = XVECTOR (tmp);
-	  if (vec->header.size==0)
+	  vec = XVECTOR (tmp);
+	  if (vec->header.size == 0)
 	    invalid_syntax ("Empty byte-code object");
 	  make_byte_code (vec);
 	  return tmp;
@@ -3866,7 +3892,8 @@ DEFUN ("unintern", Funintern, Sunintern, 1, 2, 0,
 The value is t if a symbol was found and deleted, nil otherwise.
 NAME may be a string or a symbol.  If it is a symbol, that symbol
 is deleted, if it belongs to OBARRAY--no other symbol is deleted.
-OBARRAY defaults to the value of the variable `obarray'.  */)
+OBARRAY, if nil, defaults to the value of the variable `obarray'.
+usage: (unintern NAME OBARRAY)  */)
   (Lisp_Object name, Lisp_Object obarray)
 {
   register Lisp_Object string, tem;
@@ -3936,7 +3963,8 @@ OBARRAY defaults to the value of the variable `obarray'.  */)
 
 /* Return the symbol in OBARRAY whose names matches the string
    of SIZE characters (SIZE_BYTE bytes) at PTR.
-   If there is no such symbol in OBARRAY, return nil.
+   If there is no such symbol, return the integer bucket number of
+   where the symbol would be if it were present.
 
    Also store the bucket number in oblookup_last_bucket_number.  */
 
@@ -4343,7 +4371,7 @@ init_lread (void)
 #ifdef CANNOT_DUMP
   bool use_loadpath = true;
 #else
-  bool use_loadpath = !NILP (Vpurify_flag);
+  bool use_loadpath = NILP (Vpurify_flag);
 #endif
 
   if (use_loadpath && egetenv ("EMACSLOADPATH"))
@@ -4386,7 +4414,7 @@ init_lread (void)
             }
         }                       /* Fmemq (Qnil, Vload_path) */
     }
-  else                          /* Vpurify_flag || !EMACSLOADPATH */
+  else
     {
       Vload_path = load_path_default ();
 
@@ -4403,7 +4431,7 @@ init_lread (void)
           sitelisp = decode_env_path (0, PATH_SITELOADSEARCH, 0);
           if (! NILP (sitelisp)) Vload_path = nconc2 (sitelisp, Vload_path);
         }
-    }                           /* !Vpurify_flag && EMACSLOADPATH */
+    }
 
   Vvalues = Qnil;
 

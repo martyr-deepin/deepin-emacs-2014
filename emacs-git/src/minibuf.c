@@ -1,6 +1,6 @@
 /* Minibuffer input and completion.
 
-Copyright (C) 1985-1986, 1993-2013 Free Software Foundation, Inc.
+Copyright (C) 1985-1986, 1993-2014 Free Software Foundation, Inc.
 
 This file is part of GNU Emacs.
 
@@ -965,9 +965,9 @@ and some related functions, which use zero-indexing for POSITION.  */)
 DEFUN ("read-string", Fread_string, Sread_string, 1, 5, 0,
        doc: /* Read a string from the minibuffer, prompting with string PROMPT.
 If non-nil, second arg INITIAL-INPUT is a string to insert before reading.
-  This argument has been superseded by DEFAULT-VALUE and should normally
-  be nil in new code.  It behaves as in `read-from-minibuffer'.  See the
-  documentation string of that function for details.
+  This argument has been superseded by DEFAULT-VALUE and should normally be nil
+  in new code.  It behaves as INITIAL-CONTENTS in `read-from-minibuffer' (which
+  see).
 The third arg HISTORY, if non-nil, specifies a history list
   and optionally the initial position in the list.
 See `read-from-minibuffer' for details of HISTORY argument.
@@ -1967,7 +1967,7 @@ A value of t means no truncation.
 This variable only affects history lists that don't specify their own
 maximum lengths.  Setting the `history-length' property of a history
 variable overrides this default.  */);
-  XSETFASTINT (Vhistory_length, 30);
+  XSETFASTINT (Vhistory_length, 100);
 
   DEFVAR_BOOL ("history-delete-duplicates", history_delete_duplicates,
 	       doc: /* Non-nil means to delete duplicates in history.

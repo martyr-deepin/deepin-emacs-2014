@@ -1,3 +1,99 @@
+2014-04-18  Paul Eggert  <eggert@cs.ucla.edu>
+
+	* notes/bzr: Update instructions for merging from gnulib.
+	Remove obsolete note about tramp.el and tramp-sh.el.
+	Change "emacs-23" to "emacs-24".
+
+2014-04-11  Glenn Morris  <rgm@gnu.org>
+
+	* grammars/Makefile.in (EMACSDATA, EMACSDOC, EMACSPATH): Unexport.
+
+2014-03-22  Glenn Morris  <rgm@gnu.org>
+
+	* quick-install-emacs (AVOID): Remove testfile and test-distrib.
+
+2014-03-21  Glenn Morris  <rgm@gnu.org>
+
+	* update_autogen: Auto-detect VCS in use.
+	(vcs): New variable.
+	(status, commit, main): Handle git.
+
+2014-03-07  Paul Eggert  <eggert@cs.ucla.edu>
+
+	Fix oversight preventing lib/sys/types.h from being generated.
+	* merge-gnulib (GNULIB_TOOL_FLAGS): Don't avoid sys_types.
+
+2014-02-06  David Engster  <deng@randomsample.de>
+
+	* grammars/c.by (function-pointer): Correctly deal with anonymous
+	function pointers.
+	(opt-brackets-after-symbol): New.
+	(multi-stage-dereference): Use it.  Add rules for explicit
+	matching the last dereference.
+
+2014-01-16  Eric S. Raymond  <esr@thyrsus.com>
+
+	* notes/commits: Add a 'graph on VCS-independent ways of
+	identifying commits and the desirability thereof.
+
+2014-01-15  Paul Eggert  <eggert@cs.ucla.edu>
+
+	Fix copyright license notices for Adobe Unicode mapping files.
+	* charsets/mapfiles/README: The copied files are not compressed.
+	Check for copies as of today.
+	* charsets/mapfiles/stdenc.txt, charsets/mapfiles/symbol.txt:
+	Update from table version 0.2 (1999-03-30) to 1.0 (2011-07-12).
+	This doesn't change the table data, just copyright license notice.
+	The new notices are compatible with the GPL, the old ones were not.
+
+2014-01-13  Glenn Morris  <rgm@gnu.org>
+
+	* update_autogen (status): New function.  Use throughout.
+
+2014-01-10  Glenn Morris  <rgm@gnu.org>
+
+	* update_autogen: Fix sed bug that was losing the last AUTOGEN_VCS.
+
+2014-01-04  Glenn Morris  <rgm@gnu.org>
+
+	* admin.el (manual-html-fix-node-div): Handle Texinfo 5's movable <hr>.
+	(manual-html-fix-index-2): Tweak Texinfo 5 table format.
+	Fix minor Texinfo 4 issue with start of detailed menu.
+
+2014-01-03  Glenn Morris  <rgm@gnu.org>
+
+	* admin.el: More Texinfo 5 updates.
+	(manual-html-fix-headers): Tweak Texinfo 5 body.
+	(manual-html-fix-node-div): Treat "header" like "node".
+	(manual-html-fix-index-1): Handle Texinfo 5 top heading.
+	(manual-html-fix-index-2): Tweak Texinfo 5 listing tables.
+
+2014-01-02  Xue Fuqiao  <xfq.free@gmail.com>
+
+	* check-doc-strings: Replace `perl -w' with `use warnings;'.
+
+2013-12-30  Glenn Morris  <rgm@gnu.org>
+
+	* admin.el (manual-html-fix-headers, manual-html-fix-index-1):
+	Some updates for changes in Texinfo 5 output.
+
+2013-12-29  Xue Fuqiao  <xfq.free@gmail.com>
+
+	* make-emacs:
+	* build-configs: Add the "use strict;" and "use warnings;" pragmas.
+
+2013-12-28  Glenn Morris  <rgm@gnu.org>
+
+	* admin.el (cusver-scan): Warn about missing :types.
+	(cusver-check): Interactively, require existing directories.
+
+2013-12-27  Xue Fuqiao  <xfq.free@gmail.com>
+
+	* admin.el (manual-misc-manuals, make-manuals, manual-pdf)
+	(cusver-find-files, cusver-new-version, cusver-scan)
+	(cusver-goto-xref, cusver-check): Doc fix.
+	(manual-html-node, cusver-check): Use `user-error'.
+
 2013-12-24  Paul Eggert  <eggert@cs.ucla.edu>
 
 	Automate the procedure for updating copyright year.
@@ -7,9 +103,8 @@
 
 2013-12-24  Xue Fuqiao  <xfq.free@gmail.com>
 
-	* admin.el (add-release-logs):
-	(set-version-in-file, set-version, set-copyright):
-	Use `user-error'.
+	* admin.el (add-release-logs, set-version-in-file, set-version)
+	(set-copyright): Use `user-error'.
 
 2013-12-22  Eli Zaretskii  <eliz@gnu.org>
 
@@ -295,7 +390,7 @@
 
 2013-05-07  Paul Eggert  <eggert@cs.ucla.edu>
 
-	Use Gnulib ACL implementation, for benefit of Solaris etc. (Bug#14295)
+	Use Gnulib ACL implementation, for benefit of Solaris etc.  (Bug#14295)
 	* merge-gnulib (GNULIB_MODULES): Add qacl.
 	(GNULIB_TOOL_FLAGS): Do not avoid errno.
 
@@ -510,10 +605,10 @@
 	(cusver-scan): Check if containing group has a :version.
 	(cusver-check): Add VERSION argument.
 
-2012-10-01  David Engster  <deng@randomsample.de>
+2012-10-06  David Engster  <deng@randomsample.de>
 
 	* grammars/bovine-grammar.el:
-	* grammars/wisent-grammar.el: Move to lisp directory.
+	* grammars/wisent-grammar.el: Move to lisp/cedet/semantic directory.
 
 2012-10-01  David Engster  <deng@randomsample.de>
 
@@ -972,6 +1067,10 @@
 
 	* notes/bugtracker (bugtracker_debbugs_url): Fix typo.
 
+2011-02-20  Paul Eggert  <eggert@cs.ucla.edu>
+
+	* notes/copyright: Remove src/md5.c and src/md5.h as special cases.
+
 2011-02-19  Eli Zaretskii  <eliz@gnu.org>
 
 	* admin.el (set-version): Add msdos/sed2v2.inp.
@@ -979,8 +1078,9 @@
 2011-02-16  Paul Eggert  <eggert@cs.ucla.edu>
 
 	Remove no-longer needed getloadavg symbols.
-	* CPP-DEFINES (LOAD_AVE_CVT, LOAD_AVE_TYPE, FSCALE, KERNEL_FILE):
+	* CPP-DEFINES (LOAD_AVE_CVT, LOAD_AVE_TYPE, FSCALE, KERNEL_FILE)
 	(LDAV_SYMBOL): Remove.
+	* notes/copyright: Remove src/getloadavg.c as a special case.
 
 2011-02-12  Glenn Morris  <rgm@gnu.org>
 
@@ -1503,7 +1603,7 @@
 	Sub-directory `unidata' is for codes to generate charprop.el and
 	many other uni-*.el files from `UnicodeData.txt'.
 
-	* Unidata/README: New file.
+	* unidata/README: New file.
 
 	* unidata/Makefile: New file.
 
@@ -1929,8 +2029,6 @@
 	emacs.exe before zipping, and including batch file to recreate
 	after unpacking.
 
-	* nt/stitch.bat: New file.
-
 	* nt/README-ftp-server: Update wording and version number etc.
 	Add extra instructions for installing multi-file .zip
 	distribution.
@@ -2050,7 +2148,7 @@
 
 2001-09-04  Andrew Innes  <andrewi@gnu.org>
 
-	* admin/nt/makedist.bat: Remove reference to obsolete file
+	* nt/makedist.bat: Remove reference to obsolete file
 	GETTING.GNU.SOFTWARE.  Remove outdated comments.  Explain about
 	version of tar used.
 
@@ -2058,7 +2156,7 @@
 ;; coding: utf-8
 ;; End:
 
-  Copyright (C) 2001-2013 Free Software Foundation, Inc.
+  Copyright (C) 2001-2014 Free Software Foundation, Inc.
 
   This file is part of GNU Emacs.
 

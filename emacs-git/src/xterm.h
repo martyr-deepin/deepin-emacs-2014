@@ -1,5 +1,5 @@
 /* Definitions and headers for communication with X protocol.
-   Copyright (C) 1989, 1993-1994, 1998-2013 Free Software Foundation,
+   Copyright (C) 1989, 1993-1994, 1998-2014 Free Software Foundation,
    Inc.
 
 This file is part of GNU Emacs.
@@ -198,6 +198,10 @@ struct x_display_info
      mouse-face.  */
   Mouse_HLInfo mouse_highlight;
 
+  /* Logical identifier of this display.  */
+  unsigned x_id;
+
+  /* Default name for all frames on this display.  */
   char *x_id_name;
 
   /* The number of fonts opened for this display.  */
@@ -992,7 +996,7 @@ extern Lisp_Object x_get_focus_frame (struct frame *);
 
 #ifdef USE_GTK
 extern int xg_set_icon (struct frame *, Lisp_Object);
-extern int xg_set_icon_from_xpm_data (struct frame *, const char**);
+extern int xg_set_icon_from_xpm_data (struct frame *, const char **);
 #endif /* USE_GTK */
 
 extern void x_implicitly_set_name (struct frame *, Lisp_Object, Lisp_Object);
@@ -1048,6 +1052,10 @@ extern void x_session_close (void);
 /* Defined in xterm.c */
 
 extern Lisp_Object Qx_gtk_map_stock;
+
+#if !defined USE_X_TOOLKIT && !defined USE_GTK
+extern void x_clear_under_internal_border (struct frame *f);
+#endif
 
 /* Is the frame embedded into another application? */
 

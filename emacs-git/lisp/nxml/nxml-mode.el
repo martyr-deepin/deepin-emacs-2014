@@ -1,9 +1,9 @@
 ;;; nxml-mode.el --- a new XML mode  -*- lexical-binding:t -*-
 
-;; Copyright (C) 2003-2004, 2007-2013 Free Software Foundation, Inc.
+;; Copyright (C) 2003-2004, 2007-2014 Free Software Foundation, Inc.
 
 ;; Author: James Clark
-;; Keywords: XML
+;; Keywords: wp, hypermedia, languages, XML
 
 ;; This file is part of GNU Emacs.
 
@@ -46,6 +46,7 @@
 
 (defgroup nxml nil
   "New XML editing mode."
+  :link '(custom-manual "(nxml-mode) Top")
   :group 'languages)
 
 (defgroup nxml-faces nil
@@ -871,7 +872,7 @@ Called with `font-lock-beg' and `font-lock-end' dynamically bound."
 
 (defun nxml-fontify-matcher (bound)
   "Called as font-lock keyword matcher."
-
+  (syntax-propertize bound)
   (unless nxml-degraded
     (nxml-debug-change "nxml-fontify-matcher" (point) bound)
 

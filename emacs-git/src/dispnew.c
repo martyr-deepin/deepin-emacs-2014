@@ -1,6 +1,6 @@
 /* Updating of data structures for redisplay.
 
-Copyright (C) 1985-1988, 1993-1995, 1997-2013 Free Software Foundation,
+Copyright (C) 1985-1988, 1993-1995, 1997-2014 Free Software Foundation,
 Inc.
 
 This file is part of GNU Emacs.
@@ -2055,7 +2055,8 @@ adjust_frame_glyphs_for_window_redisplay (struct frame *f)
     w->left_col = 0;
     w->pixel_top = 0;
     w->top_line = 0;
-    w->pixel_width = FRAME_PIXEL_WIDTH (f);
+    w->pixel_width = (FRAME_PIXEL_WIDTH (f)
+		      - 2 * FRAME_INTERNAL_BORDER_WIDTH (f));
     w->total_cols = FRAME_TOTAL_COLS (f);
     w->pixel_height = FRAME_MENU_BAR_HEIGHT (f);
     w->total_lines = FRAME_MENU_BAR_LINES (f);
@@ -5463,8 +5464,7 @@ change_frame_size_1 (struct frame *f, int new_width, int new_height,
 		     bool pretend, bool delay, bool safe, bool pixelwise)
 {
   int new_text_width, new_text_height, new_root_width;
-  int old_root_width = (FRAME_PIXEL_WIDTH (f)
-			- 2 * FRAME_INTERNAL_BORDER_WIDTH (f));
+  int old_root_width = WINDOW_PIXEL_WIDTH (XWINDOW (FRAME_ROOT_WINDOW (f)));
   int new_cols, new_lines;
   ptrdiff_t count = SPECPDL_INDEX ();
 
@@ -5516,7 +5516,11 @@ change_frame_size_1 (struct frame *f, int new_width, int new_height,
      example, fullscreen and remove/add scroll bar.  */
   if (new_text_height == FRAME_TEXT_HEIGHT (f)
       && new_text_width == FRAME_TEXT_WIDTH (f)
-      && new_root_width == old_root_width)
+      && new_root_width == old_root_width
+      && (FRAME_PIXEL_HEIGHT (f) ==
+	  FRAME_TEXT_TO_PIXEL_HEIGHT (f, new_text_height))
+      && (FRAME_PIXEL_WIDTH (f) ==
+	  FRAME_TEXT_TO_PIXEL_WIDTH (f, new_text_width)))
     return;
 
   block_input ();
@@ -5535,7 +5539,7 @@ change_frame_size_1 (struct frame *f, int new_width, int new_height,
       /* MSDOS frames cannot PRETEND, as they change frame size by
 	 manipulating video hardware.  */
       if ((FRAME_TERMCAP_P (f) && !pretend) || FRAME_MSDOS_P (f))
-	FrameRows (FRAME_TTY (f)) = new_height;
+	FrameRows (FRAME_TTY (f)) = new_lines;
     }
 
   if (new_text_width != FRAME_TEXT_WIDTH (f)

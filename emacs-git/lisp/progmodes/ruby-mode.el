@@ -1,6 +1,6 @@
 ;;; ruby-mode.el --- Major mode for editing Ruby files
 
-;; Copyright (C) 1994-2013 Free Software Foundation, Inc.
+;; Copyright (C) 1994-2014 Free Software Foundation, Inc.
 
 ;; Authors: Yukihiro Matsumoto
 ;;	Nobuyoshi Nakada
@@ -106,7 +106,7 @@
   "Regexp to match the beginning of a heredoc.")
 
   (defconst ruby-expression-expansion-re
-    "\\(?:[^\\]\\|\\=\\)\\(\\\\\\\\\\)*\\(#\\({[^}\n\\\\]*\\(\\\\.[^}\n\\\\]*\\)*}\\|\\(\\$\\|@\\|@@\\)\\(\\w\\|_\\)+\\)\\)"))
+    "\\(?:[^\\]\\|\\=\\)\\(\\\\\\\\\\)*\\(#\\({[^}\n\\\\]*\\(\\\\.[^}\n\\\\]*\\)*}\\|\\(\\$\\|@\\|@@\\)\\(\\w\\|_\\)+\\|\\$[^a-zA-Z \n]\\)\\)"))
 
 (defun ruby-here-doc-end-match ()
   "Return a regexp to find the end of a heredoc.
@@ -226,7 +226,10 @@ This should only be called after matching against `ruby-here-doc-beg-re'."
   :group 'ruby
   :safe 'integerp)
 
-(defcustom ruby-align-to-stmt-keywords nil
+(defconst ruby-alignable-keywords '(if while unless until begin case for def)
+  "Keywords that can be used in `ruby-align-to-stmt-keywords'.")
+
+(defcustom ruby-align-to-stmt-keywords '(def)
   "Keywords after which we align the expression body to statement.
 
 When nil, an expression that begins with one these keywords is
@@ -250,19 +253,27 @@ the statement:
 
 Only has effect when `ruby-use-smie' is t.
 "
-  :type '(choice
+  :type `(choice
           (const :tag "None" nil)
           (const :tag "All" t)
           (repeat :tag "User defined"
-                  (choice (const if)
-                          (const while)
-                          (const unless)
-                          (const until)
-                          (const begin)
-                          (const case)
-                          (const for))))
+                  (choice ,@(mapcar
+                             (lambda (kw) (list 'const kw))
+                             ruby-alignable-keywords))))
   :group 'ruby
   :safe 'listp
+  :version "24.4")
+
+(defcustom ruby-align-chained-calls nil
+  "If non-nil, align chained method calls.
+
+Each method call on a separate line will be aligned to the column
+of its parent.
+
+Only has effect when `ruby-use-smie' is t."
+  :type 'boolean
+  :group 'ruby
+  :safe 'booleanp
   :version "24.4")
 
 (defcustom ruby-deep-arglist t
@@ -273,17 +284,26 @@ Only has effect when `ruby-use-smie' is nil."
   :group 'ruby
   :safe 'booleanp)
 
+;; FIXME Woefully under documented.  What is the point of the last `t'?.
 (defcustom ruby-deep-indent-paren '(?\( ?\[ ?\] t)
   "Deep indent lists in parenthesis when non-nil.
 The value t means continuous line.
 Also ignores spaces after parenthesis when `space'.
 Only has effect when `ruby-use-smie' is nil."
+  :type '(choice (const nil)
+                 character
+                 (repeat (choice character
+                                 (cons character (choice (const nil)
+                                                         (const t)))
+                                 (const t) ; why?
+                                 )))
   :group 'ruby)
 
 (defcustom ruby-deep-indent-paren-style 'space
   "Default deep indent style.
 Only has effect when `ruby-use-smie' is nil."
-  :options '(t nil space) :group 'ruby)
+  :type '(choice (const t) (const nil) (const space))
+  :group 'ruby)
 
 (defcustom ruby-encoding-map
   '((us-ascii       . nil)       ;; Do not put coding: us-ascii
@@ -342,10 +362,10 @@ It is used when `ruby-encoding-magic-comment-style' is set to `custom'."
              ;; but avoids lots of conflicts:
              (exp "and" exp) (exp "or" exp))
        (exp  (exp1) (exp "," exp) (exp "=" exp)
-             (id " @ " exp)
-             (exp "." id))
+             (id " @ " exp))
        (exp1 (exp2) (exp2 "?" exp1 ":" exp1))
-       (exp2 ("def" insts "end")
+       (exp2 (exp3) (exp3 "." exp2))
+       (exp3 ("def" insts "end")
              ("begin" insts-rescue-insts "end")
              ("do" insts "end")
              ("class" insts "end") ("module" insts "end")
@@ -372,7 +392,7 @@ It is used when `ruby-encoding-magic-comment-style' is set to `custom'."
        (ielsei (itheni) (itheni "else" insts))
        (if-body (ielsei) (if-body "elsif" if-body)))
      '((nonassoc "in") (assoc ";") (right " @ ")
-       (assoc ",") (right "=") (assoc "."))
+       (assoc ",") (right "="))
      '((assoc "when"))
      '((assoc "elsif"))
      '((assoc "rescue" "ensure"))
@@ -391,7 +411,8 @@ It is used when `ruby-encoding-magic-comment-style' is set to `custom'."
        (nonassoc ">" ">=" "<" "<=")
        (nonassoc "==" "===" "!=")
        (nonassoc "=~" "!~")
-       (left "<<" ">>"))))))
+       (left "<<" ">>")
+       (right "."))))))
 
 (defun ruby-smie--bosp ()
   (save-excursion (skip-chars-backward " \t")
@@ -401,14 +422,17 @@ It is used when `ruby-encoding-magic-comment-style' is set to `custom'."
   (save-excursion
     (skip-chars-backward " \t")
     (not (or (bolp)
+             (memq (char-before) '(?\[ ?\())
              (and (memq (char-before)
-                        '(?\; ?- ?+ ?* ?/ ?: ?. ?, ?\[ ?\( ?\\ ?& ?> ?< ?%
-                          ?~ ?^))
+                        '(?\; ?- ?+ ?* ?/ ?: ?. ?, ?\\ ?& ?> ?< ?% ?~ ?^))
+                  ;; Not a binary operator symbol.
+                  (not (eq (char-before (1- (point))) ?:))
                   ;; Not the end of a regexp or a percent literal.
                   (not (memq (car (syntax-after (1- (point)))) '(7 15))))
              (and (eq (char-before) ?\?)
                   (equal (save-excursion (ruby-smie--backward-token)) "?"))
              (and (eq (char-before) ?=)
+                  ;; Not a symbol :==, :!=, or a foo= method.
                   (string-match "\\`\\s." (save-excursion
                                             (ruby-smie--backward-token))))
              (and (eq (char-before) ?|)
@@ -601,7 +625,20 @@ It is used when `ruby-encoding-magic-comment-style' is set to `custom'."
         ;; When after `.', let's always de-indent,
         ;; because when `.' is inside the line, the
         ;; additional indentation from it looks out of place.
-        ((smie-rule-parent-p ".") (smie-rule-parent (- ruby-indent-level)))
+        ((smie-rule-parent-p ".")
+         (let (smie--parent)
+           (save-excursion
+             ;; Traverse up the parents until the parent is "." at
+             ;; indentation, or any other token.
+             (while (and (let ((parent (smie-indent--parent)))
+                           (goto-char (cadr parent))
+                           (save-excursion
+                             (unless (integerp (car parent)) (forward-char -1))
+                             (not (ruby-smie--bosp))))
+                         (progn
+                           (setq smie--parent nil)
+                           (smie-rule-parent-p "."))))
+             (smie-rule-parent))))
         (t (smie-rule-parent))))))
     (`(:after . ,(or `"(" "[" "{"))
      ;; FIXME: Shouldn't this be the default behavior of
@@ -613,9 +650,15 @@ It is used when `ruby-encoding-magic-comment-style' is set to `custom'."
        ;; because we want to reject hanging tokens at bol, too.
        (unless (or (eolp) (forward-comment 1))
          (cons 'column (current-column)))))
+    (`(:before . " @ ")
+     (save-excursion
+       (skip-chars-forward " \t")
+       (cons 'column (current-column))))
     (`(:before . "do") (ruby-smie--indent-to-stmt))
-    (`(:before . ".") ruby-indent-level)
-    (`(:after . "=>") ruby-indent-level)
+    (`(:before . ".")
+     (if (smie-rule-sibling-p)
+         (and ruby-align-chained-calls 0)
+       ruby-indent-level))
     (`(:before . ,(or `"else" `"then" `"elsif" `"rescue" `"ensure"))
      (smie-rule-parent))
     (`(:before . "when")
@@ -630,7 +673,7 @@ It is used when `ruby-encoding-magic-comment-style' is set to `custom'."
           (smie-indent--hanging-p)
           ruby-indent-level))
     (`(:after . ,(or "?" ":")) ruby-indent-level)
-    (`(:before . ,(or "if" "while" "unless" "until" "begin" "case" "for"))
+    (`(:before . ,(guard (memq (intern-soft token) ruby-alignable-keywords)))
      (when (not (ruby--at-indentation-p))
        (if (ruby-smie--indent-to-stmt-p token)
            (ruby-smie--indent-to-stmt)
@@ -1769,6 +1812,7 @@ It will be properly highlighted even when the call omits parens.")
       ("[!?]"
        (0 (unless (save-excursion
                     (or (nth 8 (syntax-ppss (match-beginning 0)))
+                        (eq (char-before) ?:)
                         (let (parse-sexp-lookup-properties)
                           (zerop (skip-syntax-backward "w_")))
                         (memq (preceding-char) '(?@ ?$))))
@@ -1979,27 +2023,17 @@ See `font-lock-syntax-table'.")
           "yield")
         'symbols))
      (1 font-lock-keyword-face))
-    ;; Some core methods.
+    ;; Core methods that have required arguments.
     (,(concat
        ruby-font-lock-keyword-beg-re
        (regexp-opt
         '( ;; built-in methods on Kernel
-          "__callee__"
-          "__dir__"
-          "__method__"
-          "abort"
           "at_exit"
           "autoload"
           "autoload?"
-          "binding"
-          "block_given?"
-          "caller"
           "catch"
           "eval"
           "exec"
-          "exit"
-          "exit!"
-          "fail"
           "fork"
           "format"
           "lambda"
@@ -2012,19 +2046,12 @@ See `font-lock-syntax-table'.")
           "proc"
           "putc"
           "puts"
-          "raise"
-          "rand"
-          "readline"
-          "readlines"
           "require"
           "require_relative"
-          "sleep"
           "spawn"
           "sprintf"
-          "srand"
           "syscall"
           "system"
-          "throw"
           "trap"
           "warn"
           ;; keyword-like private methods on Module
@@ -2038,11 +2065,40 @@ See `font-lock-syntax-table'.")
           "include"
           "module_function"
           "prepend"
+          "private_class_method"
+          "private_constant"
+          "public_class_method"
+          "public_constant"
+          "refine"
+          "using")
+        'symbols))
+     (1 (unless (looking-at " *\\(?:[]|,.)}=]\\|$\\)")
+          font-lock-builtin-face)))
+    ;; Kernel methods that have no required arguments.
+    (,(concat
+       ruby-font-lock-keyword-beg-re
+       (regexp-opt
+        '("__callee__"
+          "__dir__"
+          "__method__"
+          "abort"
+          "at_exit"
+          "binding"
+          "block_given?"
+          "caller"
+          "exit"
+          "exit!"
+          "fail"
           "private"
           "protected"
           "public"
-          "refine"
-          "using")
+          "raise"
+          "rand"
+          "readline"
+          "readlines"
+          "sleep"
+          "srand"
+          "throw")
         'symbols))
      (1 font-lock-builtin-face))
     ;; Here-doc beginnings.
@@ -2057,13 +2113,28 @@ See `font-lock-syntax-table'.")
      1 font-lock-variable-name-face)
     ;; Keywords that evaluate to certain values.
     ("\\_<__\\(?:LINE\\|ENCODING\\|FILE\\)__\\_>"
-     (0 font-lock-variable-name-face))
+     (0 font-lock-builtin-face))
     ;; Symbols.
     ("\\(^\\|[^:]\\)\\(:\\([-+~]@?\\|[/%&|^`]\\|\\*\\*?\\|<\\(<\\|=>?\\)?\\|>[>=]?\\|===?\\|=~\\|![~=]?\\|\\[\\]=?\\|@?\\(\\w\\|_\\)+\\([!?=]\\|\\b_*\\)\\|#{[^}\n\\\\]*\\(\\\\.[^}\n\\\\]*\\)*}\\)\\)"
      2 font-lock-constant-face)
-    ;; Variables.
-    ("\\(\\$\\([^a-zA-Z0-9 \n]\\|[0-9]\\)\\)\\W"
-     1 font-lock-variable-name-face)
+    ;; Special globals.
+    (,(concat "\\$\\(?:[:\"!@;,/\\._><\\$?~=*&`'+0-9]\\|-[0adFiIlpvw]\\|"
+              (regexp-opt '("LOAD_PATH" "LOADED_FEATURES" "PROGRAM_NAME"
+                            "ERROR_INFO" "ERROR_POSITION"
+                            "FS" "FIELD_SEPARATOR"
+                            "OFS" "OUTPUT_FIELD_SEPARATOR"
+                            "RS" "INPUT_RECORD_SEPARATOR"
+                            "ORS" "OUTPUT_RECORD_SEPARATOR"
+                            "NR" "INPUT_LINE_NUMBER"
+                            "LAST_READ_LINE" "DEFAULT_OUTPUT" "DEFAULT_INPUT"
+                            "PID" "PROCESS_ID" "CHILD_STATUS"
+                            "LAST_MATCH_INFO" "IGNORECASE"
+                            "ARGV" "MATCH" "PREMATCH" "POSTMATCH"
+                            "LAST_PAREN_MATCH" "stdin" "stdout" "stderr"
+                            "DEBUG" "FILENAME" "VERBOSE" "SAFE" "CLASSPATH"
+                            "JRUBY_VERSION" "JRUBY_REVISION" "ENV_JAVA"))
+              "\\_>\\)")
+     0 font-lock-builtin-face)
     ("\\(\\$\\|@\\|@@\\)\\(\\w\\|_\\)+"
      0 font-lock-variable-name-face)
     ;; Constants.
@@ -2080,11 +2151,21 @@ See `font-lock-syntax-table'.")
     (ruby-match-expression-expansion
      2 font-lock-variable-name-face t)
     ;; Negation char.
-    ("[^[:alnum:]_]\\(!\\)[^=]"
+    ("\\(?:^\\|[^[:alnum:]_]\\)\\(!+\\)[^=]"
      1 font-lock-negation-char-face)
     ;; Character literals.
     ;; FIXME: Support longer escape sequences.
     ("\\_<\\?\\\\?\\S " 0 font-lock-string-face)
+    ;; Regexp options.
+    ("\\(?:\\s|\\|/\\)\\([imxo]+\\)"
+     1 (when (save-excursion
+               (let ((state (syntax-ppss (match-beginning 0))))
+                 (and (nth 3 state)
+                      (or (eq (char-after) ?/)
+                          (progn
+                            (goto-char (nth 8 state))
+                            (looking-at "%r"))))))
+         font-lock-preprocessor-face))
     )
   "Additional expressions to highlight in Ruby mode.")
 
@@ -2125,10 +2206,10 @@ See `font-lock-syntax-table'.")
 (add-to-list 'auto-mode-alist
              (cons (purecopy (concat "\\(?:\\."
                                      "rb\\|ru\\|rake\\|thor"
-                                     "\\|jbuilder\\|gemspec"
+                                     "\\|jbuilder\\|gemspec\\|podspec"
                                      "\\|/"
                                      "\\(?:Gem\\|Rake\\|Cap\\|Thor"
-                                     "Vagrant\\|Guard\\)file"
+                                     "\\|Vagrant\\|Guard\\|Pod\\)file"
                                      "\\)\\'")) 'ruby-mode))
 
 ;;;###autoload

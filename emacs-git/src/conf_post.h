@@ -1,6 +1,6 @@
 /* conf_post.h --- configure.ac includes this via AH_BOTTOM
 
-Copyright (C) 1988, 1993-1994, 1999-2002, 2004-2013 Free Software
+Copyright (C) 1988, 1993-1994, 1999-2002, 2004-2014 Free Software
 Foundation, Inc.
 
 This file is part of GNU Emacs.
@@ -87,10 +87,6 @@ typedef bool bool_bf;
 #ifdef HPUX
 #undef srandom
 #undef random
-/* We try to avoid checking for random and rint on hpux in
-   configure.ac, but some other configure test might check for them as
-   a dependency, so to be safe we also undefine them here.
- */
 #undef HAVE_RANDOM
 #undef HAVE_RINT
 #endif  /* HPUX */
@@ -99,7 +95,8 @@ typedef bool bool_bf;
 #ifdef emacs
 char *_getpty();
 #endif
-
+#define INET6 /* Needed for struct sockaddr_in6.  */
+#undef HAVE_GETADDRINFO /* IRIX has getaddrinfo but not struct addrinfo.  */
 #endif /* IRIX6_5 */
 
 #ifdef MSDOS
@@ -120,6 +117,11 @@ You lose; /* Emacs for DOS must be compiled with DJGPP */
 #else
 # define lstat stat
 #endif
+
+/* We must intercept 'opendir' calls to stash away the directory name,
+   so we could reuse it in readlinkat; see msdos.c.  */
+#define opendir sys_opendir
+
 /* The "portable" definition of _GL_INLINE on config.h does not work
    with DJGPP GCC 3.4.4: it causes unresolved externals in sysdep.c,
    although lib/execinfo.h is included and the inline functions there
@@ -130,6 +132,9 @@ You lose; /* Emacs for DOS must be compiled with DJGPP */
 /* End of gnulib-related stuff.  */
 
 #define emacs_raise(sig) msdos_fatal_signal (sig)
+
+/* DATA_START is needed by vm-limit.c and unexcoff.c. */
+#define DATA_START (&etext + 1)
 
 /* Define one of these for easier conditionals.  */
 #ifdef HAVE_X_WINDOWS
@@ -147,7 +152,7 @@ You lose; /* Emacs for DOS must be compiled with DJGPP */
    directory tree).  Given the unknown policy of different DPMI
    hosts regarding loading of untouched pages, I'm not going to risk
    enlarging Emacs footprint by another 100+ KBytes.  */
-#define SYSTEM_PURESIZE_EXTRA (-170000+65000)
+#define SYSTEM_PURESIZE_EXTRA (-170000+90000)
 #endif
 #endif  /* MSDOS */
 
@@ -159,6 +164,10 @@ You lose; /* Emacs for DOS must be compiled with DJGPP */
 #elif defined DARWIN_OS
 #  define SYSTEM_PURESIZE_EXTRA 200000
 #endif
+#endif
+
+#ifdef CYGWIN
+#define SYSTEM_PURESIZE_EXTRA 10000
 #endif
 
 #if defined HAVE_NTGUI && !defined DebPrint
@@ -217,14 +226,14 @@ extern void _DebPrint (const char *fmt, ...);
 
 /* Work around GCC bug 59600: when a function is inlined, the inlined
    code may have its addresses sanitized even if the function has the
-   no_sanitize_address attribute.  This bug is present in GCC 4.8.2
-   and clang 3.3, the latest releases as of December 2013, and the
-   only platforms known to support address sanitization.  When the bug
-   is fixed the #if can be updated accordingly.  */
-#if ADDRESS_SANITIZER
-# define ADDRESS_SANITIZER_WORKAROUND NO_INLINE
+   no_sanitize_address attribute.  This bug is fixed in GCC 4.9.0 and
+   clang 3.4.  */
+#if (! ADDRESS_SANITIZER \
+     || ((4 < __GNUC__ + (9 <= __GNUC_MINOR__)) \
+	 || 3 < __clang_major__ + (4 <= __clang_minor__)))
+# define ADDRESS_SANITIZER_WORKAROUND /* No workaround needed.  */
 #else
-# define ADDRESS_SANITIZER_WORKAROUND
+# define ADDRESS_SANITIZER_WORKAROUND NO_INLINE
 #endif
 
 /* Attribute of functions whose code should not have addresses

@@ -2,7 +2,7 @@
    0.12.  (Implements POSIX draft P1003.2/D11.2, except for some of the
    internationalization features.)
 
-   Copyright (C) 1993-2013 Free Software Foundation, Inc.
+   Copyright (C) 1993-2014 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -713,7 +713,8 @@ typedef enum
 static int
 extract_number (re_char *source)
 {
-  return (SIGN_EXTEND_CHAR (source[1]) << 8) + source[0];
+  unsigned leading_byte = SIGN_EXTEND_CHAR (source[1]);
+  return (leading_byte << 8) + source[0];
 }
 
 /* Same as EXTRACT_NUMBER, except increment SOURCE to after the number.

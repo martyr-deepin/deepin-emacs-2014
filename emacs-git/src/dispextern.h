@@ -1,6 +1,6 @@
 /* Interface definitions for display code.
 
-Copyright (C) 1985, 1993-1994, 1997-2013 Free Software Foundation, Inc.
+Copyright (C) 1985, 1993-1994, 1997-2014 Free Software Foundation, Inc.
 
 This file is part of GNU Emacs.
 
@@ -1765,6 +1765,8 @@ enum face_id
   MENU_FACE_ID,
   VERTICAL_BORDER_FACE_ID,
   WINDOW_DIVIDER_FACE_ID,
+  WINDOW_DIVIDER_FIRST_PIXEL_FACE_ID,
+  WINDOW_DIVIDER_LAST_PIXEL_FACE_ID,
   BASIC_FACE_ID_SENTINEL
 };
 

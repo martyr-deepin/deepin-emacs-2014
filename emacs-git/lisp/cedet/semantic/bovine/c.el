@@ -1,6 +1,6 @@
 ;;; semantic/bovine/c.el --- Semantic details for C
 
-;; Copyright (C) 1999-2013 Free Software Foundation, Inc.
+;; Copyright (C) 1999-2014 Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 
@@ -504,7 +504,7 @@ code to parse."
     (let ((eval-form (eval parsedtokelist)))
       (if (or (not eval-form)
               (and (numberp eval-form)
-                   (equal eval-form 0)));; ifdefline resulted in false
+                   (equal eval-form 0)));; ifdef line resulted in false
 
 	;; The if indicates to skip this preprocessor section
 	(let ((pt nil))
@@ -1242,7 +1242,7 @@ Use `semantic-analyze-current-tag' to debug this fcn."
       (setq scope (semantic-calculate-scope))
 
       (setq allhits (semantic--analyze-refs-full-lookup tag scope t))
-      
+
       (when (or (zerop (semanticdb-find-result-length allhits))
 		(and (= (semanticdb-find-result-length allhits) 1)
 		     (eq (car (semanticdb-find-result-nth allhits 0)) tag)))
@@ -1594,7 +1594,7 @@ Optional PARENT and COLOR as specified with
   "Return non-nil if TAG is considered abstract.
 PARENT is tag's parent.
 In C, a method is abstract if it is `virtual', which is already
-handled.  A class is abstract iff its destructor is virtual."
+handled.  A class is abstract only if its destructor is virtual."
   (cond
    ((eq (semantic-tag-class tag) 'type)
     (require 'semantic/find)

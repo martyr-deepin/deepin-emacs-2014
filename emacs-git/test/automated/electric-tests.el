@@ -1,6 +1,6 @@
 ;;; electric-tests.el --- tests for electric.el
 
-;; Copyright (C) 2013  João Távora
+;; Copyright (C) 2013-2014 Free Software Foundation, Inc.
 
 ;; Author: João Távora <joaotavora@gmail.com>
 ;; Keywords:
@@ -18,15 +18,16 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-;;; Commentary: Tests for Electric Pair mode.
-;;; TODO: Add tests for other Electric-* functionality
+;;; Commentary:
 
-;;
+;; Tests for Electric Pair mode.
+;; TODO: Add tests for other Electric-* functionality
 
 ;;; Code:
 (require 'ert)
 (require 'ert-x)
 (require 'electric)
+(require 'elec-pair)
 (require 'cl-lib)
 
 (defun call-with-saved-electric-modes (fn)
@@ -52,7 +53,8 @@
     (funcall mode)
     (insert fixture)
     (save-electric-modes
-      (let ((last-command-event char))
+      (let ((last-command-event char)
+            (transient-mark-mode 'lambda))
         (goto-char where)
         (funcall fixture-fn)
         (cl-progv
@@ -112,8 +114,8 @@
                                      mode
                                      extra-desc))
            ()
-         ,(format "With \"%s\", try input %c at point %d. \
-Should %s \"%s\" and point at %d"
+         ,(format "With |%s|, try input %c at point %d. \
+Should %s |%s| and point at %d"
                   fixture
                   char
                   (1+ pos)
@@ -139,7 +141,7 @@ Should %s \"%s\" and point at %d"
           expected-string
           expected-point
           bindings
-          (modes '(quote (emacs-lisp-mode ruby-mode c++-mode)))
+          (modes '(quote (ruby-mode c++-mode)))
           (test-in-comments t)
           (test-in-strings t)
           (test-in-code t)
@@ -184,7 +186,7 @@ Should %s \"%s\" and point at %d"
                    bindings
                    fixture-fn))))))
 
-;;; Basic pairings and skippings
+;;; Basic pairs and skips
 ;;;
 (define-electric-pair-test balanced-situation
   " (())  " "(((((((" :skip-pair-string "ppppppp"
@@ -235,7 +237,7 @@ Should %s \"%s\" and point at %d"
 (define-electric-pair-test find-matching-different-paren-type-inside-list
   "( ()]) " "-[-----" :skip-pair-string "-------")
 
-(define-electric-pair-test ignore-different-unmatching-paren-type
+(define-electric-pair-test ignore-different-nonmatching-paren-type
   "( ()]) " "-(-----" :skip-pair-string "-p-----")
 
 (define-electric-pair-test autopair-keep-least-amount-of-mixed-unbalance
@@ -293,13 +295,55 @@ Should %s \"%s\" and point at %d"
   :bindings `((electric-pair-text-syntax-table
                . ,prog-mode-syntax-table)))
 
-(define-electric-pair-test inhibit-only-if-next-is-mismatched
+(define-electric-pair-test inhibit-if-strings-mismatched
   "\"foo\"\"bar" "\""
-  :expected-string "\"\"\"foo\"\"bar"
+  :expected-string "\"\"foo\"\"bar"
   :expected-point 2
   :test-in-strings nil
   :bindings `((electric-pair-text-syntax-table
                . ,prog-mode-syntax-table)))
+
+(define-electric-pair-test inhibit-in-mismatched-string-inside-ruby-comments
+  "foo\"\"
+#
+#    \"bar\"
+#    \"   \"
+#    \"
+#
+baz\"\""
+  "\""
+  :modes '(ruby-mode)
+  :test-in-strings nil
+  :test-in-comments nil
+  :expected-point 19
+  :expected-string
+  "foo\"\"
+#
+#    \"bar\"\"
+#    \"   \"
+#    \"
+#
+baz\"\""
+  :fixture-fn #'(lambda () (goto-char (point-min)) (search-forward "bar")))
+
+(define-electric-pair-test inhibit-in-mismatched-string-inside-c-comments
+  "foo\"\"/*
+    \"bar\"
+    \"   \"
+    \"
+*/baz\"\""
+  "\""
+  :modes '(c-mode)
+  :test-in-strings nil
+  :test-in-comments nil
+  :expected-point 18
+  :expected-string
+  "foo\"\"/*
+    \"bar\"\"
+    \"   \"
+    \"
+*/baz\"\""
+  :fixture-fn #'(lambda () (goto-char (point-min)) (search-forward "bar")))
 
 
 ;;; More quotes, but now don't bind `electric-pair-text-syntax-table'
@@ -338,6 +382,31 @@ Should %s \"%s\" and point at %d"
   :test-in-strings nil
   :test-in-code nil
   :test-in-comments t)
+
+(define-electric-pair-test whitespace-skipping-for-quotes-not-outside
+  "  \"  \"" "\"-----" :expected-string "\"\"  \"  \""
+  :expected-point 2
+  :bindings '((electric-pair-skip-whitespace . chomp))
+  :test-in-strings nil
+  :test-in-code t
+  :test-in-comments nil)
+
+(define-electric-pair-test whitespace-skipping-for-quotes-only-inside
+  "  \"  \"" "---\"--" :expected-string "  \"\""
+  :expected-point 5
+  :bindings '((electric-pair-skip-whitespace . chomp))
+  :test-in-strings nil
+  :test-in-code t
+  :test-in-comments nil)
+
+(define-electric-pair-test whitespace-skipping-quotes-not-without-proper-syntax
+  "  \"  \"" "---\"--" :expected-string "  \"\"\"  \""
+  :expected-point 5
+  :modes '(text-mode)
+  :bindings '((electric-pair-skip-whitespace . chomp))
+  :test-in-strings nil
+  :test-in-code t
+  :test-in-comments nil)
 
 
 ;;; Pairing arbitrary characters
@@ -440,7 +509,7 @@ Should %s \"%s\" and point at %d"
     (with-temp-buffer
       (insert "()")
       (goto-char 2)
-      (electric-pair-backward-delete-char 1)
+      (electric-pair-delete-pair 1)
       (should (equal "" (buffer-string))))))
 
 

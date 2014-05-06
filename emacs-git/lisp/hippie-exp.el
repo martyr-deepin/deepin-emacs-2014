@@ -1,9 +1,9 @@
 ;;; hippie-exp.el --- expand text trying various ways to find its expansion
 
-;; Copyright (C) 1992, 2001-2013 Free Software Foundation, Inc.
+;; Copyright (C) 1992, 2001-2014 Free Software Foundation, Inc.
 
 ;; Author: Anders Holst <aho@sans.kth.se>
-;; Last change: 3 March 1998
+;; Maintainer: emacs-devel@gnu.org
 ;; Version: 1.6
 ;; Keywords: abbrev convenience
 

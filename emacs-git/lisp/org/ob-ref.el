@@ -1,6 +1,6 @@
 ;;; ob-ref.el --- org-babel functions for referencing external data
 
-;; Copyright (C) 2009-2013 Free Software Foundation, Inc.
+;; Copyright (C) 2009-2014 Free Software Foundation, Inc.
 
 ;; Authors: Eric Schulte
 ;;	 Dan Davison
@@ -85,7 +85,9 @@ the variable."
       (cons (intern var)
 	    (let ((out (save-excursion
 			 (when org-babel-current-src-block-location
-			   (goto-char org-babel-current-src-block-location))
+			   (goto-char (if (markerp org-babel-current-src-block-location)
+					  (marker-position org-babel-current-src-block-location)
+					org-babel-current-src-block-location)))
 			 (org-babel-read ref))))
 	      (if (equal out ref)
 		  (if (string-match "^\".*\"$" ref)
