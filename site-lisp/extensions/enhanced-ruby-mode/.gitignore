@@ -1,7 +1,0 @@
-.bzr
-.bzrignore
-*~
-nokoload.gemspec
-pkg
-tmp
-*.elc
