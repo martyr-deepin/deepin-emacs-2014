@@ -161,7 +161,7 @@ class BrowserBuffer(QWebView):
         view.show()
 
     def remove_view(self, view_id):
-        if self.view_dict.has_key(view_id):
+        if view_id in self.view_dict:
             self.view_dict[view_id].remove()
             self.view_dict.pop(view_id)
 
@@ -294,14 +294,14 @@ if __name__ == '__main__':
     # Because epc server is running in sub-thread.
     @postGui(False)
     def create_buffer(buffer_id, buffer_url, buffer_width, buffer_height):
-        if not buffer_dict.has_key(buffer_id):
+        if not buffer_id in buffer_dict:
             buffer = BrowserBuffer(buffer_id, buffer_width, buffer_height)
             buffer.open_url(buffer_url)
             buffer_dict[buffer_id] = buffer
 
     @postGui(False)
     def remove_buffer(buffer_id):
-        if buffer_dict.has_key(buffer_id):
+        if buffer_id in buffer_dict:
             buffer = buffer_dict[buffer_id]
             buffer.remove_all_views()
             buffer_dict.pop(buffer_id)
@@ -311,7 +311,7 @@ if __name__ == '__main__':
 
     @postGui(False)
     def adjust_size(buffer_id, w, h):
-        if buffer_dict.has_key(buffer_id):
+        if buffer_id in buffer_dict:
             buffer_dict[buffer_id].adjust_size(w, h)
 
     @postGui(False)
@@ -321,8 +321,8 @@ if __name__ == '__main__':
         for view_info in view_infos:
             [buffer_id, x, y, w, h] = view_info
             view_id = "%s_%s" % (x, y)
-            if buffer_dict.has_key(buffer_id):
-                if not buffer_view_dict.has_key(buffer_id):
+            if buffer_id in buffer_dict:
+                if not buffer_id in buffer_view_dict:
                     buffer_view_dict[buffer_id] = {}
 
                 buffer_view_dict[buffer_id][view_id] = (x, y, w, h)
@@ -330,7 +330,7 @@ if __name__ == '__main__':
                 call_message("Buffer id %s is not exist!" % buffer_id)
 
         for buffer in buffer_dict.values():
-            if buffer_view_dict.has_key(buffer.buffer_id):
+            if buffer.buffer_id in buffer_view_dict:
                 emacs_view_ids = buffer_view_dict[buffer.buffer_id].keys()
                 buffer_view_ids = buffer.view_dict.keys()
 
@@ -352,11 +352,11 @@ if __name__ == '__main__':
 
     @postGui(False)
     def focus_view(buffer_id, x, y, w, h):
-        if buffer_dict.has_key(buffer_id):
+        if buffer_id in buffer_dict:
             buffer = buffer_dict[buffer_id]
             view_id = "%s_%s" % (x, y)
 
-            if buffer.view_dict.has_key(view_id):
+            if view_id in buffer.view_dict:
                 view = buffer.view_dict[view_id]
                 view_xwindow_id = view.winId().__int__()
                 grab_focus(view_xwindow_id)
