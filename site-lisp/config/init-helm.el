@@ -125,6 +125,7 @@
       '(
         ("inf-ruby" "Run an inferior Ruby process in a buffer." "inf-ruby")
         ("yaoddmuse-post-library-default" "Post elisp library to EmacsWiki" "yaoddmuse-extension")
+        ("auto-install-from-emacswiki" "Install package from EmacsWiki.org" "auto-install")
         )
       )
 
