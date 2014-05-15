@@ -1,6 +1,6 @@
 ;;; helm-ls-git.el --- list git files. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2013 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2014 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -104,13 +104,13 @@ Valid values are symbol 'abs (default) or 'relative."
   ;; `helm-resume' will use the value of `helm-default-directory'
   ;; as value for `default-directory'.
   (helm-aif (helm-ls-git-root-dir)
-      (with-helm-default-directory it
-          (with-output-to-string
-            (with-current-buffer standard-output
-              (apply #'process-file
-                     "git"
-                     nil (list t helm-ls-git-log-file) nil
-                     (list "ls-files" "--full-name" "--")))))))
+            (with-helm-default-directory it
+                                         (with-output-to-string
+                                           (with-current-buffer standard-output
+                                             (apply #'process-file
+                                                    "git"
+                                                    nil (list t helm-ls-git-log-file) nil
+                                                    (list "ls-files" "--full-name" "--")))))))
 
 (cl-defun helm-ls-git-root-dir (&optional (directory default-directory))
   (let ((root (locate-dominating-file directory ".git")))
@@ -125,11 +125,16 @@ Valid values are symbol 'abs (default) or 'relative."
            for abs = (expand-file-name i root)
            for disp = (if (and helm-ff-transformer-show-only-basename
                                (not (string-match "[.]\\{1,2\\}$" i)))
-                          (helm-basename i) (cl-case helm-ls-git-show-abs-or-relative
-                                              (absolute abs)
-                                              (relative i)))
+                          (helm-basename i)
+                        (cl-case helm-ls-git-show-abs-or-relative
+                          (absolute abs)
+                          (relative i)))
            collect
            (cons (propertize disp 'face 'helm-ff-file) abs)))
+
+(defun helm-ls-git-sort-fn (candidates)
+  "Transformer for sorting candidates."
+  (helm-ff-sort-candidates candidates nil))
 
 (defun helm-ls-git-init ()
   (let ((data (helm-ls-git-list-files)))
@@ -146,12 +151,17 @@ Valid values are symbol 'abs (default) or 'relative."
     (helm-init-candidates-in-buffer 'global data)))
 
 (defun helm-ls-git-header-name (name)
-  (format "%s (%s)"
-          name
-          (replace-regexp-in-string
-           "\n" ""
-           (shell-command-to-string
-            "git rev-parse --abbrev-ref HEAD"))))
+  (let ((refs   (shell-command-to-string "git rev-parse --branches"))
+        (branch (shell-command-to-string
+                 "git rev-parse --abbrev-ref HEAD")))
+    (format "%s (%s)"
+            name
+            (replace-regexp-in-string
+             "\n" ""
+             ;; Check REFS to avoid message error in header
+             ;; when repo is just initialized and there is
+             ;; no branches yet.
+             (if (or (null refs) (string= refs "")) "--" branch)))))
 
 (defvar helm-source-ls-git
   `((name . "Git files")
@@ -161,7 +171,12 @@ Valid values are symbol 'abs (default) or 'relative."
     (keymap . ,helm-generic-files-map)
     (help-message . helm-generic-file-help-message)
     (mode-line . helm-generic-file-mode-line-string)
-    (candidate-transformer . helm-ls-git-transformer)
+    (match-part . (lambda (candidate)
+                    (if helm-ff-transformer-show-only-basename
+                        (helm-basename candidate)
+                      candidate)))
+    (candidate-transformer . (helm-ls-git-transformer
+                              helm-ls-git-sort-fn))
     (action-transformer helm-transform-file-load-el)
     (action . ,(cdr (helm-get-actions-from-type helm-source-locate)))))
 
@@ -259,8 +274,8 @@ Valid values are symbol 'abs (default) or 'relative."
     (header-name . helm-ls-git-header-name)
     (init . (lambda ()
               (helm-init-candidates-in-buffer
-                  'global
-                (helm-ls-git-status))))
+               'global
+               (helm-ls-git-status))))
     (candidates-in-buffer)
     (keymap . ,helm-generic-files-map)
     (filtered-candidate-transformer . helm-ls-git-status-transformer)
@@ -315,8 +330,8 @@ Valid values are symbol 'abs (default) or 'relative."
                                                                 (progn
                                                                   (vc-git-revert f)
                                                                   (helm-aif (get-file-buffer f)
-                                                                      (with-current-buffer it
-                                                                        (revert-buffer t t)))))))))))
+                                                                            (with-current-buffer it
+                                                                              (revert-buffer t t)))))))))))
           ((string-match "^ D " disp)
            (append actions (list '("Git delete" . vc-git-delete-file))))
           (t actions))))
