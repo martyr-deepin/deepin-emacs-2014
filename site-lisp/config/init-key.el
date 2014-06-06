@@ -61,6 +61,10 @@
    ("s-R" . re-builder)                 ;可视化构建正则表达式
    )
  "init-rebuilder")
+(lazy-set-autoload-key                  ;快速运行
+ '(
+   ("M-!" . quickrun))
+ "quickrun")
 ;;; ### Color-moccur ###
 ;;; --- 增强的moccur
 (lazy-set-autoload-key
