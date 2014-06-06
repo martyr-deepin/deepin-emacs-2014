@@ -73,13 +73,17 @@ class WebPage(QWebPage):
         super(WebPage, self).__init__()
 
     def acceptNavigationRequest(self, frame, request, type):
-        if(type == QWebPage.NavigationTypeLinkClicked):
-            if(frame == self.mainFrame()):
-                self.view().link_clicked(request.url())
-            else:
+        # Handle myself if got user event.
+        if type == QWebPage.NavigationTypeLinkClicked:
+            if self.view().press_ctrl_flag:
                 call_method("open-url", [request.url().toString()])
-                return False
+            else:
+                self.view().load(request.url())
 
+            # Return False to stop default behavior.
+            return False    
+
+        # Otherwise, use default behavior.
         return QWebPage.acceptNavigationRequest(self, frame, request, type)
 
 class BrowserBuffer(QWebView):
@@ -93,8 +97,7 @@ class BrowserBuffer(QWebView):
         self.buffer_width = buffer_width
         self.buffer_height = buffer_height
 
-        self.page().setLinkDelegationPolicy(QWebPage.DelegateAllLinks)
-        self.page().linkClicked.connect(self.link_clicked)
+        self.setPage(WebPage())
         self.page().mainFrame().setScrollBarPolicy(Qt.Horizontal, Qt.ScrollBarAlwaysOff)
         self.settings().setUserStyleSheetUrl(QUrl.fromLocalFile(os.path.join(get_parent_dir(__file__), "theme.css")))
         self.settings().setAttribute(QWebSettings.PluginsEnabled, True)
@@ -186,12 +189,6 @@ class BrowserBuffer(QWebView):
     @postGui()
     def open_url(self, url):
         self.load(QUrl(url))
-
-    def link_clicked(self, url):
-        if self.press_ctrl_flag:
-            call_method("open-url", [url.url()])
-        else:
-            self.load(url)
 
 class BrowserView(QWidget):
     def __init__(self, browser_buffer, view_id):
