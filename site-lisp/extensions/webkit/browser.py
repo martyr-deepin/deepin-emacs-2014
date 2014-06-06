@@ -93,8 +93,6 @@ class BrowserBuffer(QWebView):
         self.buffer_width = buffer_width
         self.buffer_height = buffer_height
 
-        # self.setPage(WebPage())
-
         self.page().setLinkDelegationPolicy(QWebPage.DelegateAllLinks)
         self.page().linkClicked.connect(self.link_clicked)
         self.page().mainFrame().setScrollBarPolicy(Qt.Horizontal, Qt.ScrollBarAlwaysOff)
@@ -383,34 +381,6 @@ if __name__ == '__main__':
     active_window_watcher = ActiveWindowWatcher()
     active_window_watcher.activeWindowChanged.connect(handle_active_window)
     active_window_watcher.start()
-
-    # This function just for test python module.
-    def test():
-        emacs_xid = "106954839"
-
-        init(emacs_xid)
-
-        create_buffer("1", "http://www.google.com", 1600, 400)
-
-        # View will adjust.
-        buffer_dict["1"].add_view("400_500", 400, 500, 300, 400)
-
-        # View will destory.
-        buffer_dict["1"].add_view("900_500", 900, 500, 300, 400)
-
-        # View will add.
-        view_infos = [
-            ["1", 0, 0, 300, 400],
-            ["1", 0, 500, 300, 400],
-            ["1", 400, 0, 300, 400],
-            ["1", 400, 500, 500, 400],
-        ]
-
-        update_views(view_infos)
-
-        adjust_size("1", "400_500", 400, 500, 500, 400)
-
-    # test()
 
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     sys.exit(app.exec_())
