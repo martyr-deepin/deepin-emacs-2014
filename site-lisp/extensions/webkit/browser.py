@@ -85,6 +85,9 @@ class WebPage(QWebPage):
 
         # Otherwise, use default behavior.
         return QWebPage.acceptNavigationRequest(self, frame, request, type)
+    
+    def javaScriptConsoleMessage(self, msg, lineNumber, sourceID):
+        call_message("JsConsole(%s:%d): %s" % (sourceID, lineNumber, msg))    
 
 class BrowserBuffer(QWebView):
 
@@ -112,7 +115,7 @@ class BrowserBuffer(QWebView):
         self.titleChanged.connect(self.change_title)
 
         self.press_ctrl_flag = False
-
+        
     def change_title(self, title):
         call_method("change-buffer-title", [self.buffer_id, title])
 
