@@ -226,10 +226,12 @@
 ;;; --- 多标签浏览
 (lazy-set-key
  '(
-   ("M-7" . tabbar-backward-tab)        ;移动到后一个标签
-   ("M-8" . tabbar-forward-tab)         ;移动到前一个标签
-   ("M-9" . tabbar-backward-group)      ;移动到后一个标签组
-   ("M-0" . tabbar-forward-group)       ;移动到前一个标签组
+   ("M-7" . tabbar-backward-tab)              ;移动到后一个标签
+   ("M-8" . tabbar-forward-tab)               ;移动到前一个标签
+   ("M-9" . tabbar-backward-group)            ;移动到后一个标签组
+   ("M-0" . tabbar-forward-group)             ;移动到前一个标签组
+   ("<C-tab>" . tabbar-backward-tab)          ;移动到后一个标签
+   ("<C-S-iso-lefttab>" . tabbar-forward-tab) ;移动到前一个标签
    ))
 (lazy-set-autoload-key
  '(
