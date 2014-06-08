@@ -130,8 +130,17 @@
 (defun webkit-get-emacs-xid ()
   (frame-parameter nil 'window-id))
 
+(random t)
+
 (defun webkit-generate-id ()
-  (replace-regexp-in-string "\n" "" (shell-command-to-string "uuidgen")))
+  (format "%04x%04x-%04x-%04x-%04x-%06x%06x"
+          (random (expt 16 4))
+          (random (expt 16 4))
+          (random (expt 16 4))
+          (random (expt 16 4))
+          (random (expt 16 4))
+          (random (expt 16 6))
+          (random (expt 16 6)) ))
 
 (defvar pyepc-file (expand-file-name "browser.py" (file-name-directory load-file-name)))
 
