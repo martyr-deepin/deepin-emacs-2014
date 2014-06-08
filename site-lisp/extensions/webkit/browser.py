@@ -26,7 +26,7 @@ if os.name == 'posix':
     QCoreApplication.setAttribute(QtCore.Qt.AA_X11InitThreads, True)
 
 from PyQt5.QtWebKitWidgets import QWebView, QWebPage
-from PyQt5.QtWebKit import  QWebSettings
+from PyQt5.QtWebKit import QWebSettings
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import QUrl, Qt
 from PyQt5 import QtGui
@@ -103,6 +103,7 @@ class BrowserBuffer(QWebView):
         self.settings().setAttribute(QWebSettings.PluginsEnabled, True)
         self.settings().setAttribute(QWebSettings.JavascriptEnabled, True)
         self.settings().setAttribute(QWebSettings.JavascriptCanOpenWindows, True)
+        self.settings().setFontFamily(QWebSettings.StandardFont, "Sans")
 
         self.adjust_size(self.buffer_width, self.buffer_height)
 
