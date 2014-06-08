@@ -21,6 +21,7 @@
 
 import os
 from PyQt5 import QtCore
+from PyQt5.QtNetwork import QNetworkCookieJar, QNetworkCookie
 from PyQt5.QtCore import QCoreApplication, QEvent
 if os.name == 'posix':
     QCoreApplication.setAttribute(QtCore.Qt.AA_X11InitThreads, True)
@@ -102,6 +103,8 @@ class BrowserBuffer(QWebView):
 
         self.setPage(WebPage())
         self.page().mainFrame().setScrollBarPolicy(Qt.Horizontal, Qt.ScrollBarAlwaysOff)
+        cookie_jar.restore_cookies()
+        self.page().networkAccessManager().setCookieJar(cookie_jar)
         self.settings().setUserStyleSheetUrl(QUrl.fromLocalFile(os.path.join(get_parent_dir(__file__), "theme.css")))
         self.settings().setAttribute(QWebSettings.PluginsEnabled, True)
         self.settings().setAttribute(QWebSettings.JavascriptEnabled, True)
@@ -251,6 +254,34 @@ class BrowserView(QWidget):
 
         xlib_display.sync()
 
+class CookieJar(QNetworkCookieJar):
+    
+    def __init__(self, parent = None):
+        QNetworkCookieJar.__init__(self, parent)
+        self.cookie_path = os.path.expanduser("~/.emacs.d/deepin-emacs/webkit-cookies")
+    
+    def save_cookies(self):
+        allCookies = QNetworkCookieJar.allCookies(self)
+        
+        cookie_dir = os.path.dirname(self.cookie_path)
+        if not os.path.exists(cookie_dir):
+            os.makedirs(cookie_dir)
+                
+        with open(self.cookie_path, 'w') as f:
+            lines = ''
+            for cookie in allCookies:
+                lines = lines + cookie.toRawForm() + '\r\n'
+            f.writelines(lines)
+    
+    def restore_cookies(self):
+        if os.path.exists(self.cookie_path):
+            with open(self.cookie_path, 'r') as f:
+                lines = ''
+                for line in f:
+                    lines = lines + line
+                allCookies = QNetworkCookie.parseCookies(lines)
+                QNetworkCookieJar.setAllCookies(self, allCookies)
+                
 if __name__ == '__main__':
     import sys
     import signal
@@ -265,7 +296,9 @@ if __name__ == '__main__':
     emacs_xwindow_id = 0
 
     buffer_dict = {}
-
+    
+    cookie_jar = CookieJar()
+    
     def call_message(message):
         call_method("message", [message])
 
@@ -301,6 +334,8 @@ if __name__ == '__main__':
     @postGui(False)
     def remove_buffer(buffer_id):
         if buffer_id in buffer_dict:
+            cookie_jar.save_cookies()
+            
             buffer = buffer_dict[buffer_id]
             buffer.remove_all_views()
             buffer_dict.pop(buffer_id)
