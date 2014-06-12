@@ -153,6 +153,9 @@
 
 (defvar webkit-buffer-dict (make-hash-table :test 'equal))
 
+(defvar webkit-history-urls-path "~/.emacs.d/deepin-emacs/webkit-history")
+(defvar webkit-history-urls (make-hash-table :test 'equal))
+
 (defvar webkit-title-length 30)
 
 (defvar webkit-tab-index 0)
@@ -167,12 +170,47 @@
       )
     webkit-buffer))
 
+(defun webkit-get-url-name (url)
+  (car (last (split-string url "://")))
+  )
+
+(defun webkit-get-url-history (url-name)
+  (gethash url-name webkit-history-urls)
+  )
+
 (defun webkit-change-buffer-title (id title)
   (let* ((buffer (gethash id webkit-buffer-dict)))
     (with-current-buffer buffer
-      (rename-buffer (truncate-string-to-width title webkit-title-length)))
+      ;; Rename buffer title.
+      (rename-buffer (truncate-string-to-width title webkit-title-length))
+
+      ;; Record url title in history.
+      (let* ((url-name (webkit-get-url-name buffer-url))
+             (url-history (webkit-get-url-history url-name)))
+        (if url-history
+            (let ((url-number (car url-history))
+                  (url-title (cdr url-history)))
+              (puthash url-name (list url-number title) webkit-history-urls)
+              (webkit-save-history-urls))))
+      )
     )
   )
+
+(defun webkit-save-history-urls ()
+  (with-current-buffer (find-file-noselect webkit-history-urls-path)
+    (erase-buffer)
+    (insert (prin1-to-string webkit-history-urls))
+    (save-buffer)))
+
+(defun webkit-restore-history-urls ()
+  (if (file-exists-p webkit-history-urls-path)
+      (setq webkit-history-urls
+            (read
+             (with-temp-buffer
+               (insert-file-contents webkit-history-urls-path)
+               (buffer-string))))))
+
+(webkit-restore-history-urls)
 
 (defun webkit-open-url (url)
   (interactive "sURL: ")
@@ -193,6 +231,16 @@
         (epc:call-deferred pyepc-browser 'create_buffer (list buffer-id url w h))
         ))
     (switch-to-buffer buffer)
+
+    ;; Record browse history.
+    (let* ((url-name (webkit-get-url-name url))
+           (url-history (webkit-get-url-history url-name)))
+      (if url-history
+          (let ((url-number (car url-history))
+                (url-title (cdr url-history)))
+            (puthash url-name (list (+ url-number 1) url-title) webkit-history-urls))
+        (puthash url-name (list 1 url) webkit-history-urls))
+      (webkit-save-history-urls))
     ))
 
 (defun webkit-monitor-window-change (&rest _)
