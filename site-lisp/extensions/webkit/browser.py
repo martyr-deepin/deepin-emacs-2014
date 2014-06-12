@@ -105,6 +105,7 @@ class BrowserBuffer(QWebView):
         self.page().mainFrame().setScrollBarPolicy(Qt.Horizontal, Qt.ScrollBarAlwaysOff)
         cookie_jar.restore_cookies()
         self.page().networkAccessManager().setCookieJar(cookie_jar)
+        self.page().userAgentForUrl = self.customize_user_agent
         self.settings().setUserStyleSheetUrl(QUrl.fromLocalFile(os.path.join(get_parent_dir(__file__), "theme.css")))
         self.settings().setAttribute(QWebSettings.PluginsEnabled, True)
         self.settings().setAttribute(QWebSettings.JavascriptEnabled, True)
@@ -118,6 +119,9 @@ class BrowserBuffer(QWebView):
         self.titleChanged.connect(self.change_title)
 
         self.press_ctrl_flag = False
+        
+    def customize_user_agent(self, url):
+        return "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.114 Safari/537.36"
         
     def change_title(self, title):
         call_method("change-buffer-title", [self.buffer_id, title])
