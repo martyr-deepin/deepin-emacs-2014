@@ -89,6 +89,7 @@
 (require 'helm-autoload-commands)
 (require 'helm-ls-git)
 (require 'helm-descbinds)
+(require 'helm-webkit)
 (require 'apt-utils)
 
 ;;; Code:
@@ -111,6 +112,7 @@
        helm-source-ls-git
        helm-c-source-yasnippet
        helm-source-apt
+       helm-source-webkit
        )
      "*helm search*")))
 

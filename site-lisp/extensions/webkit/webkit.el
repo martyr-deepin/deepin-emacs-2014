@@ -196,6 +196,16 @@
     )
   )
 
+(defun webkit-delete-history-url (url-name)
+  (let ((url-history (webkit-get-url-history url-name)))
+    (when url-history
+      (remhash url-name webkit-history-urls)
+      (webkit-save-history-urls))))
+
+(defun webkit-clean-history ()
+  (setq webkit-history-urls nil)
+  (webkit-save-history-urls))
+
 (defun webkit-save-history-urls ()
   (with-current-buffer (find-file-noselect webkit-history-urls-path)
     (erase-buffer)

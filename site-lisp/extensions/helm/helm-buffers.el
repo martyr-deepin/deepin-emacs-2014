@@ -624,7 +624,7 @@ displayed with the `file-name-shadow' face if available."
 
 
 (define-helm-type-attribute 'buffer
-    `((action
+  `((action
        ("Switch to buffer" . helm-switch-to-buffer)
        ,(and (locate-library "popwin") '("Switch to buffer in popup window" . popwin:popup-buffer))
        ("Switch to buffer other window" . switch-to-buffer-other-window)
