@@ -105,6 +105,7 @@ Open file use another tool"
            (require 'init-w3m)
            (w3m-find-file file))
           ((string-equal "chm" file-extension)
+           (require 'webkit)
            (require 'chm-view)
            (chm-view-file file))
           ((string-match "\\(pdf\\|ps\\|dvi\\)$" file-extension)

@@ -333,6 +333,8 @@
                      (webkit-focus-browser-view)
                      ))
 
+(setq browse-url-browser-function (lambda (url flag) (webkit-open-url url)))
+
 (provide 'webkit)
 
 ;;; webkit.el ends here
