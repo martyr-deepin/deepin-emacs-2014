@@ -115,7 +115,7 @@
   "Return help as text with special function and SYMBOL.
 Argument FUNC get help information.
 Argument SYMBOL special symbol at current point."
-  (flet ((message (&rest args)))        ;for filter output message in echo area
+  (cl-flet ((message (&rest args)))        ;for filter output message in echo area
     (let ((pop-up-frames nil)
           (wincfg (current-window-configuration)))
       (if (get-buffer "*Help*")

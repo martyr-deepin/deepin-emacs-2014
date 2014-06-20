@@ -285,7 +285,7 @@ See also `screenshot-take' docstring. "
         (let ((default-directory "/images/"))
           (screenshot-get-directory 'default-directory)))
       (expect "/img/"
-        (flet ((getdir () "/img/"))
+        (cl-flet ((getdir () "/img/"))
           (screenshot-get-directory 'getdir)))
 
       (desc "screenshot-take-internal")

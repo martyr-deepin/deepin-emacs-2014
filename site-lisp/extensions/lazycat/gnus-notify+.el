@@ -123,7 +123,7 @@
   (interactive)
   (let (gnus-news-number)
     (force-mode-line-update t)
-    (flet ((message (&rest args)))      ;use `flet' to filter `gnus-group-get-new-news'
+    (cl-flet ((message (&rest args)))      ;use `cl-flet' to filter `gnus-group-get-new-news'
       (gnus-group-get-new-news))        ;output message on minibuffer to disturb user
     (setq gnus-news-number (gnus-get-unread-news-number))
     (if (> gnus-news-number 0)

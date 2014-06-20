@@ -186,7 +186,7 @@ additional jump methods."
                ;; only browse into C source if directory is already defined
                (if find-function-C-source-directory
                    (jump-lisp--find interned)
-                 (flet ((find-function-C-source (fun-or-var file type)
+                 (cl-flet ((find-function-C-source (fun-or-var file type)
                                                 (error "Don't browse C source")))
                    (jump-lisp--find interned)))
                (not (and (eq (point) orig-point)

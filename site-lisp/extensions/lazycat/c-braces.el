@@ -79,7 +79,7 @@
                                       text)))
                   (insert text)
                   (save-excursion
-                    (flet ((indent ()
+                    (cl-flet ((indent ()
                                    (beginning-of-line)
                                    (unless (looking-at "^ *$")
                                      (insert " ")

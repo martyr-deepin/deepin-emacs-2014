@@ -171,7 +171,7 @@ The result is returned as the following `values':
   "Return `uptimes-uptime-values' as a \"wordy\" string."
   (multiple-value-bind (days hours mins secs)
       (uptimes-uptime-values boottime endtime)
-    (flet ((mul (n word) (concat word (unless (= n 1) "s")))
+    (cl-flet ((mul (n word) (concat word (unless (= n 1) "s")))
            (say (n word) (format "%d %s" n (mul n word))))
       (concat (say days "day")
               ", "
@@ -193,7 +193,7 @@ The result is returned as the following `values':
 (defun uptimes-update ()
   "Update `uptimes-last-n' and `uptimes-top-n'."
   (uptimes-read-uptimes)
-  (flet ((trunc (list &optional (where uptimes-keep-count))
+  (cl-flet ((trunc (list &optional (where uptimes-keep-count))
                 (let ((trunc-point (nthcdr (1- where) list)))
                   (when (consp trunc-point)
                     (setf (cdr trunc-point) nil)))
@@ -232,7 +232,7 @@ The result is returned as the following `values':
   "Print uptimes list LIST to `standard-output'."
   (princ "Boot                Endtime             Uptime       This emacs\n")
   (princ "=================== =================== ============ ==========\n")
-  (flet ((format-time (time)
+  (cl-flet ((format-time (time)
                       (format-time-string "%Y-%m-%d %T" (uptimes-time-float time))))
     (loop for uptime in list
           for bootsig  = (car  uptime)

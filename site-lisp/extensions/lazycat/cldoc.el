@@ -775,7 +775,7 @@ the mode, respectively."
           (fdefinition function-name => definition)
           (fboundp function-name => generalized-boolean)
           (fmakunbound function-name => function-name)
-          (flet . "((function-name lambda-list [[local-declaration* | local-documentation]] local-form*)*) declaration* form* => result*")
+          (cl-flet . "((function-name lambda-list [[local-declaration* | local-documentation]] local-form*)*) declaration* form* => result*")
           (labels . "((function-name lambda-list [[local-declaration* | local-documentation]] local-form*)*) declaration* form* => result*")
           (macrolet . "((name lambda-list [[local-declaration* | local-documentation]] local-form*)*) declaration* form* => result*")
 

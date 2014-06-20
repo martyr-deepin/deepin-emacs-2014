@@ -21,7 +21,7 @@
     (call-process "ghc-pkg" nil (current-buffer) nil "list")
     (save-excursion
       (goto-char (point-min))
-      (flet ((f () (when (re-search-forward (rx (group (+ nonl)) ":") (point-max) t)
+      (cl-flet ((f () (when (re-search-forward (rx (group (+ nonl)) ":") (point-max) t)
                      (let ((conf (match-string-no-properties 1))
                            (b (point)) e)
                        (forward-line)

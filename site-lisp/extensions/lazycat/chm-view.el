@@ -179,7 +179,7 @@ This is necessary spend time to start sub-process."
                    (when chm-view-pid
                      ;; Kill `chm-view' process,
                      ;; and don't avoid output message.
-                     (flet ((message (&rest args)))
+                     (cl-flet ((message (&rest args)))
                        (shell-command (format "kill -9 %s" chm-view-pid)))
                      ;; Reset `chm-view-pid'.
                      (setq chm-view-pid nil)))))))

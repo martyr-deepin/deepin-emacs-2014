@@ -64,7 +64,7 @@
 
 Existing percent-escapes and reserved characters (as defined in RFC 2396) in
 the text are preserved."
-  (flet ((hexify-string (string)
+  (cl-flet ((hexify-string (string)
            (with-output-to-string
              (mapc (lambda (c)
                      (princ (format

@@ -1089,7 +1089,7 @@ If PREFIX is non-nil, will view page after post successful."
   (set-buffer post-buffer)
   ;; Try to save file before post.
   (when buffer-file-name
-    (flet ((message (&rest args)))
+    (cl-flet ((message (&rest args)))
       (basic-save-buffer)))
   ;; Post page.
   (yaoddmuse-post yaoddmuse-wikiname

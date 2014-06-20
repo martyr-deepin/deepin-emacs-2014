@@ -739,7 +739,7 @@ Convenience wrapper for `darcsum-start-process'."
   (darcsum-darcs-2-options-init)
   (when darcsum-debug
     (let* ((darcs-args (cons subcommand (append darcsum-darcs-2-options args)))
-           (formatted-args (apply 'concat (flet ((p (s) (format " %s" s))) (mapcar 'p darcs-args)))))
+           (formatted-args (apply 'concat (cl-flet ((p (s) (format " %s" s))) (mapcar 'p darcs-args)))))
       (message "darcsum running: %s%s" darcsum-program formatted-args)))
   (let*
       ((buf (generate-new-buffer (format " *darcs %s*" subcommand)))

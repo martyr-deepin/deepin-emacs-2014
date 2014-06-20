@@ -129,7 +129,7 @@ much as possible."
 
 (defun lusty-filter-buffers (buffers)
   "Return BUFFERS converted to strings with hidden buffers removed."
-  (flet ((ephemeral-p (name)
+  (cl-flet ((ephemeral-p (name)
            (string= (substring name 0 1) " ")))
     (remove-if 'ephemeral-p (mapcar 'buffer-name buffers))))
 
@@ -138,7 +138,7 @@ much as possible."
 does not begin with '.'."
   (let ((ignored-regexes (mapcar (lambda (ext) (concat ext "$"))
                                  completion-ignored-extensions)))
-    (flet ((hidden-p (str)
+    (cl-flet ((hidden-p (str)
              (char-equal (string-to-char str) ?.))
            (pwd-p (str)
              (string= (directory-file-name str) "."))

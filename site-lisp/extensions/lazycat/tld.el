@@ -334,7 +334,7 @@ Returns a list of hits."
   (let* ((tld-lookup (string= (substring search 0 1) "."))
          (result     (if tld-lookup (tld-find-tld (substring search 1)) (tld-find-name search))))
     (if result
-        (flet ((message-tld (tld)
+        (cl-flet ((message-tld (tld)
                  (message "%s is %s" (tld-tld tld) (tld-name tld))))
           (if tld-lookup
               (message-tld result)

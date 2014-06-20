@@ -261,7 +261,7 @@ SEARCH-URL is url try to search."
 
 (defun yaoddmuse-notify-popup-window (msg)
   "Use program `notify-send' notify yaoddmuse-message MSG."
-  (flet ((message (&rest args)))
+  (cl-flet ((message (&rest args)))
     (shell-command (concat yaoddmuse-notify-cmd
                            " -i " yaoddmuse-notify-icon
                            " -t " (int-to-string

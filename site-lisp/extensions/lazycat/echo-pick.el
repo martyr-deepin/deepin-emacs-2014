@@ -121,7 +121,7 @@ All functions are expected to take no arguments."
 If the function returns a string, it will be returned.  If it doesn't the last
 call to `message' will be returned."
   (let (result last-msg)
-    (flet ((message (format-string &rest args)
+    (cl-flet ((message (format-string &rest args)
                     (setq last-msg (apply 'format format-string args))))
       (setq result (funcall func))
       (if (stringp result)

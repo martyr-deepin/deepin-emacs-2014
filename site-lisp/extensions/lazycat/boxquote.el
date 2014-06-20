@@ -200,7 +200,7 @@ boxquote is found."
            (re-bottom (concat "^" (regexp-quote boxquote-bottom-corner)
                               (regexp-quote boxquote-top-and-tail)))
            (points
-            (flet ((find-box-end (re &optional back)
+            (cl-flet ((find-box-end (re &optional back)
                                  (save-excursion
                                    (when (if back
                                              (search-backward-regexp re nil t)
@@ -276,7 +276,7 @@ be formatted using `boxquote-title-format'."
   (interactive "r")
   (save-excursion
     (save-restriction
-      (flet ((bol-at-p (n)
+      (cl-flet ((bol-at-p (n)
                        (setf (point) n)
                        (bolp))
              (insert-corner (corner pre-break)

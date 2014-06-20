@@ -974,7 +974,7 @@ call this function."
 ;; REPLACES ORIGINAL in `faces.el'.
 ;; TEMPORARY BUG fix.  We wrap call to `x-defined-colors' with non-`nil' binding of
 ;; `executing-kbd-macro' to suppress messages.  Redefining `message' with an `flet'
-;; (flet ((message (arg) nil)) might be a bit cleaner, but this is OK.
+;; (cl-flet ((message (arg) nil)) might be a bit cleaner, but this is OK.
 ;; BUG reported 01/21/2005. $$$$$$$
 ;;
 (when (>= emacs-major-version 21)

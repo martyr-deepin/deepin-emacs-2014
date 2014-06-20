@@ -237,7 +237,7 @@ the text to be filled for you."
     (save-excursion
       (delete-region start end)
       (setf (point) start)
-      (insert (flet ((bolp-string (n)
+      (insert (cl-flet ((bolp-string (n)
                        (save-excursion
                          (setf (point) n)
                          (if (bolp) "" "\n"))))
