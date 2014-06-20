@@ -317,7 +317,7 @@ If select nothing, paste entire buffer."
   (paste2-buffer-get-channel)
   ;; Send command output to the server.
   (paste2-send-paste-string
-   (flet ((message (&rest args)))       ;won't output in minibuffer
+   (cl-flet ((message (&rest args)))    ;won't output in minibuffer
      (with-temp-buffer
        (shell-command command (buffer-name))
        (buffer-string)))))
