@@ -122,8 +122,7 @@
                 (lambda (candidate)
                   (webkit-clean-history)))
                ("Toggle console info"
-                (
-                 (webkit-toggle-console-info)))
+                ((webkit-toggle-console-info)))
                ))
     (persistent-action . describe-command)))
 

@@ -23,6 +23,7 @@ import os
 from PyQt5 import QtCore
 from PyQt5.QtNetwork import QNetworkCookieJar, QNetworkCookie
 from PyQt5.QtCore import QCoreApplication, QEvent
+from PyQt5.QtNetwork import QNetworkProxy
 if os.name == 'posix':
     QCoreApplication.setAttribute(QtCore.Qt.AA_X11InitThreads, True)
 
@@ -339,6 +340,9 @@ if __name__ == '__main__':
     cookie_jar = CookieJar()
     
     print_console_info = False
+    
+    if len(sys.argv) >= 2 and sys.argv[1] == "--enable-proxy":
+        QNetworkProxy.setApplicationProxy(QNetworkProxy(QNetworkProxy.Socks5Proxy, "127.0.0.1", 7070))    
     
     def call_message(message):
         call_method("message", [message])

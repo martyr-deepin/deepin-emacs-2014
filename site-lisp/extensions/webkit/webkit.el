@@ -142,12 +142,32 @@
           (random (expt 16 6))
           (random (expt 16 6)) ))
 
+(defvar webkit-enable-proxy-p nil)
+(defvar webkit-proxy-config-path "~/.emacs.d/deepin-emacs/webkit-proxy")
+(defun webkit-save-proxy-config ()
+  (with-current-buffer (find-file-noselect webkit-proxy-config-path)
+    (erase-buffer)
+    (insert (prin1-to-string webkit-enable-proxy-p))
+    (let ((delete-old-versions nil))
+      (save-buffer 0))))
+
+(defun webkit-restore-proxy-config ()
+  (if (file-exists-p webkit-proxy-config-path)
+      (setq webkit-enable-proxy-p
+            (read
+             (with-temp-buffer
+               (insert-file-contents webkit-proxy-config-path)
+               (buffer-string))))))
+
+(webkit-restore-proxy-config)
+
 (defvar pyepc-file (expand-file-name "browser.py" (file-name-directory load-file-name)))
 
 (defvar pyepc-browser
   (let* ((browser
           (epc:start-epc (or (getenv "PYTHON") "python")
-                         (list pyepc-file))))
+                         (list pyepc-file
+                               (if webkit-enable-proxy-p "--enable-proxy" "--disable-proxy")))))
     (epc:call-deferred browser 'init (list (webkit-get-emacs-xid)))
     browser))
 
@@ -313,6 +333,18 @@
 (defun webkit-toggle-console-info ()
   (interactive)
   (epc:call-deferred pyepc-browser 'toggle_console_info ()))
+
+(defun webkit-enable-proxy ()
+  (interactive)
+  (setq webkit-enable-proxy-p t)
+  (webkit-save-proxy-config)
+  (message "Enable webkit proxy, reboot emacs effective."))
+
+(defun webkit-disable-proxy ()
+  (interactive)
+  (setq webkit-enable-proxy-p nil)
+  (webkit-save-proxy-config)
+  (message "Disable webkit proxy, reboot emacs effective."))
 
 (defadvice switch-to-buffer (after webkit-switch-to-buffer-advice activate)
   (webkit-focus-browser-view))
