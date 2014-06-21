@@ -88,7 +88,9 @@ class WebPage(QWebPage):
         return QWebPage.acceptNavigationRequest(self, frame, request, type)
     
     def javaScriptConsoleMessage(self, msg, lineNumber, sourceID):
-        call_message("JsConsole(%s:%d): %s" % (sourceID, lineNumber, msg))    
+        global print_console_info
+        if print_console_info:
+            call_message("JsConsole(%s:%d): %s" % (sourceID, lineNumber, msg))    
 
 class BrowserBuffer(QWebView):
 
@@ -303,6 +305,8 @@ if __name__ == '__main__':
     
     cookie_jar = CookieJar()
     
+    print_console_info = False
+    
     def call_message(message):
         call_method("message", [message])
 
@@ -398,7 +402,12 @@ if __name__ == '__main__':
                 view = buffer.view_dict[view_id]
                 view_xwindow_id = view.winId().__int__()
                 grab_focus(view_xwindow_id)
-
+                
+    def toggle_console_info():
+        global print_console_info
+        
+        print_console_info = not print_console_info
+                
     def update_buffer():
         while True:
             for buffer in buffer_dict.values():
@@ -415,6 +424,7 @@ if __name__ == '__main__':
     server.register_function(adjust_size)
     server.register_function(update_views)
     server.register_function(focus_view)
+    server.register_function(toggle_console_info)
 
     threading.Thread(target=update_buffer).start()
 

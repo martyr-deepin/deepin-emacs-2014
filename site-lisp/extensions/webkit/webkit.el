@@ -175,7 +175,9 @@
   )
 
 (defun webkit-get-url-history (url-name)
-  (gethash url-name webkit-history-urls)
+  (if webkit-history-urls
+      (gethash url-name webkit-history-urls)
+    nil)
   )
 
 (defun webkit-change-buffer-title (id title)
@@ -218,7 +220,12 @@
             (read
              (with-temp-buffer
                (insert-file-contents webkit-history-urls-path)
-               (buffer-string))))))
+               (buffer-string)))))
+  
+  ;; Init hash table if `webkit-history-urls' is nil.
+  (unless webkit-history-urls
+    (setq webkit-history-urls (make-hash-table :test 'equal)))
+  )
 
 (webkit-restore-history-urls)
 
@@ -301,6 +308,10 @@
           (message "Focus view: %S" buffer-id)
           )
       )))
+
+(defun webkit-toggle-console-info ()
+  (interactive)
+  (epc:call-deferred pyepc-browser 'toggle_console_info ()))
 
 (defadvice switch-to-buffer (after webkit-switch-to-buffer-advice activate)
   (webkit-focus-browser-view))
