@@ -111,8 +111,8 @@
        helm-source-autoload-commands
        helm-source-ls-git
        helm-c-source-yasnippet
-       helm-source-apt
        helm-source-webkit
+       helm-source-apt
        )
      "*helm search*")))
 
