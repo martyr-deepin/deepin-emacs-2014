@@ -95,6 +95,7 @@ class WebPage(QWebPage):
 class BrowserBuffer(QWebView):
 
     redrawScreenshot = QtCore.pyqtSignal(object)
+    updateProgress = QtCore.pyqtSignal()
 
     def __init__(self, buffer_id, buffer_width, buffer_height):
         super(BrowserBuffer, self).__init__()
@@ -121,6 +122,28 @@ class BrowserBuffer(QWebView):
         self.titleChanged.connect(self.change_title)
 
         self.press_ctrl_flag = False
+        
+        self.loading_flag = False
+        self.loading_percent = 0
+        
+        self.loadFinished.connect(self.handle_load_finished)
+        self.loadStarted.connect(self.handle_load_started)
+        self.loadProgress.connect(self.handle_load_progress)
+        
+    def handle_load_started(self, *args):
+        self.loading_flag = True
+        self.loading_percent = 0
+        self.updateProgress.emit()
+                
+    def handle_load_finished(self, *args):
+        self.loading_flag = False
+        self.loading_percent = 100
+        self.updateProgress.emit()
+        
+    def handle_load_progress(self, percent):
+        self.loading_flag = True
+        self.loading_percent = percent
+        self.updateProgress.emit()
         
     def customize_user_agent(self, url):
         return "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.114 Safari/537.36"
@@ -216,6 +239,7 @@ class BrowserView(QWidget):
         self.setContentsMargins(0, 0, 0, 0)
 
         self.browser_buffer.redrawScreenshot.connect(self.updateView)
+        self.browser_buffer.updateProgress.connect(self.updateProgress)
 
         self.qimage = None
 
@@ -226,19 +250,28 @@ class BrowserView(QWidget):
         self.destroy()
 
     def paintEvent(self, event):
+        painter = QPainter(self)
+        
         if self.qimage:
-            painter = QPainter(self)
             painter.drawImage(QtCore.QRect(0, 0, self.width(), self.height()), self.qimage)
-            painter.end()
         else:
-            painter = QPainter(self)
             painter.setBrush(QtGui.QColor(255, 255, 255, 255))
-            painter.drawRect(0, 0, self.width(), self.height())
-            painter.end()
-
+            painter.drawRect(0, 0, self.browser_buffer.buffer_width, self.browser_buffer.buffer_height)
+            
+        if self.browser_buffer.loading_flag:    
+            painter.setPen(QtGui.QColor(10, 138, 255, 255))
+            painter.setBrush(QtGui.QColor(10, 138, 255, 255))
+            painter.drawRect(0, 0, self.browser_buffer.buffer_width * self.browser_buffer.loading_percent / 100, 1)
+            
+        painter.end()
+            
     @postGui()
     def updateView(self, qimage):
         self.qimage = qimage
+        self.update()
+        
+    @postGui()    
+    def updateProgress(self):
         self.update()
 
     def moveresize(self, x, y, w, h):

@@ -212,7 +212,8 @@
   (with-current-buffer (find-file-noselect webkit-history-urls-path)
     (erase-buffer)
     (insert (prin1-to-string webkit-history-urls))
-    (save-buffer)))
+    (let ((delete-old-versions nil))
+      (save-buffer 0))))
 
 (defun webkit-restore-history-urls ()
   (if (file-exists-p webkit-history-urls-path)
@@ -221,7 +222,7 @@
              (with-temp-buffer
                (insert-file-contents webkit-history-urls-path)
                (buffer-string)))))
-  
+
   ;; Init hash table if `webkit-history-urls' is nil.
   (unless webkit-history-urls
     (setq webkit-history-urls (make-hash-table :test 'equal)))
