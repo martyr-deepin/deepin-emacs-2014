@@ -109,7 +109,7 @@
 (setq erc-nickserv-passwords                                          ;设置自动登录时需要的密码
       '((freenode (((eval erc-nick) . (eval erc-password))))))
 (setq erc-autojoin-channels-alist       ;自动加入的服务器和频道
-      `(,(cons "freenode.net" '("#emacs"))))
+      `(,(cons "freenode.net" '("#emacs" "#deepin"))))
 (setq erc-log-channels-directory        ;日志的记录目录
       "~/.emacs.d/deepin-emacs/Configure-File/ERC/logs/")
 (dolist (hooked (list
