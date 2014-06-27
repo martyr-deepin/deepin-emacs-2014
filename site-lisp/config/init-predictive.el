@@ -80,6 +80,7 @@
 ;;; ### Predictive ###
 ;;; --- 英语助手
 (set-default 'predictive-auto-add-to-dict t) ;自动加入词典
+(setq predictive-dict-autosave nil)          ;不要自动保存
 (setq predictive-add-to-dict-ask nil)        ;加入词典不询问
 (setq predictive-auto-learn t)               ;自动学习
 (setq predictive-completion-speed 0.1)       ;查找补全的速度(秒)
