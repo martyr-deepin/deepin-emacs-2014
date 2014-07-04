@@ -107,12 +107,16 @@
        helm-source-findutils
        helm-source-buffers-list
        helm-source-recentf
+       helm-source-kill-ring
+       helm-source-imenu
+       helm-source-occur
        helm-source-locate
        helm-source-autoload-commands
        helm-source-ls-git
        helm-c-source-yasnippet
        helm-source-webkit
        helm-source-apt
+       helm-source-man-pages
        )
      "*helm search*")))
 
