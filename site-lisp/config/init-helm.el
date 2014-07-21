@@ -90,6 +90,9 @@
 (require 'helm-ls-git)
 (require 'helm-descbinds)
 (require 'helm-webkit)
+(require 'helm-ring)
+(require 'helm-imenu)
+(require 'helm-man)
 (require 'apt-utils)
 
 ;;; Code:
