@@ -84,11 +84,7 @@
 
 ;;; Code:
 
-(add-hook 'after-init-hook
-          (lambda ()
-            (with-temp-message
-                (kill-buffer "*GNU Emacs*"))
-            ))
+(setq initial-buffer-choice "~/")       ;默认打开文件管理器
 (emacs-session-restore)                 ;加载窗口布局
 (setq inhibit-startup-screen t)         ;关闭起动时闪屏
 (setq inhibit-splash-screen t)          ;关闭起动时闪屏
