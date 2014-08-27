@@ -5,8 +5,8 @@
 ;; Copyright (C) 2008, 2009, 2014 Andy Stewart, all rights reserved.
 ;; Copyright (C) 2010, ahei, all rights reserved.
 ;; Created: <2008-09-19 23:02:42>
-;; Version: 1.0
-;; Last-Updated: 2014-07-21 22:12:39
+;; Version: 1.1
+;; Last-Updated: 2014-08-27 14:58:52
 ;; URL: http://www.emacswiki.org/emacs/download/multi-term.el
 ;; Keywords: term, terminal, multiple buffer
 ;; Compatibility: GNU Emacs 23.2.1, GNU Emacs 24.4 (and prereleases)
@@ -126,6 +126,10 @@
 ;;
 
 ;;; Change log:
+;;
+;; 2014/08/27
+;;      * Kevin Peng <kkpengboy@gmail.com>
+;;      Keep multi-term buffer list make multi-term-next/prev can switch temrinal buffer even terminal buffer's name is changed. 
 ;;
 ;; 2014/07/21
 ;;      * Andy Stewart
