@@ -148,6 +148,15 @@
             (flymake-mode)
             ))
 
+(add-hook 'php-mode-hook
+          (lambda ()
+            (require 'flymake)
+            (require 'flymake-extension)
+            (require 'flymake-php)
+            (flymake-mode)
+            (flymake-php-load)
+            ))
+
 (provide 'init-flymake)
 
 ;;; init-flymake.el ends here
