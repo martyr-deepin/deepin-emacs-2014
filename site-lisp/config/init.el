@@ -8,8 +8,6 @@
 (require 'basic-toolkit)
 (require 'redo)
 (require 'highlight-parentheses)
-(require 'winpoint)
-(require 'iedit)
 (ignore-errors (require 'minibuffer-tray))
 
 (require 'init-flymake)
@@ -21,7 +19,6 @@
 (require 'init-session)
 (require 'init-paredit)
 (require 'init-indent)
-(require 'init-cursor-chg)
 (require 'init-auto-complete)
 (require 'init-one-key)
 (require 'init-key)
@@ -44,6 +41,9 @@
        (require 'init-yasnippet)
        (require 'init-package)
        (require 'init-smooth-scrolling)
+       (require 'init-cursor-chg)
+       (require 'init-iedit)
+       (require 'init-winpoint)
 
        (require 'init-idle)
        )

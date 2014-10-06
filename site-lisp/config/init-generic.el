@@ -134,8 +134,6 @@
               (not cl-functions)        ;`CL' 包中的运行时调用的函数
               )))
 (icomplete-mode 1)                      ;minibuffer补全反馈
-(window-point-remember-mode 1)
-(setq winpoint-non-restore-buffer-list '("*Group*"))
 (setq tramp-default-method "ssh")       ;设置传送文件默认的方法
 (ignore-errors (minibuffer-tray-mode 1))
 
