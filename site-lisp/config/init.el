@@ -10,6 +10,7 @@
 (require 'highlight-parentheses)
 (ignore-errors (require 'minibuffer-tray))
 
+(require 'init-linum)
 (require 'init-flymake)
 (require 'init-auto-save)
 (require 'init-jedi)
