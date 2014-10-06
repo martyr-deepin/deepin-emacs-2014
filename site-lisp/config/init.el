@@ -46,6 +46,7 @@
        (require 'init-smooth-scrolling)
        (require 'init-cursor-chg)
        (require 'init-winpoint)
+       (require 'init-indent-guide)
 
        (require 'init-idle)
        )
