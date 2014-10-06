@@ -73,6 +73,7 @@
 
 ;;; Require
 
+(require 'linum)
 
 ;;; Code:
 

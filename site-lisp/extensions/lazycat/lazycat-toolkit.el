@@ -639,19 +639,6 @@ Otherwise, use the value of said variable as argument to a funcall."
     (goto-char (point-min))
     (shrink-window-if-larger-than-buffer)))
 
-(defun goto-line-with-feedback ()
-  "Show line numbers temporarily, while prompting for the line number input.
-This function will detect current linum-mode status, it won't disable linum-mode if current buffer has enable it."
-  (interactive)
-  (let ((linum-mode-p linum-mode))
-    (unwind-protect
-        (progn
-          (linum-mode 1)
-          (goto-line (read-number "Goto line: ")))
-      (unless linum-mode-p
-        (linum-mode -1))
-      )))
-
 (provide 'lazycat-toolkit)
 
 ;;; lazycat-toolkit.el ends here

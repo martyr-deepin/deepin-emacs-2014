@@ -34,7 +34,6 @@
    ("s-." . unbury-buffer)                  ;反隐藏当前buffer
    ("s-&" . killall)                        ;杀掉进程
    ("C-x w" . count-words)                  ;计算单词的数量
-   ("C-z l" . linum-mode)                   ;行号模式切换
    ("C-x f" . find-file-at-point)           ;文件跳转
    ("s-f" . find-file-root)                 ;用root打开文件
    ("s-r" . find-file-smb)                  ;访问samba
@@ -77,6 +76,12 @@
    ("s-x g" . moccur-grep-find-pwd)     ;递归搜索当前目录下的文件
    )
  "dired-extension")
+(lazy-set-autoload-key
+ '(
+   ("C-z l" . linum-mode)               ;行号模式切换
+   ("M-g" . goto-line-with-feedback)    ;可视化条转行
+   )
+ "linum-extension")
 ;;; ### Buffer Move ###
 ;;; --- 缓存移动
 (lazy-set-key
@@ -95,7 +100,6 @@
    ("M-n" . go-to-next-pair-left)          ;在( ), ' ', " ", [ ], { }中跳到匹配符号的左边
    ("%" . match-paren)                     ;当在括号上按 % 时, 自动跳转到与当前括号匹配的另一个括号
    ("s-g" . goto-percent)                  ;跳转到当前Buffer的文本百分比, 单位为字符
-   ("M-g" . goto-line)                     ;到指定行
    ("M-G" . goto-column)                   ;到指定列
    ("C-M-f" . forward-paragraph)           ;下一个段落
    ("C-M-b" . backward-paragraph)          ;上一个段落
@@ -573,7 +577,6 @@
    ("M-s-i" . ielm-toggle)              ;切换ielm
    ("s-6" . insert-standard-date)       ;插入标准时间
    ("s-7" . insert-changelog-date)      ;插入Changlog时间
-   ("M-g" . goto-line-with-feedback)    ;有提示的行跳转
    )
  "lazycat-toolkit")
 (eval-after-load 'ielm-mode
