@@ -10,6 +10,7 @@
 (require 'highlight-parentheses)
 (ignore-errors (require 'minibuffer-tray))
 
+(require 'init-smex)
 (require 'init-linum)
 (require 'init-flymake)
 (require 'init-auto-save)
@@ -22,6 +23,7 @@
 (require 'init-indent)
 (require 'init-auto-complete)
 (require 'init-one-key)
+(require 'init-iedit)
 (require 'init-key)
 (require 'init-generic)
 (require 'init-auto-indent-mode)
@@ -43,7 +45,6 @@
        (require 'init-package)
        (require 'init-smooth-scrolling)
        (require 'init-cursor-chg)
-       (require 'init-iedit)
        (require 'init-winpoint)
 
        (require 'init-idle)
