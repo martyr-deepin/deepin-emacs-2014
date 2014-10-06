@@ -1,39 +1,39 @@
-;; 必须加载的
-(require 'theme)
-(require 'init-startup)
-(require 'lazy-set-key)
-(require 'one-key)
-(require 'paredit)
-(require 'tabbar)
-(require 'basic-toolkit)
-(require 'redo)
-(require 'highlight-parentheses)
-(ignore-errors (require 'minibuffer-tray))
+(with-temp-message ""                   ;抹掉插件启动的输出
+  ;; 必须加载的
+  (require 'theme)
+  (require 'init-startup)
+  (require 'lazy-set-key)
+  (require 'one-key)
+  (require 'paredit)
+  (require 'tabbar)
+  (require 'basic-toolkit)
+  (require 'redo)
+  (require 'highlight-parentheses)
+  (ignore-errors (require 'minibuffer-tray))
 
-(require 'init-smex)
-(require 'init-linum)
-(require 'init-flymake)
-(require 'init-auto-save)
-(require 'init-jedi)
-(require 'init-tabbar)
-(require 'init-mode)
-(require 'init-dired)
-(require 'init-session)
-(require 'init-paredit)
-(require 'init-indent)
-(require 'init-auto-complete)
-(require 'init-one-key)
-(require 'init-iedit)
-(require 'init-visual-regexp)
-(require 'init-key)
-(require 'init-generic)
-(require 'init-auto-indent-mode)
+  (require 'init-smex)
+  (require 'init-linum)
+  (require 'init-flymake)
+  (require 'init-auto-save)
+  (require 'init-jedi)
+  (require 'init-tabbar)
+  (require 'init-mode)
+  (require 'init-dired)
+  (require 'init-session)
+  (require 'init-paredit)
+  (require 'init-indent)
+  (require 'init-auto-complete)
+  (require 'init-one-key)
+  (require 'init-iedit)
+  (require 'init-visual-regexp)
+  (require 'init-key)
+  (require 'init-generic)
+  (require 'init-auto-indent-mode)
 
-;; 可以延后加载的
-(run-with-idle-timer
- 1 t
- #'(lambda ()
-     (with-temp-message ""              ;抹掉插件启动的输出
+  ;; 可以延后加载的
+  (run-with-idle-timer
+   1 t
+   #'(lambda ()
        (require 'pretty-lambdada)
        (require 'browse-kill-ring)
 
@@ -50,7 +50,8 @@
        (require 'init-indent-guide)
 
        (require 'init-idle)
-       )
-     ))
+
+       ))
+  )
 
 (provide 'init)

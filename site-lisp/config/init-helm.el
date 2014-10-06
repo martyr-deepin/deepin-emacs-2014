@@ -81,6 +81,7 @@
 
 ;;; Require
 
+(require 'ag)
 (require 'helm-files)
 (require 'helm-config)
 (require 'helm-helm-commands)
@@ -93,6 +94,7 @@
 (require 'helm-ring)
 (require 'helm-imenu)
 (require 'helm-man)
+(require 'helm-ag)
 (require 'apt-utils)
 
 ;;; Code:
@@ -111,6 +113,7 @@
        helm-source-buffers-list
        helm-source-recentf
        helm-source-occur
+       helm-source-do-ag
        helm-source-locate
        helm-source-kill-ring
        helm-source-imenu
