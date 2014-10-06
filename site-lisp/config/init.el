@@ -9,7 +9,6 @@
 (require 'redo)
 (require 'highlight-parentheses)
 (require 'winpoint)
-(require 'smooth-scrolling)
 (require 'iedit)
 (ignore-errors (require 'minibuffer-tray))
 
@@ -44,6 +43,7 @@
        (require 'init-doxymacs)
        (require 'init-yasnippet)
        (require 'init-package)
+       (require 'init-smooth-scrolling)
 
        (require 'init-idle)
        )

@@ -117,7 +117,6 @@
 (setq one-key-popup-window nil)                                      ;禁止自动弹出窗口
 (add-hook 'find-file-hook 'highlight-parentheses-mode t)             ;增强的括号高亮
 (global-hl-line-mode 1)                                              ;高亮当前行
-(setq smooth-scroll-margin 2)                                        ;触发滚动的行数
 (setq isearch-allow-scroll t)                                        ;isearch搜索时是可以滚动屏幕的
 (setq byte-compile-warnings
       (quote (
