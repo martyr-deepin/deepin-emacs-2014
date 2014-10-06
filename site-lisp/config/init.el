@@ -33,18 +33,20 @@
 (run-with-idle-timer
  1 t
  #'(lambda ()
-     (require 'pretty-lambdada)
-     (require 'browse-kill-ring)
+     (with-temp-message ""              ;抹掉插件启动的输出
+       (require 'pretty-lambdada)
+       (require 'browse-kill-ring)
 
-     (require 'init-tempbuf)
-     (require 'init-doc-view)
-     (require 'init-backup)
-     (require 'init-eldoc)
-     (require 'init-doxymacs)
-     (require 'init-yasnippet)
-     (require 'init-package)
+       (require 'init-tempbuf)
+       (require 'init-doc-view)
+       (require 'init-backup)
+       (require 'init-eldoc)
+       (require 'init-doxymacs)
+       (require 'init-yasnippet)
+       (require 'init-package)
 
-     (require 'init-idle)
+       (require 'init-idle)
+       )
      ))
 
 (provide 'init)

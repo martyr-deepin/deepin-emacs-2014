@@ -1182,7 +1182,7 @@ Do not call this function."
       (setq win:current-config 1)
       (win:store-config 1)
       (win:update-mode-line 1)
-      (message "Startup with window [1]"))
+      )
      ((and win:use-frame (not (interactive-p)))
       ;; When called from .emacs, since the base frame at that time
       ;; will be deleted by the function frame-notice-user-settings,
@@ -1201,8 +1201,7 @@ Do not call this function."
                                (win:switch-window (car (cdr lc)))
                                (put 'resume-windows 'lc nil)
                                (setq win:last-config (car lc))
-                               (message "Startup with window[%d]"
-                                        win:current-config))))
+                               )))
                      (let ((count 30))
                        (while (and (null (visible-frame-list))
                                    (> count 0))
@@ -1232,7 +1231,6 @@ Do not call this function."
                       (modify-frame-parameters
                        (car (minibuffer-frame-list))
                        minibuffer-frame-alist))
-                     (message "Startup with window [1]")
                      (let ((index 1) (frame (aref win:configs 1)))
                        (run-hooks 'win:allocate-frame-hook))
                      (sit-for 1))
@@ -1241,7 +1239,7 @@ Do not call this function."
       (win:store-config 1)
       (win:update-mode-line 1)
       (setq win:current-config 1)
-      (message "Startup with window[1]")))))
+      ))))
 
 ;;;
 ;; Functions for resume.
