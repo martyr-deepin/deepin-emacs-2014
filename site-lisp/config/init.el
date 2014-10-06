@@ -24,6 +24,7 @@
 (require 'init-auto-complete)
 (require 'init-one-key)
 (require 'init-iedit)
+(require 'init-visual-regexp)
 (require 'init-key)
 (require 'init-generic)
 (require 'init-auto-indent-mode)
