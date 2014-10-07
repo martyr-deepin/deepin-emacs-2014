@@ -9,8 +9,8 @@
   (require 'basic-toolkit)
   (require 'redo)
   (require 'highlight-parentheses)
-  (ignore-errors (require 'minibuffer-tray))
 
+  (require 'init-minibuffer-tray)
   (require 'init-smex)
   (require 'init-linum)
   (require 'init-flymake)

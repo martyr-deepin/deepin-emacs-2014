@@ -1,8 +1,8 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2011 ~ `(format-time-string "%Y")` ${1:Deepin, Inc}.
-#               2011 ~ `(format-time-string "%Y")` ${2:`(get-git-user-name)`}
+# Copyright (C) `(format-time-string "%Y")` ${1:Deepin, Inc}.
+#               `(format-time-string "%Y")` ${2:`(get-git-user-name)`}
 # 
 # Author:     $2 ${3:<`(get-git-user-email)`>}
 # Maintainer: $2 $3

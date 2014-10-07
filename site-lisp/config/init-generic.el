@@ -135,7 +135,6 @@
               )))
 (icomplete-mode 1)                      ;minibuffer补全反馈
 (setq tramp-default-method "ssh")       ;设置传送文件默认的方法
-(ignore-errors (minibuffer-tray-mode 1))
 
 (provide 'init-generic)
 

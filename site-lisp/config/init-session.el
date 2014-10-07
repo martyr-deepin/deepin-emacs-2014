@@ -102,7 +102,7 @@
   "Exit emacs."
   (interactive)
   (ignore-errors
-    (epc:stop-epc minibuffer-tray-epc)
+    (minibuffer-tray-stop-process)
     (kill-epc-buffers))
   (kill-unused-buffers)
   (auto-save-buffers)

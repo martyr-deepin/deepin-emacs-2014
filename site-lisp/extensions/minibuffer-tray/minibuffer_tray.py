@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2011 ~ 2014 Andy Stewart
+# Copyright (C) 2014 Andy Stewart
 # 
 # Author:     Andy Stewart <lazycat.manatee@gmail.com>
 # Maintainer: Andy Stewart <lazycat.manatee@gmail.com>
@@ -19,22 +19,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
 from PyQt5 import QtCore
-from PyQt5.QtCore import QCoreApplication
-if os.name == 'posix':
-    QCoreApplication.setAttribute(QtCore.Qt.AA_X11InitThreads, True)
-    
 from PyQt5 import QtGui
-from PyQt5.QtGui import QPainter
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtCore import Qt, QTimer, QEvent
 from PyQt5.QtWidgets import QApplication
-from epc.server import ThreadingEPCServer
-import threading
+from PyQt5.QtGui import QPainter
+import time
 import functools
 from xutils import get_xlib_display, grab_focus
-import time
+from dbus.mainloop.glib import DBusGMainLoop
+import dbus
+import dbus.service
+
+MINIBUFFER_TRAY_DBUS_NAME = "com.deepin.minibuffer_tray"
+MINIBUFFER_TRAY_OBJECT_NAME = "/com/deepin/minibuffer_tray"
 
 class postGui(QtCore.QObject):
     
@@ -63,6 +62,34 @@ class postGui(QtCore.QObject):
         else:    
             self._func(*args, **kwargs)
             
+class MinibufferTray(dbus.service.Object):
+    def __init__(self, emacs_xid, minibuffer_height):
+        dbus.service.Object.__init__(
+            self,
+            dbus.service.BusName(MINIBUFFER_TRAY_DBUS_NAME, bus=dbus.SessionBus()),
+            MINIBUFFER_TRAY_OBJECT_NAME            
+        )
+        
+        self.tray_view = TrayView(emacs_xid, minibuffer_height)
+        self.tray_view.show()
+    
+    @dbus.service.method(MINIBUFFER_TRAY_DBUS_NAME, in_signature="", out_signature="")
+    def show(self):
+        self.tray_view.show()
+        
+    @dbus.service.method(MINIBUFFER_TRAY_DBUS_NAME, in_signature="", out_signature="")
+    def hide(self):
+        self.tray_view.hide()
+        
+    @dbus.service.method(MINIBUFFER_TRAY_DBUS_NAME, in_signature="ssss", out_signature="")
+    def set_minibuffer_allocation(self, x, y, w, h):
+        self.tray_view.set_minibuffer_allocation(x, y, w, h)
+        self.tray_view.update_allocation(self.tray_view.get_string_width())
+        
+    @dbus.service.method(MINIBUFFER_TRAY_DBUS_NAME, in_signature="sss", out_signature="")
+    def update_pos(self, row, column, line_number):
+        self.tray_view.update_pos(row, column, line_number)
+        
 class TrayView(QWidget):
 
     def __init__(self, emacs_xid, minibuffer_height):
@@ -81,10 +108,6 @@ class TrayView(QWidget):
         self.update_time_timer.timeout.connect(self.update_time)
         self.update_time_timer.start(1000)
         
-        self.update_cursor_pos_timer = QTimer()
-        self.update_cursor_pos_timer.timeout.connect(self.update_cursor_pos)
-        self.update_cursor_pos_timer.start(10)
-        
         self.time_string = self.get_current_time()
         self.pos_string = ""
         self.percent_string = ""
@@ -97,11 +120,6 @@ class TrayView(QWidget):
         self.minibuffer_y = 0
         self.minibuffer_w = 0
         self.minibuffer_h = 0
-        
-        # self.installEventFilter(self)
-        
-    def update_cursor_pos(self):
-        call_method("update-cursor-pos", [])
         
     def eventFilter(self, obj, event):
         if event.type() in [QEvent.MouseButtonPress, QEvent.MouseButtonRelease, QEvent.InputMethodQuery, QEvent.KeyPress, QEvent.KeyRelease, QEvent.Enter, QEvent.WindowActivate, QEvent.ActivationChange, QEvent.ToolTip, QEvent.Leave]:
@@ -173,67 +191,28 @@ class TrayView(QWidget):
     def reparent(self, x, y):
         xlib_display = get_xlib_display()
         
-        browser_xid = self.winId().__int__()
-        browser_xwindow = xlib_display.create_resource_object("window", browser_xid)
+        tray_xwindow = xlib_display.create_resource_object("window", self.winId().__int__())
         emacs_xwindow = xlib_display.create_resource_object("window", self.emacs_xid)
         
-        browser_xwindow.reparent(emacs_xwindow, x, y + 1)
+        tray_xwindow.reparent(emacs_xwindow, x, y + 1)
         
         xlib_display.sync()
-            
-if __name__ == '__main__':
+        
+if __name__ == "__main__":
     import sys
     import signal
     
-    app = QApplication(sys.argv)
+    DBusGMainLoop(set_as_default=True) # WARING: only use once in one process
     
-    server = ThreadingEPCServer(('localhost', 0), log_traceback=True)
-    
-    server_thread = threading.Thread(target=server.serve_forever)
-    server_thread.allow_reuse_address = True
-    
-    tray_view = None
-    
-    def call_method(method_name, args):
-        handler = server.clients[0]
-        handler.call(method_name, args)
+    bus = dbus.SessionBus()
+    if bus.request_name(MINIBUFFER_TRAY_DBUS_NAME) != dbus.bus.REQUEST_NAME_REPLY_PRIMARY_OWNER:
+        print("Minibuffer tray process has startup.")
+    else:
+        app = QApplication(sys.argv)
         
-    @postGui(False)    
-    def init(emacs_xid, minibuffer_height):
-        global tray_view
+        tray = MinibufferTray(sys.argv[1], sys.argv[2])
         
-        tray_view = TrayView(emacs_xid, minibuffer_height)
-    
-    @postGui(False)    
-    def show():
-        tray_view.show()
+        print("Minibuffer tray process start.")
         
-    @postGui(False)    
-    def hide():
-        tray_view.hide()
-        
-    @postGui(False)    
-    def set_minibuffer_allocation(x, y, w, h):
-        tray_view.set_minibuffer_allocation(x, y, w, h)
-        tray_view.update_allocation(tray_view.get_string_width())
-        
-    @postGui(False)    
-    def update_pos(row, column, line_number):
-        tray_view.update_pos(row, column, line_number)
-        
-    server_thread.start()
-    server.print_port()
-    
-    server.register_function(init)
-    server.register_function(hide)
-    server.register_function(show)
-    server.register_function(set_minibuffer_allocation)
-    server.register_function(update_pos)
-    
-    # tray_view = TrayView(0, 24)
-    # show()
-    # tray_view.move(300, 300)
-    # tray_view.resize(200, 30)
-    
-    signal.signal(signal.SIGINT, signal.SIG_DFL)
-    sys.exit(app.exec_())
+        signal.signal(signal.SIGINT, signal.SIG_DFL)
+        sys.exit(app.exec_())
