@@ -89,7 +89,7 @@
 (setq vr/match-separator-string "⇛")
 (lazy-set-key
  '(
-   ("M-%" . vr/query-replace)
+   ("C-M-%" . vr/query-replace)
    ))
 
 (provide 'init-visual-regexp)
