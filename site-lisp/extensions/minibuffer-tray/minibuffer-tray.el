@@ -82,7 +82,7 @@
 ;; 2014/10/08
 ;;      * Use DBus instead Python-EPC as communication between Emacs and PyQt process.
 ;;      Elisp and python code much simple after switch to DBus implementation.
-;;      
+;;
 ;; 2014/01/26
 ;;      * First released.
 ;;
@@ -171,6 +171,7 @@
                minibuffer-tray-process-name
                minibuffer-tray-process-name
                "python" (list minibuffer-tray-python-file (minibuffer-tray-get-emacs-xid) (format "%s" minibuffer-tray-height))))
+  (set-process-query-on-exit-flag minibuffer-tray-process nil)
   (set-process-sentinel
    minibuffer-tray-process
    #'(lambda (process event)
