@@ -4,7 +4,7 @@
 
 ;; Author: Syohei YOSHIDA <syohex@gmail.com>
 ;; URL: https://github.com/syohex/emacs-helm-ag
-;; Version: 0.27
+;; Version: 0.28
 ;; Package-Requires: ((helm "1.5.6") (cl-lib "0.5"))
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -63,15 +63,15 @@
 
 (defun helm-ag-save-current-context ()
   (let ((curpoint (with-helm-current-buffer
-                    (point))))
+                   (point))))
     (helm-aif (buffer-file-name helm-current-buffer)
-        (push (list :file it :point curpoint) helm-ag-context-stack)
-      (push (list :buffer helm-current-buffer :point curpoint) helm-ag-context-stack))))
+              (push (list :file it :point curpoint) helm-ag-context-stack)
+              (push (list :buffer helm-current-buffer :point curpoint) helm-ag-context-stack))))
 
 (defsubst helm-ag--insert-thing-at-point (thing)
   (helm-aif (thing-at-point thing)
-      (substring-no-properties it)
-    ""))
+            (substring-no-properties it)
+            ""))
 
 (defun helm-ag--base-command ()
   (format "%s%s -- "
@@ -92,8 +92,8 @@
       (let* ((default-directory (or helm-ag-default-directory
                                     default-directory))
              (full-cmd (helm-aif (helm-attr 'search-this-file)
-                           (format "%s %s" helm-ag--last-query it)
-                         helm-ag--last-query))
+                                 (format "%s %s" helm-ag--last-query it)
+                                 helm-ag--last-query))
              (coding-system-for-read buf-coding)
              (coding-system-for-write buf-coding))
         (let ((ret (process-file-shell-command full-cmd nil t)))
@@ -112,8 +112,7 @@
                                    (cl-second elems))))
          (default-directory (or helm-ag-default-directory
                                 helm-ag-last-default-directory
-                                default-directory
-                                )))
+                                default-directory)))
     (setq helm-ag-last-default-directory default-directory)
     (funcall find-func filename)
     (goto-char (point-min))
@@ -191,11 +190,11 @@
     (unless context
       (error "Context stack is empty!!"))
     (helm-aif (plist-get context :file)
-        (find-file it)
-      (let ((buf (plist-get context :buffer)))
-        (if (buffer-live-p buf)
-            (switch-to-buffer buf)
-          (error "the buffer is already killed"))))
+              (find-file it)
+              (let ((buf (plist-get context :buffer)))
+                (if (buffer-live-p buf)
+                    (switch-to-buffer buf)
+                  (error "the buffer is already killed"))))
     (goto-char (plist-get context :point))))
 
 ;;;###autoload
@@ -248,32 +247,32 @@
 
 (defun helm-ag--do-ag-propertize ()
   (with-helm-window
-    (goto-char (point-min))
-    (cl-loop while (not (eobp))
-             do
-             (progn
-               (let ((start (point))
-                     (bound (line-end-position))
-                     file-end line-end)
-                 (when (search-forward ":" bound t)
-                   (setq file-end (1- (point)))
-                   (when (search-forward ":" bound t)
-                     (setq line-end (1- (point)))
-                     (set-text-properties start file-end '(face helm-moccur-buffer))
-                     (set-text-properties (1+ file-end) line-end
-                                          '(face helm-grep-lineno))
+   (goto-char (point-min))
+   (cl-loop while (not (eobp))
+            do
+            (progn
+              (let ((start (point))
+                    (bound (line-end-position))
+                    file-end line-end)
+                (when (search-forward ":" bound t)
+                  (setq file-end (1- (point)))
+                  (when (search-forward ":" bound t)
+                    (setq line-end (1- (point)))
+                    (set-text-properties start file-end '(face helm-moccur-buffer))
+                    (set-text-properties (1+ file-end) line-end
+                                         '(face helm-grep-lineno))
 
-                     (when (re-search-forward helm-input bound t)
-                       (set-text-properties (match-beginning 0) (match-end 0)
-                                            '(face helm-match))))))
-               (forward-line 1)))
-    (goto-char (point-min))
-    (helm-display-mode-line (helm-get-current-source))))
+                    (when (re-search-forward helm-input bound t)
+                      (set-text-properties (match-beginning 0) (match-end 0)
+                                           '(face helm-match))))))
+              (forward-line 1)))
+   (goto-char (point-min))
+   (helm-display-mode-line (helm-get-current-source))))
 
 (defun helm-ag--do-ag-candidate-process ()
- (let* ((default-directory (or helm-ag-default-directory default-directory))
-        (proc (start-process "helm-do-ag" nil
-                             "ag" "--nocolor" "--nogroup" "--" helm-pattern)))
+  (let* ((default-directory (or helm-ag-default-directory default-directory))
+         (proc (start-process "helm-do-ag" nil
+                              "ag" "--nocolor" "--nogroup" "--" helm-pattern)))
     (prog1 proc
       (set-process-sentinel
        proc
