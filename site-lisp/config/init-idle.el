@@ -116,6 +116,26 @@ from tradition chinese to simple chinese" t)
 (setq message-log-max t)                ;设置message记录全部消息, 而不用截去
 (setq require-final-newline nil)        ;不自动添加换行符到末尾, 有些情况会出现错误
 (setq ediff-window-setup-function (quote ediff-setup-windows-plain)) ;比较窗口设置在同一个frame里
+(setq x-stretch-cursor t)               ;光标在 TAB 字符上会显示为一个大方块
+(put 'narrow-to-region 'disabled nil)   ;开启变窄区域
+(setq print-escape-newlines t)          ;显示字符窗中的换行符为 \n
+(setq tramp-default-method "ssh")       ;设置传送文件默认的方法
+(setq void-text-area-pointer nil)       ;禁止显示鼠标指针
+(setq byte-compile-warnings
+      (quote (
+              ;; 显示的警告
+              free-vars                 ;不在当前范围的引用变量
+              unresolved                ;不知道的函数
+              callargs                  ;函数调用的参数和定义的不匹配
+              obsolete                  ;荒废的变量和函数
+              noruntime                 ;函数没有定义在运行时期
+              interactive-only          ;正常不被调用的命令
+              make-local                ;调用 `make-variable-buffer-local' 可能会不正确的
+              mapcar                    ;`mapcar' 调用
+              ;; 抑制的警告
+              (not redefine)            ;重新定义的函数 (比如参数数量改变)
+              (not cl-functions)        ;`CL' 包中的运行时调用的函数
+              )))
 
 (provide 'init-idle)
 

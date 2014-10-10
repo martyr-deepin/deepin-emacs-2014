@@ -95,28 +95,8 @@
 (setq default-major-mode 'text-mode)    ;设置默认地主模式为TEXT模式
 (setq mouse-yank-at-point t)            ;粘贴于光标处,而不是鼠标指针处
 (setq x-select-enable-clipboard t)      ;支持emacs和外部程序的粘贴
-(setq x-stretch-cursor t)               ;光标在 TAB 字符上会显示为一个大方块
-(setq void-text-area-pointer nil)       ;禁止显示鼠标指针
-(put 'narrow-to-region 'disabled nil)   ;开启变窄区域
-(setq print-escape-newlines t)          ;显示字符窗中的换行符为 \n
 (setq split-width-threshold nil)        ;分屏的时候使用上下分屏
 (add-hook 'find-file-hook 'highlight-parentheses-mode t) ;增强的括号高亮
-(setq byte-compile-warnings
-      (quote (
-              ;; 显示的警告
-              free-vars                 ;不在当前范围的引用变量
-              unresolved                ;不知道的函数
-              callargs                  ;函数调用的参数和定义的不匹配
-              obsolete                  ;荒废的变量和函数
-              noruntime                 ;函数没有定义在运行时期
-              interactive-only          ;正常不被调用的命令
-              make-local                ;调用 `make-variable-buffer-local' 可能会不正确的
-              mapcar                    ;`mapcar' 调用
-              ;; 抑制的警告
-              (not redefine)            ;重新定义的函数 (比如参数数量改变)
-              (not cl-functions)        ;`CL' 包中的运行时调用的函数
-              )))
-(setq tramp-default-method "ssh")       ;设置传送文件默认的方法
 
 (provide 'init-generic)
 
