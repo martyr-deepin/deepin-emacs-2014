@@ -77,7 +77,6 @@
 
 (require 'windows)
 (require 'cycle-buffer)
-(require 'tramp)
 
 ;;; Code:
 
@@ -744,6 +743,7 @@ use function `completion-delete'."
 (defun find-file-root (file)
   "Find file with root."
   (interactive "fFind file as sudo: ")
+  (require 'tramp)
   (tramp-cleanup-all-connections)
   (find-file (concat "/sudo:root@localhost:" file)))
 

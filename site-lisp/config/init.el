@@ -48,6 +48,7 @@
        (require 'init-smooth-scrolling)
        (require 'init-cursor-chg)
        (require 'init-winpoint)
+       (require 'init-benchmark)
 
        (require 'init-idle)
 

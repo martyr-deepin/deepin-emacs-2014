@@ -119,6 +119,8 @@ Default is t."
         (not (string-prefix-p "*helm" name))
         (not (string-prefix-p "*scratch" name))
         (not (string-prefix-p "*minibuffer tray" name))
+        (not (string-prefix-p "*WoMan-Log*" name))
+        (not (string-prefix-p "*Messages*" name))
         )))
    (delq nil
          (mapcar #'(lambda (b)
