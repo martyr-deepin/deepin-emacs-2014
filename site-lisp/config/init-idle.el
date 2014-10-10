@@ -103,6 +103,19 @@ from tradition chinese to simple chinese" t)
 (auto-compression-mode 1)               ;打开压缩文件时自动解压缩
 (setq read-quoted-char-radix 16)        ;设置 引用字符 的基数
 (setq global-mark-ring-max 1024)        ;设置最大的全局标记容量
+(global-hl-line-mode 1)                 ;高亮当前行
+(setq isearch-allow-scroll t)           ;isearch搜索时是可以滚动屏幕的
+(setq one-key-popup-window nil)         ;禁止自动弹出窗口
+(setq enable-recursive-minibuffers t)   ;minibuffer 递归调用命令
+(setq history-delete-duplicates t)      ;删除minibuffer的重复历史
+(setq minibuffer-message-timeout 1)     ;显示消息超时的时间
+(setq auto-revert-mode 1)               ;自动更新buffer
+(show-paren-mode t)                     ;显示括号匹配
+(setq show-paren-style 'parentheses)    ;括号匹配显示但不是烦人的跳到另一个括号。
+(setq blink-matching-paren nil)         ;当插入右括号时不显示匹配的左括号
+(setq message-log-max t)                ;设置message记录全部消息, 而不用截去
+(setq require-final-newline nil)        ;不自动添加换行符到末尾, 有些情况会出现错误
+(setq ediff-window-setup-function (quote ediff-setup-windows-plain)) ;比较窗口设置在同一个frame里
 
 (provide 'init-idle)
 

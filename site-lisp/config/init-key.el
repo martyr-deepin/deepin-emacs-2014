@@ -708,11 +708,11 @@
    )
  "macros+")
 ;;; ### WebKit ###
-(lazy-set-autoload-key
- '(
-   ("s-/" . webkit-open-url)
-   )
- "webkit")
+;; (lazy-set-autoload-key
+;;  '(
+;;    ("s-/" . webkit-open-url)
+;;    )
+;;  "webkit")
 ;;; ### yaoddmuse ###
 (lazy-set-autoload-key
  '(

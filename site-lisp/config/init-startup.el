@@ -81,11 +81,12 @@
 
 ;;; Require
 
+(require 'fullscreen)
 
 ;;; Code:
 
 (setq ad-redefinition-action 'accept)   ;不要烦人的 redefine warning
-(toggle-frame-fullscreen)               ;全屏
+(fullscreen)                            ;全屏
 (tool-bar-mode -1)                      ;禁用工具栏
 (menu-bar-mode -1)                      ;禁用菜单栏
 (scroll-bar-mode -1)                    ;禁用滚动条

@@ -90,7 +90,7 @@
 (require 'helm-autoload-commands)
 (require 'helm-ls-git)
 (require 'helm-descbinds)
-(require 'helm-webkit)
+;; (require 'helm-webkit)
 (require 'helm-ring)
 (require 'helm-imenu)
 (require 'helm-man)
@@ -120,7 +120,7 @@
        helm-source-autoload-commands
        helm-source-ls-git
        helm-c-source-yasnippet
-       helm-source-webkit
+       ;; helm-source-webkit
        helm-source-apt
        helm-source-man-pages
        )
