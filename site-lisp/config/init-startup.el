@@ -85,19 +85,12 @@
 
 ;;; Code:
 
-(setq ad-redefinition-action 'accept)   ;不要烦人的 redefine warning
-(fullscreen)                            ;全屏
-(tool-bar-mode -1)                      ;禁用工具栏
-(menu-bar-mode -1)                      ;禁用菜单栏
-(scroll-bar-mode -1)                    ;禁用滚动条
-(defvar emacs-font-name "文泉驿等宽微米黑"
-  "The font name of English.")
-(defvar emacs-font-size 12
-  "The default font size.")
-(if (display-grayscale-p)
-    (progn
-      (set-frame-font (format "%s-%s" (eval emacs-font-name) (eval emacs-font-size)))
-      (set-fontset-font (frame-parameter nil 'font) 'unicode (eval emacs-font-name))))
+(setq ad-redefinition-action 'accept)         ;不要烦人的 redefine warning
+(fullscreen)                                  ;全屏
+(tool-bar-mode -1)                            ;禁用工具栏
+(menu-bar-mode -1)                            ;禁用菜单栏
+(scroll-bar-mode -1)                          ;禁用滚动条
+(set-face-attribute 'default nil :height 120) ;设置字体大小
 
 (provide 'init-startup)
 
