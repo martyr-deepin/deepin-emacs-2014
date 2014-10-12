@@ -163,13 +163,13 @@ is not applied to other occurrences when it is true.")
 
 (defvar iedit-occurrence-keymap-default
   (let ((map (make-sparse-keymap)))
-;;  (set-keymap-parent map iedit-lib-keymap)
+    ;;  (set-keymap-parent map iedit-lib-keymap)
     (define-key map (kbd "M-U") 'iedit-upcase-occurrences)
     (define-key map (kbd "M-L") 'iedit-downcase-occurrences)
     (define-key map (kbd "M-R") 'iedit-replace-occurrences)
     (define-key map (kbd "M-SPC") 'iedit-blank-occurrences)
     (define-key map (kbd "M-D") 'iedit-delete-occurrences)
-    (define-key map (kbd "M-N") 'iedit-number-occurrences)
+    (define-key map (kbd "M-I") 'iedit-number-occurrences)
     (define-key map (kbd "M-B") 'iedit-toggle-buffering)
     (define-key map (kbd "M-<") 'iedit-goto-first-occurrence)
     (define-key map (kbd "M->") 'iedit-goto-last-occurrence)
@@ -353,30 +353,30 @@ occurrence, it will abort Iedit mode."
         (add-hook 'post-command-hook 'iedit-post-undo-hook nil t)
         (setq iedit-post-undo-hook-installed t))
     (when (not iedit-aborting)
-    ;; before modification
-    (if (null after)
-        (if (or (< beg (overlay-start occurrence))
-                (> end (overlay-end occurrence)))
-            (progn (setq iedit-aborting t) ; abort iedit-mode
-                   (add-hook 'post-command-hook 'iedit-reset-aborting nil t))
-          (setq iedit-before-modification-string
-                (buffer-substring-no-properties beg end))
-          ;; Check if this is called twice before modification. When inserting
-          ;; into zero-width occurrence or between two conjoined occurrences,
-          ;; both insert-in-front-hooks and insert-behind-hooks will be
-          ;; called.  Two calls will make `iedit-skip-modification-once' true.
-          (setq iedit-skip-modification-once (not iedit-skip-modification-once)))
-      ;; after modification
-      (when (not iedit-buffering)
-        (if iedit-skip-modification-once
-            ;; Skip the first hook
-            (setq iedit-skip-modification-once nil)
-          (setq iedit-skip-modification-once t)
-          (when (or (eq 0 change) ;; insertion
-                    (eq beg end)  ;; deletion
-                    (not (string= iedit-before-modification-string
-                                  (buffer-substring-no-properties beg end))))
-            (iedit-update-occurrences  occurrence after beg end change))))))))
+      ;; before modification
+      (if (null after)
+          (if (or (< beg (overlay-start occurrence))
+                  (> end (overlay-end occurrence)))
+              (progn (setq iedit-aborting t) ; abort iedit-mode
+                     (add-hook 'post-command-hook 'iedit-reset-aborting nil t))
+            (setq iedit-before-modification-string
+                  (buffer-substring-no-properties beg end))
+            ;; Check if this is called twice before modification. When inserting
+            ;; into zero-width occurrence or between two conjoined occurrences,
+            ;; both insert-in-front-hooks and insert-behind-hooks will be
+            ;; called.  Two calls will make `iedit-skip-modification-once' true.
+            (setq iedit-skip-modification-once (not iedit-skip-modification-once)))
+        ;; after modification
+        (when (not iedit-buffering)
+          (if iedit-skip-modification-once
+              ;; Skip the first hook
+              (setq iedit-skip-modification-once nil)
+            (setq iedit-skip-modification-once t)
+            (when (or (eq 0 change) ;; insertion
+                      (eq beg end)  ;; deletion
+                      (not (string= iedit-before-modification-string
+                                    (buffer-substring-no-properties beg end))))
+              (iedit-update-occurrences  occurrence after beg end change))))))))
 
 (defun iedit-update-occurrences (occurrence after beg end &optional change)
   ""
@@ -565,9 +565,9 @@ value of `iedit-occurrence-context-lines' is used for this time."
 (defun iedit-apply-on-occurrences (function &rest args)
   "Call function for each occurrence."
   (let ((inhibit-modification-hooks t))
-      (save-excursion
-        (dolist (occurrence iedit-occurrences-overlays)
-          (apply function (overlay-start occurrence) (overlay-end occurrence) args)))))
+    (save-excursion
+      (dolist (occurrence iedit-occurrences-overlays)
+        (apply function (overlay-start occurrence) (overlay-end occurrence) args)))))
 
 (defun iedit-upcase-occurrences ()
   "Covert occurrences to upper case."
@@ -684,7 +684,7 @@ After modification, conjoined overlays may be overlapped."
       (let ((previous-overlay (iedit-find-overlay-at-point
                                (1- beginning)
                                'iedit-occurrence-overlay-name)))
-        (if previous-overlay ; two conjoined occurrences
+        (if previous-overlay            ; two conjoined occurrences
             (move-overlay previous-overlay
                           (overlay-start previous-overlay)
                           beginning))))
@@ -692,7 +692,7 @@ After modification, conjoined overlays may be overlapped."
       (let ((next-overlay (iedit-find-overlay-at-point
                            ending
                            'iedit-occurrence-overlay-name)))
-        (if next-overlay ; two conjoined occurrences
+        (if next-overlay                ; two conjoined occurrences
             (move-overlay next-overlay ending (overlay-end next-overlay)))))))
 
 (defvar iedit-number-line-counter 1
@@ -789,7 +789,7 @@ This function is supposed to be called in overlay keymap."
   "Return current occurrence string.
 Return nil if occurrence string is empty string."
   (let ((ov (or (iedit-find-current-occurrence-overlay)
-                 (car iedit-occurrences-overlays))))
+                (car iedit-occurrences-overlays))))
     (if ov
         (let ((beg (overlay-start ov))
               (end (overlay-end ov)))
@@ -887,7 +887,7 @@ it just means mark is active."
 (defun iedit-barf-if-buffering()
   "Signal error if Iedit lib is buffering."
   (or  (null iedit-buffering)
-      (error "Iedit is buffering")))
+       (error "Iedit is buffering")))
 
 (provide 'iedit-lib)
 

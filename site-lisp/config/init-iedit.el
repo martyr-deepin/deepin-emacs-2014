@@ -82,6 +82,7 @@
 ;;; Require
 
 (require 'iedit)
+(require 'iedit-lib)
 
 ;;; Code:
 
@@ -90,7 +91,8 @@
   (define-key global-map iedit-toggle-key-default 'iedit-mode)
   (define-key isearch-mode-map iedit-toggle-key-default 'iedit-mode-from-isearch)
   (define-key esc-map iedit-toggle-key-default 'iedit-execute-last-modification)
-  (define-key help-map iedit-toggle-key-default 'iedit-mode-toggle-on-function))
+  (define-key help-map iedit-toggle-key-default 'iedit-mode-toggle-on-function)
+  )
 
 (provide 'init-iedit)
 
