@@ -93,9 +93,10 @@
   )
 
 (defun emacs-session-restore ()
+  (kill-unused-buffers)
   (if (file-exists-p "~/.emacs.d/deepin-emacs/Configure-File/Windows/windows-configure")
       (resume-windows 'a))
-  (kill-unused-buffers)
+  (unmark-all-buffers)
   )
 
 (defun emacs-session-save ()

@@ -33,7 +33,7 @@
 
   ;; 可以延后加载的
   (run-with-idle-timer
-   1 t
+   1 nil
    #'(lambda ()
        (require 'pretty-lambdada)
        (require 'browse-kill-ring)
@@ -51,7 +51,6 @@
        (require 'init-benchmark)
 
        (require 'init-idle)
-
        ))
   )
 

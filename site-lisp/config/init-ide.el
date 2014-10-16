@@ -76,16 +76,6 @@
 
 ;;; Code:
 
-;;; ### EDE ###
-;;; --- Emacs 开发环境
-;; (global-ede-mode 1)
-
-;;; ### Semantic ###
-;;; --- 代码分析， 智能补全
-;; (add-hook 'semantic-init-hooks 'semantic-idle-completions-mode) ;空闲时进行补全分析
-;; (setq semanticdb-project-roots (list (expand-file-name "/")))   ;配置Semantic的检索范围
-;; (autoload 'senator-try-expand-semantic "senator")               ;优先调用了senator的分析结果
-
 ;;; ### Hippie-exapnd ###
 ;;; --- 符号补全
 ;; hippie-expand 自动补全策略
@@ -107,18 +97,6 @@
         try-expand-whole-kill              ;kill-ring里面补全
         ))
 
-;;; ### Xrefactory ###
-;;; --- Java & C 重构环境
-;; (defvar xref-current-project nil)       ;设定当前的工程
-;; (defvar xref-key-binding 'none)         ;设定当前的按键邦定
-;; (setq exec-path (cons (expand-file-name "/usr/share/deepin-emacs/Site-Lisp/Packages/xref") exec-path))
-;; (setq load-path (cons (expand-file-name "/usr/share/deepin-emacs/Site-Lisp/Packages/xref/emacs") load-path))
-;; (load "xrefactory")
-;; (setq xref-auto-update-tags-before-push t)                  ;自动刷新Tags
-;; (setq xref-completion-inserts-parenthesis t)                ;自动插入圆括号
-;; (setq xref-save-files-and-update-tags-after-refactoring t)  ;重构后自动刷新Tags
-;; (setq xref-save-files-and-update-tags-before-refactoring t) ;重构前自动刷新Tags
-;; (setq xref-files-encoding 'euc-cn)                          ;设置文件编码, 支持中文
 
 (provide 'init-ide)
 

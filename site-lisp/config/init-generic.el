@@ -84,18 +84,21 @@
 
 ;;; Code:
 
-(setq initial-buffer-choice "~/")       ;默认打开文件管理器
-(emacs-session-restore)                 ;加载窗口布局
-(unmark-all-buffers)                    ;取出所有buffer的标记
-(fset 'yes-or-no-p 'y-or-n-p)           ;以 y/n代表 yes/no
-(blink-cursor-mode -1)                  ;指针不闪动
-(transient-mark-mode 1)                 ;标记高亮
-(setq-default comment-style 'indent)    ;设定自动缩进的注释风格
-(setq ring-bell-function 'ignore)       ;关闭烦人的出错时的提示声
-(setq default-major-mode 'text-mode)    ;设置默认地主模式为TEXT模式
-(setq mouse-yank-at-point t)            ;粘贴于光标处,而不是鼠标指针处
-(setq x-select-enable-clipboard t)      ;支持emacs和外部程序的粘贴
-(setq split-width-threshold nil)        ;分屏的时候使用上下分屏
+
+;; Restore emacs session.
+(setq initial-buffer-choice "~")
+(run-with-timer 1 nil #'(lambda () (bury-buffer)))
+(emacs-session-restore)
+
+(fset 'yes-or-no-p 'y-or-n-p)                            ;以 y/n代表 yes/no
+(blink-cursor-mode -1)                                   ;指针不闪动
+(transient-mark-mode 1)                                  ;标记高亮
+(setq-default comment-style 'indent)                     ;设定自动缩进的注释风格
+(setq ring-bell-function 'ignore)                        ;关闭烦人的出错时的提示声
+(setq default-major-mode 'text-mode)                     ;设置默认地主模式为TEXT模式
+(setq mouse-yank-at-point t)                             ;粘贴于光标处,而不是鼠标指针处
+(setq x-select-enable-clipboard t)                       ;支持emacs和外部程序的粘贴
+(setq split-width-threshold nil)                         ;分屏的时候使用上下分屏
 (add-hook 'find-file-hook 'highlight-parentheses-mode t) ;增强的括号高亮
 
 (provide 'init-generic)
