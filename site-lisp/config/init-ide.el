@@ -81,7 +81,6 @@
 ;; hippie-expand 自动补全策略
 (setq hippie-expand-try-functions-list
       '(
-        ;; senator-try-expand-semantic        ;优先调用senator的分析结果
         try-expand-dabbrev-visible         ;dabbrev策略, 可见窗口优先
         try-expand-dabbrev                 ;dabbrev策略
         try-expand-dabbrev-all-buffers     ;dabbrev策略, 包括所有窗口(除了当前窗口)
