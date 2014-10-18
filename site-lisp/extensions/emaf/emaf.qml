@@ -4,11 +4,20 @@ import Deepin.Widgets 1.0
 Item {
     id: framework
     
-    Rectangle {
-        anchors.fill: parent
-        /* color: "red" */
-        opacity: 0.5
+    DPreviewWindow {
+        /* xid: frame.emacs_xid */
+        /* width: frame.emacs_width */
+        /* height: frame.emacs_height */
+        xid: 85983276
+        width: 800
+        height: 450
     }
+    
+    /* Rectangle { */
+    /*     anchors.fill: parent */
+    /*     /\* color: "red" *\/ */
+    /*     opacity: 0.5 */
+    /* } */
 }
 
 /* Item { */

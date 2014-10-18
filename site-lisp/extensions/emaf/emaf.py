@@ -26,97 +26,43 @@ from PyQt5.QtCore import QCoreApplication
 if os.name == 'posix':
     QCoreApplication.setAttribute(QtCore.Qt.AA_X11InitThreads, True)
     
-from PyQt5.QtQuick import QQuickView
-from PyQt5.QtGui import QSurfaceFormat, QColor
 from PyQt5 import QtCore, QtQuick
-
-import sys
+from PyQt5.QtGui import QSurfaceFormat, QColor
+from PyQt5.QtQuick import QQuickView
 from PyQt5.QtWidgets import QApplication, qApp
-import signal
-
 from dbus.mainloop.glib import DBusGMainLoop
+from constant import EMAF_DBUS_NAME, EMAF_OBJECT_NAME
+from xutils import get_xlib_display
 import dbus
 import dbus.service
-import functools
-from xutils import get_xlib_display
+import signal
+import sys
 
-EMAF_DBUS_NAME = "com.deepin.emaf"
-EMAF_OBJECT_NAME = "/com/deepin/emaf"
-
-class postGui(QtCore.QObject):
-    
-    throughThread = QtCore.pyqtSignal(object, object)    
-    
-    def __init__(self, inclass=True):
-        super(postGui, self).__init__()
-        self.throughThread.connect(self.onSignalReceived)
-        self.inclass = inclass
-        
-    def __call__(self, func):
-        self._func = func
-        
-        @functools.wraps(func)
-        def objCall(*args, **kwargs):
-            self.emitSignal(args, kwargs)
-        return objCall
-        
-    def emitSignal(self, args, kwargs):
-        self.throughThread.emit(args, kwargs)
-                
-    def onSignalReceived(self, args, kwargs):
-        if self.inclass:
-            obj, args = args[0], args[1:]
-            self._func(obj, *args, **kwargs)
-        else:    
-            self._func(*args, **kwargs)
-            
 class Emaf(dbus.service.Object):
-    def __init__(self, emacs_xid, init_width, init_height, view):
+    def __init__(self, frame):
         dbus.service.Object.__init__(
             self,
             dbus.service.BusName(EMAF_DBUS_NAME, bus=dbus.SessionBus()),
             EMAF_OBJECT_NAME            
         )
         
-        self.view = view
-        self.emacs_xid = int(emacs_xid)
-        self.frame_width = int(init_width)
-        self.frame_height = int(init_height)
-        self.view.show()
+        self.frame = frame
         
-        self.update_allocation()
-        
-    def reparent(self):
-        xlib_display = get_xlib_display()
-        
-        emaf_xwindow = xlib_display.create_resource_object("window", self.view.winId().__int__())
-        emacs_xwindow = xlib_display.create_resource_object("window", self.emacs_xid)
-        
-        emaf_xwindow.reparent(emacs_xwindow, 0, 0)
-        
-        xlib_display.sync()
-        
-    def update_allocation(self):
-        self.view.resize(self.frame_width, self.frame_height)
-        self.reparent()
-    
     @dbus.service.method(EMAF_DBUS_NAME, in_signature="", out_signature="")
     def show(self):
-        self.view.show()
+        self.frame.show()
         
     @dbus.service.method(EMAF_DBUS_NAME, in_signature="", out_signature="")
     def hide(self):
-        self.view.hide()
+        self.frame.hide()
         
     @dbus.service.method(EMAF_DBUS_NAME, in_signature="ss", out_signature="")
     def update_frame_size(self, w, h):
-        self.frame_width = int(w)
-        self.frame_height = int(h)
-        self.update_allocation()
+        self.frame.update_size(w, h)
         
-class Window(QQuickView):
+class Frame(QQuickView):
 
-    def __init__(self):
+    def __init__(self, emacs_xid, init_width, init_height):
         QQuickView.__init__(self)
         
         surface_format = QSurfaceFormat()
@@ -128,7 +74,32 @@ class Window(QQuickView):
         self.setFormat(surface_format)
         
         self.qml_context = self.rootContext()
+        
+        self.emacs_xid = int(emacs_xid)
+        self.emacs_width = int(init_width)
+        self.emacs_height = int(init_height)
+        
+        self.show()
             
+    def reparent(self):
+        xlib_display = get_xlib_display()
+        
+        emaf_xwindow = xlib_display.create_resource_object("window", self.winId().__int__())
+        emacs_xwindow = xlib_display.create_resource_object("window", self.emacs_xid)
+        
+        emaf_xwindow.reparent(emacs_xwindow, 0, 0)
+        
+        xlib_display.sync()
+        
+    def update_allocation(self):
+        self.resize(self.emacs_width, self.emacs_height)
+        self.reparent()
+        
+    def update_size(self, w, h):
+        self.emacs_width = w
+        self.emacs_height = h
+        self.update_allocation()
+    
     def exit_app(self):
         qApp.quit()
         
@@ -140,18 +111,18 @@ if __name__ == "__main__":
         print("Minibuffer tray process has startup.")
     else:
         app = QApplication(sys.argv)
-        view = Window()
+        emacs_xid, init_width, init_height = sys.argv[1], sys.argv[2], sys.argv[3]
+        frame = Frame(emacs_xid, init_width, init_height)
+        emaf = Emaf(frame)
         
-        emaf = Emaf(sys.argv[1], sys.argv[2], sys.argv[3], view)
-        emaf.update_allocation()
+        qApp.lastWindowClosed.connect(frame.exit_app)
         
-        qApp.lastWindowClosed.connect(view.exit_app)
-        
-        qml_context = view.rootContext()
-        qml_context.setContextProperty("windowView", view)
+        qml_context = frame.rootContext()
+        qml_context.setContextProperty("frame", frame)
         qml_context.setContextProperty("qApp", qApp)
             
-        view.setSource(QtCore.QUrl.fromLocalFile(os.path.join(os.path.dirname(__file__), 'emaf.qml')))
+        frame.setSource(QtCore.QUrl.fromLocalFile(os.path.join(os.path.dirname(__file__), 'emaf.qml')))
+        frame.update_allocation()
             
         signal.signal(signal.SIGINT, signal.SIG_DFL)
         sys.exit(app.exec_())
